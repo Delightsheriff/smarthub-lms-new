@@ -102,11 +102,35 @@ to wrap `DropdownMenuLabel` in a `DropdownMenuGroup` for base-ui's
 
 ---
 
+## Plan 004 — Dashboard ✅
+
+**Status: BUILT** — incremental commits, 2026-08.
+
+**Notes:** shadcn base-ui primitives. Module cores → mock top-up → consuming
+widgets → dashboard composition → ADR, per plan §6. Instructor teaching
+dashboard deferred to Plan 011 (in-place `ComingSoon` placeholder). Calendar
+`MonthGrid`/`EventDetailDialog` deferred to Plan 007 (lighter
+`UpcomingDeadlinesPanel` this plan). Status nags = billing + referrals only
+(acceptance-letter/internship/scholarship to Plans 009–010). No `modules/auth`
+in target — `useAuthStore` + `useEffectiveMode()`.
+
+| Deliverable | Status |
+|---|---|
+| 8 module cores — learning, courses, assignments, billing, referrals, webinars, assigned-modules, progress (`api` + `components` + `config` + `types`) | ✅ `01fb555` |
+| Mock fixtures top-up (`assignment()` opts, referrals, banking, assigned-modules, progress-pulse) + router handlers (courses alias, payments summary, account/me, referrals, banking, assigned, progress-pulse, achievements, cohort-pulse) | ✅ `2cac8ae` |
+| 6 consuming widgets (billing, referrals, webinars, assigned-modules, progress-pulse, upcoming-deadlines) — each self-gates to `null` | ✅ `67b7fa2` |
+| Dashboard-local components — `StatsStrip`, `CourseProgressList` (assignments rollup via module query surface) | ✅ `47ca852` |
+| `CourseCard` (rebuilt on base-vega; no `success` badge variant, mapped) | ✅ `47ca852` |
+| `DashboardPage` + `StudentDashboardBody` — composition order + role branch; route wired | ✅ `47ca852` |
+| ADR 0008 (dashboard is a composition point, not a module) + README index | ✅ `a1f3b9c` |
+| Verify: typecheck / lint / **build (28 routes)** | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
-| 004 | Dashboard | 🚫 not started |
 | 005 | Courses & learning (recordings, materials) | 🚫 not started |
 | 006 | Assignments | 🚫 not started |
 | 007 | Calendar / activity / webinars | 🚫 not started |
