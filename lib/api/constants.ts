@@ -261,6 +261,71 @@ export const INSTRUCTOR_ROLES = [
 ] as const;
 export type InstructorRole = (typeof INSTRUCTOR_ROLES)[number];
 
+export const PAY_ITEM_KINDS = ["payload", "retainer"] as const;
+export type PayItemKind = (typeof PAY_ITEM_KINDS)[number];
+
+export const SETTLEMENT_MILESTONES = [
+  "enrolment",
+  "completion",
+  "session",
+  "conversion",
+] as const;
+export type SettlementMilestone = (typeof SETTLEMENT_MILESTONES)[number];
+
+export const INSTRUCTOR_PAY_ITEM_STATUS = {
+  PENDING: "pending",
+  PAID: "paid",
+  CANCELLED: "cancelled",
+} as const;
+export type InstructorPayItemStatus =
+  (typeof INSTRUCTOR_PAY_ITEM_STATUS)[keyof typeof INSTRUCTOR_PAY_ITEM_STATUS];
+
+export const INSTALLMENT_ENFORCEMENT = {
+  CHASE: "chase",
+  SUSPEND: "suspend",
+} as const;
+export type InstallmentEnforcement =
+  (typeof INSTALLMENT_ENFORCEMENT)[keyof typeof INSTALLMENT_ENFORCEMENT];
+
+export const INSTALLMENT_PLAN_ORIGIN = {
+  SCHOLARSHIP: "scholarship",
+  COURSE: "course",
+} as const;
+export type InstallmentPlanOrigin =
+  (typeof INSTALLMENT_PLAN_ORIGIN)[keyof typeof INSTALLMENT_PLAN_ORIGIN];
+
+export const INSTALLMENT_PLAN_TYPE = {
+  INSTALLMENT: "installment",
+  FULL_UPFRONT: "full_upfront",
+} as const;
+export type InstallmentPlanType =
+  (typeof INSTALLMENT_PLAN_TYPE)[keyof typeof INSTALLMENT_PLAN_TYPE];
+
+export const INSTALLMENT_PLAN_STATUS = {
+  ACTIVE: "active",
+  COMPLETED: "completed",
+  DEFAULTED: "defaulted",
+  CANCELLED: "cancelled",
+} as const;
+export type InstallmentPlanStatus =
+  (typeof INSTALLMENT_PLAN_STATUS)[keyof typeof INSTALLMENT_PLAN_STATUS];
+
+/** Code + label pairs for why an enrollment's access was suspended.
+ *  Only the label is rendered by the UI; the code is the wire value. */
+export const ACCOUNT_SUSPENSION_REASONS = [
+  { code: "payment_due", label: "Payment past due" },
+  { code: "failed_payment", label: "Payment failed" },
+  { code: "policy", label: "Policy violation" },
+  { code: "conduct", label: "Code of conduct" },
+] as const;
+
+/** Code + label pairs shown on the admission-revocation letter copy. */
+export const ADMISSION_REVOCATION_REASONS = [
+  { code: "misrepresentation", label: "Misrepresentation of admission details" },
+  { code: "non_payment", label: "Non-payment of fees" },
+  { code: "duplicate", label: "Duplicate submission" },
+] as const;
+
 export const ROLES = {
   SUPER_ADMIN: "super-admin",
   INSTRUCTOR: "instructor",

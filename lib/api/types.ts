@@ -38,3 +38,13 @@ export class ApiError extends Error {
     this.data = data;
   }
 }
+
+/**
+ * Re-export the module wire shapes through the shared API-types surface
+ * so Foundation and cross-module consumers import one home.
+ */
+export type * from "@/modules/auth/types";
+export type * from "@/modules/billing/types/api.types";
+export type * from "@/modules/payment-proofs/types/api.types";
+export type * from "@/modules/siwes-profile/types/api.types";
+export type * from "@/modules/acceptance-letters/types/api.types";

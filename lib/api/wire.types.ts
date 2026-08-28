@@ -22,7 +22,83 @@ export interface WireUser {
   imageUrl?: string;
   roles?: string[];
   isVerified?: boolean;
+  gender?: "Male" | "Female";
+  country?: { isoCode?: string; name?: string } | string;
+  state?: { isoCode?: string; name?: string } | string;
+  city?: string;
+  address?: string;
+  createdAt?: string;
+  isITStudent?: boolean;
+  itVerificationStatus?: string;
+  siwesYear?: number;
+  institution?: string;
+  department?: string;
+  studentCode?: string;
+  jobTitle?: string;
+  bio?: string;
+  altPhone?: string;
+  timeZone?: string;
 }
+
+/** Financial/account fixtures added by Plan 009 (Profile & Referrals). */
+export interface WirePaymentProofFixture {
+  _id: string;
+  purpose: string;
+  courseName?: string;
+  amountClaimed: number;
+  confirmedAmount?: number;
+  screenshotUrl: string;
+  reference?: string;
+  status: "pending" | "confirmed" | "rejected";
+  reviewNotes?: string;
+  createdAt?: string;
+  reviewedAt?: string;
+}
+
+export interface WireInstallmentTrancheFixture {
+  id: string;
+  sequence: number;
+  amount: number;
+  dueDate: string;
+  status: "pending" | "paid" | "overdue" | "waived";
+  paidAt?: string;
+  graceEndsAt?: string;
+}
+
+export interface WireInstallmentPlanFixture {
+  id: string;
+  enrollmentId: string;
+  courseName?: string;
+  origin: string;
+  planType: string;
+  status: string;
+  totalAmount: number;
+  paidAmount: number;
+  amountDue: number;
+  accessStatus: string;
+  nextDue?: WireInstallmentTrancheFixture;
+  installments: WireInstallmentTrancheFixture[];
+}
+
+export interface WireSiwesRegistrationFixture {
+  registrationId: string;
+  siwesDurationMonths?: number;
+  siwesDurationEditable: boolean;
+  schoolName?: string;
+  institutionName?: string;
+}
+
+export interface WireAcceptanceLetterFixture {
+  registrationId: string;
+  url: string;
+  refNumber: string;
+  issuedAt: string;
+  courseName?: string;
+  institutionName?: string;
+  durationMonths?: number;
+  durationEditable?: boolean;
+}
+
 
 export interface WireInstructor {
   _id: string;

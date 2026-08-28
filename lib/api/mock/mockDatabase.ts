@@ -10,16 +10,20 @@
  */
 
 import type {
+  WireAcceptanceLetterFixture,
   WireAssignment,
   WireBillingBreakdown,
   WireCalendarEvent,
   WireConversation,
   WireEnrolledCourse,
+  WireInstallmentPlanFixture,
   WireInternship,
   WireModule,
   WireNotification,
+  WirePaymentProofFixture,
   WireRecording,
   WireScholarshipApplication,
+  WireSiwesRegistrationFixture,
   WireSubmission,
   WireTeachingCohort,
   WireWebinar,
@@ -44,6 +48,22 @@ export const mockUser: WireUser = {
   imageUrl: "/mock/ade.jpg",
   roles: ["student", "instructor"],
   isVerified: true,
+  gender: "Male",
+  country: { isoCode: "NG", name: "Nigeria" },
+  state: { isoCode: "LA", name: "Lagos" },
+  city: "Ikeja",
+  address: "12 Academy Road, Ikeja",
+  createdAt: daysAgo(200),
+  isITStudent: true,
+  itVerificationStatus: "approved",
+  siwesYear: 2026,
+  institution: "University of Lagos",
+  department: "Computer Science",
+  studentCode: "UNILAG/CS/2024/0012",
+  jobTitle: "Frontend Developer Intern",
+  bio: "Full-stack web developer in training. I build accessible, fast interfaces and love learning new tools.",
+  altPhone: "+2348098765432",
+  timeZone: "Africa/Lagos",
 };
 
 export const mockInstructor: WireUser = {
@@ -54,6 +74,29 @@ export const mockInstructor: WireUser = {
   imageUrl: "/mock/ngozi.jpg",
   roles: ["instructor"],
   isVerified: true,
+  gender: "Female",
+  country: { isoCode: "NG", name: "Nigeria" },
+  state: { isoCode: "FC", name: "FCT" },
+  city: "Abuja",
+  createdAt: daysAgo(500),
+  jobTitle: "Lead Instructor",
+  bio: "Data and AI educator with a decade of industry experience.",
+  timeZone: "Africa/Lagos",
+};
+
+/**
+ * A second student proving the photo gate fires for students without a
+ * photo. `gender` and `imageUrl` are intentionally missing.
+ */
+export const mockStudentNoPhoto: WireUser = {
+  _id: "usr_3",
+  firstName: "Fatima",
+  lastName: "Yusuf",
+  email: "fatima.yusuf@example.com",
+  phone: "+2348033334444",
+  roles: ["student"],
+  isVerified: true,
+  createdAt: daysAgo(40),
 };
 
 /** Root set of wire-shaped records, keyed by collection. */
@@ -71,10 +114,50 @@ export interface MockDatabase {
   internships: WireInternship[];
   scholarship: WireScholarshipApplication[];
   teaching: WireTeachingCohort[];
+  paymentProofs: WirePaymentProofFixture[];
+  installmentPlans: WireInstallmentPlanFixture[];
+  siwesRegistrations: WireSiwesRegistrationFixture[];
+  acceptanceLetters: WireAcceptanceLetterFixture[];
+  instructorEarnings: {
+    totals: { pendingNaira: number; processingNaira: number; paidNaira: number };
+    byKind?: { baseNaira: number; variableNaira: number; bonusNaira: number };
+    cohorts: Array<{
+      scheduleId?: string;
+      course: string;
+      stream?: string;
+      startDate?: string;
+      endDate?: string;
+      pending: number;
+      paid: number;
+    }>;
+    payouts: Array<{
+      _id: string;
+      totalAmount: number;
+      status: string;
+      createdAt?: string;
+      processedAt?: string;
+      bankName?: string;
+    }>;
+  };
+  earningsBreakdown: Array<{
+    scheduleId: string;
+    course: string;
+    model: string;
+    isFlat: boolean;
+    effectiveSharePct: number;
+    yourEntitlementNaira: number;
+    totalRevenueNaira: number;
+    students: Array<{
+      name: string;
+      email?: string;
+      paidNaira: number;
+      yourCutNaira?: number;
+    }>;
+  }>;
 }
 
 export const mockDatabase: MockDatabase = {
-  users: [mockUser, mockInstructor],
+  users: [mockUser, mockInstructor, mockStudentNoPhoto],
 
   courses: [
     {
@@ -548,6 +631,153 @@ export const mockDatabase: MockDatabase = {
     ],
   },
 
+  paymentProofs: [
+    {
+      _id: "pp_1",
+      purpose: "course",
+      courseName: "Full-Stack Web Development",
+      amountClaimed: 250000,
+      screenshotUrl: "/mock/proof-1.jpg",
+      reference: "ADEB-250000",
+      status: "pending",
+      createdAt: daysAgo(2),
+    },
+    {
+      _id: "pp_2",
+      purpose: "course",
+      courseName: "Python for AI & Data",
+      amountClaimed: 120000,
+      screenshotUrl: "/mock/proof-2.jpg",
+      status: "rejected",
+      reviewNotes: "Transfer receipt looks incomplete — please upload the full statement.",
+      createdAt: daysAgo(12),
+      reviewedAt: daysAgo(9),
+    },
+  ],
+
+  installmentPlans: [
+    {
+      id: "plan_1",
+      enrollmentId: "reg_2",
+      courseName: "Python for AI & Data",
+      origin: "course",
+      planType: "installment",
+      status: "active",
+      totalAmount: 350000,
+      paidAmount: 120000,
+      amountDue: 230000,
+      accessStatus: "active",
+      nextDue: { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysFromNow(14), status: "pending", graceEndsAt: daysFromNow(21) },
+      installments: [
+        { id: "tr_1", sequence: 1, amount: 120000, dueDate: daysAgo(8), status: "paid", paidAt: daysAgo(8) },
+        { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysFromNow(14), status: "pending", graceEndsAt: daysFromNow(21) },
+        { id: "tr_3", sequence: 3, amount: 115000, dueDate: daysFromNow(44), status: "pending" },
+      ],
+    },
+    {
+      id: "plan_2",
+      enrollmentId: "reg_1",
+      courseName: "Full-Stack Web Development",
+      origin: "scholarship",
+      planType: "full_upfront",
+      status: "completed",
+      totalAmount: 500000,
+      paidAmount: 500000,
+      amountDue: 0,
+      accessStatus: "active",
+      installments: [
+        { id: "tr_4", sequence: 1, amount: 500000, dueDate: daysAgo(30), status: "paid", paidAt: daysAgo(30) },
+      ],
+    },
+  ],
+
+  siwesRegistrations: [
+    {
+      registrationId: "reg_siwes_1",
+      siwesDurationMonths: 6,
+      siwesDurationEditable: true,
+      institutionName: "University of Lagos",
+      schoolName: "University of Lagos",
+    },
+    {
+      registrationId: "reg_siwes_2",
+      siwesDurationMonths: 3,
+      siwesDurationEditable: false,
+      institutionName: "Yaba College of Technology",
+    },
+  ],
+
+  acceptanceLetters: [
+    {
+      registrationId: "reg_siwes_1",
+      url: "https://res.cloudinary.com/mock/raw/upload/v1/letters/unilag-letter",
+      refNumber: "SIWES-2026-00123",
+      issuedAt: daysAgo(10),
+      courseName: "Full-Stack Web Development",
+      institutionName: "University of Lagos",
+      durationMonths: 6,
+      durationEditable: true,
+    },
+    {
+      registrationId: "reg_siwes_1_dup",
+      url: "https://res.cloudinary.com/mock/raw/upload/v1/letters/unilag-letter",
+      refNumber: "SIWES-2026-00123",
+      issuedAt: daysAgo(10),
+      courseName: "Python for AI & Data",
+      institutionName: "University of Lagos",
+    },
+    {
+      registrationId: "reg_siwes_2",
+      url: "https://res.cloudinary.com/mock/raw/upload/v1/letters/yaba-letter",
+      refNumber: "SIWES-2026-00089",
+      issuedAt: daysAgo(30),
+      institutionName: "Yaba College of Technology",
+      durationMonths: 3,
+    },
+  ],
+
+  instructorEarnings: {
+    totals: { pendingNaira: 260000, processingNaira: 120000, paidNaira: 800000 },
+    byKind: { baseNaira: 500000, variableNaira: 580000, bonusNaira: 100000 },
+    cohorts: [
+      { scheduleId: "sched_1", course: "Full-Stack Web Development", stream: "course", startDate: daysAgo(30), endDate: daysFromNow(120), pending: 85000, paid: 400000 },
+      { scheduleId: "sched_2", course: "Python for AI & Data", stream: "course", startDate: daysAgo(8), endDate: daysFromNow(160), pending: 175000, paid: 250000 },
+      { course: "Web Accessibility Deep Dive", stream: "foundational", startDate: daysAgo(60), pending: 0, paid: 150000 },
+    ],
+    payouts: [
+      { _id: "payout_1", totalAmount: 400000, status: "pending", createdAt: daysAgo(1), bankName: "GTBank" },
+      { _id: "payout_2", totalAmount: 300000, status: "paid", createdAt: daysAgo(40), processedAt: daysAgo(35), bankName: "GTBank" },
+    ],
+  },
+
+  earningsBreakdown: [
+    {
+      scheduleId: "sched_1",
+      course: "Full-Stack Web Development",
+      model: "legacy-50",
+      isFlat: true,
+      effectiveSharePct: 50,
+      yourEntitlementNaira: 200000,
+      totalRevenueNaira: 400000,
+      students: [
+        { name: "Chidi Eze", email: "chidi.eze@example.com", paidNaira: 500000, yourCutNaira: 250000 },
+        { name: "Zainab Sanni", paidNaira: 300000, yourCutNaira: 150000 },
+      ],
+    },
+    {
+      scheduleId: "sched_2",
+      course: "Python for AI & Data",
+      model: "main-track",
+      isFlat: false,
+      effectiveSharePct: 30,
+      yourEntitlementNaira: 90000,
+      totalRevenueNaira: 300000,
+      students: [
+        { name: "Amina Bello", email: "amina.bello@example.com", paidNaira: 300000 },
+      ],
+    },
+  ],
+
   webinars: [
     {
       _id: "web_1",
@@ -976,4 +1206,8 @@ export const createMutableDatabase = (seed: MockDatabase): MockDatabase => ({
   internships: [...seed.internships],
   scholarship: [...seed.scholarship],
   teaching: [...seed.teaching],
+  paymentProofs: [...seed.paymentProofs],
+  installmentPlans: [...seed.installmentPlans],
+  siwesRegistrations: [...seed.siwesRegistrations],
+  acceptanceLetters: [...seed.acceptanceLetters],
 });
