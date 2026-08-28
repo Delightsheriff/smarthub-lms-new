@@ -73,11 +73,39 @@ done so far and where we're at.
 
 ---
 
+## Plan 003 — Navigation Chrome ✅
+
+**Status: BUILT** — incremental commits, 2026-08.
+
+**Notes:** shadcn `sidebar`/`dropdown-menu`/`sheet`/`alert-dialog`/`avatar`
+(built on `@base-ui/react` — **`render` prop, not `asChild`**). The nav *
+data* is a pure seam (`configs/nav.ts`); toggling the dropdown's label had
+to wrap `DropdownMenuLabel` in a `DropdownMenuGroup` for base-ui's
+`Menu.Group` context (fix `a124f5b`). Nav-composition unit tests are
+**deferred to the Plan 005 Vitest harness** (per plan; no test runner yet).
+
+| Deliverable | Status |
+|---|---|
+| shadcn base-ui primitives: `avatar`, `badge`, `dropdown-menu`, `alert-dialog`, `sheet`, `input`, `separator`, `tooltip`, `sidebar` | ✅ commit 1 |
+| Global `hooks/use-mobile.ts` rewritten (useSyncExternalStore; shadcn-gen violated lint) | ✅ commit 1 |
+| `Logo` (legacy SVGs copied → `public/images/`), `ThemeToggle` (`use-mounted` sync-external-store) | ✅ commit 2 |
+| `RoleSwitcher` (student/instructor, expanded vs collapsed) | ✅ commit 2 |
+| `AppSidebar` — desktop rail (`Sidebar collapsible="icon"`, render-prop links, inbox badge `9+/99+`) | ✅ `677901c` |
+| `useInboxUnreadCount` (sums `mockDatabase.conversations[].unreadCount[userId]`) | ✅ `677901c` |
+| `BottomNav` — mobile pinned bar (4 items + More sheet, iOS safe-area) | ✅ `c2034d5` |
+| `TopBar` + `UserMenu` (gated sign-out via `AlertDialog`) | ✅ commit 5 |
+| Shell chrome in `AppShell` — controlled `SidebarProvider` (`open`/`onOpenChange` → `sidebarStore`) | ✅ `16f2ad9` |
+| `MessageToastListener` (mock socket `message:new` → toast) + `CommandPaletteListener` (⌘K → `uiStore.searchOpen`, no dialog) | ✅ `16f2ad9` |
+| Dropped `uiStore.sideNavCollapsed` duplicate (single source = `sidebarStore`) | ✅ `16f2ad9` |
+| ADR 0007 (nav data/rendering seam) + README index | ✅ `db557d0` |
+| Verify: typecheck / lint / **build (27 routes)** | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
-| 003 | Navigation chrome | 🚫 not started |
 | 004 | Dashboard | 🚫 not started |
 | 005 | Courses & learning (recordings, materials) | 🚫 not started |
 | 006 | Assignments | 🚫 not started |
