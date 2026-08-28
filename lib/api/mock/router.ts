@@ -290,6 +290,21 @@ registerMockRoute({
   handler: () => mockProgressPulse,
 });
 
+// Achievements + cohort pulse are intentionally empty in the mock phase —
+// the ProgressPulseCard self-gates on their presence, so the personal
+// pulse renders cleanly without badge/cohort sections.
+registerMockRoute({
+  verb: "get",
+  path: "/lms/me/achievements",
+  handler: () => [],
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/me/cohort-pulse",
+  handler: () => [],
+});
+
 registerMockRoute({
   verb: "get",
   path: "/lms/internships/me",
