@@ -5,7 +5,6 @@ import { getNavItemsForMode } from "@/configs/nav";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
-import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -47,9 +46,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" side="left">
-      <SidebarHeader className="gap-2 py-2">
-        <div className={cn(collapsed && "grid justify-center")}>
-          <Link href="/dashboard" aria-label="SmartHub">
+      <SidebarHeader className="gap-2 p-2">
+        <div className="flex justify-center">
+          <Link href="/dashboard" aria-label="SmartHub" className="block">
             <Logo size="sm" />
           </Link>
         </div>

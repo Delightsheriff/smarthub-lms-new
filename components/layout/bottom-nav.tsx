@@ -75,7 +75,7 @@ export function BottomNav() {
                       active && "bg-primary/10"
                     )}
                   >
-                    <Icon className="h-[18px] w-[18px]" />
+                    <Icon className="h-4.5 w-4.5" />
                     {badge > 0 && (
                       <Badge className="absolute -right-1.5 -top-1.5 h-3.5 min-w-3.5 justify-center px-1 text-[9px] leading-none border-transparent bg-accent text-white">
                         {badge > 9 ? "9+" : badge}
@@ -107,7 +107,7 @@ export function BottomNav() {
                   (moreIsActive || moreOpen) && "bg-primary/10"
                 )}
               >
-                <MoreHorizontal className="h-[18px] w-[18px]" />
+                <MoreHorizontal className="h-4.5 w-4.5" />
               </span>
               <span className="text-[10px] font-medium leading-none">More</span>
             </button>

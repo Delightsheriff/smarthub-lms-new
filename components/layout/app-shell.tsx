@@ -12,6 +12,8 @@ import { MessageToastListener } from "@/components/layout/message-toast-listener
 import { CommandPaletteListener } from "@/components/layout/command-palette-listener";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useSidebarStore } from "@/store/slices/sidebarStore";
+import { CONTENT_MAX_WIDTH } from "@/configs/brand";
+import { cn } from "@/lib/utils";
 
 /**
  * The `(app)` LMS shell.
@@ -49,7 +51,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <TopBar />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+        <main
+          className={cn(
+            "mx-auto w-full flex-1 px-4 py-6",
+            CONTENT_MAX_WIDTH
+          )}
+        >
           {children}
         </main>
       </SidebarInset>

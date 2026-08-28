@@ -15,3 +15,10 @@ export const BRAND = {
   primary: "#d52b74",
   url: "https://smart-hub.academy",
 } as const;
+
+/**
+ * Shared content-column width (Tailwind class). The top bar and the
+ * `(app)` main column both center on this so chrome actions and page
+ * content sit on the same vertical edges. Change it in ONE place.
+ */
+export const CONTENT_MAX_WIDTH = "max-w-6xl" as const;

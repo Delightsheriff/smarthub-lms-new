@@ -1,20 +1,19 @@
 "use client";
 import { useEffect } from "react";
 import { useUiStore } from "@/store/slices/uiStore";
+import { CommandPalette } from "@/components/layout/command-palette";
 
 /**
  * App-wide host for the global command palette.
  *
  * Registers the ⌘K / Ctrl-K shortcut once and flips the shared
  * `ui.searchOpen` flag, so the top-bar search trigger and the shortcut
- * both drive the same dialog. Mounted in the `(app)` shell next to
- * `MessageToastListener`.
- *
- * The palette *dialog* itself deliberately does not exist yet — Plan 003
- * only opens the flag (listener only, per user decision). The paletted
- * UI + command results land with the global search slice (Plan 009).
+ * both drive the same dialog. Renders the palette bound to that flag.
+ * Mounted in the `(app)` shell next to `MessageToastListener`.
  */
 export function CommandPaletteListener() {
+  const open = useUiStore((s) => s.searchOpen);
+  const setOpen = useUiStore((s) => s.setSearchOpen);
   const toggle = useUiStore((s) => s.toggleSearch);
 
   useEffect(() => {
@@ -28,5 +27,5 @@ export function CommandPaletteListener() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [toggle]);
 
-  return null;
+  return <CommandPalette open={open} onOpenChange={setOpen} />;
 }
