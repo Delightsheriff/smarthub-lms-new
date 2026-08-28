@@ -24,8 +24,8 @@ import { useSidebarStore } from "@/store/slices/sidebarStore";
  * Then it hosts the navigation chrome:
  * - `SidebarProvider` — **controlled** and bound to the persisted
  *   `sidebarStore.collapsed` flag, so desktop collapse is durable and the
- *   store is the single source of truth (the old `uiStore.sideNavCollapsed`
- *   duplicate was removed — ADR 0009).
+ *   store is the single source of truth (the legacy `uiStore.sideNavCollapsed`
+ *   duplicate was removed — see ADR 0007 §4).
  * - Desktop rail (`AppSidebar`) + `SidebarInset` wrapping `TopBar` + the
  *   scrolled page region.
  * - Mobile pinned `BottomNav`.
