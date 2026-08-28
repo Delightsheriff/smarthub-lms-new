@@ -67,8 +67,8 @@ done so far and where we're at.
 | shadcn `skeleton` + `card` primitives | ✅ `bdf9f09` |
 | `(auth)` route group + centered panel layout + 4 stubs (`auth-placeholder`) | ✅ `90e5bac` |
 | shadcn consistency pass (global-error button → shadcn `Button`) | ✅ `bdf9f09` |
-| ADR 0006: `(app)`/`(auth)` split + gating layering; `headers` over `proxy` | 🔨 |
-| Verify: typecheck / lint / build | 🔨 planned |
+| ADR 0006: `(app)`/`(auth)` split + gating layering; `headers` over `proxy` | ✅ `d0de220` |
+| Verify: typecheck / lint / build (29 routes, webmanifest + robots generated) | ✅ |
 | **Commit — INCREMENTAL (6 units, not one lump)** | ✅ |
 
 ---
