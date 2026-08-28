@@ -11,6 +11,7 @@ import {
   Loader2,
   MessageCircle,
 } from "lucide-react";
+import { Accordion } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -244,11 +245,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
               : "Download curriculum"}
           </Button>
         </div>
-        <ul className="divide-y">
+        <Accordion>
           {modules.map((m) => (
             <CourseModuleRow key={m.id} courseSlug={course.slug} module={m} />
           ))}
-        </ul>
+        </Accordion>
       </Card>
     </div>
   );
