@@ -127,11 +127,36 @@ in target — `useAuthStore` + `useEffectiveMode()`.
 
 ---
 
+## Plan 005 — Courses & Learning ✅
+
+**Status: BUILT** — 6 incremental commits (`1df4743`…`8aa9a79`), 2026-08.
+
+**Notes:** All four §8 open questions confirmed by user (Assignment stays in
+`assignments` module; static placeholder curriculum PDF; Vitest added here;
+real reachable sample assets). Plan 004's module cores already carried the
+data layer — this plan delivered presentation + mock content + tests + ADR.
+One normalisation taproot (`modules/learning/api/normalise.ts`) + one URL
+classifier (`classifyVideoUrl`) serve every surface; no `success`/`accent`
+badge variants exist, mapped to valid ones. Instructor courses branch
+deferred to Plan 011 — student body only.
+
+| Deliverable | Status |
+|---|---|
+| **Commit A** — Vitest harness (`vitest.config.ts`, `test` script) + content-rich mock seed (recording/material helpers w/ providers, multi-part, locked, drive, cloudinary; courses recs/mats; course_3 + mod_6/7/8; enriched assigned) + router handlers (course detail, my recordings/materials, view/download patches) + shadcn accordion+tabs | ✅ `1df4743` |
+| **Commit B** — `classifyVideoUrl` (video/youtube/vimeo/drive/external), `use-previewable-url` (no effect setState), `RichText` + `CollapsibleRichText` (motion) | ✅ `63f81cf` |
+| **Commit C** — `modules/learning` endpoints/service/`content.queries`, `recording-player-dialog`, `material-preview-dialog`, `module-section` (Recordings/Materials/Assignments), recordings/materials feeds | ✅ `c488c69` |
+| **Commit D** — `course-module-row` (motion, valid badges), `course-outline`, `CoursesPageContent` (student body, dropdown filters), `CourseDetailPageContent`, `CourseModulePageContent` — all `render`-prop triggers, `text-emerald-600`, no `Accordion type=` prop | ✅ `1cdd64d` |
+| **Commit E** — `AssignedModulesPageContent` + route wiring (courses list, `[slug]` detail + layout two-pane/Sheet, `[slug]/modules/[moduleSlug]`, recordings, materials, assigned) | ✅ `fb3b408` |
+| **Commit F** — 4 Vitest test files (34 tests: normalisers + URL classifier) + ADR 0009 (shared normalisation taproot) | ✅ `8aa9a79` |
+| Verify: typecheck / lint / **build (32 routes)** / 34 tests / dev-boot (6 routes 200) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
-| 005 | Courses & learning (recordings, materials) | 🚫 not started |
+| 006 | Assignments | 🚫 not started |
 | 006 | Assignments | 🚫 not started |
 | 007 | Calendar / activity / webinars | 🚫 not started |
 | 008 | Messaging / inbox / notifications | 🚫 not started |

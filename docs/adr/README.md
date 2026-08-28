@@ -13,3 +13,4 @@ a later ADR that reverses an earlier one must say so explicitly.
 | 0006 | Route groups `(app)`/`(auth)` + gating layering; `headers` over `proxy` | Accepted |
 | 0007 | Nav data / nav rendering seam (`configs/nav.ts` pure data; collapse via `sidebarStore`) | Accepted |
 | 0008 | The dashboard is a composition point, not a module | Accepted |
+| 0009 | Student learning surface shares one normalisation taproot | Accepted |
