@@ -1,46 +1,61 @@
 "use client";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { TopBar } from "@/components/layout/top-bar";
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { MessageToastListener } from "@/components/layout/message-toast-listener";
+import { CommandPaletteListener } from "@/components/layout/command-palette-listener";
 import { useAuthStore } from "@/store/slices/authStore";
-import { useEffectiveMode } from "@/hooks/use-effective-mode";
+import { useSidebarStore } from "@/store/slices/sidebarStore";
 
 /**
  * The `(app)` LMS shell.
  *
- * Owns the **gate**: reads `isAuthenticated` from `authStore` (the
- * interface — no HTTP mocking here) and redirects to `/login` when a
- * signed-in session is not present. In the UI-first phase the store is
- * seeded signed-in, so the shell renders; after `logout()` (or a cleared
- * store) it redirects to the (stub) login.
+ * Owns the **gate**: redirects to `/login` when `isAuthenticated` is not
+ * set, exactly like a middleware would for the protected region (the
+ * legacy used `middleware.ts`; we gate in the layout shell instead — see
+ * ADR 0006 / ADR 0007).
  *
- * Full navigation chrome (side rail, mobile nav, command palette) lands
- * in Plan 004. This layout only establishes the gated region + main
- * scroll container so the shell *concentrates* the guard rather than
- * each page owning it (deletion test: remove this and the gate reappears
- * per-page — so it must stay).
+ * Then it hosts the navigation chrome:
+ * - `SidebarProvider` — **controlled** and bound to the persisted
+ *   `sidebarStore.collapsed` flag, so desktop collapse is durable and the
+ *   store is the single source of truth (the old `uiStore.sideNavCollapsed`
+ *   duplicate was removed — ADR 0009).
+ * - Desktop rail (`AppSidebar`) + `SidebarInset` wrapping `TopBar` + the
+ *   scrolled page region.
+ * - Mobile pinned `BottomNav`.
+ * - App-wide socket + keyboard listeners (`MessageToastListener`,
+ *   `CommandPaletteListener`).
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { mode } = useEffectiveMode();
+  const collapsed = useSidebarStore((s) => s.collapsed);
+  const setCollapsed = useSidebarStore((s) => s.setCollapsed);
 
   if (!isAuthenticated) {
     redirect("/login");
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
-      {/* Minimal chrome placeholder — real top bar / rail in Plan 004. */}
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
-        <span className="text-sm font-semibold tracking-tight">
-          SmartHub
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {mode === "instructor" ? "Teaching" : "Learning"}
-        </span>
-      </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider
+      open={!collapsed}
+      onOpenChange={(open) => setCollapsed(!open)}
+    >
+      <AppSidebar />
+      <SidebarInset>
+        <TopBar />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+          {children}
+        </main>
+      </SidebarInset>
+      <BottomNav />
+      <MessageToastListener />
+      <CommandPaletteListener />
+    </SidebarProvider>
   );
 }
