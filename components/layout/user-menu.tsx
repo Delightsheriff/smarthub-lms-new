@@ -18,6 +18,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -66,16 +67,18 @@ export function UserMenu() {
           }
         />
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuLabel className="flex flex-col gap-0.5 normal-case">
-            <span className="truncate text-sm font-semibold text-foreground">
-              {fullName || "—"}
-            </span>
-            {user?.email && (
-              <span className="truncate text-xs font-normal text-muted-foreground">
-                {user.email}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex flex-col gap-0.5 normal-case">
+              <span className="truncate text-sm font-semibold text-foreground">
+                {fullName || "—"}
               </span>
-            )}
-          </DropdownMenuLabel>
+              {user?.email && (
+                <span className="truncate text-xs font-normal text-muted-foreground">
+                  {user.email}
+                </span>
+              )}
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
 
           <DropdownMenuItem onClick={() => router.push("/profile")}>
