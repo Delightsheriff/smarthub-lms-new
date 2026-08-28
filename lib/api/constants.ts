@@ -6,6 +6,11 @@
  * normaliser + type files stay aligned with the contract.
  */
 
+/** URL prefix all student-facing LMS routes live under. Module
+ *  `config/endpoints.ts` files build their paths from this. The mock
+ *  router registers handlers beneath the same prefix. */
+export const LMS_PREFIX = "/lms" as const;
+
 export const COHORT_STATUS = {
   UPCOMING: "upcoming",
   ACTIVE: "active",
