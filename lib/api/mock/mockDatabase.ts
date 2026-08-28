@@ -1,0 +1,616 @@
+/**
+ * UI-first mock data source.
+ *
+ * Holds **wire-shaped** records (string `_id`s, nested sub-docs, real enum
+ * values — see `lib/api/wire.types.ts`) mirroring `smarthub-api`. The
+ * data-source adapter (`lib/api/client.ts`) exposes async query/mutation
+ * handlers over these records. When the real API lands (Plan 012), only
+ * that adapter changes — this module becomes a test fixture / non-default
+ * source.
+ */
+
+import type {
+  WireBillingBreakdown,
+  WireCalendarEvent,
+  WireConversation,
+  WireEnrolledCourse,
+  WireInternship,
+  WireModule,
+  WireNotification,
+  WireRecording,
+  WireScholarshipApplication,
+  WireSubmission,
+  WireTeachingCohort,
+  WireWebinar,
+  WireUser,
+} from "@/lib/api/wire.types";
+import type { ContentLink } from "@/types/content-link";
+
+const daysFromNow = (days: number) =>
+  new Date(Date.now() + days * 86_400_000).toISOString();
+const daysAgo = (days: number) =>
+  new Date(Date.now() - days * 86_400_000).toISOString();
+
+export const mockUser: WireUser = {
+  _id: "usr_1",
+  firstName: "Ade",
+  middleName: "Oluwaseun",
+  lastName: "Balogun",
+  email: "ade.balogun@example.com",
+  phone: "+2348012345678",
+  imageUrl: "/mock/ade.jpg",
+  roles: ["student", "instructor"],
+  isVerified: true,
+};
+
+export const mockInstructor: WireUser = {
+  _id: "usr_2",
+  firstName: "Ngozi",
+  lastName: "Okonkwo",
+  email: "ngozi.okonkwo@example.com",
+  imageUrl: "/mock/ngozi.jpg",
+  roles: ["instructor"],
+  isVerified: true,
+};
+
+const recordingLinks = (id: string): ContentLink[] => [
+  { name: "Part 1", url: `https://mock.smarthub.dev/rec/${id}/p1` },
+  { name: "Part 2", url: `https://mock.smarthub.dev/rec/${id}/p2` },
+];
+
+/** Root set of wire-shaped records, keyed by collection. */
+export interface MockDatabase {
+  users: WireUser[];
+  courses: WireEnrolledCourse[];
+  modules: Record<string, WireModule[]>;
+  recordings: WireRecording[];
+  submissions: WireSubmission[];
+  conversations: WireConversation[];
+  calendar: WireCalendarEvent[];
+  notifications: WireNotification[];
+  billing: WireBillingBreakdown;
+  webinars: WireWebinar[];
+  internships: WireInternship[];
+  scholarship: WireScholarshipApplication[];
+  teaching: WireTeachingCohort[];
+}
+
+export const mockDatabase: MockDatabase = {
+  users: [mockUser, mockInstructor],
+
+  courses: [
+    {
+      _id: "course_1",
+      name: "Full-Stack Web Development",
+      nameSlug: "full-stack-web-development",
+      description:
+        "Build and ship production web apps end-to-end: HTML/CSS, JavaScript, React, Node and databases, topped with a portfolio capstone.",
+      thumbnail: "/mock/course-web.png",
+      category: "Web Development",
+      difficulty: "Intermediate",
+      enrollment: {
+        _id: "enr_1",
+        enrollmentDate: daysAgo(40),
+        status: "active",
+        progress: 46,
+        lastAccessedAt: daysAgo(1),
+        schedule: {
+          _id: "sched_1",
+          startDate: daysAgo(30),
+          endDate: daysFromNow(120),
+          mode: "online",
+          instructors: [wireInstructorRef()],
+        },
+      },
+      modules: [
+        { _id: "mod_1", title: "HTML & CSS Foundations", titleSlug: "html-css", order: 1, isPublished: true },
+        { _id: "mod_2", title: "JavaScript Essentials", titleSlug: "js-essentials", order: 2, isPublished: true },
+        { _id: "mod_3", title: "React & Components", titleSlug: "react-components", order: 3, isPublished: true },
+      ],
+      instructor: wireInstructorRef(),
+      instructors: [wireInstructorRef()],
+      moduleStats: { total: 3, completed: 1 },
+      mode: "online",
+      courseKind: "full",
+    },
+    {
+      _id: "course_2",
+      name: "Python for AI & Data",
+      nameSlug: "python-for-ai-data",
+      description:
+        "From Python fundamentals to machine-learning basics and data analysis with pandas and scikit-learn.",
+      thumbnail: "/mock/course-python.png",
+      category: "Data Science",
+      difficulty: "Beginner",
+      enrollment: {
+        _id: "enr_2",
+        enrollmentDate: daysAgo(10),
+        status: "active",
+        progress: 12,
+        lastAccessedAt: daysAgo(2),
+        schedule: {
+          _id: "sched_2",
+          startDate: daysAgo(8),
+          endDate: daysFromNow(160),
+          mode: "hybrid",
+          instructors: [wireInstructorRef()],
+        },
+      },
+      modules: [
+        { _id: "mod_4", title: "Python Basics", titleSlug: "python-basics", order: 1, isPublished: true },
+      ],
+      instructor: wireInstructorRef(),
+      instructors: [wireInstructorRef()],
+      moduleStats: { total: 1, completed: 0 },
+      mode: "hybrid",
+      courseKind: "full",
+    },
+  ],
+
+  modules: {
+    mod_1: [
+      {
+        _id: "mod_1",
+        title: "HTML & CSS Foundations",
+        titleSlug: "html-css",
+        description: "Semantic markup, flexbox, grid and responsive design.",
+        status: "published",
+        order: 1,
+        estimatedDuration: 240,
+        learningObjectives: [
+          "Write semantic, accessible HTML",
+          "Lay out pages with flexbox and grid",
+          "Build responsive, mobile-first interfaces",
+        ],
+        cohortStatus: "completed",
+        cohortStartedAt: daysAgo(30),
+        cohortCompletedAt: daysAgo(14),
+        recordings: [
+          recording("rec_1", "Intro to HTML", 18, false, "published"),
+          recording("rec_2", "Flexbox in Practice", 26, true, "published"),
+          recording("rec_3", "CSS Grid Masterclass", 31, true, "published"),
+        ],
+        materials: [
+          material("mat_1", "HTML & CSS Cheat Sheet", "guide", "pdf"),
+          material("mat_2", "Week 1 Slides", "presentation", "slide"),
+          material("mat_3", "Practice Exercises", "exercise", "exercise"),
+        ],
+        assignments: [
+          assignment("asgn_1", "Build a Landing Page", "mod_1", 100, 5),
+        ],
+      },
+    ],
+    mod_2: [
+      {
+        _id: "mod_2",
+        title: "JavaScript Essentials",
+        titleSlug: "js-essentials",
+        description: "Variables, functions, arrays, objects and DOM.",
+        status: "published",
+        order: 2,
+        estimatedDuration: 300,
+        learningObjectives: [
+          "Master ES6+ syntax",
+          "Work with the DOM and events",
+        ],
+        cohortStatus: "in-progress",
+        cohortStartedAt: daysAgo(12),
+        cohortCompletedAt: null,
+        recordings: [
+          recording("rec_4", "JavaScript Primer", 22, true, "published"),
+          recording("rec_5", "DOM & Events", 27, false, "published"),
+        ],
+        materials: [
+          material("mat_4", "ES6 Reference", "reference", "pdf"),
+        ],
+        assignments: [
+          assignment("asgn_2", "Interactive Quiz App", "mod_2", 80, 2),
+        ],
+      },
+    ],
+    mod_3: [
+      {
+        _id: "mod_3",
+        title: "React & Components",
+        titleSlug: "react-components",
+        description: "Components, props, state and hooks.",
+        status: "published",
+        order: 3,
+        estimatedDuration: 360,
+        learningObjectives: ["Compose reusable components", "Manage state with hooks"],
+        cohortStatus: "not-started",
+        cohortStartedAt: null,
+        cohortCompletedAt: null,
+        recordings: [
+          recording("rec_6", "Your First Component", 20, false, "published"),
+        ],
+        materials: [],
+        assignments: [
+          assignment("asgn_3", "Portfolio in React", "mod_3", 120, 7),
+        ],
+      },
+    ],
+    mod_4: [
+      {
+        _id: "mod_4",
+        title: "Python Basics",
+        titleSlug: "python-basics",
+        description: "Syntax, data types, control flow and functions.",
+        status: "published",
+        order: 1,
+        estimatedDuration: 180,
+        learningObjectives: ["Read and write Python", "Use data structures"],
+        cohortStatus: "in-progress",
+        cohortStartedAt: daysAgo(8),
+        cohortCompletedAt: null,
+        recordings: [
+          recording("rec_7", "Python Setup & First Script", 14, true, "published"),
+        ],
+        materials: [
+          material("mat_5", "Python Quickstart", "guide", "pdf"),
+        ],
+        assignments: [
+          assignment("asgn_4", "Data Wrangling Warm-up", "mod_4", 60, 3),
+        ],
+      },
+    ],
+  },
+
+  recordings: [],
+
+  submissions: [
+    submissionFor("asgn_1", "usr_1", {
+      status: "graded",
+      grade: { score: 84, totalPoints: 100, percentage: 84, letterGrade: "B" },
+      feedback: { general: "Great structure; tighten spacing on mobile." },
+    }),
+  ],
+
+  conversations: [
+    {
+      _id: "conv_1",
+      type: "support",
+      participants: [mockUser, mockInstructor],
+      lastMessage: {
+        _id: "msg_5",
+        conversationId: "conv_1",
+        sender: { _id: "usr_2", firstName: "Ngozi", lastName: "Okonkwo", email: "ngozi.okonkwo@example.com" },
+        content: "Ready to review your latest submission, Ade.",
+        createdAt: daysAgo(1),
+      },
+      unreadCount: { usr_1: 1 },
+      updatedAt: daysAgo(1),
+      metadata: {},
+    },
+    {
+      _id: "conv_2",
+      type: "assignment",
+      participants: [mockUser, mockInstructor],
+      lastMessage: {
+        _id: "msg_9",
+        conversationId: "conv_2",
+        sender: { _id: "usr_1", firstName: "Ade", lastName: "Balogun", email: mockUser.email },
+        content: "Just pushed my quiz app repo.",
+        createdAt: daysAgo(2),
+      },
+      unreadCount: {},
+      updatedAt: daysAgo(2),
+      metadata: { assignmentId: { _id: "asgn_2", title: "Interactive Quiz App" } },
+    },
+  ],
+
+  calendar: [
+    {
+      _id: "evt_1",
+      type: "class-session",
+      source: "auto",
+      title: "Live: Flexbox Lab",
+      description: "Hands-on flexbox workshop.",
+      link: "https://meet.example.com/sh",
+      location: "Online",
+      start: daysFromNow(0) + "",
+      end: daysFromNow(0) + "",
+      allDay: false,
+      scope: "schedule",
+      scopeId: "sched_1",
+      isCancelled: false,
+      sourceRef: { model: "ClassSession", id: "cs_1" },
+      meta: { courseName: "Full-Stack Web Development" },
+    },
+    {
+      _id: "evt_2",
+      type: "assignment-due",
+      source: "auto",
+      title: "Interactive Quiz App due",
+      start: daysFromNow(2),
+      allDay: false,
+      scope: "assignment",
+      scopeId: "asgn_2",
+      isCancelled: false,
+      meta: { courseName: "Full-Stack Web Development", moduleTitle: "JavaScript Essentials" },
+    },
+    {
+      _id: "evt_3",
+      type: "office-hours",
+      source: "manual",
+      title: "Office hours with Ngozi",
+      start: daysFromNow(4),
+      allDay: false,
+      scope: "global",
+      isCancelled: false,
+    },
+  ],
+
+  notifications: [
+    { _id: "ntf_1", type: "grade", title: "Assignment graded", body: "Your landing page scored 84%.", createdAt: daysAgo(1), read: false, actionUrl: "/assignments" },
+    { _id: "ntf_2", type: "material", title: "New material added", body: "ES6 Reference added to JavaScript Essentials.", createdAt: daysAgo(2), read: true, actionUrl: "/courses/full-stack-web-development" },
+    { _id: "ntf_3", type: "announcement", title: "Cohort announcement", body: "Submission window extended by 24h.", createdAt: daysAgo(3), read: false, actionUrl: "/notifications" },
+  ],
+
+  billing: {
+    overall: {
+      totalPaid: 320000,
+      totalDue: 480000,
+      totalAmount: 800000,
+      totalDiscount: 50000,
+      paymentProgress: 40,
+      nextPaymentDue: daysFromNow(14),
+    },
+    registrations: [
+      {
+        _id: "reg_1",
+        course: { _id: "course_1", name: "Full-Stack Web Development", nameSlug: "full-stack-web-development", mode: "online" },
+        schedule: { _id: "sched_1", startDate: daysAgo(30), duration: "6 months" },
+        paymentStatus: "completed",
+        paymentOption: "installment",
+        totalAmount: 500000,
+        paidAmount: 500000,
+        remainingAmount: 0,
+        coursePrice: 550000,
+        discountAmount: 0,
+        nextPaymentDue: null,
+        payments: [
+          { _id: "pay_1", amount: 250000, paymentDate: daysAgo(30) },
+          { _id: "pay_2", amount: 250000, paymentDate: daysAgo(10) },
+        ],
+      },
+      {
+        _id: "reg_2",
+        course: { _id: "course_2", name: "Python for AI & Data", nameSlug: "python-for-ai-data", mode: "hybrid" },
+        schedule: { _id: "sched_2", startDate: daysAgo(8), duration: "5 months" },
+        paymentStatus: "completed",
+        paymentOption: "installment",
+        totalAmount: 350000,
+        paidAmount: 120000,
+        remainingAmount: 230000,
+        coursePrice: 350000,
+        discountAmount: 50000,
+        discountKind: "amount",
+        discountValue: 50000,
+        discountReason: "scholarship",
+        discountNote: "Partial merit scholarship.",
+        nextPaymentDue: daysFromNow(14),
+        payments: [{ _id: "pay_3", amount: 120000, paymentDate: daysAgo(8) }],
+      },
+    ],
+  },
+
+  webinars: [
+    {
+      _id: "web_1",
+      title: "Building a Career in Data",
+      nameSlug: "career-in-data",
+      description: "Panel on breaking into data roles.",
+      date: daysFromNow(6),
+      speakers: ["Ngozi Okonkwo", "Dr. Yusuf Adamu"],
+      tags: ["data", "career"],
+      liveLink: "https://meet.example.com/webinar",
+      recordingLink: "https://youtube.example.com/xyz",
+      posterUrl: "/mock/webinar-data.png",
+      isAvailable: true,
+      reservationsOpen: true,
+      externalResources: [],
+    },
+    {
+      _id: "web_2",
+      title: "Intro to AI Tools",
+      nameSlug: "intro-ai-tools",
+      description: "Hands-on intro to LLM tooling.",
+      date: daysAgo(20),
+      speakers: ["Sola Adeyemi"],
+      tags: ["ai"],
+      recordingLink: "https://youtube.example.com/abc",
+      posterUrl: "/mock/webinar-ai.png",
+      isAvailable: true,
+      reservationsOpen: false,
+      externalResources: [],
+    },
+  ],
+
+  internships: [
+    {
+      _id: "int_1",
+      internName: "Ade Balogun",
+      internEmail: "ade.balogun@example.com",
+      product: { key: "python-ai", name: "Python for AI & Data" },
+      mentor: { name: "Ngozi Okonkwo", email: "ngozi.okonkwo@example.com", title: "Lead Instructor" },
+      startDate: daysAgo(7),
+      endDate: daysFromNow(83),
+      status: "active",
+      progressPercent: 15,
+      checkIns: [
+        { _id: "ci_1", weekOf: daysAgo(1), summary: "Set up environment, began first task.", hoursLogged: 8 },
+      ],
+      tasks: [
+        { _id: "it_1", internship: "int_1", title: "Set up dev environment", description: "Install Python, VS Code, git.", status: "done", order: 1, submittedAt: daysAgo(5) },
+        { _id: "it_2", internship: "int_1", title: "Build a data-cleaning script", description: "Clean the provided CSV.", status: "in_progress", order: 2, dueDate: daysFromNow(4) },
+        { _id: "it_3", internship: "int_1", title: "Weekly check-in", status: "todo", order: 3, dueDate: daysFromNow(2) },
+      ],
+    },
+  ],
+
+  scholarship: [
+    {
+      _id: "sch_1",
+      cohort: "2026 Cohort A",
+      track: "web-dev",
+      stage: "enrolled",
+      awardedTier: "full",
+      siwesCouponCode: "SIWES-WEB-2026",
+      createdAt: daysAgo(45),
+    },
+  ],
+
+  teaching: [
+    {
+      _id: "sched_1",
+      startDate: daysAgo(30),
+      endDate: daysFromNow(120),
+      duration: "6 months",
+      studentCount: 34,
+      progress: 46,
+      course: {
+        _id: "course_1",
+        name: "Full-Stack Web Development",
+        nameSlug: "full-stack-web-development",
+        mode: "online",
+        imageUrl: "/mock/course-web.png",
+        description: "Build and ship production web apps end-to-end.",
+      },
+    },
+    {
+      _id: "sched_2",
+      startDate: daysAgo(8),
+      endDate: daysFromNow(160),
+      duration: "5 months",
+      studentCount: 21,
+      progress: 12,
+      course: {
+        _id: "course_2",
+        name: "Python for AI & Data",
+        nameSlug: "python-for-ai-data",
+        mode: "hybrid",
+        imageUrl: "/mock/course-python.png",
+        description: "Python fundamentals to machine learning.",
+      },
+    },
+  ],
+};
+
+function wireInstructorRef() {
+  return {
+    _id: "usr_2",
+    firstName: "Ngozi",
+    lastName: "Okonkwo",
+    email: "ngozi.okonkwo@example.com",
+    imageUrl: "/mock/ngozi.jpg",
+    bio: "Full-stack engineer and educator.",
+    jobTitle: "Lead Instructor",
+    whatsapp: "+2348098765432",
+  };
+}
+
+function recording(
+  id: string,
+  title: string,
+  duration: number,
+  watched: boolean,
+  status: "draft" | "published" | "archived",
+): WireRecording {
+  return {
+    _id: id,
+    title,
+    duration,
+    durationLabel: `${duration} min`,
+    videoUrl: `https://mock.smarthub.dev/rec/${id}/p1`,
+    links: recordingLinks(id),
+    thumbnailUrl: `/mock/rec-${id}.png`,
+    publishedAt: daysAgo(20),
+    status,
+    watched,
+  };
+}
+
+function material(
+  id: string,
+  title: string,
+  category: "guide" | "presentation" | "exercise" | "reference",
+  fileType: "pdf" | "slide" | "exercise" | "link",
+) {
+  return {
+    _id: id,
+    title,
+    category,
+    fileType,
+    fileUrl: `https://mock.smarthub.dev/mat/${id}`,
+    links: [{ name: title, url: `https://mock.smarthub.dev/mat/${id}` }],
+    tags: [category],
+  };
+}
+
+function assignment(
+  id: string,
+  title: string,
+  _module: string,
+  totalPoints: number,
+  dueInDays: number,
+) {
+  return {
+    _id: id,
+    title,
+    instructions: "Follow the brief in the resource link and submit before the deadline.",
+    description: `Submission for ${title}.`,
+    assignmentLink: "https://docs.example.com/brief",
+    links: [],
+    type: "assignment" as const,
+    priority: "medium" as const,
+    dueDate: daysFromNow(dueInDays),
+    totalPoints,
+    allowLateSubmission: true,
+    status: "submitted" as const,
+    module: _module,
+    course: "course_1",
+  };
+}
+
+function submissionFor(
+  assignmentId: string,
+  userId: string,
+  overrides: Partial<WireSubmission> = {},
+): WireSubmission {
+  return {
+    _id: `sub_${assignmentId}_${userId}`,
+    assignment: assignmentId,
+    user: userId,
+    course: "course_1",
+    submissionType: "file",
+    fileName: "landing-page.zip",
+    fileUrl: "https://mock.smarthub.dev/sub/landing.zip",
+    fileMimeType: "application/zip",
+    notes: "Here is my landing page project.",
+    status: "submitted",
+    submittedAt: daysAgo(2),
+    isLateSubmission: false,
+    version: 1,
+    submissionHistory: [
+      { action: "submitted", timestamp: daysAgo(2), notes: "Initial submission" },
+    ],
+    ...overrides,
+  };
+}
+
+/** In-memory mutable copy so mutation handlers can append/edit records. */
+export const createMutableDatabase = (seed: MockDatabase): MockDatabase => ({
+  ...seed,
+  courses: [...seed.courses],
+  modules: Object.fromEntries(
+    Object.entries(seed.modules).map(([k, v]) => [k, [...v]]),
+  ),
+  submissions: [...seed.submissions],
+  conversations: [...seed.conversations],
+  notifications: [...seed.notifications],
+  webinars: [...seed.webinars],
+  internships: [...seed.internships],
+  scholarship: [...seed.scholarship],
+  teaching: [...seed.teaching],
+});
