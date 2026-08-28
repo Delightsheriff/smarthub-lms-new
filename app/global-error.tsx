@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 // Global error boundary for the ROOT layout. Must render its own
 // `<html>` and `<body>` (the root layout is replaced while this is
 // shown). Client Component — no metadata/fonts from next/font here.
@@ -21,13 +23,7 @@ export default function GlobalError({
           An unexpected error occurred. You can try again, or head back to the
           dashboard.
         </p>
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground outline-none transition-colors hover:bg-primary/80 focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Try again
-        </button>
+        <Button onClick={reset}>Try again</Button>
       </body>
     </html>
   );
