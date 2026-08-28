@@ -122,7 +122,7 @@ in target — `useAuthStore` + `useEffectiveMode()`.
 | Dashboard-local components — `StatsStrip`, `CourseProgressList` (assignments rollup via module query surface) | ✅ `47ca852` |
 | `CourseCard` (rebuilt on base-vega; no `success` badge variant, mapped) | ✅ `47ca852` |
 | `DashboardPage` + `StudentDashboardBody` — composition order + role branch; route wired | ✅ `47ca852` |
-| ADR 0008 (dashboard is a composition point, not a module) + README index | ✅ `a1f3b9c` |
+| ADR 0008 (dashboard is a composition point, not a module) + README index | ✅ `12b53fd` |
 | Verify: typecheck / lint / **build (28 routes)** | ✅ |
 
 ---
