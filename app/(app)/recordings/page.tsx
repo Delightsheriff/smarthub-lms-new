@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { RecordingsPageContent } from "@/modules/learning/components/recordings-page-content";
 
 export default function RecordingsPage() {
-  return <ComingSoon title="Recordings" />;
+  return <RecordingsPageContent />;
 }

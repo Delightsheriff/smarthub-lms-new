@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { AssignedModulesPageContent } from "@/modules/assigned-modules/components/AssignedModulesPageContent";
 
 export default function AssignedPage() {
-  return <ComingSoon title="Assigned to you" />;
+  return <AssignedModulesPageContent />;
 }

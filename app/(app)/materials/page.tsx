@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { MaterialsPageContent } from "@/modules/learning/components/materials-page-content";
 
 export default function MaterialsPage() {
-  return <ComingSoon title="Materials" />;
+  return <MaterialsPageContent />;
 }
