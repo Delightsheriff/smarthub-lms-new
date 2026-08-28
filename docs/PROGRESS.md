@@ -1,0 +1,99 @@
+# SmartHub LMS Port — Progress & Checklist
+
+Living status doc for the port. Each plan has a checklist of its
+deliverables; boxes are checked as they land. Use this to see everything
+done so far and where we're at.
+
+**Master context:** `plans/PORTING.md` · **Domain glossary:** `CONTEXT.md` ·
+**Decisions:** `docs/adr/` · **Plan 002 outline:** `docs/PLAN-002-OUTLINE.md`
+
+---
+
+## Legend
+
+- ✅ **Done** — built, verified (typecheck/lint/build), committed
+- 🔨 **In progress** — being worked on right now
+- ⬜ **Open / confirmed** — plan acknowledged by user, code not written
+- 🚫 **Deferred** — deliberately postponed (with reason)
+
+---
+
+## Plan 001 — Foundation ✅
+
+**Status: BUILT** — committed `e10adca` (2026-08)
+
+| Deliverable | Status |
+|---|---|
+| Runtime + dev deps installed | ✅ |
+| Contract mirror — `lib/api/constants.ts` (enums) | ✅ |
+| Wire types — `lib/api/wire.types.ts` (string ids, nested sub-docs) | ✅ |
+| Shared types — `lib/api/types.ts` (envelope + `ApiError`) | ✅ |
+| Data-source seam — `lib/api/client.ts` (`get/post/put/patch/delete/getBlob`) | ✅ |
+| Mock db — `lib/api/mock/mockDatabase.ts` (wire-faithful fixtures) | ✅ |
+| Mock handlers — `lib/api/mock/router.ts` | ✅ |
+| Barrel — `lib/api/index.ts` | ✅ |
+| `lib/utils.ts` extended (`formatPrice`, `formatDate`, `timeAgo`, `htmlToPlainText`, …) | ✅ |
+| `lib/constants/` — `api.ts`, `storage.ts` | ✅ |
+| `lib/services/storage.service.ts` | ✅ |
+| `lib/mime-extension.ts`, `lib/module-progress.ts`, `lib/image.ts`, `lib/cloudinary-download.ts` | ✅ |
+| Socket seam — `lib/socket/socket-provider.tsx` (mock emitter) | ✅ |
+| Stores — `authStore` (mock-seeded), `roleModeStore`, `sidebarStore`, `uiStore` | ✅ |
+| `types/auth.ts` (`AuthUser`) | ✅ |
+| Configs — `configs/brand.ts`, `configs/nav.ts` | ✅ |
+| Hooks — `useEffectiveMode`, `usePageParam`, `useNotificationChime`, `useTitleNotifier` | ✅ |
+| Providers — `QueryProvider`, `AppProviders`; root layout wired | ✅ |
+| Animation folder — `FadeIn`, `Stagger`/`StaggerItem` | ✅ |
+| `CONTEXT.md` glossary seeded | ✅ |
+| `docs/adr/` — 5 foundation ADRs | ✅ |
+| Verify: typecheck / lint / build / dev-boot | ✅ |
+| **Commit (incremental lesson learned)** | ✅ |
+
+---
+
+## Plan 002 — App Shell & Route Skeleton ✅
+
+**Status: BUILT** — incremental commits, 2026-08.
+**Next-16 note:** `middleware.ts` is deprecated → we use `next.config.ts`
+`headers()` for noindex (no `proxy.ts` yet; deferred to Plan 012 auth).
+
+| Deliverable | Status |
+|---|---|
+| Root layout: Inter font, metadata (title template, noindex), viewport, `AppProviders` | ✅ `7860f65` |
+| `next.config.ts` `headers()` → `X-Robots-Tag: noindex, nofollow` | ✅ `7860f65` |
+| Root `app/page.tsx` → redirect `/dashboard` | ✅ `7860f65` |
+| Global files: `manifest.ts`, `robots.ts`, `instrumentation.ts`, `not-found.tsx`, `global-error.tsx` (all Next-16-correct) | ✅ `8bb1cbb` |
+| `(app)` route group + `layout.tsx` + `AppShell` (auth gating, redirect to `/login`) | ✅ `0be319d` |
+| 20 `(app)` route stubs via `ComingSoon` (shadcn `Card`+`Skeleton`) | ✅ `bdf9f09` |
+| shadcn `skeleton` + `card` primitives | ✅ `bdf9f09` |
+| `(auth)` route group + centered panel layout + 4 stubs (`auth-placeholder`) | ✅ `90e5bac` |
+| shadcn consistency pass (global-error button → shadcn `Button`) | ✅ `bdf9f09` |
+| ADR 0006: `(app)`/`(auth)` split + gating layering; `headers` over `proxy` | 🔨 |
+| Verify: typecheck / lint / build | 🔨 planned |
+| **Commit — INCREMENTAL (6 units, not one lump)** | ✅ |
+
+---
+
+## Future plans (deferred, in delivery order)
+
+| Plan | Focus | Status |
+|---|---|---|
+| 003 | Navigation chrome | 🚫 not started |
+| 004 | Dashboard | 🚫 not started |
+| 005 | Courses & learning (recordings, materials) | 🚫 not started |
+| 006 | Assignments | 🚫 not started |
+| 007 | Calendar / activity / webinars | 🚫 not started |
+| 008 | Messaging / inbox / notifications | 🚫 not started |
+| 009 | Profile / payments / billing / SIWES / referrals | 🚫 not started |
+| 010 | Programs & AI help (Oreo) | 🚫 not started |
+| 011 | Teaching / instructor CRUD | 🚫 not started |
+| 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
+
+---
+
+## Cross-cutting conventions (from AGENTS.md)
+
+- Work **one plan at a time**; a plan is confirmed by the user before code.
+- **Never assume; confirm scope** — ask before starting a slice, flag ambiguities.
+- **Commit incrementally** — small logical units, per deliverable, not one lump.
+- Use **shadcn** primitives (via MCP); rebuild on `base-vega`; no old theme.
+- Run `npm run typecheck` + `npm run lint` (+ build when feasible) before claiming done.
