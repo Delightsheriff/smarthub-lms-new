@@ -6,6 +6,7 @@
  */
 
 import { registerMockRoute, type MockRequestContext } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/types";
 import type { WireMaterial, WireRecording } from "@/lib/api/wire.types";
 import {
   mockAssignedModules,
@@ -15,6 +16,35 @@ import {
   mockReferrals,
   mockUser,
 } from "@/lib/api/mock/mockDatabase";
+
+const isoNow = () => new Date().toISOString();
+const isoDaysAgo = (days: number) =>
+  new Date(Date.now() - days * 86_400_000).toISOString();
+
+/** Mutable store of referral payouts, seeded with a pending + paid row. */
+const mockPayouts = [
+  {
+    _id: "payout_referral_1",
+    kind: "referral",
+    status: "pending",
+    totalAmount: 75000,
+    currency: "NGN",
+    bankSnapshot: { bankName: "GTBank", accountName: "Oluwaseun Ade Balogun", accountNumber: "0123456789" },
+    commissions: ["ref_1"],
+    createdAt: isoDaysAgo(1),
+  },
+  {
+    _id: "payout_referral_2",
+    kind: "referral",
+    status: "paid",
+    totalAmount: 45000,
+    currency: "NGN",
+    bankSnapshot: { bankName: "GTBank", accountName: "Oluwaseun Ade Balogun", accountNumber: "0123456789" },
+    commissions: ["ref_3"],
+    createdAt: isoDaysAgo(30),
+    processedAt: isoDaysAgo(24),
+  },
+];
 
 const byId = <T extends { _id: string }>(items: T[], id?: string, arr: T[] = items) =>
   arr.find((i) => i._id === id);
@@ -440,4 +470,298 @@ registerMockRoute({
   verb: "get",
   path: "/lms/search",
   handler: () => [],
+});
+
+// ---------------------------------------------------------------
+// Plan 009 — Profile, Payments & Billing, SIWES, Letters, Referrals
+// ---------------------------------------------------------------
+
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/profile/details",
+  handler: (ctx: MockRequestContext) => {
+    const patch = (ctx.data ?? {}) as Record<string, unknown>;
+    for (const key of Object.keys(patch)) {
+      (mockUser as unknown as Record<string, unknown>)[key] = patch[key];
+    }
+    return { success: true, message: "Profile updated", statusCode: 200 };
+  },
+});
+
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/profile/professional",
+  handler: (ctx: MockRequestContext) => {
+    const patch = (ctx.data ?? {}) as Record<string, unknown>;
+    for (const key of Object.keys(patch)) {
+      (mockUser as unknown as Record<string, unknown>)[key] = patch[key];
+    }
+    return { success: true, message: "Professional profile saved", statusCode: 200 };
+  },
+});
+
+registerMockRoute({
+  verb: ["get", "patch"],
+  path: "/lms/profile/banking",
+  handler: (ctx: MockRequestContext) => {
+    const stored = (mockUser as unknown as { _profileBanking?: Record<string, unknown> })
+      ._profileBanking ?? {
+      bankName: "GTBank",
+      accountName: "Oluwaseun Ade Balogun",
+      accountNumber: "0123456789",
+      payoutEmail: "ade.balogun@example.com",
+      updatedAt: isoDaysAgo(3),
+    };
+    if (ctx.path.endsWith("/banking") && ctx.path.includes("/profile/") === false) {
+      /* noop guard */
+    }
+    if (typeof (ctx as { data?: unknown }).data === "object" && (ctx as { data?: unknown }).data !== null) {
+      const patch = (ctx as { data: Record<string, unknown> }).data;
+      const next = {
+        ...stored,
+        ...patch,
+        updatedAt: isoNow(),
+      };
+      (mockUser as unknown as { _profileBanking?: Record<string, unknown> })._profileBanking = next;
+      return next;
+    }
+    return stored;
+  },
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/auth/set-password",
+  handler: () => ({ success: true, message: "Password updated", statusCode: 200 }),
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/lms/me/attendance-pin/rotate",
+  handler: () => ({
+    rawPin: String(Math.floor(1000 + Math.random() * 9000)),
+    issuedAt: isoNow(),
+  }),
+});
+
+// Storage seam: "put bytes → get URL". Blob is discarded; the mock keeps
+// an in-memory URL. Mirrors `downscaleImage`/`cloudinary-download` output.
+const uploadUrls: string[] = [];
+registerMockRoute({
+  verb: "post",
+  path: "/uploads",
+  handler: () => {
+    const url = `/uploads/${uploadUrls.length + 1}`;
+    uploadUrls.push(url);
+    return { url };
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/payment-proofs/me",
+  handler: () => ({
+    bank: {
+      bankName: "Guaranty Trust Bank",
+      accountName: "SmartHub Academy",
+      accountNumber: "0987654321",
+      paymentInstructions: "Use your full name as the transfer narration so we can match your payment.",
+    },
+    registrations: mockDatabase.billing.registrations.map((r) => ({
+      _id: r._id,
+      courseName: r.course?.name || "Untitled course",
+      totalAmount: r.totalAmount,
+      paidAmount: r.paidAmount,
+      remainingAmount: r.remainingAmount,
+      paymentOption: r.paymentOption,
+      paymentStatus: r.paymentStatus as string,
+    })),
+    proofs: mockDatabase.paymentProofs,
+  }),
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/payment-proofs/my-plans",
+  handler: () => mockDatabase.installmentPlans,
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/payment-proofs",
+  handler: (ctx: MockRequestContext) => {
+    const input = (ctx.data ?? {}) as {
+      amount?: number;
+      screenshotUrl?: string;
+      registration?: string;
+      installment?: string;
+      reference?: string;
+    };
+    const proof = {
+      _id: `pp_${Date.now()}`,
+      purpose: "course",
+      courseName: mockDatabase.billing.registrations.find(
+        (r) => r._id === input.registration,
+      )?.course?.name,
+      amountClaimed: input.amount ?? 0,
+      screenshotUrl: input.screenshotUrl ?? "",
+      reference: input.reference,
+      status: "pending",
+      createdAt: isoNow(),
+    };
+    mockDatabase.paymentProofs.push(proof as (typeof mockDatabase.paymentProofs)[number]);
+    return proof;
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/me/siwes-registrations",
+  handler: () => mockDatabase.siwesRegistrations,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/acceptance-letters",
+  handler: () => mockDatabase.acceptanceLetters,
+});
+
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/registrations/:id/siwes-duration",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    const reg = mockDatabase.siwesRegistrations.find(
+      (r) => r.registrationId === id,
+    );
+    if (!reg || reg.siwesDurationEditable === false) {
+      throw new ApiError(
+        "This registration is locked — contact admin to change the duration.",
+        403,
+      );
+    }
+    const body = (ctx.data ?? {}) as { siwesDurationMonths?: number };
+    reg.siwesDurationMonths = body.siwesDurationMonths;
+    return { success: true, message: "SIWES duration updated", statusCode: 200 };
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/instructor-earnings/me",
+  handler: () => mockDatabase.instructorEarnings,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/instructor-earnings/breakdown",
+  handler: () => mockDatabase.earningsBreakdown,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/account/applications",
+  handler: () => ({
+    courses: mockDatabase.billing.registrations.map((r) => ({
+      kind: "course",
+      id: r._id,
+      label: r.course?.name || "Course",
+      status: r.paymentStatus,
+      when: r.schedule?.startDate,
+    })),
+    internships: mockDatabase.internships.map((i) => ({
+      kind: "internship",
+      id: i._id,
+      label: i.product?.name || "Internship",
+      status: i.status,
+      when: i.startDate,
+    })),
+    scholarships: mockDatabase.scholarship.map((s) => ({
+      kind: "scholarship",
+      id: s._id,
+      label: `Scholarship — ${s.cohort}`,
+      status: s.stage,
+      when: s.createdAt,
+      awardedTier: s.awardedTier,
+    })),
+  }),
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/referrals/payouts",
+  handler: (ctx: MockRequestContext) => {
+    const page = Number(ctx.params?.page) || 1;
+    const pageSize = Number(ctx.params?.pageSize) || 20;
+    const start = (page - 1) * pageSize;
+    const items = mockPayouts.slice(start, start + pageSize);
+    return {
+      items,
+      meta: {
+        totalItems: mockPayouts.length,
+        totalPages: Math.max(1, Math.ceil(mockPayouts.length / pageSize)),
+        currentPage: page,
+        pageSize,
+      },
+    };
+  },
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/lms/referrals/payouts",
+  handler: () => {
+    const payout = {
+      _id: `payout_referral_${Date.now()}`,
+      kind: "referral",
+      status: "pending",
+      totalAmount: mockReferrals.totals.earnedNaira,
+      currency: "NGN",
+      bankSnapshot: mockBanking,
+      commissions: [],
+      createdAt: isoNow(),
+    };
+    mockPayouts.unshift(payout);
+    // Requesting a payout moves the earned commission into the pending
+    // payout so the ledger reflects it's no longer withdrawable.
+    mockReferrals.totals.earnedNaira = 0;
+    return payout;
+  },
+});
+
+registerMockRoute({
+  verb: "delete",
+  path: "/lms/referrals/payouts/:id",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    const idx = mockPayouts.findIndex((p) => p._id === id);
+    if (idx === -1) throw new ApiError("Payout not found", 404);
+    const [removed] = mockPayouts.splice(idx, 1);
+    if (removed?.status === "pending") {
+      // Cancelling a pending payout returns its value to the earned
+      // balance.
+      mockReferrals.totals.earnedNaira += removed.totalAmount;
+    }
+    return { success: true, message: "Payout cancelled", statusCode: 200 };
+  },
+});
+
+const CHECKED_IN_SESSIONS = new Set<string>();
+registerMockRoute({
+  verb: "post",
+  path: "/lms/class-sessions/:sessionId/check-in",
+  handler: (ctx: MockRequestContext) => {
+    const sessionId = String(ctx.params?.sessionId);
+    const body = (ctx.data ?? {}) as { token?: string };
+    if (!body.token) throw new ApiError("Invalid or missing check-in token.", 401);
+    if (sessionId === "expired-session") throw new ApiError("This QR has expired.", 410);
+    if (sessionId === "foreign-session" || sessionId.startsWith("not-enrolled")) {
+      throw new ApiError("You're not enrolled in this cohort.", 403);
+    }
+    if (CHECKED_IN_SESSIONS.has(sessionId)) {
+      return { status: "already-checked-in" };
+    }
+    CHECKED_IN_SESSIONS.add(sessionId);
+    return { status: "ok" };
+  },
 });

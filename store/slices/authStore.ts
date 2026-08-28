@@ -9,21 +9,55 @@ export function toAuthUser(u: {
   _id: string;
   email: string;
   firstName?: string;
+  middleName?: string;
   lastName?: string;
   imageUrl?: string;
   phone?: string;
   roles?: string[];
   isVerified?: boolean;
+  gender?: "Male" | "Female";
+  country?: { isoCode?: string; name?: string } | string;
+  state?: { isoCode?: string; name?: string } | string;
+  city?: string;
+  address?: string;
+  createdAt?: string;
+  isITStudent?: boolean;
+  itVerificationStatus?: string;
+  siwesYear?: number;
+  institution?: string;
+  department?: string;
+  studentCode?: string;
+  jobTitle?: string;
+  bio?: string;
+  altPhone?: string;
+  timeZone?: string;
 }): AuthUser {
   return {
     _id: u._id,
     email: u.email,
     firstName: u.firstName,
+    middleName: u.middleName,
     lastName: u.lastName,
     imageUrl: u.imageUrl,
     phone: u.phone,
     roles: u.roles,
     isVerified: u.isVerified,
+    gender: u.gender,
+    country: u.country,
+    state: u.state,
+    city: u.city,
+    address: u.address,
+    createdAt: u.createdAt,
+    isITStudent: u.isITStudent,
+    itVerificationStatus: u.itVerificationStatus,
+    siwesYear: u.siwesYear,
+    institution: u.institution,
+    department: u.department,
+    studentCode: u.studentCode,
+    jobTitle: u.jobTitle,
+    bio: u.bio,
+    altPhone: u.altPhone,
+    timeZone: u.timeZone,
     // Mock user is both a student and an instructor — hand the UI a
     // dual-role account so the mode toggle + both nav surfaces work.
     lmsRole:
