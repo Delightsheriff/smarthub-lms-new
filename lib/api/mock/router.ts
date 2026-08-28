@@ -6,7 +6,14 @@
  */
 
 import { registerMockRoute, type MockRequestContext } from "@/lib/api/client";
-import { mockDatabase } from "@/lib/api/mock/mockDatabase";
+import {
+  mockAssignedModules,
+  mockBanking,
+  mockDatabase,
+  mockProgressPulse,
+  mockReferrals,
+  mockUser,
+} from "@/lib/api/mock/mockDatabase";
 
 const byId = <T extends { _id: string }>(items: T[], id?: string, arr: T[] = items) =>
   arr.find((i) => i._id === id);
@@ -20,6 +27,14 @@ registerMockRoute({
 registerMockRoute({
   verb: "get",
   path: "/lms/enrolled-courses",
+  handler: () => mockDatabase.courses,
+});
+
+// Alias: courses service reads `/lms/courses`; enrolled-courses is the
+// legacy spelling the calendar/nav surfaces still use.
+registerMockRoute({
+  verb: "get",
+  path: "/lms/courses",
   handler: () => mockDatabase.courses,
 });
 
@@ -223,6 +238,56 @@ registerMockRoute({
   verb: "get",
   path: "/lms/billing/breakdown",
   handler: () => mockDatabase.billing,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/payments/summary",
+  handler: () => ({
+    totalPaid: 320000,
+    totalDue: 480000,
+    totalAmount: 800000,
+    paymentProgress: 40,
+    nextPaymentDue: {
+      amount: 230000,
+      dueDate: mockDatabase.billing.overall.nextPaymentDue,
+      course: "Python for AI & Data",
+    },
+  }),
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/account/me",
+  handler: () => ({
+    ...mockUser,
+    referralCode: mockReferrals.code,
+    hasPassword: true,
+  }),
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/account/referrals",
+  handler: () => mockReferrals,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/account/banking",
+  handler: () => mockBanking,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/modules/assigned",
+  handler: () => mockAssignedModules,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/me/progress-pulse",
+  handler: () => mockProgressPulse,
 });
 
 registerMockRoute({

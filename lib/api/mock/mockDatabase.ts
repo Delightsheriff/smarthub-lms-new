@@ -10,6 +10,7 @@
  */
 
 import type {
+  WireAssignment,
   WireBillingBreakdown,
   WireCalendarEvent,
   WireConversation,
@@ -25,6 +26,9 @@ import type {
   WireUser,
 } from "@/lib/api/wire.types";
 import type { ContentLink } from "@/types/content-link";
+import type { ApiAssignedModule } from "@/modules/assigned-modules/types/api.types";
+import type { ProgressSnapshot } from "@/modules/progress/types";
+import type { ReferralsResponse } from "@/modules/referrals/types";
 
 const daysFromNow = (days: number) =>
   new Date(Date.now() + days * 86_400_000).toISOString();
@@ -176,7 +180,9 @@ export const mockDatabase: MockDatabase = {
           material("mat_3", "Practice Exercises", "exercise", "exercise"),
         ],
         assignments: [
-          assignment("asgn_1", "Build a Landing Page", "mod_1", 100, 5),
+          assignment("asgn_1", "Build a Landing Page", "mod_1", 100, 5, {
+            status: "graded",
+          }),
         ],
       },
     ],
@@ -226,7 +232,10 @@ export const mockDatabase: MockDatabase = {
         ],
         materials: [],
         assignments: [
-          assignment("asgn_3", "Portfolio in React", "mod_3", 120, 7),
+          assignment("asgn_3", "Portfolio in React", "mod_3", 120, -1, {
+            status: "overdue",
+            priority: "high",
+          }),
         ],
       },
     ],
@@ -250,7 +259,15 @@ export const mockDatabase: MockDatabase = {
           material("mat_5", "Python Quickstart", "guide", "pdf"),
         ],
         assignments: [
-          assignment("asgn_4", "Data Wrangling Warm-up", "mod_4", 60, 3),
+          assignment("asgn_4", "Data Wrangling Warm-up", "mod_4", 60, 7, {
+            status: "draft",
+            course: "course_2",
+          }),
+          assignment("asgn_5", "Pandas Primer", "mod_4", 80, 3, {
+            status: "submitted",
+            course: "course_2",
+            priority: "high",
+          }),
         ],
       },
     ],
@@ -497,6 +514,121 @@ export const mockDatabase: MockDatabase = {
   ],
 };
 
+/** Referral dashboard snapshot (`GET /lms/account/referrals`). */
+export const mockReferrals: ReferralsResponse = {
+  eligible: true,
+  code: "ADEBALO25",
+  uses: 3,
+  qualifiedCount: 2,
+  commissionRate: 10,
+  totals: { pendingNaira: 45000, earnedNaira: 120000, paidNaira: 75000 },
+  records: [
+    {
+      _id: "ref_1",
+      status: "qualified",
+      commission: 25000,
+      amount: 250000,
+      firstPaymentAmount: 250000,
+      referred: {
+        firstName: "Chidi",
+        lastName: "Eze",
+        email: "chidi.eze@example.com",
+      },
+      registration: {
+        course: {
+          _id: "course_2",
+          name: "Python for AI & Data",
+          nameSlug: "python-for-ai-data",
+        },
+        createdAt: daysAgo(20),
+      },
+      createdAt: daysAgo(20),
+    },
+    {
+      _id: "ref_2",
+      status: "pending",
+      potentialAmount: 85000,
+      amount: 85000,
+      referred: { firstName: "Zainab", lastName: "Sanni" },
+      registration: {
+        course: {
+          _id: "course_1",
+          name: "Full-Stack Web Development",
+          nameSlug: "full-stack-web-development",
+        },
+        createdAt: daysAgo(2),
+      },
+      createdAt: daysAgo(2),
+    },
+    {
+      _id: "ref_3",
+      status: "paid",
+      commission: 50000,
+      amount: 500000,
+      firstPaymentAmount: 500000,
+      referred: { firstName: "Tunde", lastName: "Adeyemi" },
+      registration: { course: "course_1", createdAt: daysAgo(40) },
+      createdAt: daysAgo(40),
+    },
+  ],
+};
+
+/** Banking details snapshot (`GET /lms/account/banking`). */
+export const mockBanking = {
+  bankName: "GTBank",
+  accountName: "Oluwaseun Ade Balogun",
+  accountNumber: "0123456789",
+  payoutEmail: "ade.balogun@example.com",
+  updatedAt: daysAgo(3),
+};
+
+/** Standalone modules granted directly to the student. */
+export const mockAssignedModules: ApiAssignedModule[] = [
+  {
+    _id: "amd_1",
+    title: "Web Accessibility Deep Dive",
+    titleSlug: "web-accessibility-deep-dive",
+    description:
+      "A focused module on making web apps usable for everyone — donated by your instructor.",
+    estimatedDuration: "3–4 hours",
+    learningObjectives: [
+      "Apply WCAG 2.1 AA criteria",
+      "Test with screen readers",
+      "Fix common accessibility regressions",
+    ],
+    assignedAt: daysAgo(6),
+    note: "Go through this before the interview prep block.",
+    recordings: [
+      recording("rec_10", "A11y Foundations", 24, false, "published"),
+    ],
+    materials: [
+      material("mat_10", "WCAG Quick Guide", "guide", "pdf"),
+    ],
+    assignments: [
+      {
+        _id: "aasgn_1",
+        title: "Audit a live page",
+        module: "amd_1",
+        dueDate: daysFromNow(4),
+        totalPoints: 50,
+        type: "assignment",
+        description: "Run an axe scan and report the findings.",
+      },
+    ],
+  },
+];
+
+/** Gamification pulse (`GET /lms/me/progress-pulse`). */
+export const mockProgressPulse: ProgressSnapshot = {
+  totalSubmissions: 6,
+  onTimeSubmissions: 4,
+  onTimePct: 67,
+  currentStreak: 3,
+  masteryAvgPct: 78,
+  pendingAssignments: 2,
+  gradedCount: 3,
+};
+
 function wireInstructorRef() {
   return {
     _id: "usr_2",
@@ -554,6 +686,11 @@ function assignment(
   _module: string,
   totalPoints: number,
   dueInDays: number,
+  opts: {
+    status?: WireAssignment["status"];
+    course?: string;
+    priority?: WireAssignment["priority"];
+  } = {},
 ) {
   return {
     _id: id,
@@ -563,13 +700,13 @@ function assignment(
     assignmentLink: "https://docs.example.com/brief",
     links: [],
     type: "assignment" as const,
-    priority: "medium" as const,
+    priority: opts.priority ?? "medium",
     dueDate: daysFromNow(dueInDays),
     totalPoints,
     allowLateSubmission: true,
-    status: "submitted" as const,
+    status: opts.status ?? "submitted" as const,
     module: _module,
-    course: "course_1",
+    course: opts.course ?? "course_1",
   };
 }
 
