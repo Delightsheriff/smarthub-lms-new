@@ -96,20 +96,18 @@ export function RecordingPlayerDialog({
         {parts.length > 1 && (
           <div className="flex flex-wrap gap-1.5">
             {parts.map((part, i) => (
-              <button
+              <Button
                 key={`${part.url}-${i}`}
                 type="button"
+                size="sm"
+                variant={i === activePart ? "default" : "secondary"}
+                className="rounded-full px-3"
                 onClick={() =>
                   setPartState({ forId: recording.id, index: i })
                 }
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  i === activePart
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
               >
                 {part.name || `Link ${i + 1}`}
-              </button>
+              </Button>
             ))}
           </div>
         )}

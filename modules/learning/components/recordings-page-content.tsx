@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
@@ -55,26 +57,19 @@ export function RecordingsPageContent() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1">
-        {FILTERS.map((f) => {
-          const on = filter === f.value;
-          return (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => setFilter(f.value)}
-              className={cn(
-                "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-                on
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-muted-foreground border-border hover:text-foreground",
-              )}
-            >
+      <Tabs
+        value={filter}
+        onValueChange={(v) => setFilter(v as Filter)}
+        className="-mx-4 px-4"
+      >
+        <TabsList variant="line" className="w-fit overflow-x-auto">
+          {FILTERS.map((f) => (
+            <TabsTrigger key={f.value} value={f.value}>
               {f.label}
-            </button>
-          );
-        })}
-      </div>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading && (
         <div className="space-y-3">
@@ -132,24 +127,26 @@ export function RecordingsPageContent() {
                     >
                       {locked ? (
                         <span
-                          className="shrink-0 mt-0.5 p-0.5 text-muted-foreground"
+                          className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground"
                           aria-hidden
                         >
                           <Lock className="h-5 w-5" />
                         </span>
                       ) : (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={open}
                           aria-label={`Play ${r.title}`}
-                          className="shrink-0 mt-0.5 rounded-full text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors p-0.5"
+                          className="mt-0.5 shrink-0 rounded-full text-primary"
                         >
                           {r.watched ? (
                             <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                           ) : (
                             <PlayCircle className="h-5 w-5" />
                           )}
-                        </button>
+                        </Button>
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -161,17 +158,18 @@ export function RecordingsPageContent() {
                           {row.module.title}
                         </p>
                         {locked ? (
-                          <p className="text-left text-sm font-medium leading-tight text-muted-foreground">
+                          <p className="text-sm font-medium leading-tight text-muted-foreground">
                             {r.title}
                           </p>
                         ) : (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
                             onClick={open}
-                            className="text-left text-sm font-medium leading-tight hover:text-primary transition-colors"
+                            className="h-auto p-0 text-left text-sm font-medium leading-tight text-foreground hover:text-primary"
                           >
                             {r.title}
-                          </button>
+                          </Button>
                         )}
                         {locked ? (
                           <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">

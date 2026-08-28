@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
@@ -86,38 +87,41 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
                   links inside the description clickable. */}
               {locked ? (
                 <span
-                  className="shrink-0 mt-0.5 p-0.5 text-muted-foreground"
+                  className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground"
                   aria-hidden
                 >
                   <Lock className="h-5 w-5" />
                 </span>
               ) : (
-                <button
+                <Button
                   type="button"
-                  onClick={open}
+                  variant="ghost"
+                  size="icon-sm"
                   aria-label={`Play ${r.title}`}
-                  className="shrink-0 mt-0.5 rounded-full text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors p-0.5"
+                  onClick={open}
+                  className="mt-0.5 shrink-0 rounded-full text-primary"
                 >
                   {r.watched ? (
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                   ) : (
                     <PlayCircle className="h-5 w-5" />
                   )}
-                </button>
+                </Button>
               )}
               <div className="min-w-0 flex-1">
                 {locked ? (
-                  <p className="text-left text-sm font-medium leading-tight text-muted-foreground">
+                  <p className="text-sm font-medium leading-tight text-muted-foreground">
                     {r.title}
                   </p>
                 ) : (
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={open}
-                    className="text-left text-sm font-medium leading-tight hover:text-primary transition-colors"
+                    className="h-auto p-0 text-left text-sm font-medium leading-tight text-foreground hover:text-primary"
                   >
                     {r.title}
-                  </button>
+                  </Button>
                 )}
                 {locked ? (
                   <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -189,8 +193,9 @@ export function MaterialsSection({ items }: { items: Material[] }) {
           const expanded = expandedId === m.id;
           return (
             <li key={m.id} id={`material-${m.id}`} className="scroll-mt-24">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => {
                   if (expandable) {
                     setExpandedId(expanded ? null : m.id);
@@ -199,21 +204,21 @@ export function MaterialsSection({ items }: { items: Material[] }) {
                   }
                 }}
                 disabled={!hasFile && !instructionsOnly}
-                className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-muted/60 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex h-auto items-center gap-3 w-full justify-start px-4 py-3 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                   <Icon className="h-4 w-4 text-muted-foreground" />
                 </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium leading-tight">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-medium leading-tight">
                     {m.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  </span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">
                     {multiFile
                       ? `${links.length} files`
                       : m.size || (instructionsOnly ? "Guide" : null)}
-                  </p>
-                </div>
+                  </span>
+                </span>
                 {multiFile || instructionsOnly ? (
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground shrink-0">
                     {expanded ? "Hide" : multiFile ? "Open" : "Read"}
@@ -221,7 +226,7 @@ export function MaterialsSection({ items }: { items: Material[] }) {
                 ) : hasFile ? (
                   <Eye className="h-4 w-4 text-muted-foreground shrink-0" />
                 ) : null}
-              </button>
+              </Button>
 
               {/* Body: shown inline for instructions-only materials (click
                   to expand). For file-backed materials with a description,
@@ -246,24 +251,27 @@ export function MaterialsSection({ items }: { items: Material[] }) {
                               {link.name || `Link ${i + 1}`}
                             </span>
                           )}
-                          <button
+                          <Button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs"
+                            onClick={() =>
                               openPreview(
                                 m,
                                 link.url,
                                 multiFile ? link.name : undefined,
-                              );
-                            }}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                              )
+                            }
                           >
                             <Eye className="h-3 w-3" /> Preview
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 text-xs text-muted-foreground"
+                            onClick={() => {
                               void downloadFile(
                                 link.url,
                                 multiFile && link.name
@@ -272,10 +280,9 @@ export function MaterialsSection({ items }: { items: Material[] }) {
                                 m.fileType,
                               );
                             }}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
                           >
                             <ExternalLink className="h-3 w-3" /> Download
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>

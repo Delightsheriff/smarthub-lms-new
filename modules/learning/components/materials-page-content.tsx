@@ -10,12 +10,13 @@ import {
   Notebook,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
 import { useMyMaterials, useTrackMaterialDownload } from "../api/content.queries";
 import { downloadFile } from "@/lib/cloudinary-download";
-import { cn } from "@/lib/utils";
 import type { Material, MaterialWithContext } from "../types";
 
 const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
@@ -75,26 +76,19 @@ export function MaterialsPageContent() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 pb-1">
-        {FILTERS.map((f) => {
-          const on = filter === f.value;
-          return (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => setFilter(f.value)}
-              className={cn(
-                "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
-                on
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-muted-foreground border-border hover:text-foreground",
-              )}
-            >
+      <Tabs
+        value={filter}
+        onValueChange={(v) => setFilter(v as Filter)}
+        className="-mx-4 px-4"
+      >
+        <TabsList variant="line" className="w-fit overflow-x-auto">
+          {FILTERS.map((f) => (
+            <TabsTrigger key={f.value} value={f.value}>
               {f.label}
-            </button>
-          );
-        })}
-      </div>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading && (
         <div className="space-y-3">
@@ -145,8 +139,9 @@ export function MaterialsPageContent() {
                   const expanded = expandedId === m.id;
                   return (
                     <li key={m.id}>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
                         onClick={() => {
                           if (instructionsOnly) {
                             setExpandedId(expanded ? null : m.id);
@@ -155,27 +150,27 @@ export function MaterialsPageContent() {
                           }
                         }}
                         disabled={!hasFile && !instructionsOnly}
-                        className="flex items-center gap-3 w-full text-left px-4 py-3 hover:bg-muted/60 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex h-auto items-center gap-3 w-full justify-start px-4 py-3 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                           <Icon className="h-4 w-4 text-muted-foreground" />
                         </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
                             {row.module.order != null
                               ? `Module ${row.module.order
                                   .toString()
                                   .padStart(2, "0")} · `
                               : ""}
                             {row.module.title}
-                          </p>
-                          <p className="text-sm font-medium leading-tight">
+                          </span>
+                          <span className="block text-sm font-medium leading-tight">
                             {m.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          </span>
+                          <span className="block text-xs text-muted-foreground mt-0.5">
                             {m.size || (instructionsOnly ? "Guide" : null)}
-                          </p>
-                        </div>
+                          </span>
+                        </span>
                         {hasFile ? (
                           <Eye className="h-4 w-4 text-muted-foreground shrink-0" />
                         ) : instructionsOnly ? (
@@ -183,7 +178,7 @@ export function MaterialsPageContent() {
                             {expanded ? "Hide" : "Read"}
                           </span>
                         ) : null}
-                      </button>
+                      </Button>
 
                       {hasBody && (instructionsOnly ? expanded : true) && (
                         <div className="border-t border-border bg-muted/20 px-4 py-3">
@@ -193,30 +188,30 @@ export function MaterialsPageContent() {
                           />
                           {hasFile && (
                             <div className="mt-3 flex gap-2">
-                              <button
+                              <Button
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openPreview(m);
-                                }}
-                                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0 text-xs"
+                                onClick={() => openPreview(m)}
                               >
                                 <Eye className="h-3 w-3" /> Preview
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-0 text-xs text-muted-foreground"
+                                onClick={() => {
                                   void downloadFile(
                                     m.fileUrl,
                                     m.title,
                                     m.fileType,
                                   );
                                 }}
-                                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
                               >
                                 <ExternalLink className="h-3 w-3" /> Download
-                              </button>
+                              </Button>
                             </div>
                           )}
                         </div>
