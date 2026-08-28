@@ -6,6 +6,7 @@
  */
 
 import { registerMockRoute, type MockRequestContext } from "@/lib/api/client";
+import type { WireMaterial, WireRecording } from "@/lib/api/wire.types";
 import {
   mockAssignedModules,
   mockBanking,
@@ -36,6 +37,118 @@ registerMockRoute({
   verb: "get",
   path: "/lms/courses",
   handler: () => mockDatabase.courses,
+});
+
+/** Build a full course-detail payload: embeds each module's content
+ *  (recordings/materials/assignments) + aggregated `resources` counts.
+ *  Mirrors what `GET /lms/courses/:slug` returns so the outline and
+ *  module page render off a single round-trip (no per-module fan-out). */
+function buildCourseDetail(courseId: string) {
+  const course = byId(mockDatabase.courses, courseId);
+  if (!course) return null;
+  const modules = course.modules
+    .map((m) => mockDatabase.modules[m._id]?.[0])
+    .filter(Boolean);
+  const resources = modules.reduce(
+    (acc, mod) => {
+      acc.totalRecordings += mod?.recordings?.length ?? 0;
+      acc.totalMaterials += mod?.materials?.length ?? 0;
+      acc.totalAssignments += mod?.assignments?.length ?? 0;
+      return acc;
+    },
+    { totalRecordings: 0, totalMaterials: 0, totalAssignments: 0 },
+  );
+  return { ...course, modules, resources };
+}
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/courses/:courseSlug",
+  handler: (ctx: MockRequestContext) => {
+    const slug = String(ctx.params?.courseSlug);
+    const course = mockDatabase.courses.find((c) => c.nameSlug === slug);
+    if (!course) throw new Error("course not found");
+    return buildCourseDetail(course._id);
+  },
+});
+
+/** Flat content feeds with course + module context attached — mirrors
+ *  the enrolled-course walk the source does for `/recordings` and
+ *  `/materials`. */
+function contentFeed() {
+  const out: {
+    recordings: Array<{
+      course: { _id: string; name: string; nameSlug: string };
+      module: { _id: string; title: string; titleSlug?: string };
+      recording: WireRecording;
+    }>;
+    materials: Array<{
+      course: { _id: string; name: string; nameSlug: string };
+      module: { _id: string; title: string; titleSlug?: string };
+      material: WireMaterial;
+    }>;
+  } = { recordings: [], materials: [] };
+
+  for (const course of mockDatabase.courses) {
+    for (const modSummary of course.modules) {
+      const mod = mockDatabase.modules[modSummary._id]?.[0];
+      if (!mod) continue;
+      const courseRef = {
+        _id: course._id,
+        name: course.name,
+        nameSlug: course.nameSlug,
+      };
+      const moduleRef = {
+        _id: mod._id,
+        title: mod.title,
+        titleSlug: mod.titleSlug,
+      };
+      for (const rec of mod.recordings ?? []) {
+        out.recordings.push({ course: courseRef, module: moduleRef, recording: rec });
+      }
+      for (const mat of mod.materials ?? []) {
+        out.materials.push({ course: courseRef, module: moduleRef, material: mat });
+      }
+    }
+  }
+  return out;
+}
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/recordings/me",
+  handler: () => contentFeed().recordings,
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/materials/me",
+  handler: () => contentFeed().materials,
+});
+
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/recordings/:id/view",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    for (const course of mockDatabase.courses) {
+      for (const modSummary of course.modules) {
+        const mod = mockDatabase.modules[modSummary._id]?.[0];
+        const rec = (mod?.recordings ?? []).find((r) => r._id === id);
+        if (rec) {
+          rec.watched = true;
+          return { success: true, watched: true };
+        }
+      }
+    }
+    throw new Error("recording not found");
+  },
+});
+
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/materials/:id/download",
+  handler: () => ({ success: true }),
 });
 
 registerMockRoute({

@@ -25,7 +25,6 @@ import type {
   WireWebinar,
   WireUser,
 } from "@/lib/api/wire.types";
-import type { ContentLink } from "@/types/content-link";
 import type { ApiAssignedModule } from "@/modules/assigned-modules/types/api.types";
 import type { ProgressSnapshot } from "@/modules/progress/types";
 import type { ReferralsResponse } from "@/modules/referrals/types";
@@ -56,11 +55,6 @@ export const mockInstructor: WireUser = {
   roles: ["instructor"],
   isVerified: true,
 };
-
-const recordingLinks = (id: string): ContentLink[] => [
-  { name: "Part 1", url: `https://mock.smarthub.dev/rec/${id}/p1` },
-  { name: "Part 2", url: `https://mock.smarthub.dev/rec/${id}/p2` },
-];
 
 /** Root set of wire-shaped records, keyed by collection. */
 export interface MockDatabase {
@@ -142,11 +136,48 @@ export const mockDatabase: MockDatabase = {
       },
       modules: [
         { _id: "mod_4", title: "Python Basics", titleSlug: "python-basics", order: 1, isPublished: true },
+        // Deliberately no titleSlug — exercises the slug→id fallback path
+        // in `useCourseModule` / `normaliseModuleContent` (slug falls back
+        // to `_id`). Route stays `/courses/.../modules/mod_6`.
+        { _id: "mod_6", title: "NumPy & Vectorization", order: 2, isPublished: true },
       ],
       instructor: wireInstructorRef(),
       instructors: [wireInstructorRef()],
-      moduleStats: { total: 1, completed: 0 },
+      moduleStats: { total: 2, completed: 0 },
       mode: "hybrid",
+      courseKind: "full",
+    },
+    {
+      _id: "course_3",
+      name: "UI/UX Design Foundations",
+      nameSlug: "ui-ux-design",
+      description:
+        "Design thinking, wireframing, and Figma. A completed course — exercises the completed-enrollment status mapping on the courses list.",
+      thumbnail: "/mock/course-ux.png",
+      category: "Design",
+      difficulty: "Beginner",
+      enrollment: {
+        _id: "enr_3",
+        enrollmentDate: daysAgo(90),
+        status: "completed",
+        progress: 100,
+        lastAccessedAt: daysAgo(30),
+        schedule: {
+          _id: "sched_3",
+          startDate: daysAgo(88),
+          endDate: daysAgo(5),
+          mode: "online",
+          instructors: [wireInstructorRef()],
+        },
+      },
+      modules: [
+        { _id: "mod_7", title: "Design Thinking", titleSlug: "design-thinking", order: 1, isPublished: true },
+        { _id: "mod_8", title: "Wireframes in Figma", titleSlug: "wireframes-figma", order: 2, isPublished: true },
+      ],
+      instructor: wireInstructorRef(),
+      instructors: [wireInstructorRef()],
+      moduleStats: { total: 2, completed: 2 },
+      mode: "online",
       courseKind: "full",
     },
   ],
@@ -170,14 +201,35 @@ export const mockDatabase: MockDatabase = {
         cohortStartedAt: daysAgo(30),
         cohortCompletedAt: daysAgo(14),
         recordings: [
-          recording("rec_1", "Intro to HTML", 18, false, "published"),
-          recording("rec_2", "Flexbox in Practice", 26, true, "published"),
-          recording("rec_3", "CSS Grid Masterclass", 31, true, "published"),
+          recording("rec_1", "Intro to HTML", 18, true, "published", {
+            provider: "youtube",
+            description: "<p>The first lesson on semantic markup.</p>",
+          }),
+          recording("rec_2", "Flexbox in Practice", 26, false, "published", {
+            provider: "vimeo",
+          }),
+          recording("rec_3", "CSS Grid Masterclass", 31, false, "published", {
+            parts: 2,
+          }),
+          recording("rec_4", "Responsive Deep Dive", 24, false, "published", {
+            provider: "drive",
+            locked: true,
+          }),
         ],
         materials: [
-          material("mat_1", "HTML & CSS Cheat Sheet", "guide", "pdf"),
-          material("mat_2", "Week 1 Slides", "presentation", "slide"),
-          material("mat_3", "Practice Exercises", "exercise", "exercise"),
+          material("mat_1", "HTML & CSS Cheat Sheet", "guide", "pdf", {
+            cloudinary: true,
+            description:
+              "<p>Printable cheat sheet covering tags, attributes and layout helpers.</p>",
+          }),
+          material("mat_2", "Week 1 Slides", "presentation", "slide", {
+            multi: true,
+          }),
+          material("mat_3", "Practice Exercises", "exercise", "exercise", {
+            guideOnly: true,
+            description:
+              "<p>Work through the four exercises in order, then compare against the walkthrough.</p>",
+          }),
         ],
         assignments: [
           assignment("asgn_1", "Build a Landing Page", "mod_1", 100, 5, {
@@ -203,11 +255,15 @@ export const mockDatabase: MockDatabase = {
         cohortStartedAt: daysAgo(12),
         cohortCompletedAt: null,
         recordings: [
-          recording("rec_4", "JavaScript Primer", 22, true, "published"),
+          recording("rec_4", "JavaScript Primer", 22, true, "published", {
+            provider: "video",
+          }),
           recording("rec_5", "DOM & Events", 27, false, "published"),
         ],
         materials: [
-          material("mat_4", "ES6 Reference", "reference", "pdf"),
+          material("mat_4", "ES6 Reference", "reference", "pdf", {
+            drive: true,
+          }),
         ],
         assignments: [
           assignment("asgn_2", "Interactive Quiz App", "mod_2", 80, 2),
@@ -269,6 +325,86 @@ export const mockDatabase: MockDatabase = {
             priority: "high",
           }),
         ],
+      },
+    ],
+    mod_6: [
+      {
+        _id: "mod_6",
+        title: "NumPy & Vectorization",
+        // No titleSlug — the course list entry mirrors this, so the
+        // slug falls back to `_id` when building module routes.
+        description:
+          "Vectorised array computing with NumPy — the backbone of pandas.",
+        status: "published",
+        order: 2,
+        estimatedDuration: 160,
+        learningObjectives: ["Build ndarrays", "Vectorise loops"],
+        cohortStatus: "not-started",
+        cohortStartedAt: null,
+        cohortCompletedAt: null,
+        recordings: [
+          recording("rec_8", "Arrays & Broadcasting", 21, false, "published", {
+            description:
+              "<p>How <strong>broadcasting</strong> keeps loops out of hot code.</p>",
+          }),
+        ],
+        materials: [
+          material("mat_6", "NumPy Cheat Sheet", "reference", "pdf", {
+            cloudinary: true,
+          }),
+        ],
+        assignments: [],
+      },
+    ],
+    mod_7: [
+      {
+        _id: "mod_7",
+        title: "Design Thinking",
+        titleSlug: "design-thinking",
+        description: "Empathise, define, ideate — the double diamond.",
+        status: "published",
+        order: 1,
+        estimatedDuration: 200,
+        learningObjectives: [
+          "Run a discovery interview",
+          "Frame a problem statement",
+        ],
+        cohortStatus: "completed",
+        cohortStartedAt: daysAgo(70),
+        cohortCompletedAt: daysAgo(30),
+        recordings: [
+          recording("rec_9", "The Double Diamond", 16, true, "published"),
+        ],
+        materials: [
+          material("mat_7", "Double Diamond Canvas", "exercise", "pdf", {
+            guideOnly: true,
+            description:
+              "<p>Fill the canvas for your own mini-product, then share to the cohort channel.</p>",
+          }),
+        ],
+        assignments: [],
+      },
+    ],
+    mod_8: [
+      {
+        _id: "mod_8",
+        title: "Wireframes in Figma",
+        titleSlug: "wireframes-figma",
+        description: "From low-fidelity sketch to a Figma wireframe.",
+        status: "published",
+        order: 2,
+        estimatedDuration: 190,
+        learningObjectives: ["Use Figma frames", "Apply a grid"],
+        cohortStatus: "completed",
+        cohortStartedAt: daysAgo(30),
+        cohortCompletedAt: daysAgo(6),
+        recordings: [],
+        materials: [
+          material("mat_8", "Figma Starter File", "presentation", "slide", {
+            drive: true,
+          }),
+        ],
+        assignments: [],
       },
     ],
   },
@@ -616,6 +752,40 @@ export const mockAssignedModules: ApiAssignedModule[] = [
       },
     ],
   },
+  {
+    // Deliberately no titleSlug — the assigned page deep-links by id,
+    // exercising the `slug → _id` fallback for standalone modules.
+    _id: "amd_2",
+    title: "Git Workflow Primer",
+    description:
+      "A crash refresher on branching, rebasing and clean history — granted ahead of the team project.",
+    estimatedDuration: "2 hours",
+    learningObjectives: [
+      "Reconcile a branch without merge-commit noise",
+      "Rewrite a commit history safely",
+    ],
+    assignedAt: daysAgo(3),
+    note: "Run through this before the first project sprint call.",
+    recordings: [
+      recording("rec_11", "Branching & PRs", 19, false, "published"),
+    ],
+    materials: [
+      material("mat_11", "Git Cheat Sheet", "reference", "pdf", {
+        cloudinary: true,
+      }),
+    ],
+    assignments: [
+      {
+        _id: "aasgn_2",
+        title: "Fix the tangled history",
+        module: "amd_2",
+        dueDate: daysFromNow(7),
+        totalPoints: 30,
+        type: "module-project",
+        description: "Rebase a squashed branch onto main and open a PR.",
+      },
+    ],
+  },
 ];
 
 /** Gamification pulse (`GET /lms/me/progress-pulse`). */
@@ -648,18 +818,46 @@ function recording(
   duration: number,
   watched: boolean,
   status: "draft" | "published" | "archived",
+  opts: {
+    /** Provider shape for `classifyVideoUrl`. Defaults to a plain
+     *  direct file so the classifier returns `video`. */
+    provider?: "youtube" | "vimeo" | "drive" | "video";
+    /** Multi-part: expose ≥2 links and mirror `videoUrl` to link 0. */
+    parts?: number;
+    /** Withhold from this viewer — never playable. */
+    locked?: boolean;
+    description?: string;
+  } = {},
 ): WireRecording {
+  const { provider = "video", parts = 1, locked, description } = opts;
+  const idFor = (n: number) => `${id}/p${n}`;
+  const partsLinks = Array.from({ length: parts }, (_, n) => ({
+    name: `Part ${n + 1}`,
+    url: `https://mock.smarthub.dev/rec/${idFor(n + 1)}`,
+  }));
+  const videoUrl =
+    provider === "youtube"
+      ? "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      : provider === "vimeo"
+        ? "https://vimeo.com/76979871"
+        : provider === "drive"
+          ? "https://drive.google.com/file/d/1aZbYcDeFg1234567890/view"
+          : `https://res.cloudinary.com/mock/video/upload/v1/rec/${id}.mp4`;
   return {
     _id: id,
     title,
+    description,
     duration,
     durationLabel: `${duration} min`,
-    videoUrl: `https://mock.smarthub.dev/rec/${id}/p1`,
-    links: recordingLinks(id),
+    // Locked recordings have their `videoUrl` withheld server-side —
+    // the player must never receive a playable source for them.
+    videoUrl: locked ? undefined : videoUrl,
+    links: parts > 1 ? partsLinks : [{ name: "Part 1", url: videoUrl }],
     thumbnailUrl: `/mock/rec-${id}.png`,
     publishedAt: daysAgo(20),
     status,
     watched,
+    isLockedForViewer: locked,
   };
 }
 
@@ -668,14 +866,42 @@ function material(
   title: string,
   category: "guide" | "presentation" | "exercise" | "reference",
   fileType: "pdf" | "slide" | "exercise" | "link",
+  opts: {
+    /** Cloudinary (extensionless) URL → exercises the blob-wrap seam. */
+    cloudinary?: boolean;
+    /** Drive-hosted link. */
+    drive?: boolean;
+    /** Multi-file material (links.length > 1). */
+    multi?: boolean;
+    /** Instructions-only guide: no fileUrl, just a description. */
+    guideOnly?: boolean;
+    description?: string;
+    size?: number;
+  } = {},
 ) {
+  const { cloudinary, drive, multi, guideOnly, description, size } = opts;
+  const url = drive
+    ? "https://drive.google.com/file/d/1DriveFile12345/view"
+    : cloudinary
+      ? "https://res.cloudinary.com/mock/raw/upload/v1/materials/legacy-no-ext"
+      : `https://res.cloudinary.com/mock/raw/upload/v1/materials/${id}`;
+  const links = multi
+    ? [
+        { name: "Part A", url: `${url}-a` },
+        { name: "Part B", url: `${url}-b` },
+      ]
+    : guideOnly
+      ? []
+      : [{ name: title, url }];
   return {
     _id: id,
     title,
     category,
     fileType,
-    fileUrl: `https://mock.smarthub.dev/mat/${id}`,
-    links: [{ name: title, url: `https://mock.smarthub.dev/mat/${id}` }],
+    description,
+    fileUrl: guideOnly ? undefined : url,
+    fileSize: size,
+    links,
     tags: [category],
   };
 }
