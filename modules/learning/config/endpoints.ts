@@ -2,7 +2,9 @@ import { LMS_PREFIX } from "@/lib/api/constants";
 
 /**
  * Module-content endpoints. Recordings + materials own their own LMS
- * routes; assignments-by-module live on the assignments router.
+ * routes; assignments-by-module live on the assignments router. All
+ * under `/lms/*` per the smarthub-api Pass-1 namespace; the mock
+ * router registers handlers beneath the same prefix.
  */
 export const LEARNING_ENDPOINTS = {
   RECORDINGS_BY_MODULE: (moduleId: string) =>
