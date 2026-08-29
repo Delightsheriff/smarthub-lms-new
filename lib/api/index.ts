@@ -3,7 +3,7 @@
 
 import "@/lib/api/mock/router";
 
-export { apiClient } from "@/lib/api/client";
+export { apiClient, uploadFile } from "@/lib/api/client";
 export type {
   ApiClientRequestOptions,
   HttpVerb,

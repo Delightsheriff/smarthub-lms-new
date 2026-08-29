@@ -110,3 +110,25 @@ export const apiClient = {
     return exec<T>("delete", path, undefined, options);
   },
 };
+
+/**
+ * Storage/upload seam: "put bytes → get URL". Mock-backed now (the mock
+ * returns a synthetic `/uploads/N` URL without storing the blob);
+ * Cloudinary-backed at Plan 012. Profile avatars, payment-proof receipts
+ * and acceptance-letter downloads all route through this one method.
+ */
+export async function uploadFile(
+  file: File,
+  options?: ApiClientRequestOptions,
+): Promise<string> {
+  const raw = (await exec<unknown | { url?: string; secure_url?: string }>(
+    "post",
+    "/uploads",
+    { fileName: file.name },
+    options,
+  )) as string | { url?: string; secure_url?: string };
+  if (typeof raw === "string") return raw;
+  const url = raw?.url ?? raw?.secure_url;
+  if (!url) throw new Error("Upload succeeded but no URL was returned");
+  return url;
+}
