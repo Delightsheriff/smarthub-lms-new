@@ -192,6 +192,31 @@ progress 0–100 (test-caught gap). ADRs continue the `000N` sequence → **0010
 | ADRs — 0010 payment seam, 0011 storage/upload seam (README indexed) | ✅ |
 | Verify: typecheck / lint / **60 tests** / build (29 routes) | ✅ |
 
+## Plan 010 — Programs + AI + Help (Internships / Scholarship / Oreo / Help / Branding) 🔨
+
+**Status: BUILT (code + fixtures + tests) — verification gates pending.** Worked
+incrementally; entries committed as each logical unit landed.
+
+**Scope (user-confirmed, §8):** check-in shipped under 009 (no build here) ·
+Oreo "How I got this" = collapsed read-only panel · scholarship is a dashboard
+card only (no route) · shell `Logo` swaps to `useBranding` (bundled fallback) ·
+`ScholarshipPhotoGate` = upload-persist, no crop (`react-easy-crop` deferred) ·
+Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
+
+| Deliverable | Status |
+|---|---|
+| Mock — wire `WireInternshipPayment` + `WireHelpResource`; fixtures (payment pending + settled, inert `applied` scholarship, help library, branding); intern role + enriched tasks/check-ins; router handlers (internships me/tasks/:id/check-ins/payment/payment-proof, scholarship me/banner/photo, oreo ask+stream+usage, help, `/platform/branding`) | ✅ |
+| Canned Oreo — `lib/api/mock/oreo-canned.ts` (deterministic ask → `AskAnswer`, fallback, near-limit usage, mode-scoped suggestions) | ✅ |
+| Internships module — workspace (placement summary, progress, task start/submit + dialog, check-ins + composer), payment page (bank detail + upload proof, confirmed strip, empty state), dashboard + banner tiles (self-gating) | ✅ |
+| Tech Scholarship module — `TechScholarshipCard` (tier/track/cohort + SIWES coupon), `ShareMilestoneDialog` (banner + regenerate + caption + optional photo + WhatsApp/X + copy caption) | ✅ |
+| Oreo module — `api/markdown.ts` safe-subset parser + `AnswerMarkdown`, `OreoPageContent` (suggestion chips per mode, transcript, pending bubble, "How I got this" collapsible, usage meter, New chat) | ✅ |
+| Help module — mode-filtered library, category grouping, native `<video>` cards (no iframes), document/link CTAs | ✅ |
+| Branding module — `useBranding`/fallback, shell `Logo` swaps to runtime branding | ✅ |
+| Wire-up — `/internships`, `/internships/me/payment`, `/oreo`, `/help` routes; dashboard tiles + Help nav entry (`COMMON_NAV_ITEMS`) | ✅ |
+| Tests — internship normalise + `computeProgress`, help grouping, markdown matrix (headings/tables/lists/fences/links incl. http(s)-only), canned oreo (determinism, fallback, usage, no-HTML) | ✅ |
+| ADR — 0012 Oreo-as-seam (+ scholarship server-derived gate + branding fallback notes); README indexed | ✅ |
+| Verify: typecheck / lint / tests / build + §7 walkthrough | ⬜ |
+
 ---
 
 ## Future plans (deferred, in delivery order)
@@ -201,7 +226,7 @@ progress 0–100 (test-caught gap). ADRs continue the `000N` sequence → **0010
 | 006 | Assignments | 🚫 not started |
 | 007 | Calendar / activity / webinars | 🚫 not started |
 | 008 | Messaging / inbox / notifications | 🚫 not started |
-| 010 | Programs & AI help (Oreo) | 🚫 not started |
+| 010 | Programs & AI help (Oreo) | 🔨 built — verification gates pending |
 | 011 | Teaching / instructor CRUD | 🚫 not started |
 | 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
 
