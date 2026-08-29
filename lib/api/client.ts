@@ -87,7 +87,12 @@ async function exec<T>(
   await delay();
   const { handler, ctx } = resolveHandler(verb, { path, data, params: options?.params });
   const result = handler(ctx);
-  return (result instanceof Promise ? await result : result) as T;
+  const resolved = (result instanceof Promise ? await result : result) as T;
+  // Handlers may return live mock singletons. In-place mutations of a
+  // singleton make a later response reference-equal to the cached value,
+  // so React Query's structural sharing silently drops the update. Return a
+  // defensive deep copy each call so every write surfaces as a new value.
+  return JSON.parse(JSON.stringify(resolved)) as T;
 }
 
 export const apiClient = {

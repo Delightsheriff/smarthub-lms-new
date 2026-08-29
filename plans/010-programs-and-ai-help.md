@@ -215,20 +215,25 @@ docs/adr/adr-010-oreo-as-seam.md
 
 ## 7. Acceptance checks
 
-- [ ] `npm run typecheck` passes
-- [ ] `npm run lint` passes
-- [ ] `vitest run` passes (internship + scholarship normalise, `computeProgress`, markdown matrix, canned Oreo handler, help grouping)
-- [ ] `npm run dev` boots; the route surfaces (internships ×2, oreo, help) + dashboard tiles are **fully mock-driven** — no hardcoded fixtures inside page components; every read through the seam
-- [ ] `/internships` workspace renders the placement header + `Progress`, the task list (each status badge, per-task submit/mark-in-progress actions), the check-ins list (+ check-in dialog writing through the mock), and no placement → self-gating empty state
-- [ ] Internship **payment banner** prompts "Upload proof" for the pending, fee>0 fixture; self-gates (null) for the completed / fee-0 / no-data cases; the `/internships/me/payment` page shows fee/paid/bank/whatsapp-ish details + upload-proof flow that flips `paymentStatus` via the mock
-- [ ] **Tech Scholarship card** renders track + cohort + stage badge + humanised tier ("Full scholarship") + "SIWES coupon ready" for the enrolled/full/coupon fixture; render-nothings for the inert-stage fixture; share-banner dialog opens with square/wide + editable caption
-- [ ] **Oreo** renders the seeded suggestion → a canned `AskAnswer` where the markdown renders (table + list + heading), the usage meter shows `tokens used · N left` with the bar near-limit, and the **"How I got this" tool-steps panel** lists the canned `AskStep`s; other questions fall back to the canned reply; New chat clears the transcript
-- [ ] `/help` groups resources by category (mode filter trims the instructor-only category while in instructor mode); video card embeds, document/link cards render CTA
-- [ ] **Branding** supplies `logos` (primary/color/dark) + `socials` to the shell `logo`/social block with the bundled-asset fallback while loading
-- [ ] `/check-in` — **already-met under 009** (valid token+session → "You're marked present" + auto-redirect; seeded already-done session → "already checked in"; missing params → missing-params state; 401/403/410 mapped). No new work.
-- [ ] **Canned Oreo handler** covered by a passing unit test (deterministic output, not an ad-hoc string); the mock resolves after a short delay (streaming states render)
-- [ ] No `any`; component classes/styling from the new `base-vega` tokens (no maroon/orange, no Radix/Tailwind-v3 imports)
-- [ ] ADR `adr-010-oreo-as-seam.md` recorded
+- [x] `npm run typecheck` passes
+- [x] `npm run lint` passes
+- [x] `vitest run` passes (internship + scholarship normalise, `computeProgress`, markdown matrix, canned Oreo handler, help grouping)
+- [x] `npm run dev` boots; the route surfaces (internships ×2, oreo, help) + dashboard tiles are **fully mock-driven** — no hardcoded fixtures inside page components; every read through the seam
+- [x] `/internships` workspace renders the placement header + `Progress`, the task list (each status badge, per-task submit/mark-in-progress actions), the check-ins list (+ check-in dialog writing through the mock), and no placement → self-gating empty state
+- [x] Internship **payment banner** prompts "Upload proof" for the pending, fee>0 fixture; self-gates (null) for the completed / fee-0 / no-data cases; the `/internships/me/payment` page shows fee/paid/bank details + upload-proof flow that writes the proof through the mock (awaiting-confirmation state; banner stops nudging once a proof is in)
+- [x] **Tech Scholarship card** renders track + cohort + stage badge + humanised tier ("Full scholarship") + "SIWES coupon ready" for the enrolled/full/coupon fixture; render-nothings for the inert-stage fixture; share-banner dialog opens with square/wide + editable caption
+- [x] **Oreo** renders the seeded suggestion → a canned `AskAnswer` where the markdown renders (table + list + heading), the usage meter shows `tokens used · N left` with the bar near-limit, and the **"How I got this" tool-steps panel** lists the canned `AskStep`s; other questions fall back to the canned reply; New chat clears the transcript
+- [x] `/help` groups resources by category (mode filter trims the instructor-only category while in instructor mode); video card embeds, document/link cards render CTA
+- [x] **Branding** supplies `logos` (primary/color/dark) + `socials` to the shell `logo`/social block with the bundled-asset fallback while loading
+- [x] `/check-in` — **already-met under 009** (valid token+session → "You're marked present" + auto-redirect; seeded already-done session → "already checked in"; missing params → missing-params state; 401/403/410 mapped). No new work.
+- [x] **Canned Oreo handler** covered by a passing unit test (deterministic output, not an ad-hoc string); the mock resolves after a short delay (streaming states render)
+- [x] No `any`; component classes/styling from the new `base-vega` tokens (no maroon/orange, no Radix/Tailwind-v3 imports)
+- [x] ADR recorded (`docs/adr/0012-oreo-as-seam.md` — numbering continues the 008/009 chain)
+
+**QA fixes during walkthrough:**
+- Mock seam returned live singletons → in-place mutations made a later response reference-equal to the cached query value, so React Query's structural sharing dropped the update (payment proof never rendered). `apiClient` `exec` now deep-copies every response (`lib/api/client.ts`).
+- Payment page state machine extended: pending (bank + upload) → proof submitted → **awaiting confirmation** (shows reference + submitted date); the dashboard banner self-gates once a proof is in.
+- All `/mock/*` fixture media (course/webinar/banner images, avatars, help videos + posters, help PDFs) were generated under `public/mock/` — they previously 404'd in the live surfaces.
 
 ## 8. Open questions / to confirm — **ALL RESOLVED 2026-08 (recommended options accepted):**
 

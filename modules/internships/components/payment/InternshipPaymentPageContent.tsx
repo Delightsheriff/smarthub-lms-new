@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   CheckCircle2,
+  Clock3,
   Landmark,
   Loader2,
   ReceiptText,
@@ -85,6 +86,8 @@ export function InternshipPaymentPageContent() {
 
       {settled ? (
         <ConfirmedReceipt payment={data} />
+      ) : data.paymentProofUrl ? (
+        <AwaitingConfirmation payment={data} />
       ) : (
         <PendingPayment payment={data} />
       )}
@@ -111,6 +114,39 @@ function ConfirmedReceipt({ payment }: { payment: ApiInternshipPayment }) {
           </p>
           <p className="text-sm text-muted-foreground">
             Confirmed {payment.paymentConfirmedAt ? formatDate(payment.paymentConfirmedAt) : ""}
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function AwaitingConfirmation({ payment }: { payment: ApiInternshipPayment }) {
+  return (
+    <Card className="p-6 border-info/30 bg-info/5">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
+          <Clock3 className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">Proof submitted — awaiting confirmation</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Your receipt is in for{" "}
+            {formatPrice(payment.fee - payment.paidAmount)}, submitted{" "}
+            {payment.paymentProofSubmittedAt
+              ? formatDate(payment.paymentProofSubmittedAt)
+              : ""}
+            .
+          </p>
+          {payment.paymentReference && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Reference:{" "}
+              <span className="font-mono text-xs">{payment.paymentReference}</span>
+            </p>
+          )}
+          <p className="mt-2 text-xs text-muted-foreground">
+            Finance confirms each receipt — usually within a day. This page
+            updates automatically once they do.
           </p>
         </div>
       </div>

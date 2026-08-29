@@ -15,6 +15,8 @@ export function InternshipPaymentBannerCard() {
   const { data } = useInternshipPayment();
 
   if (!data || data.paymentStatus === "completed") return null;
+  // Proof uploaded → awaiting admin confirmation; stop the nudge.
+  if (data.paymentProofUrl) return null;
 
   const due = data.fee - data.paidAmount;
   if (due <= 0) return null;

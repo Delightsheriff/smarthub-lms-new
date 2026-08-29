@@ -192,10 +192,27 @@ progress 0–100 (test-caught gap). ADRs continue the `000N` sequence → **0010
 | ADRs — 0010 payment seam, 0011 storage/upload seam (README indexed) | ✅ |
 | Verify: typecheck / lint / **60 tests** / build (29 routes) | ✅ |
 
-## Plan 010 — Programs + AI + Help (Internships / Scholarship / Oreo / Help / Branding) 🔨
+## Plan 010 — Programs + AI + Help (Internships / Scholarship / Oreo / Help / Branding) ✅
 
-**Status: BUILT (code + fixtures + tests) — verification gates pending.** Worked
-incrementally; entries committed as each logical unit landed.
+**Status: BUILT + QAd.** All §7 acceptance checks ticked after a live
+agent-browser walkthrough; QA-healthy issues fixed during the pass (below).
+
+Quick summary of the QA pass:
+- Walked every 010 surface against the dev server — internships workspace
+  (task start / submit / check-in composer), payment pending + upload-proof →
+  **awaiting-confirmation** state, scholarship share dialog, Oreo (suggestions,
+  markdown render, tool-steps, fallback, New chat), `/help` both mode filters,
+  branding in the shell.
+- **Mock seam fix (`lib/api/client.ts`):** `exec` now deep-copies every
+  response. Handlers returning live singletons meant an in-place mutation left
+  the next response reference-equal to the cached query value; React Query's
+  structural sharing silently dropped the update (payment proof never surfaced).
+- **Payment state machine:** banner self-gates once a proof is submitted; payment
+  page adds the **awaiting confirmation** card (reference + submitted date)
+  between pending and the confirmed strip.
+- **Mock assets:** all `/mock/*` fixture media (banner, course/webinar images,
+  avatars, help videos + posters, help PDFs) generated under `public/mock/` —
+  they previously 404'd in the live surfaces.
 
 **Scope (user-confirmed, §8):** check-in shipped under 009 (no build here) ·
 Oreo "How I got this" = collapsed read-only panel · scholarship is a dashboard
@@ -215,7 +232,7 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 | Wire-up — `/internships`, `/internships/me/payment`, `/oreo`, `/help` routes; dashboard tiles + Help nav entry (`COMMON_NAV_ITEMS`) | ✅ |
 | Tests — internship normalise + `computeProgress`, help grouping, markdown matrix (headings/tables/lists/fences/links incl. http(s)-only), canned oreo (determinism, fallback, usage, no-HTML) | ✅ |
 | ADR — 0012 Oreo-as-seam (+ scholarship server-derived gate + branding fallback notes); README indexed | ✅ |
-| Verify: typecheck / lint / tests / build + §7 walkthrough | ⬜ |
+| Verify: typecheck / lint / tests / build + §7 walkthrough | ✅ QA'd (`agent-browser`) |
 
 ---
 
@@ -226,7 +243,7 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 | 006 | Assignments | 🚫 not started |
 | 007 | Calendar / activity / webinars | 🚫 not started |
 | 008 | Messaging / inbox / notifications | 🚫 not started |
-| 010 | Programs & AI help (Oreo) | 🔨 built — verification gates pending |
+| 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
 | 011 | Teaching / instructor CRUD | 🚫 not started |
 | 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
 
