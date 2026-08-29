@@ -154,7 +154,12 @@ deferred to Plan 011 — student body only.
 
 ## Plan 009 — Profile / Payments / Billing / SIWES / Referrals ✅
 
-**Status: BUILT** — incremental commits, 2026-08.
+**Status: BUILT + QAd** — incremental commits, 2026-08; all 13 verification
+box-items checked in `plans/009-…md` after an agent-browser walkthrough. QA
+caught+fixed: referrals ledger rendered the commission **amount** as a rate
+(`25000%`) → derived `commission/amount`; Full-Stack cohort detail student rows
+summed to 800k paid/400k cuts against a 400k/200k summary → reconciled;
+pending ledger row now shows the `Potential ₦85,000` callout (earned 0).
 
 **Notes:** Security is a **tab, not a page** — deviation from legacy, which
 routed password change out to `/profile/security` and left the tab strip with
