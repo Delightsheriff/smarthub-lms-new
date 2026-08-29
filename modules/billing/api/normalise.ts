@@ -19,8 +19,12 @@ const formatCohortLabel = (
   return duration ? `${formatted} cohort · ${duration}` : `${formatted} cohort`;
 };
 
-const calcProgress = (paid: number, total: number) =>
-  total > 0 ? Math.round((paid / total) * 100) : 0;
+const calcProgress = (paid: number, total: number) => {
+  if (total <= 0) return 0;
+  // Clamp to 0–100 — overpaid tranches and stale balances must never
+  // render a progress bar past 100% (or below 0 for odd inputs).
+  return Math.min(100, Math.max(0, Math.round((paid / total) * 100)));
+};
 
 export function normaliseRegistration(
   api: ApiBillingRegistration,
