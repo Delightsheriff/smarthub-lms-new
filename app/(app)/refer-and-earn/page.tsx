@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { ReferralsPanel } from "@/modules/referrals/components/ReferralsPanel";
 
 export default function ReferAndEarnPage() {
-  return <ComingSoon title="Refer &amp; earn" />;
+  return <ReferralsPanel />;
 }

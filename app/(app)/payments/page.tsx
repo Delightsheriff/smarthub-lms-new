@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { PaymentsPageContent } from "@/modules/payment-proofs/components/PaymentsPageContent";
 
 export default function PaymentsPage() {
-  return <ComingSoon title="Payments" />;
+  return <PaymentsPageContent />;
 }

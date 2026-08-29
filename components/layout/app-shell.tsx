@@ -10,6 +10,9 @@ import { TopBar } from "@/components/layout/top-bar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { MessageToastListener } from "@/components/layout/message-toast-listener";
 import { CommandPaletteListener } from "@/components/layout/command-palette-listener";
+import { ProfilePhotoGate } from "@/modules/profile/components/ProfilePhotoGate";
+import { PaymentGate } from "@/modules/payment-proofs/components/PaymentGate";
+import { PaymentStatusBanner } from "@/modules/payment-proofs/components/PaymentStatusBanner";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useSidebarStore } from "@/store/slices/sidebarStore";
 import { CONTENT_MAX_WIDTH } from "@/configs/brand";
@@ -48,16 +51,25 @@ export function AppShell({ children }: { children: ReactNode }) {
       open={!collapsed}
       onOpenChange={(open) => setCollapsed(!open)}
     >
+      <ProfilePhotoGate />
       <AppSidebar />
       <SidebarInset>
         <TopBar />
+        {/* Late-payment nudge while access is still open. Silent
+            otherwise, and replaced by the paywall once access is
+            actually paused — a banner on top of a paywall is just
+            shouting. */}
+        <PaymentStatusBanner />
         <main
           className={cn(
             "mx-auto w-full flex-1 px-4 py-6",
             CONTENT_MAX_WIDTH
           )}
         >
-          {children}
+          {/* Server-side 402s are the authority; this gives a
+              suspended learner one clear screen instead of the
+              dashboard of failed requests. */}
+          <PaymentGate>{children}</PaymentGate>
         </main>
       </SidebarInset>
       <BottomNav />
