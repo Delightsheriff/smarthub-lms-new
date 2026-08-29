@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { InternshipWorkspacePageContent } from "@/modules/internships/components/InternshipWorkspacePageContent";
 
 export default function InternshipsPage() {
-  return <ComingSoon title="Internship" />;
+  return <InternshipWorkspacePageContent />;
 }

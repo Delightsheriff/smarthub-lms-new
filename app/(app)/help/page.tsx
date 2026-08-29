@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { HelpPageContent } from "@/modules/help/components/HelpPageContent";
 
 export default function HelpPage() {
-  return <ComingSoon title="Help" />;
+  return <HelpPageContent />;
 }

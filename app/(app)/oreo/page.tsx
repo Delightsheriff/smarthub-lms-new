@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { OreoPageContent } from "@/modules/oreo/components/OreoPageContent";
 
 export default function OreoPage() {
-  return <ComingSoon title="Ask Oreo" />;
+  return <OreoPageContent />;
 }

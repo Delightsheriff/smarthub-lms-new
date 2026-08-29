@@ -1,0 +1,276 @@
+"use client";
+import { useRef, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Landmark,
+  Loader2,
+  ReceiptText,
+  UploadCloud,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate, formatPrice } from "@/lib/utils";
+import {
+  useInternshipPayment,
+  useSubmitInternshipPaymentProof,
+} from "../../api/internships.queries";
+import type { ApiInternshipPayment } from "../../types/api.types";
+
+/** `/internships/me/payment` — the internship fee surface. Self-gating
+ *  like the dashboard tiles: no applicable payment renders an empty
+ *  state, a confirmed payment shows the receipt strip. */
+export function InternshipPaymentPageContent() {
+  const { data, isLoading } = useInternshipPayment();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-40 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="p-8 md:p-12 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <ReceiptText className="h-6 w-6" />
+        </span>
+        <h1 className="mt-4 text-xl font-semibold">No internship payment</h1>
+        <p className="mt-2 max-w-md mx-auto text-sm text-muted-foreground">
+          Your internship is fully covered or you have no active placement —
+          there&apos;s nothing to pay for right now.
+        </p>
+        <Button
+          className="mt-6"
+          variant="outline"
+          render={<Link href="/internships" />}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1.5" />
+          Back to internship
+        </Button>
+      </Card>
+    );
+  }
+
+  const settled = data.paymentStatus === "completed";
+
+  return (
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+          Internship fee
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {settled
+            ? "Your internship fee is paid in full."
+            : "Complete your payment to keep your placement active."}
+        </p>
+      </header>
+
+      {settled ? (
+        <ConfirmedReceipt payment={data} />
+      ) : (
+        <PendingPayment payment={data} />
+      )}
+    </div>
+  );
+}
+
+function ConfirmedReceipt({ payment }: { payment: ApiInternshipPayment }) {
+  return (
+    <Card className="p-6 border-success/30 bg-success/5">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
+          <CheckCircle2 className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">
+            {formatPrice(payment.fee)} — paid in full
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Reference:{" "}
+            <span className="font-mono text-xs">
+              {payment.paymentReference || "—"}
+            </span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Confirmed {payment.paymentConfirmedAt ? formatDate(payment.paymentConfirmedAt) : ""}
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
+  const [open, setOpen] = useState(false);
+  const mutation = useSubmitInternshipPaymentProof();
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <Landmark className="h-4 w-4 text-primary" />
+            {payment.bank?.bankName}
+          </div>
+          <span className="text-sm font-semibold text-destructive">
+            {formatPrice(payment.fee - payment.paidAmount)} outstanding
+          </span>
+        </div>
+        <Separator className="my-4" />
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Field label="Account name" value={payment.bank?.accountName} mono />
+          <Field label="Account number" value={payment.bank?.accountNumber} mono />
+          <Field label="Fee" value={formatPrice(payment.fee)} />
+        </div>
+        {payment.bank?.paymentInstructions && (
+          <p className="mt-4 rounded-lg bg-accent/50 px-3 py-2 text-xs text-muted-foreground">
+            {payment.bank.paymentInstructions}
+          </p>
+        )}
+        <div className="mt-5 flex justify-end">
+          <Button onClick={() => setOpen(true)}>
+            <UploadCloud className="h-4 w-4 mr-1.5" />
+            Upload payment proof
+          </Button>
+        </div>
+      </Card>
+
+      <UploadProofDialog
+        open={open}
+        onOpenChange={setOpen}
+        pending={mutation.isPending}
+        onSubmit={async (input) => {
+          await mutation.mutateAsync(input);
+          setOpen(false);
+        }}
+      />
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value?: string;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p className={"mt-0.5 text-sm font-semibold" + (mono ? " font-mono" : "")}>
+        {value || "—"}
+      </p>
+    </div>
+  );
+}
+
+function UploadProofDialog({
+  open,
+  onOpenChange,
+  pending,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  pending: boolean;
+  onSubmit: (input: { file: File; reference?: string }) => Promise<void>;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [reference, setReference] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const submit = async () => {
+    if (!file) return;
+    try {
+      await onSubmit({ file, reference: reference.trim() || undefined });
+      setFile(null);
+      setReference("");
+    } catch {
+      // Interceptor toasts the error; keep the dialog open for retry.
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Upload internship payment</DialogTitle>
+          <DialogDescription>
+            Send your transfer receipt so finance can confirm your fee.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label
+            htmlFor="internship-proof-file"
+            className="block cursor-pointer rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground hover:border-primary/40"
+          >
+            <UploadCloud className="mx-auto mb-1 h-5 w-5" />
+            {file ? (
+              <span className="font-medium text-foreground">{file.name}</span>
+            ) : (
+              <span>Tap to attach your receipt (image or PDF)</span>
+            )}
+            <Input
+              id="internship-proof-file"
+              ref={fileRef}
+              type="file"
+              accept="image/*,application/pdf"
+              className="hidden"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </Label>
+          <div className="grid gap-1.5">
+            <Label htmlFor="internship-proof-reference">
+              Transfer reference (optional)
+            </Label>
+            <Input
+              id="internship-proof-reference"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="From your bank app"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={pending}
+          >
+            Cancel
+          </Button>
+          <Button onClick={submit} disabled={pending || !file}>
+            {pending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Submit proof"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

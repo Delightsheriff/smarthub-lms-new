@@ -3,6 +3,7 @@ import {
   BookOpen,
   Briefcase,
   CalendarDays,
+  CircleHelp,
   ClipboardList,
   Home,
   Inbox,
@@ -34,6 +35,7 @@ const COMMON_NAV_ITEMS: NavItem[] = [
   { label: "Activity", href: "/activity", icon: Activity },
   { label: "Profile", href: "/profile", icon: User },
   { label: "Webinars", href: "/webinars", icon: Presentation },
+  { label: "Help", href: "/help", icon: CircleHelp },
 ];
 
 /** Internship is its own track — surfaced only when the user has

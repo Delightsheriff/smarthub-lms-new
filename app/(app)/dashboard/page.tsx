@@ -19,6 +19,9 @@ import { CourseCard } from "@/modules/courses/components/CourseCard";
 import { AcceptanceLetterCard } from "@/modules/acceptance-letters/components/AcceptanceLetterCard";
 import { DashboardBillingWidget } from "@/modules/billing/components/DashboardBillingWidget";
 import { DashboardReferralsWidget } from "@/modules/referrals/components/DashboardReferralsWidget";
+import { InternshipDashboardCard } from "@/modules/internships/components/InternshipDashboardCard";
+import { InternshipPaymentBannerCard } from "@/modules/internships/components/payment/InternshipPaymentBannerCard";
+import { TechScholarshipCard } from "@/modules/tech-scholarship/components/TechScholarshipCard";
 import { DashboardWebinarsWidget } from "@/modules/webinars/components/DashboardWebinarsWidget";
 import { DashboardAssignedModulesWidget } from "@/modules/assigned-modules/components/DashboardAssignedModulesWidget";
 import { ProgressPulseCard } from "@/modules/progress/components/ProgressPulseCard";
@@ -86,6 +89,9 @@ function StudentDashboardBody() {
         <DashboardBillingWidget />
         <AcceptanceLetterCard />
         <DashboardReferralsWidget />
+        <InternshipPaymentBannerCard />
+        <InternshipDashboardCard />
+        <TechScholarshipCard />
       </div>
 
       <DashboardStatsStrip />
