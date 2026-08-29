@@ -409,6 +409,38 @@ export interface WireInternshipCheckIn {
   mentorFeedback?: string;
 }
 
+export interface WireInternshipPayment {
+  applicationId: string;
+  applicantName: string;
+  applicantEmail: string;
+  fee: number;
+  paidAmount: number;
+  paymentStatus: "pending" | "completed" | "cancelled";
+  paymentProofUrl?: string;
+  paymentProofSubmittedAt?: string;
+  paymentReference?: string;
+  paymentConfirmedAt?: string;
+  bank?: {
+    bankName?: string;
+    accountName?: string;
+    accountNumber?: string;
+    paymentInstructions?: string;
+  };
+}
+
+export interface WireHelpResource {
+  _id: string;
+  title: string;
+  description?: string;
+  type: "video" | "document" | "link";
+  url: string;
+  thumbnailUrl?: string;
+  category: string;
+  audience: "student" | "instructor" | "all";
+  order: number;
+  createdAt: string;
+}
+
 export interface WireInternship {
   _id: string;
   internName: string;

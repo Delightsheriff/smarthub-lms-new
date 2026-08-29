@@ -11,11 +11,18 @@ import type { WireMaterial, WireRecording } from "@/lib/api/wire.types";
 import {
   mockAssignedModules,
   mockBanking,
+  mockBranding,
   mockDatabase,
+  mockHelpResources,
+  mockInternshipPayment,
   mockProgressPulse,
   mockReferrals,
   mockUser,
 } from "@/lib/api/mock/mockDatabase";
+import {
+  answerOreoQuestion,
+  OREO_USAGE,
+} from "@/lib/api/mock/oreo-canned";
 
 const isoNow = () => new Date().toISOString();
 const isoDaysAgo = (days: number) =>
@@ -744,6 +751,209 @@ registerMockRoute({
     }
     return { success: true, message: "Payout cancelled", statusCode: 200 };
   },
+});
+
+/** Internship — `GET /lms/internships/me`. Null when the user has no
+ *  placement (grads / non-interns), which self-gates the workspace. */
+registerMockRoute({
+  verb: "get",
+  path: "/lms/internships/me",
+  handler: () => mockDatabase.internships[0] ?? null,
+});
+
+/** Internship tasks — `PATCH /lms/internships/me/tasks/:taskId`. Students
+ *  can only reach `in_progress`/`submitted` (never set `done`, never
+ *  un-set a status). */
+registerMockRoute({
+  verb: "patch",
+  path: "/lms/internships/me/tasks/:taskId",
+  handler: (ctx: MockRequestContext) => {
+    const internship = mockDatabase.internships[0];
+    if (!internship) throw new ApiError("No internship placement", 404);
+    const taskId = String(ctx.params?.taskId);
+    const task = internship.tasks?.find((t) => t._id === taskId);
+    if (!task) throw new ApiError("Task not found", 404);
+    const body = (ctx.data ?? {}) as {
+      status?: string;
+      submissionUrl?: string;
+      submissionNote?: string;
+    };
+    const nextStatus = body.status;
+    if (
+      nextStatus &&
+      !["in_progress", "submitted"].includes(nextStatus)
+    ) {
+      throw new ApiError("You can only start or submit a task.", 403);
+    }
+    if (nextStatus) task.status = nextStatus as typeof task.status;
+    if (nextStatus === "submitted") {
+      task.submissionUrl = body.submissionUrl?.trim() || undefined;
+      task.submissionNote = body.submissionNote?.trim() || undefined;
+      task.submittedAt = isoNow();
+    }
+    return internship;
+  },
+});
+
+/** Internship check-ins — `POST /lms/internships/me/check-ins`. */
+registerMockRoute({
+  verb: "post",
+  path: "/lms/internships/me/check-ins",
+  handler: (ctx: MockRequestContext) => {
+    const internship = mockDatabase.internships[0];
+    if (!internship) throw new ApiError("No internship placement", 404);
+    const body = (ctx.data ?? {}) as {
+      weekOf?: string;
+      summary?: string;
+      blockers?: string;
+      hoursLogged?: number;
+    };
+    if (!body.weekOf || !body.summary?.trim()) {
+      throw new ApiError("Week and summary are required.", 400);
+    }
+    const checkIn = {
+      _id: `ci_${internship.checkIns.length + 1}`,
+      weekOf: body.weekOf,
+      summary: body.summary.trim(),
+      blockers: body.blockers?.trim() || undefined,
+      hoursLogged: body.hoursLogged,
+      submittedAt: isoNow(),
+    };
+    internship.checkIns.push(checkIn);
+    return checkIn;
+  },
+});
+
+/** Internship payment — `GET /lms/internships/me/payment`. Null for
+ *  grads/waived/non-interns; settled fixture proves the confirmed strip. */
+registerMockRoute({
+  verb: "get",
+  path: "/lms/internships/me/payment",
+  handler: () => mockInternshipPayment ?? null,
+});
+
+/** Internship payment proof — `POST /lms/internships/me/payment-proof`.
+ *  The receipt was already uploaded to `/uploads` (storage seam); this
+ *  just records it + the optional reference. */
+registerMockRoute({
+  verb: "post",
+  path: "/lms/internships/me/payment-proof",
+  handler: (ctx: MockRequestContext) => {
+    const body = (ctx.data ?? {}) as {
+      proofUrl?: string;
+      reference?: string;
+    };
+    if (!body.proofUrl) throw new ApiError("Missing proof URL.", 400);
+    Object.assign(mockInternshipPayment, {
+      paymentProofUrl: body.proofUrl,
+      paymentReference: body.reference?.trim() || undefined,
+      paymentProofSubmittedAt: isoNow(),
+    });
+    return mockInternshipPayment;
+  },
+});
+
+/** Scholarship — `GET /scholarship-applications/me`. Returns the active
+ *  (admitted/enrolled) application or null so the card render-nothings. */
+registerMockRoute({
+  verb: "get",
+  path: "/scholarship-applications/me",
+  handler: () =>
+    mockDatabase.scholarship.find(
+      (a) => a.stage === "admitted" || a.stage === "enrolled",
+    ) ?? null,
+});
+
+/** Banner regeneration timestamp — bumped when `?force=true`. */
+let regeneratedAt = isoNow();
+
+/** Scholarship banner — `GET /scholarship-applications/me/banner`.
+ *  `?force=true` regenerates (bumps generatedAt). */
+registerMockRoute({
+  verb: "get",
+  path: "/scholarship-applications/me/banner",
+  handler: (ctx: MockRequestContext) => {
+    const force = String(ctx.params?.force) === "true";
+    if (force) regeneratedAt = isoNow();
+    return {
+      squareUrl: "/mock/banner-square.png",
+      wideUrl: "/mock/banner-wide.png",
+      generatedAt: regeneratedAt,
+      suggestedCaption:
+        "I got the SmartHub Tech Scholarship 🎓 — full ride into the Web Development track. Couldn't have asked for a better start. #SmartHub #TechScholarship #WebDev",
+    };
+  },
+});
+
+/** Scholarship photo — `PATCH /scholarship-applications/me/photo`.
+ *  Upload-persist only (no crop) in this slice — the URL comes from the
+ *  `/uploads` storage seam. Mirrors the photo onto the auth user so the
+ *  banner has a face to work with. */
+registerMockRoute({
+  verb: "patch",
+  path: "/scholarship-applications/me/photo",
+  handler: (ctx: MockRequestContext) => {
+    const body = (ctx.data ?? {}) as { imageUrl?: string };
+    if (!body.imageUrl) throw new ApiError("Missing image URL.", 400);
+    mockUser.imageUrl = body.imageUrl;
+    return { ok: true };
+  },
+});
+
+/** Oreo — canned ask + stream. Both resolve the same deterministic
+ *  `AskAnswer` after a short delay so streaming states render. The page
+ *  consumes the promise directly; the real SSE `streamAsk` reader is the
+ *  deferred adapter for Plan 012. */
+const oreoDelay = () => new Promise((r) => setTimeout(r, 650));
+registerMockRoute({
+  verb: "post",
+  path: "/lms/oreo/ask",
+  handler: async (ctx: MockRequestContext) => {
+    await oreoDelay();
+    const body = (ctx.data ?? {}) as { question?: string };
+    return answerOreoQuestion(String(body.question ?? ""));
+  },
+});
+registerMockRoute({
+  verb: "post",
+  path: "/lms/oreo/ask/stream",
+  handler: async (ctx: MockRequestContext) => {
+    await oreoDelay();
+    const body = (ctx.data ?? {}) as { question?: string };
+    return answerOreoQuestion(String(body.question ?? ""));
+  },
+});
+
+/** Oreo usage — `GET /lms/oreo/usage`. */
+registerMockRoute({
+  verb: "get",
+  path: "/lms/oreo/usage",
+  handler: () => OREO_USAGE,
+});
+
+/** Help library — `GET /lms/help?mode=…`. Filtered by audience; the
+ *  server pre-sorts by category then order. */
+registerMockRoute({
+  verb: "get",
+  path: "/lms/help",
+  handler: (ctx: MockRequestContext) => {
+    const mode = String(ctx.params?.mode ?? "student");
+    return mockHelpResources
+      .filter(
+        (r) => r.audience === "all" || r.audience === mode,
+      )
+      .sort(
+        (a, b) =>
+          a.category.localeCompare(b.category) || a.order - b.order,
+      );
+  },
+});
+
+/** Branding — `GET /platform/branding` (public, not under /lms). */
+registerMockRoute({
+  verb: "get",
+  path: "/platform/branding",
+  handler: () => mockBranding,
 });
 
 const CHECKED_IN_SESSIONS = new Set<string>();

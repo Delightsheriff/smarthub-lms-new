@@ -16,8 +16,10 @@ import type {
   WireCalendarEvent,
   WireConversation,
   WireEnrolledCourse,
+  WireHelpResource,
   WireInstallmentPlanFixture,
   WireInternship,
+  WireInternshipPayment,
   WireModule,
   WireNotification,
   WirePaymentProofFixture,
@@ -46,7 +48,7 @@ export const mockUser: WireUser = {
   email: "ade.balogun@example.com",
   phone: "+2348012345678",
   imageUrl: "/mock/ade.jpg",
-  roles: ["student", "instructor"],
+  roles: ["student", "instructor", "intern"],
   isVerified: true,
   gender: "Male",
   country: { isoCode: "NG", name: "Nigeria" },
@@ -840,12 +842,14 @@ export const mockDatabase: MockDatabase = {
       status: "active",
       progressPercent: 15,
       checkIns: [
-        { _id: "ci_1", weekOf: daysAgo(1), summary: "Set up environment, began first task.", hoursLogged: 8 },
+        { _id: "ci_1", weekOf: daysAgo(7), summary: "Set up environment, began first task.", hoursLogged: 8, submittedAt: daysAgo(6) },
+        { _id: "ci_2", weekOf: daysAgo(0), summary: "Cleaned the CSV, submitted the script.", hoursLogged: 11, submittedAt: daysAgo(1), mentorFeedback: "Great structure — try adding CLI flags to re-run it on new files." },
       ],
       tasks: [
         { _id: "it_1", internship: "int_1", title: "Set up dev environment", description: "Install Python, VS Code, git.", status: "done", order: 1, submittedAt: daysAgo(5) },
         { _id: "it_2", internship: "int_1", title: "Build a data-cleaning script", description: "Clean the provided CSV.", status: "in_progress", order: 2, dueDate: daysFromNow(4) },
         { _id: "it_3", internship: "int_1", title: "Weekly check-in", status: "todo", order: 3, dueDate: daysFromNow(2) },
+        { _id: "it_4", internship: "int_1", title: "README for the pipeline", status: "submitted", order: 4, submissionUrl: "https://github.com/example/pipeline", submissionNote: "First pass — feedback welcome.", submittedAt: daysAgo(2) },
       ],
     },
   ],
@@ -859,6 +863,13 @@ export const mockDatabase: MockDatabase = {
       awardedTier: "full",
       siwesCouponCode: "SIWES-WEB-2026",
       createdAt: daysAgo(45),
+    },
+    {
+      _id: "sch_2",
+      cohort: "2026 Cohort A",
+      track: "cyber",
+      stage: "applied",
+      createdAt: daysAgo(12),
     },
   ],
 
@@ -963,6 +974,165 @@ export const mockBanking = {
   accountNumber: "0123456789",
   payoutEmail: "ade.balogun@example.com",
   updatedAt: daysAgo(3),
+};
+
+/** Internship payment (`GET /lms/internships/me/payment`). Pending with
+ *  no proof yet so the payment banner prompts "Upload proof". */
+export const mockInternshipPayment: WireInternshipPayment = {
+  applicationId: "app_int_1",
+  applicantName: "Ade Balogun",
+  applicantEmail: "ade.balogun@example.com",
+  fee: 150000,
+  paidAmount: 0,
+  paymentStatus: "pending",
+  bank: {
+    bankName: "GTBank",
+    accountName: "SmartHub Academy",
+    accountNumber: "0987654321",
+    paymentInstructions:
+      "Use your full name + 'internship fee' as the reference, then upload your receipt below.",
+  },
+};
+
+/** Completed variant — proves the payment banner/page self-gating
+ *  branches (banner null, page shows the confirmed strip). */
+export const mockInternshipPaymentSettled: WireInternshipPayment = {
+  applicationId: "app_int_1",
+  applicantName: "Ade Balogun",
+  applicantEmail: "ade.balogun@example.com",
+  fee: 150000,
+  paidAmount: 150000,
+  paymentStatus: "completed",
+  paymentProofUrl: "/uploads/2",
+  paymentProofSubmittedAt: daysAgo(6),
+  paymentReference: "Oluwaseun Ade Balogun — internship fee",
+  paymentConfirmedAt: daysAgo(4),
+  bank: {
+    bankName: "GTBank",
+    accountName: "SmartHub Academy",
+    accountNumber: "0987654321",
+  },
+};
+
+/** Help library feed (`GET /lms/help?mode=…`). Three categories; the
+ *  instructor-only one trims out of the student feed. */
+export const mockHelpResources: WireHelpResource[] = [
+  {
+    _id: "h_1",
+    title: "How to join a live class",
+    description: "From the classroom link in your schedule.",
+    type: "video",
+    url: "/mock/help-join-class.mp4",
+    thumbnailUrl: "/mock/help-join-class.png",
+    category: "Getting started",
+    audience: "all",
+    order: 1,
+    createdAt: daysAgo(30),
+  },
+  {
+    _id: "h_2",
+    title: "Navigating the dashboard",
+    description: "Courses, progress and your next class at a glance.",
+    type: "document",
+    url: "/mock/help-dashboard.pdf",
+    category: "Getting started",
+    audience: "all",
+    order: 2,
+    createdAt: daysAgo(28),
+  },
+  {
+    _id: "h_3",
+    title: "Understanding your bill",
+    description: "Installments, discounts and paid-in-full states.",
+    type: "document",
+    url: "/mock/help-billing.pdf",
+    category: "Payments & billing",
+    audience: "student",
+    order: 1,
+    createdAt: daysAgo(20),
+  },
+  {
+    _id: "h_4",
+    title: "Upload a payment receipt",
+    description: "How to match your transfer to your account.",
+    type: "link",
+    url: "https://help.example.com/smarthub/payments",
+    category: "Payments & billing",
+    audience: "student",
+    order: 2,
+    createdAt: daysAgo(18),
+  },
+  {
+    _id: "h_5",
+    title: "Grading assignments",
+    description: "Rubrics, comments and publishing grades.",
+    type: "video",
+    url: "/mock/help-grading.mp4",
+    thumbnailUrl: "/mock/help-grading.png",
+    category: "Teaching tools",
+    audience: "instructor",
+    order: 1,
+    createdAt: daysAgo(15),
+  },
+  {
+    _id: "h_6",
+    title: "Reading cohort earnings",
+    description: "Your share, thresholds and payouts.",
+    type: "document",
+    url: "/mock/help-earnings.pdf",
+    category: "Teaching tools",
+    audience: "instructor",
+    order: 2,
+    createdAt: daysAgo(12),
+  },
+];
+
+/** Branding payload (`GET /platform/branding`). Logo + social links the
+ *  shell renders; svg is what `Logo` uses (with the bundled fallback). */
+export const mockBranding = {
+  logos: {
+    primary: {
+      svg: "/images/smarthub-logo-color.svg",
+      png: "/images/smarthub-logo-color.png",
+      png2x: "/images/smarthub-logo-color@2x.png",
+    },
+    color: {
+      svg: "/images/smarthub-logo-color.svg",
+      png: "/images/smarthub-logo-color.png",
+      png2x: "/images/smarthub-logo-color@2x.png",
+    },
+    dark: {
+      svg: "/images/smarthub-logo-dark.svg",
+      png: "/images/smarthub-logo-dark.png",
+      png2x: "/images/smarthub-logo-dark@2x.png",
+    },
+  },
+  socials: [
+    {
+      key: "instagram",
+      label: "Instagram",
+      url: "https://instagram.com/smarthubacademy",
+      iconUrl: "/images/socials/instagram.svg",
+    },
+    {
+      key: "x",
+      label: "X",
+      url: "https://x.com/smarthubacademy",
+      iconUrl: "/images/socials/x.svg",
+    },
+    {
+      key: "linkedin",
+      label: "LinkedIn",
+      url: "https://linkedin.com/company/smarthubacademy",
+      iconUrl: "/images/socials/linkedin.svg",
+    },
+    {
+      key: "youtube",
+      label: "YouTube",
+      url: "https://youtube.com/@smarthubacademy",
+      iconUrl: "/images/socials/youtube.svg",
+    },
+  ],
 };
 
 /** Standalone modules granted directly to the student. */
