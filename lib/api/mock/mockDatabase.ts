@@ -585,11 +585,11 @@ export const mockDatabase: MockDatabase = {
 
   billing: {
     overall: {
-      totalPaid: 320000,
-      totalDue: 480000,
-      totalAmount: 800000,
-      totalDiscount: 50000,
-      paymentProgress: 40,
+      totalPaid: 620000,
+      totalDue: 230000,
+      totalAmount: 1150000,
+      totalDiscount: 100000,
+      paymentProgress: 54,
       nextPaymentDue: daysFromNow(14),
     },
     registrations: [
@@ -603,7 +603,11 @@ export const mockDatabase: MockDatabase = {
         paidAmount: 500000,
         remainingAmount: 0,
         coursePrice: 550000,
-        discountAmount: 0,
+        discountAmount: 50000,
+        discountKind: "amount",
+        discountValue: 50000,
+        discountReason: "promotion",
+        discountNote: "Early-bird promotional pricing.",
         nextPaymentDue: null,
         payments: [
           { _id: "pay_1", amount: 250000, paymentDate: daysAgo(30) },
@@ -614,7 +618,7 @@ export const mockDatabase: MockDatabase = {
         _id: "reg_2",
         course: { _id: "course_2", name: "Python for AI & Data", nameSlug: "python-for-ai-data", mode: "hybrid" },
         schedule: { _id: "sched_2", startDate: daysAgo(8), duration: "5 months" },
-        paymentStatus: "completed",
+        paymentStatus: "pending",
         paymentOption: "installment",
         totalAmount: 350000,
         paidAmount: 120000,
@@ -627,6 +631,20 @@ export const mockDatabase: MockDatabase = {
         discountNote: "Partial merit scholarship.",
         nextPaymentDue: daysFromNow(14),
         payments: [{ _id: "pay_3", amount: 120000, paymentDate: daysAgo(8) }],
+      },
+      {
+        _id: "reg_3",
+        course: { _id: "course_3", name: "UI/UX Design Foundations", nameSlug: "uiux-design-foundations", mode: "hybrid" },
+        schedule: { _id: "sched_3", startDate: daysAgo(45), duration: "4 months" },
+        paymentStatus: "waived",
+        paymentOption: "installment",
+        totalAmount: 300000,
+        paidAmount: 0,
+        remainingAmount: 300000,
+        coursePrice: 300000,
+        discountAmount: 0,
+        nextPaymentDue: null,
+        payments: [],
       },
     ],
   },
@@ -667,10 +685,10 @@ export const mockDatabase: MockDatabase = {
       paidAmount: 120000,
       amountDue: 230000,
       accessStatus: "active",
-      nextDue: { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysFromNow(14), status: "pending", graceEndsAt: daysFromNow(21) },
+      nextDue: { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysAgo(3), status: "overdue", graceEndsAt: daysFromNow(14) },
       installments: [
         { id: "tr_1", sequence: 1, amount: 120000, dueDate: daysAgo(8), status: "paid", paidAt: daysAgo(8) },
-        { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysFromNow(14), status: "pending", graceEndsAt: daysFromNow(21) },
+        { id: "tr_2", sequence: 2, amount: 115000, dueDate: daysAgo(3), status: "overdue", graceEndsAt: daysFromNow(14) },
         { id: "tr_3", sequence: 3, amount: 115000, dueDate: daysFromNow(44), status: "pending" },
       ],
     },
@@ -760,8 +778,8 @@ export const mockDatabase: MockDatabase = {
       yourEntitlementNaira: 200000,
       totalRevenueNaira: 400000,
       students: [
-        { name: "Chidi Eze", email: "chidi.eze@example.com", paidNaira: 500000, yourCutNaira: 250000 },
-        { name: "Zainab Sanni", paidNaira: 300000, yourCutNaira: 150000 },
+        { name: "Chidi Eze", email: "chidi.eze@example.com", paidNaira: 250000, yourCutNaira: 125000 },
+        { name: "Zainab Sanni", paidNaira: 150000, yourCutNaira: 75000 },
       ],
     },
     {
@@ -914,7 +932,6 @@ export const mockReferrals: ReferralsResponse = {
       _id: "ref_2",
       status: "pending",
       potentialAmount: 85000,
-      amount: 85000,
       referred: { firstName: "Zainab", lastName: "Sanni" },
       registration: {
         course: {

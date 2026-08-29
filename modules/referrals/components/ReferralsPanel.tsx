@@ -485,9 +485,14 @@ function LedgerTable({ records }: { records: ReferralRecord[] }) {
                     : r.registration?.course) || "—"}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                  {typeof r.commission === "number"
-                    ? `${r.commission}%`
-                    : "—"}
+                  {(() => {
+                    const earned = Number(r.amount) || 0;
+                    const rate =
+                      typeof r.commission === "number" && earned > 0
+                        ? Math.round((r.commission / earned) * 100)
+                        : null;
+                    return rate !== null ? `${rate}%` : "—";
+                  })()}
                 </td>
                 <td className="px-5 py-3 font-medium tabular-nums text-foreground sm:px-6">
                   {(() => {

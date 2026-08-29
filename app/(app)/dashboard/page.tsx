@@ -16,6 +16,7 @@ import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useCourses } from "@/modules/courses/api/courses.queries";
 import { CourseCard } from "@/modules/courses/components/CourseCard";
+import { AcceptanceLetterCard } from "@/modules/acceptance-letters/components/AcceptanceLetterCard";
 import { DashboardBillingWidget } from "@/modules/billing/components/DashboardBillingWidget";
 import { DashboardReferralsWidget } from "@/modules/referrals/components/DashboardReferralsWidget";
 import { DashboardWebinarsWidget } from "@/modules/webinars/components/DashboardWebinarsWidget";
@@ -83,6 +84,7 @@ function StudentDashboardBody() {
           outstanding. */}
       <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
         <DashboardBillingWidget />
+        <AcceptanceLetterCard />
         <DashboardReferralsWidget />
       </div>
 
