@@ -1,6 +1,6 @@
 # PLAN 010 — Programs + AI + Help (Internships / Tech Scholarship / Oreo / Help / Branding)
 
-**Status:** Draft (awaiting confirmation)
+**Status:** Confirmed 2026-08 — scope decisions recorded in §8 (all recommended options accepted).
 **Owner:** SmartHub port
 **Depends on:** 001 Foundation (mock database, wire types/enums, API-client seam, stores/utils/providers), 002 App shell & route stubs, 003 Navigation chrome (nav exposes the routes this slice fills). 009 (billing/siwes/acceptance-letters) is not a blocker but shares the mock's `ping`s generators; internship payment proof touches `/uploads` which Foundation stubbed.
 
@@ -19,7 +19,7 @@ Port the "programs + AI + help" cluster end-to-end against the mock, all reads t
 - **Oreo module** (`modules/oreo/`) — `AskStep` / `AskUsageSummary` / `AskAnswer` / `AskHistoryTurn` / `AskTurn` types (`index.ts` only — this module has no separate wire `api.types.ts`; the ask surface is a hypermedia/AI seam, see §6.5); `oreo.service` (ask + usage behind the same API-client seam, with an SSE-style stream reader kept for the real backend), `oreo.queries` (`useOreoQuestion`, `useOreoUsage`), `config/endpoints.ts`, **`modules/oreo/lib/markdown.ts`** — the pure `renderMarkdown` util (headings, lists, code fences, links, pipe tables) + `AnswerMarkdown` (sanitises via `isomorphic-dompurify`), `OreoPageContent` (transcript, composer, suggestions, usage meter, New chat, buffered stream-state machine), plus a "How I got this" tool-steps panel driven off `AskAnswer.data`.
 - **Help module** (`modules/help/`) — `ApiHelpResource` wire type + `HelpResource` / `HelpCategoryGroup` UI types, `normaliseHelpResource` + pure `groupByCategory`, service + `useHelpResources(mode)` query, `HelpPageContent` (mode-filtered resource cards, category skeleton + empty states).
 - **Branding module** (`modules/branding/`) — `BrandLogoVariant` / `BrandSocial` / `Branding` types, `branding.service` + `useBranding` (24h stale, fall-back to bundled assets), `config/endpoints.ts`. Consumed by the shell's `logo` + social links (mount point confirmed with 003).
-- **Check-in page** — the self-contained `/check-in?token&session` page (QR-scan one-shot): POSTs to `class-sessions/:id/check-in` behind the seam, renders the ok/already/expired/not-enrolled/invalid/missing-params/error states; auto-redirect home on success. Grouped here conceptually (it's a stateless consumer of the seam, not a module).
+- **Check-in page** — the self-contained `/check-in?token&session` page (QR-scan one-shot): POSTs to `class-sessions/:id/check-in` behind the seam, renders the ok/already/expired/not-enrolled/invalid/missing-params/error states; auto-redirect home on success. **Already shipped + QA'd under Plan 009** (`app/(app)/check-in/`, mock router `post /lms/class-sessions/:sessionId/check-in`) — 010 keeps the acceptance check as an already-met item, no build work.
 - **Mock seed extension + handlers** — internship (tasks + check-ins + payment), scholarship application (an admitted/enrolled one with a coupon + a track), a **canned** Oreo conversation + usage (the mock answers without any real AI), help resources grouped by category, branding logos/socials, and the check-in POST (see §2.2).
 - **Unit tests** — pure normalisers (internship, scholarship), pure helpers (`markdown.ts` matrix: headings/tables/lists/fences/escaping; internship `progressPercent` calc), and the **canned Oreo answer handler** (fixed question → a deterministic `AskAnswer` with tool steps + usage).
 - **ADR** — record the **Oreo-as-seam** decision (stub behind the API-client seam until a real backend; see §6.5.4).
@@ -53,7 +53,7 @@ Seed fixtures must guarantee, beyond Foundation's base data:
 - **Oreo — canned, no real AI**: the mock holds a small canned-response table keyed on question substrings (e.g. "assignments", "my balance"). The `ask` handler returns a **deterministic `AskAnswer`** for a preseeded suggestion question — `answer` as markdown (with a heading, a pipe table and a list so the markdown renderer is exercised), `data: AskStep[]` (2–3 steps for the tool-steps panel: `tool`, `args`, `result { ok: true, data }`), `toolsUsed`, and `monthUsage` (a `AskUsageSummary` close to the limit, `blocked: false`, `unlimited: false`, so the meter bar shows real tokens-left). Any other question resolves to a canned fallback answer. `usage` returns the same summary. No OpenAI/SSE transport — the mock resolves the promise after a short artificial delay to let streaming states render.
 - **Help** — ≥3 categories, each with resources spanning `type` `video` / `document` / `link`, with `audience` across `student` / `instructor` / `all` so the mode filter meaningfully trims the list (a category visible only to one mode).
 - **Branding** — a full `Branding` payload (`logos.primary/color/dark`, `socials` with reachable/public sample `iconUrl`s + `url`s).
-- **Check-in** — a mock `class-sessions/:id/check-in` POST that returns `{ status: "ok" }` (or `already-checked-in` for a `sessionId` explicitly seeded as already-done), so all four terminal states except the error/param branches can be walked.
+- **Check-in** — already shipped under 009: mock `class-sessions/:id/check-in` POST returning `{ status: "ok" | "already-checked-in" }` for the seeded `sessionId`, all terminal states + auto-redirect QA'd. No new work.
 
 Mock handlers to add/verify behind the seam (verb-shaped, mirroring `smarthub-api` + legacy LMS):
 
@@ -73,7 +73,7 @@ Mock handlers to add/verify behind the seam (verb-shaped, mirroring `smarthub-ap
 ### Out of scope (explicitly deferred)
 
 - **Real AI / OpenAI / SSE transport for Oreo** — the mock is canned; the real agent loop + streaming swap lands with Plan 012 (the API-client seam + the `streamAsk` reader stay as the deferred adapter surface).
-- **Scholarship photo cropping/upload polish** (`react-easy-crop` crop UX) — the `ScholarshipPhotoGate` shell + `setPhoto`/`uploadPhoto` handlers can render the flow, but full crop UI/deps are deferred (confirm §8.4). The `/uploads` seam is already stubbed in Foundation.
+- **Scholarship photo cropping/upload polish** (`react-easy-crop` crop UX) — the `ScholarshipPhotoGate` ships as **upload-persist without crop** this slice; full crop UI/deps land with the real backend in 012 [decided §8.5]. The `/uploads` seam is already stubbed in Foundation.
 - **Instructor branch / teaching of `/courses`** — the Tech Scholarship card links into `/courses` (already rendered by Plan 005); no course CRUD here (Plan 011).
 - **Branding consumption beyond the shell** `logo` + socials — other branded surfaces (email/PDF headers) are out of scope here.
 - **Admin/AskQueryLog audit view** — the raw tool-step payload is surfaced read-only in a "How I got this" panel; a server-side audit log is deferred to the real backend.
@@ -150,10 +150,10 @@ modules/branding/
 app/(app)/
   internships/page.tsx                    -> InternshipWorkspacePageContent
   internships/me/payment/page.tsx         -> InternshipPaymentPageContent
-  scholarships/tech-scholarship/page.tsx  -> (landing stub; the card mounts on dashboard)   [see §§8.1/8.2]
   oreo/page.tsx                           -> OreoPageContent
   help/page.tsx                           -> HelpPageContent
-  check-in/page.tsx                       -> CheckInPage (self-contained)
+  # scholarship: no route (card mounts on the 004 dashboard grid)  [§8.2]
+  # check-in: shipped under 009 (no work)                           [§8.1]
 
 lib/api/mock/mockDatabase.ts           (extend: §2.2 fixtures)
 lib/api/mock/index.ts                  (register/handle the §2.2 endpoints + canned oreo table)
@@ -195,10 +195,10 @@ docs/adr/adr-010-oreo-as-seam.md
 7. **Tech Scholarship — endpoints/service/queries + components**: `useMyScholarship` (returns `null` when absent; render-nothing), `TechScholarshipCard` (track, cohort, stage badge, tier badge (humanised from `awardedTier`), SIWES-coupon badge, Courses CTA, share-banner trigger), `ScholarshipShareBannerDialog` (fetch/present square+wide banner + editable suggested caption, force-refresh), `ScholarshipPhotoGate`.
 8. **Oreo — types + service/config**: `types/index.ts` (all six Ask shapes), `config/endpoints.ts`, `oreo.service.ts` — `ask` + `usage` through the seam, plus the `streamAsk` SSE-reader function kept for the real backend (not exercised in the mock; type-only in the mock phase). `oreo.queries.ts` (`useOreoQuestion`, `useOreoUsage`).
 9. **Oreo — markdown util**: port `modules/oreo/lib/markdown.ts` — pure `renderMarkdown` (escape-first; headings, bold/italic/inline-code, links restricted to http(s), fenced code, ordered/unordered lists, pipe tables). No component imports; unit-tested directly.
-10. **Oreo — components**: `AnswerMarkdown` (isomorphic-dompurify sanitise + `dangerouslySetInnerHTML`), `OreoPageContent` (transcript in `ScrollArea`, user/assistant bubbles, composer `Textarea` with Enter-to-send, suggestion chips, `UsageMeter`, `New chat`, buffered streaming state machine driven off the mock's resolved promise, and the **"How I got this" tool-steps panel** rendering `AskAnswer.data` read-only).
+10. **Oreo — components**: `AnswerMarkdown` (isomorphic-dompurify sanitise + `dangerouslySetInnerHTML`), `OreoPageContent` (transcript in `ScrollArea`, user/assistant bubbles, composer `Textarea` with Enter-to-send, suggestion chips, `UsageMeter`, `New chat`, buffered streaming state machine driven off the mock's resolved promise after a short delay, and the **collapsed read-only "How I got this" tool-steps panel** rendering `AskAnswer.data`) [§8.3].
 11. **Help — types + api**: `types/`, `api/normalise.ts` (`normaliseHelpResource` + pure `groupByCategory` preserving `order`), service (`list(mode)`), `useHelpResources(mode)`, then `HelpPageContent` (category sections, video/document/link card variants, skeleton + empty states).
-12. **Branding — types + api**: `types/index.ts`, `branding.service.ts`, `useBranding` (24h stale, GC 48h, `retry: 1`, bundled-asset fallback while loading/on error). Mount the returned `logos`/`socials` into the shell `logo` + social links (coordinated with 003; if 003 already shipped the `logo` without data, swap the hardcoded refs for `useBranding`).
-13. **Route pages + check-in**: wire the thin `(app)` pages; port `check-in/page.tsx` as a self-contained client page (token/session `useSearchParams`, StrictMode-safe single POST via the seam, the eight states, 4s auto-redirect home on ok/already).
+12. **Branding — types + api**: `types/index.ts`, `branding.service.ts`, `useBranding` (24h stale, GC 48h, `retry: 1`, bundled-asset fallback while loading/on error). **Swap the shell's hardcoded `Logo` SVGs + any social refs to `useBranding`** so the chrome is data-driven with the bundled fallback [§8.4].
+13. **Route pages**: wire the thin `(app)` pages — `/internships`, `/internships/me/payment`, `/oreo`, `/help`. (Check-in + its page + mock handler shipped under 009; no work here.)
 14. **Unit tests**: internship normalise + `computeProgress`, scholarship normalise (labels + `isActiveScholar` for each stage), `markdown.ts` matrix (headings/tables/list/fence/escaping/link-scheme guard), **canned Oreo answer handler** (preseeded question → expected `AskAnswer` with tool steps + `monthUsage`), help `groupByCategory` (mode filter + order).
 15. **ADR**: `adr-010-oreo-as-seam.md` — Oreo is a **hypermedia/AI seam**: a stub behind the same API-client seam during the mock phase, `streamAsk` + telemetry surface kept as the deferred adapter, no UI depends on whether the backend is canned or real.
 16. **Verify**: `npm run typecheck`, `npm run lint`, `vitest run`, dev-boot walkthrough (§7).
@@ -218,22 +218,22 @@ docs/adr/adr-010-oreo-as-seam.md
 - [ ] `npm run typecheck` passes
 - [ ] `npm run lint` passes
 - [ ] `vitest run` passes (internship + scholarship normalise, `computeProgress`, markdown matrix, canned Oreo handler, help grouping)
-- [ ] `npm run dev` boots; all five route surfaces + check-in are **fully mock-driven** — no hardcoded fixtures inside page components; every read through the seam
+- [ ] `npm run dev` boots; the route surfaces (internships ×2, oreo, help) + dashboard tiles are **fully mock-driven** — no hardcoded fixtures inside page components; every read through the seam
 - [ ] `/internships` workspace renders the placement header + `Progress`, the task list (each status badge, per-task submit/mark-in-progress actions), the check-ins list (+ check-in dialog writing through the mock), and no placement → self-gating empty state
 - [ ] Internship **payment banner** prompts "Upload proof" for the pending, fee>0 fixture; self-gates (null) for the completed / fee-0 / no-data cases; the `/internships/me/payment` page shows fee/paid/bank/whatsapp-ish details + upload-proof flow that flips `paymentStatus` via the mock
 - [ ] **Tech Scholarship card** renders track + cohort + stage badge + humanised tier ("Full scholarship") + "SIWES coupon ready" for the enrolled/full/coupon fixture; render-nothings for the inert-stage fixture; share-banner dialog opens with square/wide + editable caption
 - [ ] **Oreo** renders the seeded suggestion → a canned `AskAnswer` where the markdown renders (table + list + heading), the usage meter shows `tokens used · N left` with the bar near-limit, and the **"How I got this" tool-steps panel** lists the canned `AskStep`s; other questions fall back to the canned reply; New chat clears the transcript
 - [ ] `/help` groups resources by category (mode filter trims the instructor-only category while in instructor mode); video card embeds, document/link cards render CTA
 - [ ] **Branding** supplies `logos` (primary/color/dark) + `socials` to the shell `logo`/social block with the bundled-asset fallback while loading
-- [ ] `/check-in` with a valid `token`+`session` POSTs behind the seam and lands on "You're marked present" (auto-redirect home); an already-done `sessionId` shows "already checked in"; missing params → the missing-params state
-- [ ] **Canned Oreo handler** covered by a passing unit test (deterministic output, not an ad-hoc string)
+- [ ] `/check-in` — **already-met under 009** (valid token+session → "You're marked present" + auto-redirect; seeded already-done session → "already checked in"; missing params → missing-params state; 401/403/410 mapped). No new work.
+- [ ] **Canned Oreo handler** covered by a passing unit test (deterministic output, not an ad-hoc string); the mock resolves after a short delay (streaming states render)
 - [ ] No `any`; component classes/styling from the new `base-vega` tokens (no maroon/orange, no Radix/Tailwind-v3 imports)
 - [ ] ADR `adr-010-oreo-as-seam.md` recorded
 
-## 8. Open questions / to confirm
+## 8. Open questions / to confirm — **ALL RESOLVED 2026-08 (recommended options accepted):**
 
-1. **"How I got this" tool-steps panel surfacing.** Source comments note the raw tool-step payload is "for developer audit, not the reader" (students/instructors see only the markdown answer). The spoke brief asks to "note markdown rendering, tool-steps panel". Confirm: render a **collapsed, read-only "How I got this" panel** under assistant bubbles (from `AskAnswer.data`), or keep it hidden entirely per the source? Recommend the collapsed panel (it demonstrates the canned tool data and is trivially hidden later).
-2. **Scholarship route.** The scholarship surface is a *dashboard card*, not a standalone page; the source has no `/scholarship` route. Confirm: (a) ship no route and mount `TechScholarshipCard` on the Plan 004 dashboard (recommended), or (b) also add a thin `app/(app)/scholarships/tech-scholarship/page.tsx` landing stub. If the dashboard grid isn't ready when this slice lands, the tiles must be composition-ready (self-gating) regardless.
-3. **Branding mount point.** 003 ships the `logo`; confirm this slice swaps its hardcoded refs for `useBranding` (logos/socials) so the shell is data-driven, or 003 already owns that and 010 only supplies the module/service for later consumers. Coordinate to avoid two owners.
-4. **Scholarship photo crop depth.** `ScholarshipPhotoGate` + `setPhoto`/`uploadPhoto` can render and persist a photo URL, but the `react-easy-crop` crop UI (a real dep) is heavier. Confirm: port the full crop UX now, or ship the photo gate as upload-persist without crop this slice and add cropping with the real backend (Plan 012)? Recommend the latter to keep deps minimal in the mock phase.
-5. **Oreo streaming in the mock.** The source wires the page through `streamAsk` (SSE). In the mock phase there's no real stream. Confirm the canned handler resolves a single `AskAnswer` (with a short delay so streaming states render) and the page consumes it through a thin adapter, leaving the real `streamAsk` reader in place but unused — vs. faking incremental `token` frames to exercise the buffer. Recommend the former.
+1. ✅ **DECIDED: collapsed read-only panel.** Render a collapsed, read-only "How I got this" section under each assistant bubble from `AskAnswer.data`; trivially hidden later.
+2. ✅ **DECIDED: no route.** `TechScholarshipCard` mounts on the 004 dashboard grid only; no `/scholarship` page.
+3. ✅ **DECIDED: shell is data-driven.** 010 swaps `Logo`'s hardcoded SVGs (and socials, if present) for `useBranding`, bundled-asset fallback while loading/on error.
+4. ✅ **DECIDED: upload-persist, no crop.** Photo gate renders + persists a photo URL; `react-easy-crop` deferred to 012.
+5. ✅ **DECIDED: single resolved `AskAnswer` + short delay.** Mock resolves deterministically after ~600 ms so streaming states render; page consumes via a thin adapter; `streamAsk` reader stays as the deferred SSE adapter.
