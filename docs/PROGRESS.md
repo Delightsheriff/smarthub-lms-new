@@ -152,15 +152,50 @@ deferred to Plan 011 — student body only.
 
 ---
 
+## Plan 009 — Profile / Payments / Billing / SIWES / Referrals ✅
+
+**Status: BUILT** — incremental commits, 2026-08.
+
+**Notes:** Security is a **tab, not a page** — deviation from legacy, which
+routed password change out to `/profile/security` and left the tab strip with
+a dead trigger; `ChangePasswordForm` renders in-place with `?tab=security`
+deep-link (no `/profile/security` route). Profile page identities/verifies,
+Student+Cohort Earnings branch on `/billing` via `useEffectiveMode`. Gates
+mounted in `AppShell`: `ProfilePhotoGate` (shell root) → `PaymentStatusBanner`
+(above `main`) → `PaymentGate` (wrapping children; `resolvePaymentGate` pure
+decision, path-boundary-aware ALWAYS_OPEN). `resolvePaymentGate` also fixed a
+legacy `startsWith` boundary bug (`/payments-archived` no longer reads as the
+open surface). No `/profile/security` route exists. Achievements/Notifications
+tabs = self-gating placeholders (progress/push modules land later). AVATAR
+`no-img-element` lint fixed via shadcn `Avatar`. Billing normaliser clamps
+progress 0–100 (test-caught gap). ADRs continue the `000N` sequence → **0010**
+(payment seam) + **0011** (storage/upload seam).
+
+| Deliverable | Status |
+|---|---|
+| Profile module — `AvatarUploader` (shadcn Avatar, no raw img), `EditProfileDetailsDialog`, `BankingTab`, `ProfessionalTab`, `AttendancePinSection`, `ProfilePhotoGate`, `profile.service`/`queries` | ✅ |
+| Payment-proofs module — `PaymentsPageContent`, `InstallmentScheduleCard`, `PaymentGate` (pure `resolvePaymentGate`), `PaymentStatusBanner` | ✅ |
+| Billing module wiring — `BillingPageContent`, `BillingSummaryCard`, `RegistrationBillingCard`, `DashboardBillingWidget` + `/billing` mode branch | ✅ |
+| SIWES module — `SiwesPlacementTab`, passthrough normaliser + query (60s stale), editable/locked rows | ✅ |
+| Acceptance-letters module — `AcceptanceLetterCard` (view/download via `cloudinary-download`), `EditSiwesDurationDialog` (1–12, invalidates letters+siwes keys), normalise (`issuedAt→Date`) + `dedupeAcceptanceLetters` (extracted pure fn) | ✅ |
+| Instructor-earnings module — `InstructorEarningsPageContent`, `CohortEarningsDetailContent`, totals/byKind/payouts, bank-nudge via `useBankingDetails` | ✅ |
+| Referrals module — `CopyableCode`, `ProgramShareLink` (env/subdomain origin, copy+WhatsApp), `ReferralsPanel` (shadcn Tabs: share/earnings/ledger/payouts) | ✅ |
+| Auth — `PasswordInput` (composes base-vega `Input`), `ChangePasswordForm` + `useChangePassword` (`/auth/set-password`), Security as in-place tab | ✅ |
+| Route pages — `/profile` (tab strip + `?tab=` sync + Security tab), `/billing` (mode branch), `/billing/cohort/[scheduleId]` (Next 16 `useParams`), `/payments`, `/refer-and-earn`, `/check-in` (token+session state machine incl. 401/403/410, single-fire ref, auto-redirect) | ✅ |
+| Shell mounts — `ProfilePhotoGate` → `PaymentStatusBanner` → `PaymentGate` inside `AppShell` (below auth gate) | ✅ |
+| Tests — billing normaliser (incl. progress clamp + discount-presence), acceptance normalise + dedupe, payment-gate decision, profile mock PATCH-fold + banking put + avatar clear | ✅ |
+| ADRs — 0010 payment seam, 0011 storage/upload seam (README indexed) | ✅ |
+| Verify: typecheck / lint / **60 tests** / build (29 routes) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
 | 006 | Assignments | 🚫 not started |
-| 006 | Assignments | 🚫 not started |
 | 007 | Calendar / activity / webinars | 🚫 not started |
 | 008 | Messaging / inbox / notifications | 🚫 not started |
-| 009 | Profile / payments / billing / SIWES / referrals | 🚫 not started |
 | 010 | Programs & AI help (Oreo) | 🚫 not started |
 | 011 | Teaching / instructor CRUD | 🚫 not started |
 | 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |

@@ -14,3 +14,5 @@ a later ADR that reverses an earlier one must say so explicitly.
 | 0007 | Nav data / nav rendering seam (`configs/nav.ts` pure data; collapse via `sidebarStore`) | Accepted |
 | 0008 | The dashboard is a composition point, not a module | Accepted |
 | 0009 | Student learning surface shares one normalisation taproot | Accepted |
+| 0010 | Learner-facing payment surface is one seam (`MyInstallmentPlan` + `BillingBreakdown`, gates derive from `accessStatus`), not a provider call | Accepted |
+| 0011 | Uploads/downloads/previews route through one storage seam (`uploadFile`/`downscaleImage`/`downloadFile`) | Accepted |
