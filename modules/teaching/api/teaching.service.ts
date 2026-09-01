@@ -1,0 +1,53 @@
+import { apiClient } from "@/lib/api";
+import { TEACHING_ENDPOINTS } from "../config/endpoints";
+import type { ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
+import type {
+  CohortRosterRow,
+  CohortAssignmentRow,
+  CohortSubmissionRow,
+} from "../types";
+
+class TeachingService {
+  async getCohorts(): Promise<ApiTeachingCohort[]> {
+    return apiClient.get<ApiTeachingCohort[]>(TEACHING_ENDPOINTS.COHORTS);
+  }
+
+  async getCohortDetail(id: string): Promise<ApiTeachingCohortDetail> {
+    return apiClient.get<ApiTeachingCohortDetail>(TEACHING_ENDPOINTS.COHORT_DETAIL(id));
+  }
+
+  async getRoster(id: string): Promise<CohortRosterRow[]> {
+    return apiClient.get<CohortRosterRow[]>(TEACHING_ENDPOINTS.ROSTER(id));
+  }
+
+  async getAssignments(id: string): Promise<CohortAssignmentRow[]> {
+    return apiClient.get<CohortAssignmentRow[]>(TEACHING_ENDPOINTS.ASSIGNMENTS(id));
+  }
+
+  async getSubmissions(id: string): Promise<CohortSubmissionRow[]> {
+    return apiClient.get<CohortSubmissionRow[]>(TEACHING_ENDPOINTS.SUBMISSIONS(id));
+  }
+
+  async gradeSubmission(
+    submissionId: string,
+    score: number,
+    feedback?: string,
+  ): Promise<{ success: boolean }> {
+    return apiClient.put<{ success: boolean }>(
+      TEACHING_ENDPOINTS.GRADE_SUBMISSION(submissionId),
+      { score, feedback },
+    );
+  }
+
+  async updateAssignmentSchedule(
+    attachmentId: string,
+    patch: { dueDate?: string; isVisible?: boolean },
+  ): Promise<{ success: boolean }> {
+    return apiClient.put<{ success: boolean }>(
+      TEACHING_ENDPOINTS.UPDATE_ASSIGNMENT(attachmentId),
+      patch,
+    );
+  }
+}
+
+export const teachingService = new TeachingService();
