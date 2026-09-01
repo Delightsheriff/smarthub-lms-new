@@ -523,4 +523,28 @@ export interface WireTeachingCohort {
   };
 }
 
+export interface WireActivityActor {
+  user?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+}
+
+export interface WireActivityResource {
+  type?: string;
+  id?: string;
+  label?: string;
+}
+
+export interface WireActivityEvent {
+  _id: string;
+  actor: WireActivityActor;
+  action: string;
+  resource?: WireActivityResource;
+  metadata?: Record<string, unknown>;
+  ip?: string;
+  userAgent?: string;
+  createdAt: string;
+}
+
 export {};

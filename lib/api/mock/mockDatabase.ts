@@ -11,6 +11,7 @@
 
 import type {
   WireAcceptanceLetterFixture,
+  WireActivityEvent,
   WireAssignment,
   WireBillingBreakdown,
   WireCalendarEvent,
@@ -110,6 +111,7 @@ export interface MockDatabase {
   submissions: WireSubmission[];
   conversations: WireConversation[];
   calendar: WireCalendarEvent[];
+  activity: WireActivityEvent[];
   notifications: WireNotification[];
   billing: WireBillingBreakdown;
   webinars: WireWebinar[];
@@ -573,11 +575,11 @@ export const mockDatabase: MockDatabase = {
       type: "class-session",
       source: "auto",
       title: "Live: Flexbox Lab",
-      description: "Hands-on flexbox workshop.",
+      description: "Hands-on flexbox workshop with live code walkthrough.",
       link: "https://meet.example.com/sh",
-      location: "Online",
-      start: daysFromNow(0) + "",
-      end: daysFromNow(0) + "",
+      location: "Online (Google Meet)",
+      start: daysFromNow(0),
+      end: daysFromNow(0),
       allDay: false,
       scope: "schedule",
       scopeId: "sched_1",
@@ -602,10 +604,77 @@ export const mockDatabase: MockDatabase = {
       type: "office-hours",
       source: "manual",
       title: "Office hours with Ngozi",
+      description: "Q&A session covering async JS and Promises.",
       start: daysFromNow(4),
       allDay: false,
       scope: "global",
       isCancelled: false,
+    },
+    {
+      _id: "evt_4",
+      type: "announcement",
+      source: "manual",
+      title: "Mid-Term Project Briefing",
+      description: "Overview of requirements for the upcoming capstone project.",
+      start: daysFromNow(7),
+      allDay: true,
+      scope: "global",
+      isCancelled: false,
+    },
+    {
+      _id: "evt_5",
+      type: "general",
+      source: "manual",
+      title: "Webinar: Building a Career in Data",
+      description: "Panel discussion with industry experts.",
+      link: "https://meet.example.com/webinar",
+      start: daysFromNow(6),
+      allDay: false,
+      scope: "global",
+      isCancelled: false,
+    },
+  ],
+
+  activity: [
+    {
+      _id: "act_1",
+      actor: { user: "usr_1", name: "Ade Balogun", email: "ade.balogun@example.com", role: "student" },
+      action: "auth.login",
+      resource: { type: "session", label: "Web Portal Session" },
+      ip: "102.89.23.4",
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+      createdAt: daysAgo(0),
+    },
+    {
+      _id: "act_2",
+      actor: { user: "usr_1", name: "Ade Balogun", role: "student" },
+      action: "submission.submit",
+      resource: { type: "assignment", id: "asgn_2", label: "Interactive Quiz App" },
+      metadata: { submissionType: "url", version: 1 },
+      createdAt: daysAgo(1),
+    },
+    {
+      _id: "act_3",
+      actor: { user: "usr_1", name: "Ade Balogun", role: "student" },
+      action: "submission.resubmit",
+      resource: { type: "assignment", id: "asgn_1", label: "Build a Landing Page" },
+      metadata: { submissionType: "file", version: 2 },
+      createdAt: daysAgo(3),
+    },
+    {
+      _id: "act_4",
+      actor: { user: "usr_1", name: "Ade Balogun", role: "student" },
+      action: "payment.create",
+      resource: { type: "payment", id: "pay_1", label: "Installment #2 Payment" },
+      metadata: { amount: 150000, status: "approved" },
+      createdAt: daysAgo(5),
+    },
+    {
+      _id: "act_5",
+      actor: { user: "usr_1", name: "Ade Balogun", role: "student" },
+      action: "profile.update",
+      resource: { type: "profile", label: "Banking Details" },
+      createdAt: daysAgo(10),
     },
   ],
 
@@ -1418,6 +1487,8 @@ export const createMutableDatabase = (seed: MockDatabase): MockDatabase => ({
   ),
   submissions: [...seed.submissions],
   conversations: [...seed.conversations],
+  calendar: [...seed.calendar],
+  activity: [...seed.activity],
   notifications: [...seed.notifications],
   webinars: [...seed.webinars],
   internships: [...seed.internships],

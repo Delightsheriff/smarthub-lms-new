@@ -413,19 +413,92 @@ registerMockRoute({
 registerMockRoute({
   verb: "get",
   path: "/lms/calendar",
-  handler: () => mockDatabase.calendar,
+  handler: (ctx: MockRequestContext) => {
+    const fromStr = ctx.params?.from;
+    const toStr = ctx.params?.to;
+
+    let events = mockDatabase.calendar;
+
+    if (fromStr && toStr) {
+      const from = new Date(fromStr).getTime();
+      const to = new Date(toStr).getTime();
+      events = events.filter((e) => {
+        const t = new Date(e.start).getTime();
+        return t >= from && t <= to;
+      });
+    }
+
+    return events;
+  },
 });
 
 registerMockRoute({
   verb: "get",
   path: "/lms/activity",
-  handler: () => [],
+  handler: (ctx: MockRequestContext) => {
+    const page = parseInt(String(ctx.params?.page || "1"), 10) || 1;
+    const pageSize = parseInt(String(ctx.params?.pageSize || "20"), 10) || 20;
+
+    const data = mockDatabase.activity || [];
+    const total = data.length;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+
+    const start = (page - 1) * pageSize;
+    const pagedData = data.slice(start, start + pageSize);
+
+    return {
+      statusCode: 200,
+      message: "Activity history fetched successfully",
+      success: true,
+      data: pagedData,
+      meta: {
+        total,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      },
+    };
+  },
 });
 
 registerMockRoute({
   verb: "get",
   path: "/lms/webinars",
-  handler: () => mockDatabase.webinars,
+  handler: (ctx: MockRequestContext) => {
+    const sort = ctx.params?.sort;
+    const page = parseInt(String(ctx.params?.page || "1"), 10) || 1;
+    const pageSize = parseInt(String(ctx.params?.pageSize || "10"), 10) || 10;
+    const now = Date.now();
+
+    let all = mockDatabase.webinars || [];
+
+    if (sort === "upcoming") {
+      all = all.filter((w) => new Date(w.date).getTime() >= now - 3600 * 2 * 1000);
+      return all;
+    }
+
+    if (sort === "past") {
+      all = all.filter((w) => new Date(w.date).getTime() < now - 3600 * 2 * 1000);
+    }
+
+    const total = all.length;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+    const start = (page - 1) * pageSize;
+    const paged = all.slice(start, start + pageSize);
+
+    return {
+      statusCode: 200,
+      message: "Webinars fetched successfully",
+      success: true,
+      data: paged,
+      meta: {
+        total,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      },
+    };
+  },
 });
 
 registerMockRoute({
