@@ -120,6 +120,10 @@ export interface MockDatabase {
   internships: WireInternship[];
   scholarship: WireScholarshipApplication[];
   teaching: WireTeachingCohort[];
+  teachingRosters: Record<string, Array<{ studentId: string; name: string; email?: string; lastSubmittedAt: string | null; submissionCount: number }>>;
+  teachingAssignments: Record<string, Array<{ attachmentId: string; assignmentId: string; title: string; description?: string; module?: string; dueDate?: string; allowLateSubmission?: boolean; isVisible?: boolean; totalPoints?: number; submissionCount: number; gradedCount: number; pendingCount: number; lateCount: number }>>;
+  teachingSubmissions: Record<string, Array<{ id: string; assignment: { id: string; title: string; totalPoints?: number }; student: { id: string; name: string; email?: string }; submittedAt?: string; status?: string; isLate: boolean; score?: number; fileUrl?: string; externalUrl?: string; submissionType?: "file" | "text" | "url"; fileName?: string; fileMimeType?: string; content?: string }>>;
+  teachingSessions: Record<string, { session: { _id: string; scheduleId: string; startsAt: string; durationMinutes: number; title: string; location?: string; link?: string; isCancelled?: boolean }; rows: Array<{ studentId: string; enrollmentId: string; firstName: string; lastName: string; email: string; imageUrl?: string; status?: "present" | "late" | "absent" | "excused"; source?: "meet-report" | "qr-scan" | "terminal-pin" | "instructor" | "admin"; durationMinutes?: number; note?: string; markedAt?: string }> }>;
   paymentProofs: WirePaymentProofFixture[];
   installmentPlans: WireInstallmentPlanFixture[];
   siwesRegistrations: WireSiwesRegistrationFixture[];
@@ -1140,6 +1144,109 @@ export const mockDatabase: MockDatabase = {
       },
     },
   ],
+
+  teachingRosters: {
+    sched_1: [
+      { studentId: "usr_1", name: "Ade Balogun", email: "ade.balogun@example.com", lastSubmittedAt: daysAgo(1), submissionCount: 4 },
+      { studentId: "usr_3", name: "Tunde Bakare", email: "tunde.bakare@example.com", lastSubmittedAt: daysAgo(3), submissionCount: 3 },
+      { studentId: "usr_4", name: "Aisha Bello", email: "aisha.bello@example.com", lastSubmittedAt: daysAgo(5), submissionCount: 2 },
+    ],
+    sched_2: [
+      { studentId: "usr_5", name: "Kofi Mensah", email: "kofi.mensah@example.com", lastSubmittedAt: daysAgo(2), submissionCount: 2 },
+    ],
+  },
+
+  teachingAssignments: {
+    sched_1: [
+      {
+        attachmentId: "att_1",
+        assignmentId: "asgn_1",
+        title: "Build a Landing Page",
+        module: "HTML & CSS Fundamentals",
+        dueDate: daysAgo(5),
+        allowLateSubmission: true,
+        isVisible: true,
+        totalPoints: 100,
+        submissionCount: 32,
+        gradedCount: 30,
+        pendingCount: 2,
+        lateCount: 3,
+      },
+      {
+        attachmentId: "att_2",
+        assignmentId: "asgn_2",
+        title: "Interactive Quiz App",
+        module: "JavaScript Essentials",
+        dueDate: daysFromNow(2),
+        allowLateSubmission: false,
+        isVisible: true,
+        totalPoints: 100,
+        submissionCount: 18,
+        gradedCount: 10,
+        pendingCount: 8,
+        lateCount: 0,
+      },
+    ],
+  },
+
+  teachingSubmissions: {
+    sched_1: [
+      {
+        id: "sub_asgn_1_usr_1",
+        assignment: { id: "asgn_1", title: "Build a Landing Page", totalPoints: 100 },
+        student: { id: "usr_1", name: "Ade Balogun", email: "ade.balogun@example.com" },
+        submittedAt: daysAgo(3),
+        status: "graded",
+        isLate: false,
+        score: 84,
+        submissionType: "file",
+        fileName: "landing-page-v2.zip",
+        fileUrl: "https://mock.smarthub.dev/sub/landing.zip",
+        content: "Refactored layout spacing and improved responsive grid behavior.",
+      },
+      {
+        id: "sub_asgn_2_usr_1",
+        assignment: { id: "asgn_2", title: "Interactive Quiz App", totalPoints: 100 },
+        student: { id: "usr_1", name: "Ade Balogun", email: "ade.balogun@example.com" },
+        submittedAt: daysAgo(1),
+        status: "submitted",
+        isLate: false,
+        submissionType: "url",
+        externalUrl: "https://github.com/ade/interactive-quiz-app",
+        content: "GitHub repository URL containing quiz app implementation.",
+      },
+      {
+        id: "sub_asgn_2_usr_3",
+        assignment: { id: "asgn_2", title: "Interactive Quiz App", totalPoints: 100 },
+        student: { id: "usr_3", name: "Tunde Bakare", email: "tunde.bakare@example.com" },
+        submittedAt: daysAgo(0),
+        status: "submitted",
+        isLate: false,
+        submissionType: "text",
+        content: "Here is my inline quiz app code:\nfunction calculateScore(answers) { return answers.reduce((acc, curr) => acc + (curr.isCorrect ? 10 : 0), 0); }",
+      },
+    ],
+  },
+
+  teachingSessions: {
+    cs_1: {
+      session: {
+        _id: "cs_1",
+        scheduleId: "sched_1",
+        startsAt: daysAgo(0),
+        durationMinutes: 120,
+        title: "Live: Flexbox Lab",
+        location: "Online (Google Meet)",
+        link: "https://meet.example.com/sh",
+        isCancelled: false,
+      },
+      rows: [
+        { studentId: "usr_1", enrollmentId: "enr_1", firstName: "Ade", lastName: "Balogun", email: "ade.balogun@example.com", status: "present", source: "instructor", durationMinutes: 110, markedAt: daysAgo(0) },
+        { studentId: "usr_3", enrollmentId: "enr_3", firstName: "Tunde", lastName: "Bakare", email: "tunde.bakare@example.com", status: "late", source: "meet-report", durationMinutes: 80, markedAt: daysAgo(0) },
+        { studentId: "usr_4", enrollmentId: "enr_4", firstName: "Aisha", lastName: "Bello", email: "aisha.bello@example.com", status: "absent", source: "instructor", markedAt: daysAgo(0) },
+      ],
+    },
+  },
 };
 
 /** Referral dashboard snapshot (`GET /lms/account/referrals`). */
@@ -1629,6 +1736,10 @@ export const createMutableDatabase = (seed: MockDatabase): MockDatabase => ({
   internships: [...seed.internships],
   scholarship: [...seed.scholarship],
   teaching: [...seed.teaching],
+  teachingRosters: { ...seed.teachingRosters },
+  teachingAssignments: { ...seed.teachingAssignments },
+  teachingSubmissions: { ...seed.teachingSubmissions },
+  teachingSessions: { ...seed.teachingSessions },
   paymentProofs: [...seed.paymentProofs],
   installmentPlans: [...seed.installmentPlans],
   siwesRegistrations: [...seed.siwesRegistrations],

@@ -695,7 +695,172 @@ registerMockRoute({
 registerMockRoute({
   verb: "get",
   path: "/lms/teaching/cohorts",
-  handler: () => mockDatabase.teaching,
+  handler: () => mockDatabase.teaching || [],
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/cohorts/:id",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    const cohort = byId(mockDatabase.teaching, id);
+    if (!cohort) return null;
+
+    const courseModules = mockDatabase.modules[cohort.course?._id || "course_1"] || [];
+
+    return {
+      ...cohort,
+      instructors: [
+        { _id: "usr_2", firstName: "Ngozi", lastName: "Okonkwo" },
+      ],
+      modules: courseModules.map((m, idx) => ({
+        _id: m._id,
+        title: m.title,
+        titleSlug: m.titleSlug,
+        description: m.description,
+        learningObjectives: m.learningObjectives,
+        estimatedDuration: m.estimatedDuration,
+        order: idx + 1,
+        assignmentCount: 2,
+        recordingCount: 3,
+        materialCount: 5,
+      })),
+    };
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/cohorts/:id/roster",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    return mockDatabase.teachingRosters[id] || mockDatabase.teachingRosters["sched_1"] || [];
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/cohorts/:id/assignments",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    return mockDatabase.teachingAssignments[id] || mockDatabase.teachingAssignments["sched_1"] || [];
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/cohorts/:id/submissions",
+  handler: (ctx: MockRequestContext) => {
+    const id = String(ctx.params?.id);
+    return mockDatabase.teachingSubmissions[id] || mockDatabase.teachingSubmissions["sched_1"] || [];
+  },
+});
+
+registerMockRoute({
+  verb: "put",
+  path: "/lms/teaching/submissions/:id/grade",
+  handler: (ctx: MockRequestContext) => {
+    const subId = String(ctx.params?.id);
+    const data = ctx.data as { score?: number; feedback?: string } | undefined;
+
+    for (const scheduleId of Object.keys(mockDatabase.teachingSubmissions)) {
+      const subs = mockDatabase.teachingSubmissions[scheduleId];
+      const target = subs.find((s) => s.id === subId);
+      if (target) {
+        target.status = "graded";
+        target.score = data?.score;
+        return { success: true, submission: target };
+      }
+    }
+
+    return { success: true };
+  },
+});
+
+registerMockRoute({
+  verb: "put",
+  path: "/lms/teaching/assignments/:attachmentId",
+  handler: (ctx: MockRequestContext) => {
+    const attId = String(ctx.params?.attachmentId);
+    const data = ctx.data as { dueDate?: string; isVisible?: boolean } | undefined;
+
+    for (const scheduleId of Object.keys(mockDatabase.teachingAssignments)) {
+      const atts = mockDatabase.teachingAssignments[scheduleId];
+      const target = atts.find((a) => a.attachmentId === attId);
+      if (target) {
+        if (data?.dueDate !== undefined) target.dueDate = data.dueDate;
+        if (data?.isVisible !== undefined) target.isVisible = data.isVisible;
+        return { success: true, attachment: target };
+      }
+    }
+
+    return { success: true };
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/attendance/sessions/:id",
+  handler: (ctx: MockRequestContext) => {
+    const sessionId = String(ctx.params?.id);
+    const sessionData = mockDatabase.teachingSessions[sessionId] || mockDatabase.teachingSessions["cs_1"];
+    return sessionData;
+  },
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/lms/teaching/attendance/sessions/:id/mark",
+  handler: (ctx: MockRequestContext) => {
+    const sessionId = String(ctx.params?.id);
+    const data = ctx.data as { marks?: Array<{ studentId: string; status: "present" | "late" | "absent" | "excused"; note?: string }> } | undefined;
+    const sessionData = mockDatabase.teachingSessions[sessionId] || mockDatabase.teachingSessions["cs_1"];
+
+    if (sessionData && data?.marks) {
+      for (const mark of data.marks) {
+        const row = sessionData.rows.find((r) => r.studentId === mark.studentId);
+        if (row) {
+          row.status = mark.status;
+          row.source = "instructor";
+          row.note = mark.note;
+          row.markedAt = new Date().toISOString();
+        }
+      }
+    }
+
+    return { succeeded: data?.marks?.length || 0, failed: 0 };
+  },
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/teaching/attendance/students/:studentId",
+  handler: (ctx: MockRequestContext) => {
+    const studentId = String(ctx.params?.studentId);
+    return {
+      student: { userId: studentId, firstName: "Ade", lastName: "Balogun", email: "ade.balogun@example.com" },
+      cohorts: [
+        {
+          scheduleId: "sched_1",
+          courseName: "Full-Stack Web Development",
+          cohortStartDate: daysAgo(30),
+          summary: { held: 10, present: 8, late: 1, absent: 1, excused: 0, unmarked: 0, percentage: 85 },
+          sessions: [
+            {
+              sessionId: "cs_1",
+              title: "Live: Flexbox Lab",
+              startsAt: daysAgo(0),
+              isCancelled: false,
+              status: "present",
+              source: "instructor",
+              durationMinutes: 110,
+              markedAt: daysAgo(0),
+            },
+          ],
+        },
+      ],
+    };
+  },
 });
 
 registerMockRoute({
