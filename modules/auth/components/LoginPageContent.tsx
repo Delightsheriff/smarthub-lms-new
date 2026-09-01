@@ -1,39 +1,58 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { LogIn, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useLogin } from "../api/auth.queries";
 import { getNextPath } from "../lib/next-path";
 import { Logo } from "@/components/layout/logo";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email address is required").email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean(),
+});
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 export function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = getNextPath(searchParams);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-
   const loginMutation = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: true,
+    },
+  });
+
+  const onSubmit = async (values: LoginValues) => {
     try {
-      await loginMutation.mutateAsync({
-        email,
-        password,
-        rememberMe,
-      });
+      await loginMutation.mutateAsync(values);
       router.push(nextPath);
     } catch {
-      // Error handled by apiClient toast
+      // Handled by apiClient toast
     }
   };
 
@@ -55,63 +74,88 @@ export function LoginPageContent() {
           </CardHeader>
 
           <CardContent className="p-0 pt-2">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-primary" /> Email Address
-                </label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  required
-                  className="rounded-xl text-xs"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-primary" /> Email Address
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="name@example.com"
+                          className="rounded-xl text-xs"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5 text-primary" /> Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs font-semibold text-primary hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="rounded-xl text-xs pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded-lg text-muted-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <Lock className="h-3.5 w-3.5 text-primary" /> Password
+                        </FormLabel>
+                        <Link
+                          href="/forgot-password"
+                          className="text-xs font-semibold text-primary hover:underline"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                      <FormControl>
+                        <PasswordInput
+                          placeholder="••••••••"
+                          className="rounded-xl text-xs"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                type="submit"
-                disabled={loginMutation.isPending}
-                className="w-full rounded-xl font-semibold mt-2"
-              >
-                <LogIn className="mr-2 h-4 w-4" />
-                {loginMutation.isPending ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0 pt-1">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          id="rememberMe"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-input text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                        />
+                      </FormControl>
+                      <FormLabel htmlFor="rememberMe" className="text-xs text-muted-foreground cursor-pointer font-normal">
+                        Remember me on this device
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={loginMutation.isPending}
+                  className="w-full rounded-xl font-semibold mt-2"
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>

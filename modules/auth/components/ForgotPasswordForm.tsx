@@ -2,24 +2,46 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Mail, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForgotPassword } from "../api/auth.queries";
 import { Logo } from "@/components/layout/logo";
 
+const forgotSchema = z.object({
+  email: z.string().min(1, "Email address is required").email("Please enter a valid email address"),
+});
+
+type ForgotValues = z.infer<typeof forgotSchema>;
+
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
 
   const forgotMutation = useForgotPassword();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<ForgotValues>({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const onSubmit = async (values: ForgotValues) => {
     try {
-      await forgotMutation.mutateAsync({ email });
-      setSent(true);
+      await forgotMutation.mutateAsync(values);
+      setSentEmail(values.email);
     } catch {
       // Handled by toast
     }
@@ -43,11 +65,11 @@ export function ForgotPasswordForm() {
           </CardHeader>
 
           <CardContent className="p-0 pt-2">
-            {sent ? (
+            {sentEmail ? (
               <div className="rounded-xl border bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300 p-4 text-center space-y-2 text-xs">
                 <p className="font-semibold">Reset instructions sent!</p>
                 <p className="text-[11px] text-muted-foreground">
-                  Check your inbox for <strong>{email}</strong> for password reset instructions.
+                  Check your inbox for <strong>{sentEmail}</strong> for password reset instructions.
                 </p>
                 <div className="pt-2">
                   <Button
@@ -61,39 +83,48 @@ export function ForgotPasswordForm() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5 text-primary" /> Email Address
-                  </label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    required
-                    className="rounded-xl text-xs"
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5 text-primary" /> Email Address
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="name@example.com"
+                            className="rounded-xl text-xs"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <Button
-                  type="submit"
-                  disabled={forgotMutation.isPending}
-                  className="w-full rounded-xl font-semibold mt-2"
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  {forgotMutation.isPending ? "Sending..." : "Send Reset Link"}
-                </Button>
-
-                <div className="text-center pt-2">
-                  <Link
-                    href="/login"
-                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                  <Button
+                    type="submit"
+                    disabled={forgotMutation.isPending}
+                    className="w-full rounded-xl font-semibold mt-2"
                   >
-                    <ArrowLeft className="h-3.5 w-3.5" /> Back to Sign In
-                  </Link>
-                </div>
-              </form>
+                    <Send className="mr-2 h-4 w-4" />
+                    {forgotMutation.isPending ? "Sending..." : "Send Reset Link"}
+                  </Button>
+
+                  <div className="text-center pt-2">
+                    <Link
+                      href="/login"
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" /> Back to Sign In
+                    </Link>
+                  </div>
+                </form>
+              </Form>
             )}
           </CardContent>
         </Card>

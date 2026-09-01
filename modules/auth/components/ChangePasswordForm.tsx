@@ -1,37 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useChangePassword } from "../api/auth.queries";
 
-export function ChangePasswordForm() {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+const changeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password confirmation is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "New passwords do not match",
+    path: ["confirmPassword"],
+  });
 
+type ChangeValues = z.infer<typeof changeSchema>;
+
+export function ChangePasswordForm() {
   const changeMutation = useChangePassword();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const form = useForm<ChangeValues>({
+    resolver: zodResolver(changeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-
+  const onSubmit = async (values: ChangeValues) => {
     try {
       await changeMutation.mutateAsync({
-        currentPassword,
-        newPassword,
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
       });
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      form.reset();
     } catch {
       // Handled by toast
     }
@@ -49,60 +67,60 @@ export function ChangePasswordForm() {
       </CardHeader>
 
       <CardContent className="p-0 pt-2">
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-          {error && (
-            <div className="p-3 rounded-xl border border-destructive/50 bg-destructive/10 text-xs text-destructive">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">Current Password</label>
-            <Input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="rounded-xl text-xs"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+            <FormField
+              control={form.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold text-foreground">Current Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">New Password</label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="••••••••"
-              minLength={6}
-              required
-              className="rounded-xl text-xs"
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold text-foreground">New Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">Confirm New Password</label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              minLength={6}
-              required
-              className="rounded-xl text-xs"
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold text-foreground">Confirm New Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <Button
-            type="submit"
-            disabled={changeMutation.isPending}
-            className="rounded-xl font-semibold"
-          >
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-            {changeMutation.isPending ? "Updating..." : "Update Password"}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              disabled={changeMutation.isPending}
+              className="rounded-xl font-semibold"
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              {changeMutation.isPending ? "Updating..." : "Update Password"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

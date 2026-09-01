@@ -1,36 +1,58 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, User, Lock, ArrowRight } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { CheckCircle2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useVerifyInvitation, useAcceptInvitation } from "../api/auth.queries";
 import { Logo } from "@/components/layout/logo";
+
+const acceptSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type AcceptValues = z.infer<typeof acceptSchema>;
 
 export function AcceptInvitationPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [password, setPassword] = useState("");
-
   const { data: verification, isLoading, error } = useVerifyInvitation(token);
   const acceptMutation = useAcceptInvitation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<AcceptValues>({
+    resolver: zodResolver(acceptSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: AcceptValues) => {
     try {
       await acceptMutation.mutateAsync({
         token,
-        firstName,
-        lastName,
-        password,
+        ...values,
       });
       router.push("/dashboard");
     } catch {
@@ -73,56 +95,64 @@ export function AcceptInvitationPageContent() {
             </CardHeader>
 
             <CardContent className="p-0 pt-2">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">First Name</label>
-                    <Input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Ade"
-                      required
-                      className="rounded-xl text-xs"
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-semibold text-foreground">First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ade" className="rounded-xl text-xs" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">Last Name</label>
-                    <Input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Balogun"
-                      required
-                      className="rounded-xl text-xs"
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5 text-primary" /> Create Password
-                  </label>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    minLength={6}
-                    required
-                    className="rounded-xl text-xs"
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-semibold text-foreground">Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Balogun" className="rounded-xl text-xs" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <Lock className="h-3.5 w-3.5 text-primary" /> Create Password
+                        </FormLabel>
+                        <FormControl>
+                          <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <Button
-                  type="submit"
-                  disabled={acceptMutation.isPending}
-                  className="w-full rounded-xl font-semibold mt-2"
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  {acceptMutation.isPending ? "Accepting..." : "Accept & Enter SmartHub"}
-                </Button>
-              </form>
+                  <Button
+                    type="submit"
+                    disabled={acceptMutation.isPending}
+                    className="w-full rounded-xl font-semibold mt-2"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    {acceptMutation.isPending ? "Accepting..." : "Accept & Enter SmartHub"}
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         )}
