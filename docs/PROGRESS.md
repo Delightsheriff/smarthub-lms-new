@@ -292,6 +292,23 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 
 ---
 
+## Plan 011 — Teaching / Instructor CRUD ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** Full instructor teaching workspace delivered. `/teach` groups assigned cohorts by course banner into Active vs Past tabs using pure `groupCohortsByCourse` and `isCohortEnded` date helpers. `/teach/cohorts/[scheduleId]` renders a 6-tab workspace shell (*Overview*, *Modules*, *Assignments*, *Submissions*, *Sessions*, *Roster*). Instructors can grade/score student work via `GradingDialog` (previewing file/url/text submissions), toggle assignment visibility & due dates, view student attendance records in `StudentAttendanceSheet`, and mark per-session class attendance on `/teaching/sessions/[id]`.
+
+| Deliverable | Status |
+|---|---|
+| Mock database & router — teaching cohorts across active/past states, rosters, assignment attachments, grading submissions, and attendance sessions/history | ✅ `4d13b7f` |
+| `modules/teaching/` — types, `normaliseCohort` / `normaliseCohortDetail`, pure `groupCohortsByCourse` & `isCohortEnded` date helpers, `teachingService`, `attendanceService`, query/mutation hooks | ✅ `65de4ee` |
+| Teaching Components — `TeachPageContent`, `CourseCard`, `CohortCard`, `CohortDetailPageContent` (6-tab workspace), `GradingDialog`, `ClassSessionAttendancePage`, `StudentAttendanceSheet` | ✅ `b0787e7` |
+| Routes & Components — `Switch` base-vega primitive, `/teach`, `/teach/cohorts/[scheduleId]`, `/teaching/sessions/[id]` | ✅ `d62d5f4` |
+| Tests — `tests/teaching/group-cohorts.test.ts`, `tests/teaching/normalise.test.ts` (**111 total tests passing**) | ✅ `d62d5f4` |
+| Verify: typecheck / lint / **111 tests pass** / build (30 routes) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
@@ -300,7 +317,7 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 | 007 | Calendar / activity / webinars | ✅ built + verified |
 | 008 | Messaging / inbox / notifications | ✅ built + verified |
 | 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
-| 011 | Teaching / instructor CRUD | 🚫 not started |
+| 011 | Teaching / instructor CRUD | ✅ built + verified |
 | 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
 
 ---
