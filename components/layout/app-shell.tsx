@@ -38,6 +38,8 @@ import { cn } from "@/lib/utils";
  */
 import { redirect, usePathname } from "next/navigation";
 
+import { InstallAppPrompt } from "@/modules/push/components/InstallAppPrompt";
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -78,6 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <BottomNav />
       <MessageToastListener />
       <CommandPaletteListener />
+      <InstallAppPrompt />
     </SidebarProvider>
   );
 }
