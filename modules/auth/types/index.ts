@@ -1,11 +1,3 @@
-/**
- * Auth wire shapes for the LMS portal. Mirrors the `smarthub-api` User
- * projection plus the sealed login/invitation contracts. During the
- * UI-first/mock phase only the projection is seeded; the login/reset/
- * invitation *flows* land with Plan 012. The types are defined now so
- * every consumer compiles against the sealed contract.
- */
-
 export interface AuthUser {
   _id: string;
   email: string;
@@ -14,14 +6,14 @@ export interface AuthUser {
   lastName?: string;
   imageUrl?: string;
   phone?: string;
+  roles?: string[];
+  isVerified?: boolean;
   gender?: "Male" | "Female";
   country?: { isoCode?: string; name?: string } | string;
   state?: { isoCode?: string; name?: string } | string;
   city?: string;
   address?: string;
   createdAt?: string;
-  isVerified?: boolean;
-  roles?: string[];
   isITStudent?: boolean;
   itVerificationStatus?: string;
   siwesYear?: number;
@@ -38,33 +30,46 @@ export interface AuthUser {
 
 export interface LoginRequest {
   email: string;
-  password: string;
+  password?: string;
+  rememberMe?: boolean;
 }
 
 export interface LoginResponse {
   user: AuthUser;
   accessToken: string;
-  refreshToken: string;
 }
 
-export type InvitationStatus =
-  | "pending"
-  | "accepted"
-  | "rejected"
-  | "cancelled"
-  | "expired";
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password?: string;
+  newPassword?: string;
+}
 
 export interface VerifyInvitationResponse {
-  code: string;
-  email: string;
-  status: InvitationStatus;
-  token?: string;
+  valid: boolean;
+  email?: string;
+  invitation?: {
+    _id: string;
+    email: string;
+    courseName?: string;
+    cohortName?: string;
+    role?: string;
+  };
 }
 
 export interface AcceptInvitationPayload {
-  inviteCode: string;
   token: string;
   password?: string;
   firstName?: string;
   lastName?: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword?: string;
+  currentPassword?: string;
+  newPassword?: string;
 }

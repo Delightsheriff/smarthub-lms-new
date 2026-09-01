@@ -1,9 +1,12 @@
-/**
- * Auth wire surface. Auth lives at the unprefixed root, NOT under
- * /lms — the user isn't a student until after login resolves. During
- * the UI-first phase only the set-password mutation is served by the
- * mock; the full login/reset/session surface lands with Plan 012.
- */
+import { LMS_PREFIX } from "@/lib/api/constants";
+
 export const AUTH_ENDPOINTS = {
-  SET_PASSWORD: "/auth/set-password",
+  LOGIN: `${LMS_PREFIX}/auth/login`,
+  LOGOUT: `${LMS_PREFIX}/auth/logout`,
+  ME: `${LMS_PREFIX}/auth/me`,
+  FORGOT_PASSWORD: `${LMS_PREFIX}/auth/forgot-password`,
+  RESET_PASSWORD: `${LMS_PREFIX}/auth/reset-password`,
+  CHANGE_PASSWORD: `${LMS_PREFIX}/auth/change-password`,
+  VERIFY_INVITATION: (token: string) => `${LMS_PREFIX}/invitations/verify/${token}`,
+  ACCEPT_INVITATION: `${LMS_PREFIX}/invitations/accept`,
 } as const;

@@ -1,21 +1,47 @@
 import { apiClient } from "@/lib/api";
 import { AUTH_ENDPOINTS } from "../config/endpoints";
+import type {
+  LoginRequest,
+  LoginResponse,
+  AuthUser,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+  VerifyInvitationResponse,
+  AcceptInvitationPayload,
+} from "../types";
 
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-/**
- * Authenticated password change from /profile (Security tab). The
- * mock verifies nothing yet and always succeeds; the real service
- * rejects with a 401 when `currentPassword` is wrong, which the form
- * surfaces inline.
- */
 class AuthService {
-  async changePassword(input: ChangePasswordRequest): Promise<void> {
-    await apiClient.post(AUTH_ENDPOINTS.SET_PASSWORD, input);
+  async login(payload: LoginRequest): Promise<LoginResponse> {
+    return apiClient.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, payload);
+  }
+
+  async logout(): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>(AUTH_ENDPOINTS.LOGOUT, {}, { silent: true });
+  }
+
+  async getMe(): Promise<AuthUser> {
+    return apiClient.get<AuthUser>(AUTH_ENDPOINTS.ME, { silent: true });
+  }
+
+  async forgotPassword(payload: ForgotPasswordRequest): Promise<{ success: boolean; message?: string }> {
+    return apiClient.post<{ success: boolean; message?: string }>(AUTH_ENDPOINTS.FORGOT_PASSWORD, payload);
+  }
+
+  async resetPassword(payload: ResetPasswordRequest): Promise<{ success: boolean; message?: string }> {
+    return apiClient.post<{ success: boolean; message?: string }>(AUTH_ENDPOINTS.RESET_PASSWORD, payload);
+  }
+
+  async changePassword(payload: ChangePasswordRequest): Promise<{ success: boolean; message?: string }> {
+    return apiClient.post<{ success: boolean; message?: string }>(AUTH_ENDPOINTS.CHANGE_PASSWORD, payload);
+  }
+
+  async verifyInvitation(token: string): Promise<VerifyInvitationResponse> {
+    return apiClient.get<VerifyInvitationResponse>(AUTH_ENDPOINTS.VERIFY_INVITATION(token));
+  }
+
+  async acceptInvitation(payload: AcceptInvitationPayload): Promise<{ success: boolean; accessToken?: string }> {
+    return apiClient.post<{ success: boolean; accessToken?: string }>(AUTH_ENDPOINTS.ACCEPT_INVITATION, payload);
   }
 }
 
