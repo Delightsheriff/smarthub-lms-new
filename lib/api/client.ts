@@ -1,139 +1,207 @@
-/**
- * The data-source seam.
- *
- * Every module's `*.service.ts` calls THIS surface (get/post/put/patch/
- * delete/getBlob + silent). In the UI-first phase the handlers resolve
- * against the mock database; at Plan 012 the same surface is re-pointed
- * at the real axios adapter. Module services and screens never know which
- * data source is live.
- *
- * Mock routes are registered by `lib/api/mock/router.ts` (imported once
- * where the app boots).
- */
-
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from "axios";
+import { toast } from "sonner";
 import { ApiError } from "@/lib/api/types";
+import { useAuthStore } from "@/store/slices/authStore";
 
 export interface ApiClientRequestOptions {
-  /** Suppress the automatic success/error toast for non-GET calls. */
+  /** Suppress the automatic success/error toast for calls. */
   silent?: boolean;
   params?: Record<string, string | number | boolean | undefined>;
   headers?: Record<string, string>;
 }
 
-export interface MockRequestContext {
-  path: string;
-  data?: unknown;
-  params?: Record<string, string | number | boolean | undefined>;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-export type HttpVerb = "get" | "post" | "put" | "patch" | "delete";
+const instance: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-export interface MockRoute {
-  verb: HttpVerb | HttpVerb[];
-  path: string;
-  handler: (ctx: MockRequestContext) => unknown | Promise<unknown>;
-}
+// Single-flight refresh state lock
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
 
-const routes: MockRoute[] = [];
-
-export function registerMockRoute(route: MockRoute): void {
-  routes.push(route);
-}
-
-function segments(path: string): string[] {
-  return path.split("/").filter(Boolean);
-}
-
-function matchPath(pattern: string, path: string): boolean {
-  const p = segments(pattern);
-  const a = segments(path);
-  if (p.length !== a.length) return false;
-  for (let i = 0; i < p.length; i++) {
-    if (p[i].startsWith(":")) continue;
-    if (p[i] !== a[i]) return false;
-  }
-  return true;
-}
-
-function extractParams(pattern: string, path: string): Record<string, string> {
-  const p = segments(pattern);
-  const a = segments(path);
-  const params: Record<string, string> = {};
-  p.forEach((seg, i) => {
-    if (seg.startsWith(":")) params[seg.slice(1)] = a[i] ?? "";
-  });
-  return params;
-}
-
-function resolveHandler(verb: HttpVerb, ctx: MockRequestContext) {
-  for (const route of routes) {
-    const verbs = Array.isArray(route.verb) ? route.verb : [route.verb];
-    if (verbs.includes(verb) && matchPath(route.path, ctx.path)) {
-      const fullCtx = { ...ctx, params: { ...ctx.params, ...extractParams(route.path, ctx.path) } };
-      return { handler: route.handler, ctx: fullCtx };
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      prom.resolve(token);
     }
+  });
+  failedQueue = [];
+};
+
+// Request Interceptor — attach Bearer token
+instance.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  throw new ApiError(`No mock handler for ${verb.toUpperCase()} ${ctx.path}`, 404);
+  return config;
+});
+
+// Response Interceptor — handle single-flight 401 refresh + error mapping
+instance.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError<{ message?: string; error?: string; statusCode?: number }>) => {
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      if (originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/refresh")) {
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (newToken: string) => {
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              }
+              resolve(instance(originalRequest));
+            },
+            reject: (err) => reject(err),
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshResponse = await axios.post<{ accessToken?: string }>(
+          `${API_BASE_URL}/lms/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
+
+        const newToken = refreshResponse.data.accessToken;
+        if (newToken) {
+          const user = useAuthStore.getState().user;
+          if (user) {
+            useAuthStore.getState().setAuth(user, newToken);
+          }
+          processQueue(null, newToken);
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          }
+          return instance(originalRequest);
+        }
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
+        useAuthStore.getState().logout();
+        return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
+function formatError(error: unknown): ApiError {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string | string[]; error?: string; statusCode?: number } | undefined;
+    const message = Array.isArray(data?.message)
+      ? data.message.join(", ")
+      : data?.message || data?.error || error.message || "An unexpected network error occurred.";
+    const status = error.response?.status || 500;
+    return new ApiError(message, status);
+  }
+  if (error instanceof ApiError) return error;
+  return new ApiError((error as Error)?.message || "An error occurred", 500);
 }
 
-const delay = () => new Promise((r) => setTimeout(r, 60));
-
-async function exec<T>(
-  verb: HttpVerb,
-  path: string,
+async function execRequest<T>(
+  method: "get" | "post" | "put" | "patch" | "delete",
+  url: string,
   data?: unknown,
   options?: ApiClientRequestOptions,
 ): Promise<T> {
-  await delay();
-  const { handler, ctx } = resolveHandler(verb, { path, data, params: options?.params });
-  const result = handler(ctx);
-  const resolved = (result instanceof Promise ? await result : result) as T;
-  // Handlers may return live mock singletons. In-place mutations of a
-  // singleton make a later response reference-equal to the cached value,
-  // so React Query's structural sharing silently drops the update. Return a
-  // defensive deep copy each call so every write surfaces as a new value.
-  return JSON.parse(JSON.stringify(resolved)) as T;
+  try {
+    const response = await instance.request<T>({
+      method,
+      url,
+      data,
+      params: options?.params,
+      headers: options?.headers,
+    });
+    return response.data;
+  } catch (err) {
+    const apiError = formatError(err);
+    if (!options?.silent) {
+      toast.error(apiError.message);
+    }
+    throw apiError;
+  }
 }
 
 export const apiClient = {
-  get<T>(path: string, options?: ApiClientRequestOptions) {
-    return exec<T>("get", path, undefined, options);
+  get<T>(path: string, options?: ApiClientRequestOptions): Promise<T> {
+    return execRequest<T>("get", path, undefined, options);
   },
-  getBlob(_path: string, _options?: ApiClientRequestOptions): Promise<Blob> {
-    return Promise.resolve(new Blob());
+  async getBlob(path: string, options?: ApiClientRequestOptions): Promise<Blob> {
+    try {
+      const response = await instance.get(path, {
+        params: options?.params,
+        headers: options?.headers,
+        responseType: "blob",
+      });
+      return response.data as Blob;
+    } catch (err) {
+      const apiError = formatError(err);
+      if (!options?.silent) toast.error(apiError.message);
+      throw apiError;
+    }
   },
-  post<T>(path: string, data?: unknown, options?: ApiClientRequestOptions) {
-    return exec<T>("post", path, data, options);
+  post<T>(path: string, data?: unknown, options?: ApiClientRequestOptions): Promise<T> {
+    return execRequest<T>("post", path, data, options);
   },
-  put<T>(path: string, data?: unknown, options?: ApiClientRequestOptions) {
-    return exec<T>("put", path, data, options);
+  put<T>(path: string, data?: unknown, options?: ApiClientRequestOptions): Promise<T> {
+    return execRequest<T>("put", path, data, options);
   },
-  patch<T>(path: string, data?: unknown, options?: ApiClientRequestOptions) {
-    return exec<T>("patch", path, data, options);
+  patch<T>(path: string, data?: unknown, options?: ApiClientRequestOptions): Promise<T> {
+    return execRequest<T>("patch", path, data, options);
   },
-  delete<T>(path: string, options?: ApiClientRequestOptions) {
-    return exec<T>("delete", path, undefined, options);
+  delete<T>(path: string, options?: ApiClientRequestOptions): Promise<T> {
+    return execRequest<T>("delete", path, undefined, options);
   },
 };
 
-/**
- * Storage/upload seam: "put bytes → get URL". Mock-backed now (the mock
- * returns a synthetic `/uploads/N` URL without storing the blob);
- * Cloudinary-backed at Plan 012. Profile avatars, payment-proof receipts
- * and acceptance-letter downloads all route through this one method.
- */
 export async function uploadFile(
   file: File,
   options?: ApiClientRequestOptions,
 ): Promise<string> {
-  const raw = (await exec<unknown | { url?: string; secure_url?: string }>(
-    "post",
-    "/uploads",
-    { fileName: file.name },
-    options,
-  )) as string | { url?: string; secure_url?: string };
-  if (typeof raw === "string") return raw;
-  const url = raw?.url ?? raw?.secure_url;
-  if (!url) throw new Error("Upload succeeded but no URL was returned");
-  return url;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await instance.post<{ url?: string; secure_url?: string }>(
+      "/lms/uploads",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...options?.headers,
+        },
+        params: options?.params,
+      },
+    );
+    const url = response.data.url || response.data.secure_url;
+    if (!url) throw new ApiError("Upload succeeded but no file URL was returned", 500);
+    return url;
+  } catch (err) {
+    const apiError = formatError(err);
+    if (!options?.silent) toast.error(apiError.message);
+    throw apiError;
+  }
 }

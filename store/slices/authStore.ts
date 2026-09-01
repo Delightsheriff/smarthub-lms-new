@@ -1,10 +1,9 @@
 "use client";
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { mockUser } from "@/lib/api/mock/mockDatabase";
 import type { AuthUser } from "@/types/auth";
 
-/** Map a wire user to the AuthUser projection the UI consumes. */
 export function toAuthUser(u: {
   _id: string;
   email: string;
@@ -32,6 +31,10 @@ export function toAuthUser(u: {
   altPhone?: string;
   timeZone?: string;
 }): AuthUser {
+  const roles = u.roles || [];
+  const isStudent = roles.includes("student") || roles.includes("student_free");
+  const isInstructor = roles.includes("instructor") || roles.includes("lead") || roles.includes("co-instructor");
+
   return {
     _id: u._id,
     email: u.email,
@@ -58,51 +61,49 @@ export function toAuthUser(u: {
     bio: u.bio,
     altPhone: u.altPhone,
     timeZone: u.timeZone,
-    // Mock user is both a student and an instructor — hand the UI a
-    // dual-role account so the mode toggle + both nav surfaces work.
     lmsRole:
-      u.roles?.includes("student") && u.roles.includes("instructor")
+      isStudent && isInstructor
         ? "both"
-        : u.roles?.includes("student")
+        : isStudent
           ? "student"
-          : u.roles?.includes("instructor")
+          : isInstructor
             ? "instructor"
-            : null,
+            : "student",
     referralEligible: true,
   };
 }
 
-const seedUser = () => toAuthUser(mockUser);
-
 interface AuthState {
   user: AuthUser | null;
+  token: string | null;
   isAuthenticated: boolean;
-  /** Set the current user (e.g. after a login mutation / /auth/me). */
-  setAuth: (user: AuthUser, _accessToken?: string, _refreshToken?: string) => void;
-  /** Update the cached user (e.g. after `/auth/me` refresh). */
+  setAuth: (user: AuthUser, accessToken?: string) => void;
   setUser: (user: AuthUser) => void;
-  /** Clear store + tokens. Caller is responsible for the redirect. */
   logout: () => void;
-  /** Restore the seeded mock identity (UI-first phase helper). */
-  seedDemo: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: seedUser(),
-      isAuthenticated: true,
-      setAuth: (user) => set({ user, isAuthenticated: true }),
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      setAuth: (user, token) =>
+        set({
+          user,
+          token: token ?? null,
+          isAuthenticated: true,
+        }),
       setUser: (user) => set({ user, isAuthenticated: true }),
-      logout: () => set({ user: null, isAuthenticated: false }),
-      seedDemo: () => set({ user: seedUser(), isAuthenticated: true }),
+      logout: () => set({ user: null, token: null, isAuthenticated: false }),
     }),
     {
-      name: "smarthub-lms-new.auth.v1",
+      name: "smarthub-lms-new.auth.v2",
       partialize: (s) => ({
         user: s.user,
+        token: s.token,
         isAuthenticated: s.isAuthenticated,
       }),
-    }
-  )
+    },
+  ),
 );
