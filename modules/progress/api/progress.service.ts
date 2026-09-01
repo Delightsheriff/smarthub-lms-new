@@ -1,20 +1,14 @@
 import { apiClient } from "@/lib/api";
 import { PROGRESS_ENDPOINTS } from "../config/endpoints";
-import type {
-  Achievement,
-  CohortPulse,
-  ProgressSnapshot,
-} from "../types";
+import type { Achievement, ProgressPulse } from "../types";
 
 class ProgressService {
-  async pulse(): Promise<ProgressSnapshot> {
-    return apiClient.get<ProgressSnapshot>(PROGRESS_ENDPOINTS.PULSE);
+  async getAchievements(): Promise<Achievement[]> {
+    return apiClient.get<Achievement[]>(PROGRESS_ENDPOINTS.ACHIEVEMENTS, { silent: true });
   }
-  async achievements(): Promise<Achievement[]> {
-    return apiClient.get<Achievement[]>(PROGRESS_ENDPOINTS.ACHIEVEMENTS);
-  }
-  async cohortPulse(): Promise<CohortPulse[]> {
-    return apiClient.get<CohortPulse[]>(PROGRESS_ENDPOINTS.COHORT_PULSE);
+
+  async getPulse(): Promise<ProgressPulse> {
+    return apiClient.get<ProgressPulse>(PROGRESS_ENDPOINTS.PULSE, { silent: true });
   }
 }
 

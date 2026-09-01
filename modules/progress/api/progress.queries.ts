@@ -3,28 +3,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { progressService } from "./progress.service";
 
-/** All three queries share a stale window — the dashboard reloads
- *  them in concert so the widget never shows a mix of fresh/stale
- *  numbers. */
-const STALE_MS = 60_000;
+export const PROGRESS_QUERY_KEYS = {
+  achievements: ["progress", "achievements"] as const,
+  pulse: ["progress", "pulse"] as const,
+} as const;
 
-export const useProgressPulse = () =>
-  useQuery({
-    queryKey: ["lms", "progress-pulse"],
-    queryFn: () => progressService.pulse(),
-    staleTime: STALE_MS,
+export function useAchievements() {
+  return useQuery({
+    queryKey: PROGRESS_QUERY_KEYS.achievements,
+    queryFn: () => progressService.getAchievements(),
+    staleTime: 10 * 60 * 1000,
   });
+}
 
-export const useAchievements = () =>
-  useQuery({
-    queryKey: ["lms", "achievements"],
-    queryFn: () => progressService.achievements(),
-    staleTime: STALE_MS,
+export function useProgressPulse() {
+  return useQuery({
+    queryKey: PROGRESS_QUERY_KEYS.pulse,
+    queryFn: () => progressService.getPulse(),
+    staleTime: 5 * 60 * 1000,
   });
-
-export const useCohortPulse = () =>
-  useQuery({
-    queryKey: ["lms", "cohort-pulse"],
-    queryFn: () => progressService.cohortPulse(),
-    staleTime: STALE_MS,
-  });
+}

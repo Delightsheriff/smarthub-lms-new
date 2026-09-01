@@ -21,6 +21,8 @@ import { BankingTab } from "@/modules/profile/components/BankingTab";
 import { AttendancePinSection } from "@/modules/profile/components/AttendancePinSection";
 import { SiwesPlacementTab } from "@/modules/siwes-profile/components/SiwesPlacementTab";
 import { ChangePasswordForm } from "@/modules/auth/components/ChangePasswordForm";
+import { NotificationSettingsCard } from "@/modules/push/components/NotificationSettingsCard";
+import { AchievementsList } from "@/modules/progress/components/AchievementsList";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -307,21 +309,11 @@ export default function ProfilePageContent() {
         </TabsContent>
 
         <TabsContent value="notifications">
-          <Card className="p-6 text-center space-y-1">
-            <p className="font-semibold">Notification preferences</p>
-            <p className="text-sm text-muted-foreground">
-              Coming in a later slice.
-            </p>
-          </Card>
+          <NotificationSettingsCard />
         </TabsContent>
 
         <TabsContent value="achievements">
-          <Card className="p-6 text-center space-y-1">
-            <p className="font-semibold">Achievements</p>
-            <p className="text-sm text-muted-foreground">
-              Coming in a later slice.
-            </p>
-          </Card>
+          <AchievementsList />
         </TabsContent>
 
         <TabsContent value="security">
