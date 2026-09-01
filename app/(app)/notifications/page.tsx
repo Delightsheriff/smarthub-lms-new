@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { NotificationsPageContent } from "@/modules/notifications/components/NotificationsPageContent";
 
 export default function NotificationsPage() {
-  return <ComingSoon title="Notifications" />;
+  return <NotificationsPageContent />;
 }

@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { InboxPageContent } from "@/modules/conversations/components/InboxPageContent";
 
 export default function InboxPage() {
-  return <ComingSoon title="Inbox" />;
+  return <InboxPageContent />;
 }

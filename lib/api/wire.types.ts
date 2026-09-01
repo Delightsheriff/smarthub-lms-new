@@ -21,6 +21,7 @@ export interface WireUser {
   phone?: string;
   imageUrl?: string;
   roles?: string[];
+  role?: string;
   isVerified?: boolean;
   gender?: "Male" | "Female";
   country?: { isoCode?: string; name?: string } | string;
@@ -115,6 +116,8 @@ export interface WireInstructor {
 export interface WireCourseRef {
   _id: string;
   name?: string;
+  title?: string;
+  slug?: string;
   nameSlug?: string;
   color?: string;
   bgColor?: string;
@@ -123,6 +126,7 @@ export interface WireCourseRef {
 export interface WireModuleRef {
   _id: string;
   title?: string;
+  slug?: string;
   titleSlug?: string;
   order?: number;
 }

@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Logo } from "@/components/layout/logo";
 import { RoleSwitcher } from "@/components/layout/role-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { SearchTrigger } from "@/components/layout/search-trigger";
+import { NotificationBell } from "@/modules/notifications/components/NotificationBell";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { CONTENT_MAX_WIDTH } from "@/configs/brand";
@@ -66,15 +65,7 @@ export function TopBar() {
 
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Notifications"
-            className="rounded-full"
-          >
-            <Bell className="size-[18px]" />
-          </Button>
+          <NotificationBell />
           <UserMenu />
         </div>
       </div>
