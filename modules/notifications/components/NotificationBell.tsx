@@ -1,0 +1,144 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { Bell, CheckCheck, BookOpen, Award, Megaphone, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn, formatDateTime } from "@/lib/utils";
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkRead,
+  useMarkAllRead,
+} from "../api/notifications.queries";
+
+export function NotificationBell() {
+  const [open, setOpen] = useState(false);
+
+  const { data: notifications } = useNotifications();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const markReadMutation = useMarkRead();
+  const markAllReadMutation = useMarkAllRead();
+
+  const handleItemClick = (id: string, read: boolean) => {
+    if (!read) {
+      markReadMutation.mutate(id);
+    }
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case "grade":
+        return <Award className="h-4 w-4 text-emerald-600" />;
+      case "material":
+        return <BookOpen className="h-4 w-4 text-blue-600" />;
+      case "announcement":
+        return <Megaphone className="h-4 w-4 text-amber-600" />;
+      default:
+        return <Bell className="h-4 w-4 text-primary" />;
+    }
+  };
+
+  const items = (notifications || []).slice(0, 5);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="relative rounded-xl text-muted-foreground hover:text-foreground"
+            aria-label="Notifications"
+          />
+        }
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge className="absolute -top-1 -right-1 bg-red-600 text-white font-bold text-[10px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center p-0 border-2 border-background">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </Badge>
+        )}
+      </PopoverTrigger>
+
+      <PopoverContent align="end" className="w-80 sm:w-96 p-0 rounded-2xl shadow-md">
+        {/* Header */}
+        <div className="p-3 border-b flex items-center justify-between bg-muted/30">
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4 text-primary" />
+            <span className="font-semibold text-xs text-foreground">Notifications</span>
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="text-[10px] rounded-full">
+                {unreadCount} new
+              </Badge>
+            )}
+          </div>
+
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => markAllReadMutation.mutate()}
+              className="text-[11px] text-muted-foreground hover:text-primary rounded-lg"
+            >
+              <CheckCheck className="mr-1 h-3 w-3" /> Mark all read
+            </Button>
+          )}
+        </div>
+
+        {/* List */}
+        <div className="divide-y max-h-80 overflow-y-auto scrollbar-none">
+          {items.length > 0 ? (
+            items.map((n) => (
+              <div
+                key={n.id}
+                onClick={() => handleItemClick(n.id, n.read)}
+                className={cn(
+                  "p-3 transition-colors cursor-pointer text-xs space-y-1",
+                  !n.read ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/40",
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 font-semibold text-foreground">
+                    {getIcon(n.type)}
+                    <span className="truncate">{n.title}</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground shrink-0 font-mono">
+                    {formatDateTime(n.createdAt)}
+                  </span>
+                </div>
+                {n.body && (
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed pl-6">
+                    {n.body}
+                  </p>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-6">
+              No notifications yet.
+            </p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-2 border-t bg-muted/20 text-center">
+          <Button
+            render={<Link href="/notifications" onClick={() => setOpen(false)} />}
+            variant="ghost"
+            size="xs"
+            className="w-full text-xs text-primary font-medium rounded-xl"
+          >
+            View all notifications →
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
