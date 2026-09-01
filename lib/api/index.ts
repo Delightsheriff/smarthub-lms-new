@@ -1,15 +1,7 @@
-/** API-layer barrel. Importing this registers the mock routes and
- *  exposes the data-source seam + mirrored contract. */
-
-import "@/lib/api/mock/router";
+/** API-layer barrel exposing the data-source seam + mirrored contract. */
 
 export { apiClient, uploadFile } from "@/lib/api/client";
-export type {
-  ApiClientRequestOptions,
-  HttpVerb,
-  MockRequestContext,
-  MockRoute,
-} from "@/lib/api/client";
+export type { ApiClientRequestOptions } from "@/lib/api/client";
 export { ApiError } from "@/lib/api/types";
 export type {
   ApiErrorResponse,
@@ -43,4 +35,3 @@ export type {
   WireUser,
   WireWebinar,
 } from "@/lib/api/wire.types";
-export { mockDatabase } from "@/lib/api/mock/mockDatabase";

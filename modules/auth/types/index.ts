@@ -49,6 +49,8 @@ export interface ResetPasswordRequest {
   newPassword?: string;
 }
 
+export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";
+
 export interface VerifyInvitationResponse {
   valid: boolean;
   email?: string;

@@ -17,10 +17,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
-      }
       return;
     }
 
@@ -31,7 +27,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       autoConnect: true,
     });
 
-    setSocket(socketInstance);
+    // Synchronize socket state asynchronously inside effect
+    requestAnimationFrame(() => {
+      setSocket(socketInstance);
+    });
 
     return () => {
       socketInstance.disconnect();

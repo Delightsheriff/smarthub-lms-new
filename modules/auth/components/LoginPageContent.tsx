@@ -9,6 +9,7 @@ import * as z from "zod";
 import { LogIn, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -131,12 +132,10 @@ export function LoginPageContent() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center gap-2 space-y-0 pt-1">
                       <FormControl>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           id="rememberMe"
                           checked={field.value}
-                          onChange={field.onChange}
-                          className="rounded border-input text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
                       <FormLabel htmlFor="rememberMe" className="text-xs text-muted-foreground cursor-pointer font-normal">

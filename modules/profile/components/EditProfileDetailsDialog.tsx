@@ -166,13 +166,14 @@ function ProfileDetailsForm({
         <div className="flex items-center justify-between">
           <Label htmlFor="phone">Phone</Label>
           {!phoneUnlocked ? (
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => setUnlockOpen(true)}
-              className="text-xs font-medium text-primary hover:underline"
+              className="h-auto p-0 text-xs font-medium text-primary hover:underline"
             >
               Unlock to edit
-            </button>
+            </Button>
           ) : null}
         </div>
         <Input

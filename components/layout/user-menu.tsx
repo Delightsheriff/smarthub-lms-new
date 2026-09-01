@@ -5,6 +5,7 @@ import { ClipboardList, HelpCircle, LogOut, Settings, User } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/slices/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,10 +53,11 @@ export function UserMenu() {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <button
+            <Button
               type="button"
+              variant="ghost"
               aria-label="Account menu"
-              className="ml-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="ml-1.5 h-auto p-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-transparent"
             >
               <Avatar className="h-9 w-9 ring-2 ring-background transition-shadow hover:ring-primary/30">
                 {user?.imageUrl && (
@@ -63,7 +65,7 @@ export function UserMenu() {
                 )}
                 <AvatarFallback>{initial}</AvatarFallback>
               </Avatar>
-            </button>
+            </Button>
           }
         />
         <DropdownMenuContent align="end" className="w-60">

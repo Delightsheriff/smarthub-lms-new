@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
-import { OREO_SUGGESTIONS, type OreoSuggestionMode } from "@/lib/api/mock/oreo-canned";
+import { OREO_SUGGESTIONS, type OreoSuggestionMode } from "../config/suggestions";
 import { AnswerMarkdown } from "./AnswerMarkdown";
 import { useAskOreo, useOreoUsage } from "../api/oreo.queries";
 import type { AskAnswer } from "../types";
@@ -121,14 +121,14 @@ export function OreoPageContent() {
               <div className="flex flex-wrap justify-center gap-2">
                 {suggestions.map((s) => (
                   <Button
-                    key={s}
+                    key={s.prompt}
                     size="sm"
                     variant="outline"
-                    onClick={() => void submit(s)}
+                    onClick={() => void submit(s.prompt)}
                     disabled={ask.isPending}
                   >
                     <CircleHelp className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                    {s}
+                    {s.prompt}
                   </Button>
                 ))}
               </div>

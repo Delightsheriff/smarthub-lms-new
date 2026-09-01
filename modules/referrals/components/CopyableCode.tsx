@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 /**
  * Click-to-copy pill for the raw referral code. Icon flips to a
@@ -39,11 +40,12 @@ export function CopyableCode({ code }: Props) {
   };
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
       onClick={onCopy}
       title="Click to copy"
-      className="inline-flex items-center gap-2 rounded-md border border-input bg-muted px-3 py-2 font-mono text-base font-semibold text-primary transition-colors hover:border-primary/40 hover:bg-primary/5"
+      className="inline-flex items-center gap-2 h-auto px-3 py-2 font-mono text-base font-semibold text-primary"
     >
       <span>{code}</span>
       {copied ? (
@@ -51,6 +53,6 @@ export function CopyableCode({ code }: Props) {
       ) : (
         <Copy className="h-4 w-4 text-muted-foreground" />
       )}
-    </button>
+    </Button>
   );
 }

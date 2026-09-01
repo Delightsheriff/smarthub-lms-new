@@ -93,10 +93,11 @@ export function AvatarUploader({
 
   return (
     <div className={`relative inline-flex ${className ?? ""}`}>
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={triggerPick}
-        className="group relative inline-flex rounded-full"
+        className="group relative inline-flex p-0 h-auto rounded-full hover:bg-transparent"
         aria-label="Change profile photo"
       >
         <Avatar className={`${SIZE_CLASSES[size]} ring-1 ring-border`}>
@@ -108,7 +109,7 @@ export function AvatarUploader({
         <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition group-hover:opacity-100">
           <Camera className={size === "lg" || size === "xl" ? "h-6 w-6" : "h-4 w-4"} />
         </span>
-      </button>
+      </Button>
 
       {imageUrl ? (
         <Button
