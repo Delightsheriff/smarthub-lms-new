@@ -31,6 +31,12 @@ class AssignmentsService {
     return apiClient.get<ApiSubmission[]>(SUBMISSIONS_ENDPOINTS.MY);
   }
 
+  async getMySubmission(assignmentId: string): Promise<ApiSubmission | null> {
+    return apiClient.get<ApiSubmission | null>(
+      `${SUBMISSIONS_ENDPOINTS.CREATE}/${assignmentId}/mine`,
+    );
+  }
+
   async createSubmission(body: SubmissionPayload): Promise<ApiSubmission> {
     return apiClient.post<ApiSubmission>(SUBMISSIONS_ENDPOINTS.CREATE, body);
   }

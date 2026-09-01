@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { AssignmentListPageContent } from "@/modules/assignments/components/assignment-list-page-content";
 
 export default function AssignmentsPage() {
-  return <ComingSoon title="Tasks" />;
+  return <AssignmentListPageContent />;
 }

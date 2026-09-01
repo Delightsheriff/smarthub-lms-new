@@ -7,7 +7,7 @@
 
 import { registerMockRoute, type MockRequestContext } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/types";
-import type { WireMaterial, WireRecording } from "@/lib/api/wire.types";
+import type { WireMaterial, WireRecording, WireSubmission } from "@/lib/api/wire.types";
 import {
   mockAssignedModules,
   mockBanking,
@@ -268,12 +268,23 @@ registerMockRoute({
 
 registerMockRoute({
   verb: "get",
+  path: "/lms/submissions/student",
+  handler: () =>
+    mockDatabase.submissions.filter(
+      (s) => s.user === mockDatabase.users[0]._id,
+    ),
+});
+
+registerMockRoute({
+  verb: "get",
   path: "/lms/submissions/:assignmentId/mine",
   handler: (ctx: MockRequestContext) => {
     const assignmentId = String(ctx.params?.assignmentId);
-    return mockDatabase.submissions.find(
-      (s) => s.assignment === assignmentId && s.user === mockDatabase.users[0]._id,
-    ) ?? null;
+    return (
+      mockDatabase.submissions.find(
+        (s) => s.assignment === assignmentId && s.user === mockDatabase.users[0]._id,
+      ) ?? null
+    );
   },
 });
 
@@ -281,34 +292,122 @@ registerMockRoute({
   verb: "post",
   path: "/lms/submissions",
   handler: (ctx: MockRequestContext) => {
-    const data = ctx.data as { assignment: string } | undefined;
+    const data = ctx.data as {
+      assignmentId?: string;
+      assignment?: string;
+      submissionType?: "file" | "text" | "url";
+      content?: string;
+      fileUrl?: string;
+      fileName?: string;
+      fileSize?: number;
+      fileMimeType?: string;
+      externalUrl?: string;
+      notes?: string;
+    } | undefined;
+
     if (!data) throw new Error("missing submission body");
-    const existing = mockDatabase.submissions.find(
-      (s) => s.assignment === data.assignment && s.user === mockDatabase.users[0]._id,
+    const targetAssignmentId = data.assignmentId || data.assignment;
+    if (!targetAssignmentId) throw new Error("missing assignment ID");
+
+    const existingIndex = mockDatabase.submissions.findIndex(
+      (s) => s.assignment === targetAssignmentId && s.user === mockDatabase.users[0]._id,
     );
-    const updated = {
-      _id: existing?._id ?? `sub_${data.assignment}_${mockDatabase.users[0]._id}`,
-      assignment: data.assignment,
+    const existing = existingIndex >= 0 ? mockDatabase.submissions[existingIndex] : null;
+
+    const newVersion = (existing?.version ?? 0) + 1;
+    const now = new Date().toISOString();
+
+    const newSubmission: WireSubmission = {
+      _id: existing?._id ?? `sub_${targetAssignmentId}_${mockDatabase.users[0]._id}`,
+      assignment: targetAssignmentId,
       user: mockDatabase.users[0]._id,
-      submissionType: "file" as const,
-      fileUrl: "https://mock.smarthub.dev/sub/upload.zip",
-      fileName: "submission.zip",
-      status: "submitted" as const,
-      submittedAt: new Date().toISOString(),
+      submissionType: data.submissionType ?? "file",
+      content: data.content,
+      fileUrl: data.fileUrl ?? (data.submissionType === "file" ? "https://mock.smarthub.dev/sub/upload.pdf" : undefined),
+      fileName: data.fileName ?? (data.submissionType === "file" ? "submission.pdf" : undefined),
+      fileSize: data.fileSize ?? 102400,
+      fileMimeType: data.fileMimeType ?? "application/pdf",
+      externalUrl: data.externalUrl,
+      notes: data.notes,
+      status: "submitted",
+      submittedAt: now,
       isLateSubmission: false,
-      version: (existing?.version ?? 0) + 1,
+      version: newVersion,
+      previousVersionId: existing?._id,
       submissionHistory: [
         ...(existing?.submissionHistory ?? []),
-        { action: "submitted", timestamp: new Date().toISOString() },
+        { action: "submitted", timestamp: now, notes: data.notes || "Submitted work" },
       ],
     };
-    if (existing) {
-      Object.assign(existing, updated);
+
+    if (existingIndex >= 0) {
+      mockDatabase.submissions[existingIndex] = newSubmission;
     } else {
-      mockDatabase.submissions.push(updated as never);
+      mockDatabase.submissions.push(newSubmission);
     }
+    return newSubmission;
+  },
+});
+
+registerMockRoute({
+  verb: "put",
+  path: "/lms/submissions/:id/resubmit",
+  handler: (ctx: MockRequestContext) => {
+    const subId = String(ctx.params?.id);
+    const data = ctx.data as {
+      submissionType?: "file" | "text" | "url";
+      content?: string;
+      fileUrl?: string;
+      fileName?: string;
+      fileSize?: number;
+      fileMimeType?: string;
+      externalUrl?: string;
+      notes?: string;
+    } | undefined;
+
+    const existingIndex = mockDatabase.submissions.findIndex((s) => s._id === subId);
+    if (existingIndex < 0) {
+      throw new Error(`Submission ${subId} not found`);
+    }
+
+    const existing = mockDatabase.submissions[existingIndex];
+    const now = new Date().toISOString();
+    const newVersion = existing.version + 1;
+
+    const updated: WireSubmission = {
+      ...existing,
+      submissionType: data?.submissionType ?? existing.submissionType,
+      content: data?.content ?? existing.content,
+      fileUrl: data?.fileUrl ?? existing.fileUrl,
+      fileName: data?.fileName ?? existing.fileName,
+      fileSize: data?.fileSize ?? existing.fileSize,
+      fileMimeType: data?.fileMimeType ?? existing.fileMimeType,
+      externalUrl: data?.externalUrl ?? existing.externalUrl,
+      notes: data?.notes ?? existing.notes,
+      status: "resubmitted",
+      submittedAt: now,
+      version: newVersion,
+      previousVersionId: existing._id,
+      submissionHistory: [
+        ...(existing.submissionHistory ?? []),
+        { action: "resubmitted", timestamp: now, notes: data?.notes || `Resubmitted v${newVersion}` },
+      ],
+    };
+
+    mockDatabase.submissions[existingIndex] = updated;
     return updated;
   },
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/lms/uploads/assignment",
+  handler: () => ({
+    url: "https://mock.smarthub.dev/uploads/assignment-file.pdf",
+    fileName: "assignment-file.pdf",
+    fileSize: 245000,
+    mimeType: "application/pdf",
+  }),
 });
 
 registerMockRoute({

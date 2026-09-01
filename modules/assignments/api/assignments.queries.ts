@@ -2,12 +2,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { coursesService } from "@/modules/courses/api/courses.service";
 import { normaliseEnrolledCourse } from "@/modules/courses/api/normalise";
-import { normaliseAssignment } from "@/modules/learning/api/normalise";
+import { normaliseAssignment, normaliseSubmission } from "./normalise";
 import type { ApiModule } from "@/modules/courses/types/api.types";
 import type { Course } from "@/modules/courses/types";
 import type { Module } from "@/modules/learning/types";
 import { assignmentsService, SubmissionPayload } from "./assignments.service";
-import type { Assignment } from "../types";
+import type { Assignment, Submission } from "../types";
 
 export const ASSIGNMENTS_QUERY_KEYS = {
   my: ["assignments", "my"] as const,
@@ -19,6 +19,13 @@ interface AssignmentWithContext {
   course: Course;
   module: Module;
   assignment: Assignment;
+}
+
+export interface AssignmentDetailContext {
+  assignment: Assignment;
+  submission: Submission | null;
+  course?: Course;
+  module?: Module;
 }
 
 type PopulatedRef =
@@ -95,6 +102,62 @@ export function useMyAssignments() {
   });
 }
 
+export function useAssignmentDetail(id?: string) {
+  return useQuery<AssignmentDetailContext | null>({
+    queryKey: ASSIGNMENTS_QUERY_KEYS.detail(id),
+    enabled: !!id,
+    queryFn: async () => {
+      if (!id) return null;
+      const [assignmentRaw, submissionRaw, enrolledRaw] = await Promise.all([
+        assignmentsService.getAssignmentById(id),
+        assignmentsService.getMySubmission(id),
+        coursesService.getEnrolled(),
+      ]);
+
+      if (!assignmentRaw) return null;
+
+      const assignment = normaliseAssignment(assignmentRaw);
+      const submission = submissionRaw
+        ? normaliseSubmission(submissionRaw)
+        : null;
+
+      const courses = enrolledRaw.map(normaliseEnrolledCourse);
+      const courseById = new Map(courses.map((c) => [c.id, c]));
+
+      const moduleRef = assignmentRaw.module as PopulatedRef;
+      const courseRef = assignmentRaw.course as PopulatedRef;
+      const moduleId = refId(moduleRef);
+      const courseId = refId(courseRef);
+
+      const course = courseId ? courseById.get(courseId) : undefined;
+      let moduleShape: Module | undefined;
+      if (moduleId && courseId) {
+        const fromList = enrolledRaw
+          .flatMap((ec) => ec.modules || [])
+          .find((m) => m._id === moduleId);
+        moduleShape = {
+          id: moduleId,
+          slug: (fromList as ApiModule | undefined)?.titleSlug || moduleId,
+          courseId,
+          order: (fromList as ApiModule | undefined)?.order ?? 0,
+          title: (fromList as ApiModule | undefined)?.title || "Module",
+          summary: (fromList as ApiModule | undefined)?.description || "",
+          recordings: [],
+          materials: [],
+          assignments: [],
+        };
+      }
+
+      return {
+        assignment,
+        submission,
+        course,
+        module: moduleShape,
+      };
+    },
+  });
+}
+
 export function useUpcomingDeadlines(limit = 3) {
   const all = useMyAssignments();
   return {
@@ -118,6 +181,25 @@ export function useSubmitAssignment() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({
         queryKey: ASSIGNMENTS_QUERY_KEYS.detail(vars.assignmentId),
+      });
+      qc.invalidateQueries({ queryKey: ASSIGNMENTS_QUERY_KEYS.my });
+    },
+  });
+}
+
+export function useResubmitAssignment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      submissionId,
+      payload,
+    }: {
+      submissionId: string;
+      payload: SubmissionPayload;
+    }) => assignmentsService.resubmit(submissionId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({
+        queryKey: ASSIGNMENTS_QUERY_KEYS.detail(vars.payload.assignmentId),
       });
       qc.invalidateQueries({ queryKey: ASSIGNMENTS_QUERY_KEYS.my });
     },

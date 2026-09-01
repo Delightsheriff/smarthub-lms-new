@@ -499,8 +499,38 @@ export const mockDatabase: MockDatabase = {
   submissions: [
     submissionFor("asgn_1", "usr_1", {
       status: "graded",
-      grade: { score: 84, totalPoints: 100, percentage: 84, letterGrade: "B" },
-      feedback: { general: "Great structure; tighten spacing on mobile." },
+      version: 2,
+      submittedAt: daysAgo(3),
+      grade: {
+        score: 84,
+        totalPoints: 100,
+        percentage: 84,
+        letterGrade: "B",
+        rubricScores: [
+          { criterion: "Layout & Grid Structure", score: 25, totalPoints: 30, comment: "Solid grid alignment." },
+          { criterion: "Responsive Behavior", score: 29, totalPoints: 30, comment: "Clean transition across viewports." },
+          { criterion: "Code Quality & Semantics", score: 30, totalPoints: 40, comment: "Accessible HTML and clean CSS." },
+        ],
+      },
+      feedback: { general: "Great structure; tighten spacing on mobile header elements." },
+      gradedAt: daysAgo(1),
+      gradedBy: "Ngozi Okonkwo",
+      submissionHistory: [
+        { action: "submitted", timestamp: daysAgo(5), notes: "Initial landing page draft" },
+        { action: "resubmitted", timestamp: daysAgo(3), notes: "Updated mobile layout spacing" },
+        { action: "graded", timestamp: daysAgo(1), notes: "Graded by instructor" },
+      ],
+    }),
+    submissionFor("asgn_2", "usr_1", {
+      status: "submitted",
+      version: 1,
+      submissionType: "url",
+      externalUrl: "https://github.com/ade/interactive-quiz-app",
+      notes: "Submitted GitHub repository for Quiz App.",
+      submittedAt: daysAgo(1),
+      submissionHistory: [
+        { action: "submitted", timestamp: daysAgo(1), notes: "Submitted repository link" },
+      ],
     }),
   ],
 

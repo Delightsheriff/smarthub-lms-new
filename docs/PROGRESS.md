@@ -236,11 +236,30 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 
 ---
 
+## Plan 006 — Assignments ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** Full student assignment surface delivered. Reuses `normaliseAssignment` taproot from `modules/learning`. Supports submission lifecycle (file upload, URL link, inline text), versioning, resubmission (`v1 → v2` history tracking), grade cards with rubric criteria, deadline countdown badges (`CountdownToDeadline`), and list filtering by status.
+
+| Deliverable | Status |
+|---|---|
+| Mock database — enriched assignment & submission fixtures (`asgn_1` graded w/ rubric, `asgn_2` submitted URL, overdue assignments) | ✅ |
+| Mock router — added `/lms/submissions/student`, `/lms/submissions/:assignmentId/mine`, `POST /lms/submissions`, `PUT /lms/submissions/:id/resubmit`, `POST /lms/uploads/assignment` | ✅ |
+| `modules/assignments/types/` — UI types + wire shapes | ✅ |
+| `modules/assignments/api/` — service, queries (`useMyAssignments`, `useAssignmentDetail`, `useSubmitAssignment`, `useResubmitAssignment`, `useUploadAssignmentFile`), normaliser (`normaliseSubmission`) | ✅ |
+| Components — `CountdownToDeadline`, `SubmissionStatusCard`, `SubmissionForm`, `SubmissionHistory`, `GradeCard`, `AssignmentListCard`, `AssignmentPageContent`, `AssignmentListPageContent` | ✅ |
+| Routes — `/assignments` (list + filter tabs), `/assignments/[id]` (detail composition) | ✅ |
+| Tests — `tests/assignments/normalise-and-countdown.test.ts` + `tests/assignments/submission-lifecycle.test.ts` | ✅ |
+| Verify: typecheck / lint / **91 tests pass** / build (30 routes) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
-| 006 | Assignments | 🚫 not started |
+| 006 | Assignments | ✅ built + verified |
 | 007 | Calendar / activity / webinars | 🚫 not started |
 | 008 | Messaging / inbox / notifications | 🚫 not started |
 | 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
