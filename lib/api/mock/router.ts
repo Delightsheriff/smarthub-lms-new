@@ -414,8 +414,8 @@ registerMockRoute({
   verb: "get",
   path: "/lms/calendar",
   handler: (ctx: MockRequestContext) => {
-    const fromStr = ctx.params?.from;
-    const toStr = ctx.params?.to;
+    const fromStr = typeof ctx.params?.from === "string" ? ctx.params.from : undefined;
+    const toStr = typeof ctx.params?.to === "string" ? ctx.params.to : undefined;
 
     let events = mockDatabase.calendar;
 
@@ -504,16 +504,21 @@ registerMockRoute({
 registerMockRoute({
   verb: "get",
   path: "/lms/conversations",
-  handler: () => mockDatabase.conversations,
+  handler: () => mockDatabase.conversations || [],
 });
 
 registerMockRoute({
   verb: "get",
   path: "/lms/conversations/:conversationId/messages",
   handler: (ctx: MockRequestContext) => {
-    const conv = byId(mockDatabase.conversations, String(ctx.params?.conversationId));
-    if (!conv?.lastMessage) return [];
-    return [conv.lastMessage];
+    const convId = String(ctx.params?.conversationId);
+    const msgs = (mockDatabase.messages || []).filter((m) => m.conversationId === convId);
+
+    if (msgs.length > 0) return msgs;
+
+    const conv = byId(mockDatabase.conversations, convId);
+    if (conv?.lastMessage) return [conv.lastMessage];
+    return [];
   },
 });
 
@@ -521,19 +526,28 @@ registerMockRoute({
   verb: "post",
   path: "/lms/conversations/:conversationId/messages",
   handler: (ctx: MockRequestContext) => {
-    const conv = byId(
-      mockDatabase.conversations,
-      String(ctx.params?.conversationId),
-    );
-    const content = (ctx.data as { content?: string } | undefined)?.content ?? "";
+    const convId = String(ctx.params?.conversationId);
+    const conv = byId(mockDatabase.conversations, convId);
+    const data = ctx.data as { content?: string; type?: "text" | "file" | "audio" | "video" | "system" } | undefined;
+    const content = data?.content ?? "";
+
     const msg = {
       _id: `msg_${Date.now()}`,
-      conversationId: String(ctx.params?.conversationId),
+      conversationId: convId,
       sender: mockDatabase.users[0],
       content,
+      type: data?.type || "text",
       createdAt: new Date().toISOString(),
     };
-    if (conv) conv.lastMessage = msg as never;
+
+    if (!mockDatabase.messages) mockDatabase.messages = [];
+    mockDatabase.messages.push(msg);
+
+    if (conv) {
+      conv.lastMessage = msg;
+      conv.updatedAt = msg.createdAt;
+    }
+
     return msg;
   },
 });
@@ -541,7 +555,16 @@ registerMockRoute({
 registerMockRoute({
   verb: "get",
   path: "/lms/notifications",
-  handler: () => mockDatabase.notifications,
+  handler: () => mockDatabase.notifications || [],
+});
+
+registerMockRoute({
+  verb: "get",
+  path: "/lms/notifications/unread-count",
+  handler: () => {
+    const count = (mockDatabase.notifications || []).filter((n) => !n.read && !n.isRead).length;
+    return { count };
+  },
 });
 
 registerMockRoute({
@@ -551,7 +574,37 @@ registerMockRoute({
     const n = mockDatabase.notifications.find(
       (x) => x._id === String(ctx.params?.notificationId),
     );
-    if (n) n.read = true;
+    if (n) {
+      n.read = true;
+      n.isRead = true;
+    }
+    return { success: true };
+  },
+});
+
+registerMockRoute({
+  verb: "put",
+  path: "/lms/notifications/:notificationId/read",
+  handler: (ctx: MockRequestContext) => {
+    const n = mockDatabase.notifications.find(
+      (x) => x._id === String(ctx.params?.notificationId),
+    );
+    if (n) {
+      n.read = true;
+      n.isRead = true;
+    }
+    return { success: true };
+  },
+});
+
+registerMockRoute({
+  verb: "post",
+  path: "/lms/notifications/mark-all-read",
+  handler: () => {
+    (mockDatabase.notifications || []).forEach((n) => {
+      n.read = true;
+      n.isRead = true;
+    });
     return { success: true };
   },
 });
