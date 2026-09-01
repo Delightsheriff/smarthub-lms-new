@@ -1,5 +1,10 @@
-import { AuthPlaceholder } from "@/components/layout/auth-placeholder";
+import { Suspense } from "react";
+import { AcceptInvitationPageContent } from "@/modules/auth/components/AcceptInvitationPageContent";
 
 export default function AcceptInvitationPage() {
-  return <AuthPlaceholder title="Accept invitation" />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <AcceptInvitationPageContent />
+    </Suspense>
+  );
 }

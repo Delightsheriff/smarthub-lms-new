@@ -1,5 +1,10 @@
-import { AuthPlaceholder } from "@/components/layout/auth-placeholder";
+import { Suspense } from "react";
+import { LoginPageContent } from "@/modules/auth/components/LoginPageContent";
 
 export default function LoginPage() {
-  return <AuthPlaceholder title="Sign in" />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LoginPageContent />
+    </Suspense>
+  );
 }
