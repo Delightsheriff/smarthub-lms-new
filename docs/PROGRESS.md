@@ -309,16 +309,40 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 
 ---
 
-## Future plans (deferred, in delivery order)
+## Plan 012 — Auth Flows + Real API Swap ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** The final slice of the porting project. The API seam (`lib/api/client.ts`) has been swapped from mock fixtures to the production Axios client with bearer token header stamping, single-flight 401 refresh token interceptor, auto Sonner error toasts, and `uploadFile` multipart uploads. All synthetic mock files and database structures (`lib/api/mock/`) have been completely removed. Full authentication forms delivered (`/login`, `/forgot-password`, `/reset-password/[token]`, `/accept-invitation`, and `/profile/security` password change) with Zod validation and store-backed `(app)` route shell gating.
+
+| Deliverable | Status |
+|---|---|
+| Real Axios API Client — bearer token header stamping, 401 single-flight refresh queue, auto error toasts, file upload multipart handling | ✅ |
+| Complete Removal of Mock Database — deleted `lib/api/mock/` completely along with synthetic data structures | ✅ |
+| Auth Store & State — `useAuthStore` managing token & user session lifecycle with persistent storage | ✅ |
+| Auth Surfaces & Forms — `LoginPageContent`, `ForgotPasswordForm`, `ResetPasswordForm`, `AcceptInvitationPageContent`, `ChangePasswordForm` | ✅ |
+| Protected Shell Gate — `AppShell` enforces authentication and redirects unauthenticated users to `/login?next=...` | ✅ |
+| Real Socket Wiring — `SocketProvider` connects to `socket.io-client` with bearer token handshake | ✅ |
+| Tests & Verification — **98 unit tests passing**, **0 typecheck errors**, **0 lint errors**, **clean 30-route production build** | ✅ |
+
+---
+
+## All Delivery Plans Completed (001–012) ✅
 
 | Plan | Focus | Status |
 |---|---|---|
-| 006 | Assignments | ✅ built + verified |
-| 007 | Calendar / activity / webinars | ✅ built + verified |
-| 008 | Messaging / inbox / notifications | ✅ built + verified |
-| 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
-| 011 | Teaching / instructor CRUD | ✅ built + verified |
-| 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
+| 001 | Foundation & API Seam | ✅ built + verified |
+| 002 | App & Auth Route Shells | ✅ built + verified |
+| 003 | Navigation Chrome & TopBar | ✅ built + verified |
+| 004 | Dashboard & Progress Overview | ✅ built + verified |
+| 005 | Courses & Learning Workspace | ✅ built + verified |
+| 006 | Assignments & Submissions | ✅ built + verified |
+| 007 | Calendar, Activity & Webinars | ✅ built + verified |
+| 008 | Messaging, Inbox & Notifications | ✅ built + verified |
+| 009 | Profile, Payments, SIWES & Referrals | ✅ built + verified |
+| 010 | Programs & Oreo AI Help | ✅ built + verified |
+| 011 | Teaching / Instructor CRUD | ✅ built + verified |
+| 012 | Auth Flows & Real API Swap | ✅ built + verified |
 
 ---
 

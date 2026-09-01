@@ -18,3 +18,4 @@ a later ADR that reverses an earlier one must say so explicitly.
 | 0011 | Uploads/downloads/previews route through one storage seam (`uploadFile`/`downscaleImage`/`downloadFile`) | Accepted |
 | 0012 | Oreo-as-seam: AI assistant behind the API-client seam (canned mock now, `streamAsk`/SSE deferred adapter; safe-subset markdown; scholarship server-derived gate; branding with bundled fallback) | Accepted |
 | 0013 | Instructor teaching aggregates and attendance seam (independent attendance polling, shared submission grading adapter, server/mock-side rollups) | Accepted |
+| 0014 | Auth flows and real API swap (Axios client with 401 refresh interceptor, complete removal of mock data, store-backed app shell auth gate) | Accepted |
