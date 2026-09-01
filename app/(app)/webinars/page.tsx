@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { WebinarsPageContent } from "@/modules/webinars/components/WebinarsPageContent";
 
 export default function WebinarsPage() {
-  return <ComingSoon title="Webinars" />;
+  return <WebinarsPageContent />;
 }

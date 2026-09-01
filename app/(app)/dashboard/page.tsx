@@ -25,6 +25,7 @@ import { TechScholarshipCard } from "@/modules/tech-scholarship/components/TechS
 import { DashboardWebinarsWidget } from "@/modules/webinars/components/DashboardWebinarsWidget";
 import { DashboardAssignedModulesWidget } from "@/modules/assigned-modules/components/DashboardAssignedModulesWidget";
 import { ProgressPulseCard } from "@/modules/progress/components/ProgressPulseCard";
+import { DashboardCalendarCard } from "@/modules/calendar/components/DashboardCalendarCard";
 import { UpcomingDeadlinesPanel } from "@/modules/calendar/components/UpcomingDeadlinesPanel";
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
 import { CourseProgressList } from "@/modules/dashboard/components/CourseProgressList";
@@ -155,7 +156,14 @@ function StudentDashboardBody() {
         </section>
       )}
 
-      <UpcomingDeadlinesPanel />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <DashboardCalendarCard />
+        </div>
+        <div>
+          <UpcomingDeadlinesPanel />
+        </div>
+      </div>
 
       <section className="space-y-3">
         <h2 className="font-semibold">Progress by course</h2>
