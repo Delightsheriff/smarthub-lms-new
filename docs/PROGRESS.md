@@ -274,13 +274,31 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 
 ---
 
+## Plan 008 — Messaging + Inbox + Notifications ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** Three conversational & realtime-seam surfaces delivered. Inbox lists conversations across 5 types (*Direct*, *Group*, *Assignments*, *Announcements*, *Support*) with unread badges and assignment chips. Thread view (`AssignmentThread`) renders message bubbles (`mine` vs peer) with optimistic text composer & socket event listener. Notifications module provides topbar `NotificationBell` with live unread count badge + popover dropdown feed, and dedicated `/notifications` page with mark-all-read.
+
+| Deliverable | Status |
+|---|---|
+| Mock database & router — conversations of 5 types, messages history, notifications list w/ mark-read & mark-all-read | ✅ `a1fa42b` |
+| `modules/conversations/` — types, `normaliseConversation` taproot, service, queries, `ConversationListItemRow`, `InboxPageContent` | ✅ `c3a4554` |
+| `modules/messaging/` — types, `normaliseMessage` (`mine` flag computation), service, queries (`useThread`, `useSendMessage`), `MessageBubble`, `AssignmentThread` | ✅ `c3a4554` |
+| `modules/notifications/` — types, `normaliseNotification`, service, queries (`useNotifications`, `useUnreadCount`, `useMarkRead`, `useMarkAllRead`), `NotificationBell`, `NotificationsPageContent` | ✅ `3199cc9` |
+| Components & Chrome — `Popover` base-vega primitive, `NotificationBell` mounted in `TopBar`, routes `/inbox` & `/notifications` | ✅ `356e011` |
+| Tests — `tests/conversations/normalise.test.ts`, `tests/messaging/normalise.test.ts`, `tests/notifications/normalise.test.ts` (106 total tests passing) | ✅ `356e011` |
+| Verify: typecheck / lint / **106 tests pass** / build (30 routes) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
 | 006 | Assignments | ✅ built + verified |
 | 007 | Calendar / activity / webinars | ✅ built + verified |
-| 008 | Messaging / inbox / notifications | 🚫 not started |
+| 008 | Messaging / inbox / notifications | ✅ built + verified |
 | 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
 | 011 | Teaching / instructor CRUD | 🚫 not started |
 | 012 | Auth & API swap (final — real auth + axios adapter) | 🚫 not started |
