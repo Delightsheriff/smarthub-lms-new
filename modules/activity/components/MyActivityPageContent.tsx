@@ -8,7 +8,7 @@ import {
   FileCheck,
   RefreshCw,
   CreditCard,
-  UserEdit,
+  UserCheck,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -34,7 +34,7 @@ export function getActionInfo(action: string) {
     case "payment.create":
       return { label: "Completed payment transaction", icon: CreditCard, color: "text-amber-600 bg-amber-50 dark:bg-amber-950/50" };
     case "profile.update":
-      return { label: "Updated profile details", icon: UserEdit, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50" };
+      return { label: "Updated profile details", icon: UserCheck, color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50" };
     default:
       return { label: action.replace(".", " "), icon: Activity, color: "text-primary bg-primary/10" };
   }

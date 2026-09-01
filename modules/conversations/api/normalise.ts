@@ -1,4 +1,4 @@
-import type { ApiConversation, ApiAssignmentRef, ApiCourseRef, ApiModuleRef } from "../types/api.types";
+import type { ApiConversation, ApiCourseRef, ApiModuleRef } from "../types/api.types";
 import type { ConversationListItem, ConversationAssignmentRef } from "../types";
 
 export function normaliseConversation(

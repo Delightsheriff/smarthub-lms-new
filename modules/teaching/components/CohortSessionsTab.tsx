@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Video, Calendar, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Video, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

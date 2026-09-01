@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/lib/socket/socket-provider";
 import { useThread, useSendMessage } from "../api/messaging.queries";
 import { MessageBubble } from "./MessageBubble";
-import type { ChatMessage } from "../types";
 
 interface AssignmentThreadProps {
   conversationId: string;

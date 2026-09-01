@@ -61,6 +61,7 @@ export function ConversationListItemRow({
           </Avatar>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
+              {getIcon()}
               <span className="font-semibold text-xs text-foreground truncate">
                 {conversation.title}
               </span>

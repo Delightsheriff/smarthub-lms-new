@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getMonthDays, isSameDay } from "./grid-utils";
 import type { CalendarEventUI } from "../types";

@@ -45,7 +45,7 @@ export function UpcomingDeadlinesPanel({ limit = 3 }: UpcomingDeadlinesPanelProp
         {!isLoading && (
           <div className="space-y-2.5">
             {upcoming && upcoming.length > 0 ? (
-              upcoming.map(({ assignment, course, module }) => (
+              upcoming.map(({ assignment, course, module: _module }) => (
                 <div
                   key={assignment.id}
                   className="p-3 rounded-xl border bg-muted/20 hover:bg-muted/40 transition-colors space-y-1.5"

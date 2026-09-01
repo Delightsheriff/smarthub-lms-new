@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { GraduationCap, BookOpen, Plus } from "lucide-react";
+import { GraduationCap, BookOpen } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTeachingCohorts } from "../api/teaching.queries";
 import { groupCohortsByCourse } from "../lib/group-cohorts";

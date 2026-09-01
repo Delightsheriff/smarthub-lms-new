@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Calendar, Award } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

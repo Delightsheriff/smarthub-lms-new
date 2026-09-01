@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Award, FileText, ExternalLink, Download } from "lucide-react";
+import React, { useState } from "react";
+import { Award, ExternalLink, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,16 +29,9 @@ export function GradingDialog({
   onOpenChange,
   onGradeSubmit,
 }: GradingDialogProps) {
-  const [score, setScore] = useState<number>(100);
+  const [score, setScore] = useState<number>(submission?.score ?? 100);
   const [feedback, setFeedback] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (submission) {
-      setScore(submission.score ?? 100);
-      setFeedback("");
-    }
-  }, [submission]);
 
   if (!submission) return null;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { calendarService } from "./calendar.service";
 import { normaliseEvent } from "./normalise";
@@ -22,11 +23,18 @@ export function useStudentCalendar(range?: { from?: string; to?: string }) {
 
 export function useUpcomingEvents(limit = 5) {
   const all = useStudentCalendar();
+  const [now] = useState(() => Date.now());
+
+  const data = useMemo(() => {
+    const cutoff = now - 3600 * 2 * 1000;
+    return (all.data || [])
+      .filter((e) => !e.isCancelled && e.start.getTime() >= cutoff)
+      .sort((a, b) => a.start.getTime() - b.start.getTime())
+      .slice(0, limit);
+  }, [all.data, limit, now]);
+
   return {
     ...all,
-    data: (all.data || [])
-      .filter((e) => !e.isCancelled && e.start.getTime() >= Date.now() - 3600 * 2 * 1000)
-      .sort((a, b) => a.start.getTime() - b.start.getTime())
-      .slice(0, limit),
+    data,
   };
 }

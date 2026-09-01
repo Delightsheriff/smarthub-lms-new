@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { Award, Calendar, Eye, EyeOff, Edit, Plus } from "lucide-react";
+import React from "react";
+import { Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
 import { useCohortAssignments, useUpdateAssignmentSchedule } from "../api/teaching.queries";
-import type { CohortAssignmentRow } from "../types";
 
 interface CohortAssignmentsTabProps {
   scheduleId: string;

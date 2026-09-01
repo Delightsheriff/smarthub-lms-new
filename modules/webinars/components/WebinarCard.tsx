@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
-import { webinarStatus, webinarStatusLabel, isJoinWindowOpen } from "../lib/webinar-status";
+import { webinarStatus, isJoinWindowOpen } from "../lib/webinar-status";
 import type { WebinarSummary } from "../types";
 
 interface WebinarCardProps {

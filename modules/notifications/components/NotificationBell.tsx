@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck, BookOpen, Award, Megaphone, Clock } from "lucide-react";
+import { Bell, CheckCheck, BookOpen, Award, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {

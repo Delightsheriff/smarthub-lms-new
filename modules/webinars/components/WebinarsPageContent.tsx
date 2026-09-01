@@ -1,22 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { Presentation, Video } from "lucide-react";
+import { Presentation } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWebinars } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
+import type { WebinarSummary } from "../types";
 
 export function WebinarsPageContent() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
 
-  const upcomingQuery = useWebinars({ sort: "upcoming" });
-  const pastQuery = useWebinars({ sort: "past" });
+  const upcomingQuery = useWebinars("upcoming");
+  const pastQuery = useWebinars("past", { page: 1, pageSize: 12 });
 
-  const activeQuery = activeTab === "upcoming" ? upcomingQuery : pastQuery;
-  const webinars = activeQuery.data || [];
-  const isLoading = activeQuery.isLoading;
-  const error = activeQuery.error;
+  const upcomingList = (upcomingQuery.data as WebinarSummary[]) || [];
+  const pastList = (pastQuery.data as { items: WebinarSummary[] } | undefined)?.items || [];
+
+  const webinars = activeTab === "upcoming" ? upcomingList : pastList;
+  const isLoading = activeTab === "upcoming" ? upcomingQuery.isLoading : pastQuery.isLoading;
+  const error = activeTab === "upcoming" ? upcomingQuery.error : pastQuery.error;
 
   return (
     <div className="container max-w-6xl py-8 space-y-6">
@@ -37,7 +40,7 @@ export function WebinarsPageContent() {
         >
           <TabsList className="rounded-xl bg-muted/60 p-1">
             <TabsTrigger value="upcoming" className="rounded-lg text-xs">
-              Upcoming ({upcomingQuery.data?.length || 0})
+              Upcoming ({upcomingList.length})
             </TabsTrigger>
             <TabsTrigger value="past" className="rounded-lg text-xs">
               Past Recordings

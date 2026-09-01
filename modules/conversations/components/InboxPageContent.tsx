@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useConversations } from "../api/conversations.queries";
 import { ConversationListItemRow } from "./ConversationListItemRow";
 import { AssignmentThread } from "@/modules/messaging/components/AssignmentThread";
-import type { ConversationListItem } from "../types";
 
 export function InboxPageContent() {
   const [typeFilter, setTypeFilter] = useState<string>("all");

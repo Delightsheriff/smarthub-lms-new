@@ -1,11 +1,9 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Users, Calendar, Award, CheckCircle2, Clock } from "lucide-react";
+import { BookOpen, Users, Award, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
 import type { TeachingCohortDetail } from "../types";
 
 interface CohortOverviewTabProps {

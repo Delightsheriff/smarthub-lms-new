@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Calendar as CalendarIcon, ArrowRight, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ export function DashboardCalendarCard() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: events, isLoading } = useStudentCalendar();
+  const { data: events, isLoading: _isLoading } = useStudentCalendar();
 
   const dayEvents = (events || []).filter((e) => isSameDay(e.start, selectedDate));
 

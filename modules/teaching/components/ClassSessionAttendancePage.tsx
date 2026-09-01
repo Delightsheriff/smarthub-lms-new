@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Video, Calendar, Clock, Save } from "lucide-react";
+import { ArrowLeft, Video, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDateTime } from "@/lib/utils";
 import { useSessionAttendance, useMarkSessionAttendance } from "../api/attendance.queries";
-import type { AttendanceStatus, SessionAttendanceRow } from "../types/attendance";
+import type { AttendanceStatus } from "../types/attendance";
 
 interface ClassSessionAttendancePageProps {
   sessionId: string;
@@ -21,25 +21,12 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
   const { data: sessionData, isLoading, error } = useSessionAttendance(sessionId);
   const markMutation = useMarkSessionAttendance(sessionId);
 
-  const [marksState, setMarksState] = useState<Map<string, { status: AttendanceStatus; note?: string }>>(
+  const [localOverrides, setLocalOverrides] = useState<Map<string, { status: AttendanceStatus; note?: string }>>(
     () => new Map(),
   );
 
-  useEffect(() => {
-    if (sessionData?.rows) {
-      const map = new Map<string, { status: AttendanceStatus; note?: string }>();
-      for (const row of sessionData.rows) {
-        map.set(row.studentId, {
-          status: row.status || "absent",
-          note: row.note,
-        });
-      }
-      setMarksState(map);
-    }
-  }, [sessionData]);
-
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
-    setMarksState((prev) => {
+    setLocalOverrides((prev) => {
       const next = new Map(prev);
       const existing = next.get(studentId) || { status: "absent" };
       next.set(studentId, { ...existing, status });
@@ -48,7 +35,7 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
   };
 
   const handleNoteChange = (studentId: string, note: string) => {
-    setMarksState((prev) => {
+    setLocalOverrides((prev) => {
       const next = new Map(prev);
       const existing = next.get(studentId) || { status: "absent" };
       next.set(studentId, { ...existing, note });
@@ -57,11 +44,14 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
   };
 
   const handleSaveAll = async () => {
-    const marksArray = Array.from(marksState.entries()).map(([studentId, data]) => ({
-      studentId,
-      status: data.status,
-      note: data.note,
-    }));
+    const marksArray = rows.map((row) => {
+      const override = localOverrides.get(row.studentId);
+      return {
+        studentId: row.studentId,
+        status: override?.status ?? row.status ?? "absent",
+        note: override?.note ?? row.note,
+      };
+    });
 
     await markMutation.mutateAsync({ marks: marksArray });
   };
@@ -132,7 +122,9 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
 
             <div className="space-y-3">
               {rows.map((row) => {
-                const mark = marksState.get(row.studentId) || { status: row.status || "absent" };
+                const override = localOverrides.get(row.studentId);
+                const markStatus = override?.status ?? row.status ?? "absent";
+                const markNote = override?.note ?? row.note ?? "";
 
                 return (
                   <div
@@ -156,7 +148,7 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                       {/* Status Selector */}
                       <Select
-                        value={mark.status}
+                        value={markStatus}
                         onValueChange={(v) => handleStatusChange(row.studentId, v as AttendanceStatus)}
                       >
                         <SelectTrigger className="w-32 rounded-xl text-xs bg-background">
@@ -172,7 +164,7 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
 
                       {/* Note Input */}
                       <Textarea
-                        value={mark.note || ""}
+                        value={markNote}
                         onChange={(e) => handleNoteChange(row.studentId, e.target.value)}
                         placeholder="Optional note..."
                         rows={1}

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Award, Video, FileText } from "lucide-react";
+import { Award, Video } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { TeachingModule } from "../types";
