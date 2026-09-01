@@ -1,5 +1,4 @@
 "use client";
-import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   SidebarInset,
@@ -37,13 +36,17 @@ import { cn } from "@/lib/utils";
  * - App-wide socket + keyboard listeners (`MessageToastListener`,
  *   `CommandPaletteListener`).
  */
+import { redirect, usePathname } from "next/navigation";
+
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const collapsed = useSidebarStore((s) => s.collapsed);
   const setCollapsed = useSidebarStore((s) => s.setCollapsed);
 
   if (!isAuthenticated) {
-    redirect("/login");
+    const nextUrl = pathname && pathname !== "/dashboard" ? `/login?next=${encodeURIComponent(pathname)}` : "/login";
+    redirect(nextUrl);
   }
 
   return (
