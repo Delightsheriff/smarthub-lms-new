@@ -255,12 +255,31 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 
 ---
 
+## Plan 007 — Calendar + Activity + Webinars ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** Three read-oriented surfaces delivered. Calendar includes Month grid (6×7), Week grid (data-driven hour bands), Day view, Agenda timeline, Course filter chips, and `EventDetailDialog`. Activity feed includes group-by-day actions, action icons, and pagination. Webinars module includes Upcoming/Past tabs, live join vs recording watch links, and `DashboardWebinarsWidget`.
+
+| Deliverable | Status |
+|---|---|
+| Mock database & router — seeded calendar events across scopes, activity history events, and webinars list w/ filtering & pagination | ✅ `7df421d` |
+| `modules/calendar/` — types, `grid-utils` math, `normaliseEvent` taproot, service, queries (`useStudentCalendar`, `useUpcomingEvents`) | ✅ `b4632d1` |
+| Calendar components — `MonthGrid`, `WeekGrid`, `DayView`, `CourseFilterChips`, `EventDetailDialog`, `CalendarPageContent`, `DashboardCalendarCard`, `UpcomingDeadlinesPanel` | ✅ `265ac37` |
+| `modules/activity/` — types, service, queries, `MyActivityPageContent` feed component w/ pagination | ✅ `1554535` |
+| `modules/webinars/` — `WebinarCard`, `WebinarsPageContent`, `DashboardWebinarsWidget` | ✅ `9ec2a68` |
+| Routes & Dashboard — `/calendar`, `/activity`, `/webinars` pages, dashboard grid layout | ✅ `ae4d8eb` |
+| Tests — `tests/calendar/grid-utils.test.ts`, `tests/calendar/normalise.test.ts`, `tests/webinars/webinar-status.test.ts` (101 total tests passing) | ✅ `ae4d8eb` |
+| Verify: typecheck / lint / **101 tests pass** / build (30 routes) | ✅ |
+
+---
+
 ## Future plans (deferred, in delivery order)
 
 | Plan | Focus | Status |
 |---|---|---|
 | 006 | Assignments | ✅ built + verified |
-| 007 | Calendar / activity / webinars | 🚫 not started |
+| 007 | Calendar / activity / webinars | ✅ built + verified |
 | 008 | Messaging / inbox / notifications | 🚫 not started |
 | 010 | Programs & AI help (Oreo) | ✅ built + QA'd (agent-browser walkthrough) |
 | 011 | Teaching / instructor CRUD | 🚫 not started |
