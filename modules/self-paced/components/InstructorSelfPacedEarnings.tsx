@@ -85,7 +85,7 @@ function AccruedStatus({ row }: { row: SelfPacedShareRow }) {
       return (
         <Badge
           variant="outline"
-          className="border-emerald-500/30 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-300"
+          className="border-success/30 text-success bg-success/10"
         >
           Paid
         </Badge>
@@ -95,7 +95,7 @@ function AccruedStatus({ row }: { row: SelfPacedShareRow }) {
       return (
         <Badge
           variant="outline"
-          className="border-blue-500/30 text-blue-700 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300"
+          className="border-primary/30 text-primary bg-primary/10"
           title={
             state === "pending"
               ? "Approved for payout; waiting to be included in the next one"
@@ -111,7 +111,7 @@ function AccruedStatus({ row }: { row: SelfPacedShareRow }) {
       return (
         <Badge
           variant="outline"
-          className="border-amber-500/30 text-amber-700 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300"
+          className="border-warning/30 text-warning bg-warning/10"
         >
           Pending
         </Badge>
@@ -202,9 +202,9 @@ export function InstructorSelfPacedEarnings() {
               </h2>
             )}
             <div className="grid gap-3 sm:grid-cols-3">
-              <Tile label="Pending" tone="amber" value={formatMinor(b.pending, t.currency)} />
-              <Tile label="Processing" tone="blue" value={formatMinor(b.processing, t.currency)} />
-              <Tile label="Paid" tone="primary" value={formatMinor(b.paid, t.currency)} />
+              <Tile label="Pending" tone="warning" value={formatMinor(b.pending, t.currency)} />
+              <Tile label="Processing" tone="primary" value={formatMinor(b.processing, t.currency)} />
+              <Tile label="Paid" tone="success" value={formatMinor(b.paid, t.currency)} />
             </div>
             {(b.clawedBack > 0 || b.review > 0 || t.notEligibleCount > 0) && (
               <p className="text-xs text-muted-foreground">
@@ -379,12 +379,15 @@ function Tile({
 }: {
   label: string;
   value: string;
-  tone: "amber" | "blue" | "primary";
+  tone: "warning" | "primary" | "success";
 }) {
+  // Same three states AccruedStatus's badges use, same colors: Paid is
+  // success everywhere in this file now, not primary in one place and
+  // emerald in another.
   const palette: Record<typeof tone, string> = {
-    amber: "bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800/40 dark:text-amber-200",
-    blue: "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-800/40 dark:text-blue-200",
-    primary: "bg-primary/5 border-primary/20 text-primary",
+    warning: "bg-warning/10 border-warning/30 text-warning",
+    primary: "bg-primary/10 border-primary/30 text-primary",
+    success: "bg-success/10 border-success/30 text-success",
   };
   return (
     <div className={"rounded-lg border p-4 " + palette[tone]}>

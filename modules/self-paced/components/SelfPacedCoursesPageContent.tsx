@@ -1,7 +1,8 @@
 "use client";
 import { PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { publicSiteOrigin } from "@/lib/public-origin";
 import { useSelfPacedCourses } from "../api/self-paced.queries";
 import { SelfPacedCoursesSection } from "./SelfPacedCoursesSection";
@@ -12,33 +13,28 @@ export function SelfPacedCoursesPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Self-paced courses
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Work through lessons in order and pick up exactly where you left off.
-        </p>
-      </header>
+      <PageHeader
+        title="Self-paced courses"
+        description="Work through lessons in order and pick up exactly where you left off."
+      />
 
       {empty ? (
-        <Card className="p-10 text-center">
-          <PlayCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No self-paced courses yet</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            Courses you buy appear here straight away.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            render={
-              <a href={publicSiteOrigin()} target="_blank" rel="noopener noreferrer">
-                Browse courses
-              </a>
-            }
-          />
-        </Card>
+        <EmptyState
+          icon={PlayCircle}
+          title="No self-paced courses yet"
+          description="Courses you buy appear here straight away."
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              render={
+                <a href={publicSiteOrigin()} target="_blank" rel="noopener noreferrer">
+                  Browse courses
+                </a>
+              }
+            />
+          }
+        />
       ) : (
         <SelfPacedCoursesSection title={null} description={null} />
       )}

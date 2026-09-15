@@ -279,7 +279,7 @@ function LinkCard({
         {link.isActive ? (
           <Badge
             variant="outline"
-            className="border-emerald-500/30 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-300"
+            className="border-success/30 text-success bg-success/10"
           >
             Active
           </Badge>

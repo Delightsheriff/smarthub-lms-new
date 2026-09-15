@@ -91,8 +91,8 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
           {course.whatsappGroupUrl && (
             <Card className="p-5">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20">
-                  <MessageCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
+                  <MessageCircle className="h-5 w-5 text-success" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold leading-tight">Join the course community</p>
@@ -196,7 +196,7 @@ function CourseHero({ course }: { course: SelfPacedCourse }) {
               {completed && (
                 <Badge
                   variant="outline"
-                  className="border-emerald-500/30 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  className="border-success/30 text-success bg-success/10"
                 >
                   Completed
                 </Badge>

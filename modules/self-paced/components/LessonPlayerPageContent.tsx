@@ -224,7 +224,7 @@ export function LessonPlayerPageContent({
               {lesson.completed ? (
                 <Button
                   variant="outline"
-                  className="border-emerald-500/40 text-emerald-700 hover:text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300"
+                  className="border-success/40 text-success hover:text-success/80"
                   onClick={() => setUnmarking(lesson)}
                   disabled={toggle.isPending}
                 >
@@ -418,10 +418,10 @@ function UpNextPrompt({
   }, [seconds, href, router]);
 
   return (
-    <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between border-emerald-500/30 bg-emerald-500/5">
+    <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between border-success/30 bg-success/5">
       <div className="min-w-0">
         <p className="text-sm font-semibold inline-flex items-center gap-1.5">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2 className="h-4 w-4 text-success" />
           Lesson complete
         </p>
         <p className="text-sm text-muted-foreground truncate">

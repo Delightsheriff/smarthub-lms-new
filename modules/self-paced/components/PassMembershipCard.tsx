@@ -50,14 +50,14 @@ export function PassMembershipCard({ compact = false }: { compact?: boolean }) {
             {endingSoon ? (
               <Badge
                 variant="outline"
-                className="border-amber-500/30 text-amber-700 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300"
+                className="border-warning/30 text-warning bg-warning/10"
               >
                 Ends in {daysLeft} {daysLeft === 1 ? "day" : "days"}
               </Badge>
             ) : (
               <Badge
                 variant="outline"
-                className="border-emerald-500/30 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-300"
+                className="border-success/30 text-success bg-success/10"
               >
                 Active
               </Badge>

@@ -41,7 +41,7 @@ export function SelfPacedCourseCard({
               variant={completed ? "outline" : started ? "default" : "outline"}
               className={
                 "text-[10px] backdrop-blur bg-background/80 " +
-                (completed ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300" : "")
+                (completed ? "border-success/40 text-success" : "")
               }
             >
               {completed ? "Completed" : started ? "In progress" : "Not started"}
@@ -74,7 +74,7 @@ export function SelfPacedCourseCard({
           </div>
 
           {course.certificate && (
-            <p className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <p className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
               <Award className="h-3.5 w-3.5" />
               Certificate ready
             </p>

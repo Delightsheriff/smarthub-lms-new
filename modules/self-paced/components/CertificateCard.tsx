@@ -51,13 +51,13 @@ export function CertificateCard({
   return (
     <Card
       className={cn(
-        "p-5 border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 via-background to-amber-500/5",
+        "p-5 border-success/30 bg-gradient-to-br from-success/5 via-background to-accent/5",
         className
       )}
     >
       <div className="flex gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
-          <Award className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
+          <Award className="h-5 w-5 text-success" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-semibold leading-tight">Certificate of completion</p>

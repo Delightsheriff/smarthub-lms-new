@@ -47,7 +47,7 @@ export function LessonList({
             >
               {lesson.completed ? (
                 <CheckCircle2
-                  className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                  className="h-5 w-5 shrink-0 text-success"
                   aria-label="Completed"
                 />
               ) : (
@@ -88,7 +88,7 @@ export function LessonList({
               {upNext && (
                 <Badge
                   variant="outline"
-                  className="shrink-0 text-[10px] border-amber-500/40 text-amber-700 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300"
+                  className="shrink-0 text-[10px] border-accent/40 text-accent bg-accent/10"
                 >
                   Up next
                 </Badge>
