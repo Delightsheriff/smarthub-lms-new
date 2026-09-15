@@ -105,3 +105,14 @@ with these; sharpen entries (never silently diverge) as modules land.
   the API returns.
 - **Mock database** — `lib/api/mock/mockDatabase.ts`; wire-faithful seed
   fixtures the mock handlers read.
+
+## Self-Paced Learning (Plan 013)
+
+- **Self-Paced Course** — a non-cohort course where lessons are watched asynchronously (`slug`, `lessons[]`, `faqs[]`, `cohortTrack`).
+- **Entitlement** — user authorization to access a course or lesson derived from direct ownership, active pass membership, or instructor status.
+- **Access Pass** — an all-access pass subscription granting access across all self-paced courses.
+- **Upgrade Credit** — credit accrued from self-paced purchases that can be applied toward upgrading to live cohort tracks.
+- **Learner Nudge** — contextual in-app prompts encouraging lesson continuation or completion.
+- **Watermarked Stream / Download** — time-limited, tokenized video streams and downloadable assets.
+- **Attributed Order** — a course purchase referred by an instructor's referral link.
+- **Revenue Share** — instructor compensation ledger derived from attributed and own-channel self-paced sales.

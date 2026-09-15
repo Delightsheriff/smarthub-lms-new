@@ -353,3 +353,19 @@ Oreo mock = single resolved `AskAnswer` ~650ms (streaming states render).
 - **Commit incrementally** — small logical units, per deliverable, not one lump.
 - Use **shadcn** primitives (via MCP); rebuild on `base-vega`; no old theme.
 - Run `npm run typecheck` + `npm run lint` (+ build when feasible) before claiming done.
+
+---
+
+## Plan 013 — Self-Paced Learning ✅
+
+**Status: BUILT & VERIFIED** — completed 2026-09.
+
+**Notes:** Self-paced courses, lesson player, watermarked streaming, ephemeral asset downloads, instructor referral links, attributed sales, and self-paced earnings ledger.
+
+| Deliverable | Status |
+|---|---|
+| Unit 1 — Plan approval, `public-origin.ts`, `Pager` primitive, constants, types, helpers, normalisers & 118 unit tests | ✅ `0439d4e` |
+| Unit 2 — Service & query layers (`self-paced.service.ts`, `self-paced.queries.ts`, `instructor.service.ts`, `instructor.queries.ts`, hooks) | ✅ `3f7119c` |
+| Unit 3 — UI components (`SelfPacedCoursesPageContent`, `SelfPacedCoursePageContent`, `LessonPlayerPageContent`, `InstructorSelfPacedPageContent`, referral links, sales, earnings) | ✅ `831c4cc` |
+| Unit 4 — Route integration (`/learn`, `/learn/[slug]`, `/learn/[slug]/lessons/[lessonId]`, `/self-paced/[slug]`, `/teach/self-paced`) & navigation chrome | ✅ `11aa77c` |
+| Unit 5 — ADR 0017, glossary in `CONTEXT.md`, ledger in `PROGRESS.md` & full clean verification | ✅ |
