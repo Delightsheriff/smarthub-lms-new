@@ -30,7 +30,7 @@ are met and committed.
 | 14 | [profile.md](profile.md) | Profile | ✅ Redesigned earlier this session |
 | 15 | [webinars.md](webinars.md) | Webinars | ✅ Done |
 | 16 | [help.md](help.md) | Help | ✅ Done |
-| 17 | [self-paced-sales.md](self-paced-sales.md) | Self-paced sales (instructor) | 🔴 Not started |
+| 17 | [self-paced-sales.md](self-paced-sales.md) | Self-paced sales (instructor) | 🟡 Spot-checked |
 
 ## Cross-cutting fixes (not page-specific)
 
