@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import {
@@ -27,14 +29,10 @@ export function AssignedModulesPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
-          Assigned to you
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Extra modules your instructors have shared with you.
-        </p>
-      </header>
+      <PageHeader
+        title="Assigned to you"
+        description="Extra modules your instructors have shared with you."
+      />
 
       {isLoading && (
         <div className="space-y-3">
@@ -53,16 +51,11 @@ export function AssignedModulesPageContent() {
       )}
 
       {!isLoading && !error && (data?.length ?? 0) === 0 && (
-        <Card className="p-10 text-center rounded-2xl">
-          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Sparkles className="h-6 w-6" />
-          </span>
-          <p className="font-semibold">Nothing assigned yet</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            When an instructor shares a standalone module with you, it&apos;ll
-            show up here alongside its recordings, materials, and tasks.
-          </p>
-        </Card>
+        <EmptyState
+          icon={Sparkles}
+          title="Nothing assigned yet"
+          description="When an instructor shares a standalone module with you, it'll show up here alongside its recordings, materials, and tasks."
+        />
       )}
 
       {!isLoading && !error && (data?.length ?? 0) > 0 && (
