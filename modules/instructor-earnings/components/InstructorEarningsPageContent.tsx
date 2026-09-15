@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { Wallet, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { useBankingDetails } from "@/modules/referrals/queries/use-my-referrals";
@@ -74,27 +76,13 @@ export function InstructorEarningsPageContent() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Header />
+        <Skeleton className="h-9 w-40" />
         <div className="grid gap-3 sm:grid-cols-3">
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
         </div>
         <Skeleton className="h-40 w-full rounded-2xl" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <Header />
-        <Card className="p-6 text-center space-y-2 border-destructive/20 bg-destructive/5">
-          <p className="font-semibold">We couldn&apos;t load your earnings</p>
-          <p className="text-sm text-muted-foreground">
-            Please refresh the page. If this keeps happening, contact admin.
-          </p>
-        </Card>
       </div>
     );
   }
@@ -114,9 +102,29 @@ export function InstructorEarningsPageContent() {
     cohorts.length === 0 &&
     payouts.length === 0;
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Earnings"
+          description="Your accrued earnings and payouts across the cohorts you teach."
+        />
+        <Card className="p-6 text-center space-y-2 border-destructive/20 bg-destructive/5">
+          <p className="font-semibold">We couldn&apos;t load your earnings</p>
+          <p className="text-sm text-muted-foreground">
+            Please refresh the page. If this keeps happening, contact admin.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <Header />
+      <PageHeader
+        title="Earnings"
+        description="Your accrued earnings and payouts across the cohorts you teach."
+      />
 
       {/* Bank-details nudge — payouts land in the account on file, so
           an instructor with a pending balance and no banking would get
@@ -187,14 +195,11 @@ export function InstructorEarningsPageContent() {
         )}
 
       {nothingYet ? (
-        <Card className="p-10 text-center">
-          <Wallet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No earnings yet</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            You&apos;ll earn a share of the revenue your cohorts collect.
-            As payments come in, your accrued earnings show up here.
-          </p>
-        </Card>
+        <EmptyState
+          icon={Wallet}
+          title="No earnings yet"
+          description="You'll earn a share of the revenue your cohorts collect. As payments come in, your accrued earnings show up here."
+        />
       ) : (
         <>
           <section className="space-y-3">
@@ -299,17 +304,6 @@ export function InstructorEarningsPageContent() {
         </>
       )}
     </div>
-  );
-}
-
-function Header() {
-  return (
-    <header>
-      <h1 className="text-2xl font-semibold tracking-tight">Earnings</h1>
-      <p className="text-sm text-muted-foreground mt-1">
-        Your accrued earnings and payouts across the cohorts you teach.
-      </p>
-    </header>
   );
 }
 
