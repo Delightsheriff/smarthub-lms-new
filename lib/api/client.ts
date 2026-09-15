@@ -1,5 +1,6 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from "axios";
+import axios, { type AxiosInstance, type AxiosError } from "axios";
 import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 import { ApiError, type ApiResponse } from "@/lib/api/types";
 import { useAuthStore } from "@/store/slices/authStore";
 
@@ -20,25 +21,9 @@ const instance: AxiosInstance = axios.create({
   },
 });
 
-// Single-flight refresh state lock
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (err: unknown) => void;
-}> = [];
-
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else if (token) {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
-// Request Interceptor — attach Bearer token
+// Request Interceptor — attach Bearer token. Reads the Zustand store
+// (kept in sync with the NextAuth session by AuthSessionBridge) rather
+// than `useSession()` directly, since this runs outside React.
 instance.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token && config.headers) {
@@ -47,65 +32,25 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
-// Response Interceptor — handle single-flight 401 refresh + error mapping
+// Response interceptor. smarthub-api's access tokens carry no `exp`
+// claim (jwt.sign() with no expiresIn) — they don't expire, so a 401
+// here means the session is genuinely invalid (account suspended,
+// revoked, JWT_SECRET rotated), never "needs a routine refresh". Sign
+// out for real — clears the NextAuth cookie and, via the bridge, the
+// mirrored Zustand state — instead of the single-flight refresh dance
+// this used to attempt (which called a since-fixed-elsewhere endpoint
+// that was never the actual fix for a non-expiring token anyway).
+let signingOut = false;
 instance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<{ message?: string; error?: string; statusCode?: number }>) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      if (originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/refresh")) {
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: (newToken: string) => {
-              if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-              }
-              resolve(instance(originalRequest));
-            },
-            reject: (err) => reject(err),
-          });
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const refreshResponse = await axios.post<ApiResponse<{ token?: string }>>(
-          `${API_BASE_URL}/auth/refresh-token`,
-          {},
-          { withCredentials: true },
-        );
-
-        // The refresh endpoint's envelope names this field `token`, not
-        // `accessToken` (that name is only used by /auth/login's payload).
-        const newToken = refreshResponse.data.data?.token;
-        if (newToken) {
-          const user = useAuthStore.getState().user;
-          if (user) {
-            useAuthStore.getState().setAuth(user, newToken);
-          }
-          processQueue(null, newToken);
-
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          }
-          return instance(originalRequest);
-        }
-      } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        useAuthStore.getState().logout();
-        return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
+  async (error: AxiosError) => {
+    if (error.response?.status === 401 && !signingOut) {
+      signingOut = true;
+      await signOut({ redirect: false });
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
-
     return Promise.reject(error);
   },
 );
