@@ -1,7 +1,6 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { AuthUser } from "@/types/auth";
 
 export function toAuthUser(u: {
@@ -82,28 +81,26 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      setAuth: (user, token) =>
-        set({
-          user,
-          token: token ?? null,
-          isAuthenticated: true,
-        }),
-      setUser: (user) => set({ user, isAuthenticated: true }),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+/**
+ * No `persist` middleware here on purpose. NextAuth's httpOnly session
+ * cookie is the actual, durable source of truth now (see auth.ts) —
+ * this store is a pure in-memory mirror of it, re-populated every load
+ * by `AuthSessionBridge`. A second, independent persistence layer
+ * (this store's own localStorage cache) would race the real session
+ * on every fresh load: stale cached user/token rendered first, then
+ * silently overwritten once the bridge's effect catches up — the same
+ * class of flash this replaces, just inverted.
+ */
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  setAuth: (user, token) =>
+    set({
+      user,
+      token: token ?? null,
+      isAuthenticated: true,
     }),
-    {
-      name: "smarthub-lms-new.auth.v2",
-      partialize: (s) => ({
-        user: s.user,
-        token: s.token,
-        isAuthenticated: s.isAuthenticated,
-      }),
-    },
-  ),
-);
+  setUser: (user) => set({ user, isAuthenticated: true }),
+  logout: () => set({ user: null, token: null, isAuthenticated: false }),
+}));
