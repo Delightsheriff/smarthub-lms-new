@@ -63,7 +63,7 @@ export function BottomNav() {
                 <Link
                   href={item.href}
                   className={cn(
-                    "group flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-colors",
+                    "group flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-colors active:scale-[0.96]",
                     active
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -71,8 +71,8 @@ export function BottomNav() {
                 >
                   <span
                     className={cn(
-                      "relative flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
-                      active && "bg-primary/10"
+                      "relative flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150",
+                      active && "bg-primary text-primary-foreground shadow-sm"
                     )}
                   >
                     <Icon className="h-4.5 w-4.5" />
@@ -95,7 +95,7 @@ export function BottomNav() {
               type="button"
               onClick={() => setMoreOpen(true)}
               className={cn(
-                "flex w-full flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-colors",
+                "flex w-full flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-colors active:scale-[0.96]",
                 moreIsActive || moreOpen
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -103,8 +103,12 @@ export function BottomNav() {
             >
               <span
                 className={cn(
-                  "relative flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
-                  (moreIsActive || moreOpen) && "bg-primary/10"
+                  "relative flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150",
+                  // Solid fill only for "you're on one of these pages"
+                  // (persistent state); the sheet merely being open is
+                  // transient and gets a lighter ring instead.
+                  moreIsActive && "bg-primary text-primary-foreground shadow-sm",
+                  !moreIsActive && moreOpen && "ring-2 ring-primary/30"
                 )}
               >
                 <MoreHorizontal className="h-4.5 w-4.5" />
@@ -148,9 +152,9 @@ export function BottomNav() {
                     href={item.href}
                     onClick={() => setMoreOpen(false)}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-2 rounded-2xl px-2 py-4 transition-colors",
+                      "flex flex-col items-center justify-center gap-2 rounded-2xl px-2 py-4 transition-colors active:scale-[0.97]",
                       active
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
