@@ -20,3 +20,4 @@ a later ADR that reverses an earlier one must say so explicitly.
 | 0013 | Instructor teaching aggregates and attendance seam (independent attendance polling, shared submission grading adapter, server/mock-side rollups) | Accepted |
 | 0014 | Auth flows and real API swap (Axios client with 401 refresh interceptor, complete removal of mock data, store-backed app shell auth gate) | Accepted |
 | 0015 | Restore SmartHub brand colors — maroon `#430330` / orange `#F29913`, independent `--accent`, both themes (**supersedes 0005**) | Accepted |
+| 0016 | Grouped nav sections (data-driven, run-split not group-merge) + solid maroon active-state fill as a shared-primitive change (**extends 0007**) | Accepted |
