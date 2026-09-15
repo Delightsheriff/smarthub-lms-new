@@ -15,6 +15,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.9.1",
+    "@shadcn/react": "^0.3.1",
     "@tanstack/react-query": "^5.102.8",
     "@tiptap/react": "^3.30.5",
     "@tiptap/starter-kit": "^3.30.5",
