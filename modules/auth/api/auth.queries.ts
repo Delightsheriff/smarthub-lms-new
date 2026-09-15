@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { signIn, signOut } from "next-auth/react";
+import { toast } from "sonner";
 import { authService } from "./auth.service";
 import { useAuthStore, toAuthUser } from "@/store/slices/authStore";
 import type {
@@ -16,29 +18,42 @@ export const AUTH_QUERY_KEYS = {
   invitation: (token: string) => ["auth", "invitation", token] as const,
 } as const;
 
+/**
+ * Signs in through NextAuth's Credentials provider (auth.ts calls the
+ * real smarthub-api /auth/login server-side). `AuthSessionBridge`
+ * mirrors the resulting session into the Zustand store once it lands —
+ * this mutation doesn't call `setAuth` itself, only surfaces success/
+ * failure to the form. `redirect: false` keeps NextAuth from doing its
+ * own navigation; `LoginPageContent` already does that with `nextPath`.
+ */
 export function useLogin() {
-  const setAuth = useAuthStore((s) => s.setAuth);
-
   return useMutation({
-    mutationFn: (payload: LoginRequest) => authService.login(payload),
-    onSuccess: (res) => {
-      const authUser = toAuthUser(res.user);
-      setAuth(authUser, res.accessToken);
+    mutationFn: async (payload: LoginRequest) => {
+      const result = await signIn("credentials", {
+        email: payload.email,
+        password: payload.password,
+        redirect: false,
+      });
+      if (!result || result.error) {
+        throw new Error(
+          result?.error === "CredentialsSignin"
+            ? "Invalid email or password"
+            : "Sign in failed. Please try again.",
+        );
+      }
+      return result;
+    },
+    onError: (error) => {
+      // signIn() doesn't go through apiClient, so there's no automatic
+      // toast for it the way every other mutation gets one.
+      toast.error(error instanceof Error ? error.message : "Sign in failed");
     },
   });
 }
 
 export function useLogout() {
-  const logout = useAuthStore((s) => s.logout);
-
   return useMutation({
-    mutationFn: () => authService.logout(),
-    onSuccess: () => {
-      logout();
-    },
-    onError: () => {
-      logout();
-    },
+    mutationFn: () => signOut({ redirect: false }),
   });
 }
 
