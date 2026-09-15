@@ -14,13 +14,21 @@ const STUDENT_ASSIGNMENTS_PAGE_SIZE = 200;
 
 class AssignmentsService {
   async getStudentAssignments(): Promise<ApiAssignment[]> {
+    // 404 "Student record not found" is a legitimate response for an
+    // instructor-only account (no Student doc) — a dashboard widget,
+    // not a broken call. Silenced like the other self-gating widgets
+    // (progress pulse, achievements); callers treat empty/error the same.
     return apiClient.get<ApiAssignment[]>(ASSIGNMENTS_ENDPOINTS.STUDENT, {
       params: { pageSize: STUDENT_ASSIGNMENTS_PAGE_SIZE },
+      silent: true,
     });
   }
 
   async getUpcomingDeadlines(): Promise<ApiAssignment[]> {
-    return apiClient.get<ApiAssignment[]>(ASSIGNMENTS_ENDPOINTS.UPCOMING);
+    // Same "no Student record" case as getStudentAssignments above.
+    return apiClient.get<ApiAssignment[]>(ASSIGNMENTS_ENDPOINTS.UPCOMING, {
+      silent: true,
+    });
   }
 
   async getAssignmentById(id: string): Promise<ApiAssignment> {

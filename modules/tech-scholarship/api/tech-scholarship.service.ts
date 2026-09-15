@@ -13,11 +13,13 @@ class TechScholarshipService {
     );
   }
 
-  /** The share-ready banner bundle. `force` regenerates the images. */
+  /** The share-ready banner bundle. `force` regenerates the images.
+   *  409s with "banner available once awarded" for every non-scholar
+   *  account — a dashboard-card self-gate case, not a bug. */
   async getBanner(force = false): Promise<ApiScholarshipBanner> {
     return apiClient.get<ApiScholarshipBanner>(
       SCHOLARSHIP_ENDPOINTS.BANNER,
-      { params: { force } },
+      { params: { force }, silent: true },
     );
   }
 
