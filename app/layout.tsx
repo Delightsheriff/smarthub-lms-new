@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
+import { auth } from "@/auth";
 import { AppProviders } from "@/components/providers/app-providers";
 
 const fontSans = Inter({
@@ -32,11 +33,17 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetched server-side so `SessionProvider` mounts client-side with
+  // the real session already known — without this, `useSession()`
+  // starts in a "loading" state on every fresh load and any gate that
+  // doesn't explicitly wait for it (see AppShell) flashes to /login.
+  const session = await auth();
+
   return (
     <html
       lang="en"
@@ -44,7 +51,7 @@ export default function RootLayout({
       className={`${fontSans.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders session={session}>{children}</AppProviders>
       </body>
     </html>
   );
