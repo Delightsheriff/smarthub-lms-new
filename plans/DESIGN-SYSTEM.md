@@ -89,12 +89,14 @@ new page surface, check this list first.
 | `Stagger` / `StaggerItem` | `components/animation/stagger.tsx` (pre-existing, now actually used) | Flat, un-animated list/grid pop-in |
 | `groupNavItems` | `lib/nav-grouping.ts` | Ad hoc sidebar section grouping (unit-tested — see `tests/nav/grouping.test.ts`) |
 | Per-domain type→icon→color maps | `modules/notifications/lib/notification-type.ts`, `modules/activity/lib/action-type.ts` | Duplicated `getIcon()`/`getActionInfo()` switches with raw Tailwind colors. **Pattern, not a single shared file** — two different domains (notification types vs. activity actions) get two small modules, not one forced abstraction. Do the same for a third domain rather than overloading one of these. |
+| Chat primitives: `MessageScroller`/`Message`/`Bubble`/`Marker`/`Attachment` | `components/ui/message-scroller.tsx`, `message.tsx`, `bubble.tsx`, `marker.tsx`, `attachment.tsx` | shadcn's official chat components (added 2026-06, see `ui.shadcn.com/docs/changelog/2026-06-chat-components`). Used by Ask Oreo (`modules/oreo/components/OreoPageContent.tsx`). **Gotcha:** `npx shadcn add` generates these importing `cn` from the standalone `cn` npm package, not this repo's `@/lib/utils` — fix that import on every file the CLI touches, and don't let the `cn` package linger as a second, redundant class-merge utility. `@shadcn/react` (the headless scroll/anchoring logic behind `MessageScroller`) is a real, needed dependency — keep it. |
 
 Pages already migrated to this set: Courses, Help, Notifications
 (+ `NotificationBell`), Activity, Webinars, both self-paced page-level
-surfaces, Profile/Settings, and all four auth screens. Not yet
-migrated: Referrals (882 LOC, 4 tabs), Billing, Internships, Tech
-Scholarship, Oreo, Assigned-modules.
+surfaces, Profile/Settings, Referrals, Billing, Internships, Oreo,
+Assigned-modules, and all four auth screens. Not yet migrated:
+Tech Scholarship (no standalone page — dashboard widget only, already
+consistent).
 
 ---
 
@@ -259,6 +261,7 @@ checkout.
 | Courses, Help, Notifications, Activity, Webinars migrated to shared primitives | ✅ Done |
 | Self-paced module: raw-color cleanup + `PageHeader`/`EmptyState` adoption | ✅ Done |
 | Profile/Settings redesign | ✅ Done — left settings rail (solid active-state, replaces the wrapping `TabsList`), every section wrapped in a matching `Card` header, dead "Notifications" row removed from Overview, `notification-prefs` endpoint path fixed, `Switch` dark-mode contrast fixed |
-| Referrals, Billing, Internships, Tech Scholarship, Oreo, Assigned-modules | ⬜ Not started |
+| Referrals, Billing, Internships, Oreo, Assigned-modules | ✅ Done — PageHeader/EmptyState adoption throughout; Referrals also moved onto the segmented-header-tabs pattern; Oreo rebuilt on shadcn's new chat primitives (`message-scroller`/`message`/`bubble`) |
+| Tech Scholarship | ✅ Already consistent — dashboard-only widget (`TechScholarshipCard`), no standalone page exists |
 | Per-page segmented header tabs (the CRM inspiration's "Companies · Active" pattern) | ⬜ Deliberately deferred — a per-page decision, not a chrome concern |
 | Full profile "entity drawer" (CRM-style avatar/stat-grid/list panel) | ⬜ Superseded — the left-rail + header-card shape shipped instead; revisit only if a future page specifically needs the CRM stat-grid layout |
