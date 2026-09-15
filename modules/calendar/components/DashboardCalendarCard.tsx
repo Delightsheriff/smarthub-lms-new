@@ -18,7 +18,7 @@ export function DashboardCalendarCard() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: events, isLoading: _isLoading } = useStudentCalendar();
+  const { data: events } = useStudentCalendar();
 
   const dayEvents = (events || []).filter((e) => isSameDay(e.start, selectedDate));
 
