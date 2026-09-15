@@ -242,13 +242,16 @@ export default function ProfilePageContent() {
                     </CardHeader>
                     <div className="divide-y">
                     <Row icon={Mail} label="Email" value={user?.email} />
-                    {user?.studentCode && (
-                      <Row
-                        icon={GraduationCap}
-                        label="Student code"
-                        value={user.studentCode}
-                      />
-                    )}
+                    {/* Always shown, unlike the optional fields below —
+                        every enrolled student has (or will have) a
+                        Student ID, so hiding the row when it's not yet
+                        assigned reads as "this app has no student ID
+                        concept" rather than "not assigned yet". */}
+                    <Row
+                      icon={GraduationCap}
+                      label="Student ID"
+                      value={user?.studentCode || "Not assigned yet"}
+                    />
                     {user?.phone && (
                       <Row icon={Phone} label="Phone" value={user.phone} />
                     )}
