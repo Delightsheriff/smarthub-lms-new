@@ -23,12 +23,18 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  /** Section this item renders under in the sidebar (uppercase micro-
+   *  label, CRM-style grouping). Omit for the ungrouped top/footer
+   *  items — `AppSidebar` renders those with no label at all. */
+  group?: string;
 }
 
 /** Cross-mode items — same affordance regardless of which role the
  *  user is operating as. Calendar is on this list because the
  *  backend auto-merges enrolment + teaching events; one view is
- *  enough. Inbox / Activity / Profile follow the same logic. */
+ *  enough. Inbox / Activity / Profile follow the same logic.
+ *  Deliberately ungrouped — this is the constant footer every mode
+ *  shares, not a section of its own. */
 const COMMON_NAV_ITEMS: NavItem[] = [
   { label: "Calendar", href: "/calendar", icon: CalendarDays },
   { label: "Inbox", href: "/inbox", icon: Inbox },
@@ -42,30 +48,31 @@ const COMMON_NAV_ITEMS: NavItem[] = [
  *  the `intern` role. Lives outside the student/instructor split
  *  because it isn't role-scoped the same way. */
 const INTERN_NAV_ITEMS: NavItem[] = [
-  { label: "Internship", href: "/internships", icon: Briefcase },
+  { label: "Internship", href: "/internships", icon: Briefcase, group: "Internship" },
 ];
 
 /** Mode-scoped items. Labels stay constant across modes — the
  *  destination page reads `useEffectiveMode()` and renders the
- *  right scope. */
+ *  right scope. Home + Ask Oreo stay ungrouped (the two things
+ *  opened most); everything else groups under "Learning". */
 const STUDENT_MODE_ITEMS: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Ask Oreo", href: "/oreo", icon: Sparkles },
-  { label: "Courses", href: "/courses", icon: BookOpen },
-  { label: "Recordings", href: "/recordings", icon: Video },
-  { label: "Materials", href: "/materials", icon: Library },
-  { label: "Tasks", href: "/assignments", icon: ClipboardList },
-  { label: "Assigned to you", href: "/assigned", icon: Sparkles },
-  { label: "Billing", href: "/billing", icon: Wallet },
-  { label: "Payments", href: "/payments", icon: Receipt },
+  { label: "Courses", href: "/courses", icon: BookOpen, group: "Learning" },
+  { label: "Recordings", href: "/recordings", icon: Video, group: "Learning" },
+  { label: "Materials", href: "/materials", icon: Library, group: "Learning" },
+  { label: "Tasks", href: "/assignments", icon: ClipboardList, group: "Learning" },
+  { label: "Assigned to you", href: "/assigned", icon: Sparkles, group: "Learning" },
+  { label: "Billing", href: "/billing", icon: Wallet, group: "Money" },
+  { label: "Payments", href: "/payments", icon: Receipt, group: "Money" },
 ];
 
 const INSTRUCTOR_MODE_ITEMS: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Ask Oreo", href: "/oreo", icon: Sparkles },
-  { label: "Courses", href: "/courses", icon: BookOpen },
-  { label: "Tasks", href: "/assignments", icon: ClipboardList },
-  { label: "Earnings", href: "/billing", icon: Wallet },
+  { label: "Courses", href: "/courses", icon: BookOpen, group: "Teaching" },
+  { label: "Tasks", href: "/assignments", icon: ClipboardList, group: "Teaching" },
+  { label: "Earnings", href: "/billing", icon: Wallet, group: "Teaching" },
 ];
 
 /** The 4 items that are always pinned in the mobile bottom bar for

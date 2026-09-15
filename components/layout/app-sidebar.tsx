@@ -1,15 +1,17 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getNavItemsForMode } from "@/configs/nav";
+import { getNavItemsForMode, type NavItem } from "@/configs/nav";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -20,6 +22,27 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/layout/logo";
 import { RoleSwitcher } from "@/components/layout/role-switcher";
+import { UserMenu } from "@/components/layout/user-menu";
+
+/** Splits a flat, ordered nav-item list into contiguous runs sharing
+ *  the same `group` — a pure rendering concern layered on top of
+ *  `getNavItemsForMode`'s data, never a re-ordering of it. Runs, not
+ *  a group-name merge: the ungrouped items at the top (Home, Ask
+ *  Oreo) and the ungrouped footer items (Calendar, Inbox, …) stay in
+ *  their original positions as two separate unlabeled sections,
+ *  rather than collapsing into one bucket at the top. */
+function groupNavItems(items: NavItem[]): { group?: string; items: NavItem[] }[] {
+  const sections: { group?: string; items: NavItem[] }[] = [];
+  for (const item of items) {
+    const last = sections[sections.length - 1];
+    if (last && last.group === item.group) {
+      last.items.push(item);
+    } else {
+      sections.push({ group: item.group, items: [item] });
+    }
+  }
+  return sections;
+}
 
 /**
  * Desktop application rail (shadcn `Sidebar`). Two states, handled by the
@@ -39,10 +62,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navItems = getNavItemsForMode(mode, user);
+  const sections = groupNavItems(navItems);
   const inboxUnread = useInboxUnreadCount();
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(`${href}/`);
+
+  const fullName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    user?.email ||
+    "";
 
   return (
     <Sidebar collapsible="icon" side="left">
@@ -58,38 +87,62 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => {
-                const active = isActive(item.href);
-                const Icon = item.icon;
-                const isInbox = item.href === "/inbox";
-                const badge = isInbox ? inboxUnread : 0;
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      render={
-                        <Link href={item.href}>
-                          <Icon />
-                          <span>{item.label}</span>
-                        </Link>
-                      }
-                      isActive={active}
-                      tooltip={item.label}
-                    />
-                    {badge > 0 && (
-                      <SidebarMenuBadge>
-                        {badge > 99 ? "99+" : badge}
-                      </SidebarMenuBadge>
-                    )}
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {sections.map((section, i) => (
+          <SidebarGroup key={section.group ?? `ungrouped-${i}`}>
+            {section.group && (
+              <SidebarGroupLabel className="uppercase tracking-wider text-[10.5px] font-semibold text-sidebar-foreground/50">
+                {section.group}
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {section.items.map((item) => {
+                  const active = isActive(item.href);
+                  const Icon = item.icon;
+                  const isInbox = item.href === "/inbox";
+                  const badge = isInbox ? inboxUnread : 0;
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        render={
+                          <Link href={item.href}>
+                            <Icon />
+                            <span>{item.label}</span>
+                          </Link>
+                        }
+                        isActive={active}
+                        tooltip={item.label}
+                      />
+                      {badge > 0 && (
+                        <SidebarMenuBadge>
+                          {badge > 99 ? "99+" : badge}
+                        </SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
+
+      {/* Identity card — the avatar opens the existing quick-action
+          menu (UserMenu). A dedicated profile drawer replaces this
+          once the Settings/Profile slice builds it end-to-end. */}
+      <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[collapsible=icon]:items-center">
+        <div className="flex items-center gap-2.5 rounded-xl p-1.5 group-data-[collapsible=icon]:justify-center">
+          <UserMenu />
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">
+              {fullName || "—"}
+            </p>
+            <p className="truncate text-xs text-sidebar-foreground/60">
+              {mode === "instructor" ? "Instructor" : "Student"}
+            </p>
+          </div>
+        </div>
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
