@@ -58,14 +58,18 @@
     --card-foreground: oklch(0.141 0.005 285.823);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.518 0.253 323.949);
-    --primary-foreground: oklch(0.977 0.017 320.058);
+    /* SmartHub brand — #430330 deep maroon, converted from the source
+       HSL(316 91% 14%) to OKLCH. See docs/adr/0016-restore-smarthub-brand-colors.md. */
+    --primary: oklch(0.263 0.108 342.162);
+    --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.967 0.001 286.375);
     --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.518 0.253 323.949);
-    --accent-foreground: oklch(0.977 0.017 320.058);
+    /* SmartHub brand — #F29913 orange spark, converted from HSL(36 89% 51%).
+       A real, independent accent (previously aliased to --primary). */
+    --accent: oklch(0.754 0.162 67.889);
+    --accent-foreground: oklch(0.141 0.005 285.823);
     --destructive: oklch(0.577 0.245 27.325);
     --warning: oklch(0.769 0.188 70.08);
     --warning-foreground: oklch(0.98 0.016 73.684);
@@ -73,7 +77,9 @@
     --success-foreground: oklch(0.984 0.014 180.72);
     --border: oklch(0.92 0.004 286.32);
     --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
+    /* Focus rings, active nav state and progress carry the brand maroon
+       (matches legacy: "maroon owns CTAs, focus rings, progress, active nav"). */
+    --ring: oklch(0.263 0.108 342.162);
     --chart-1: oklch(0.879 0.169 91.605);
     --chart-2: oklch(0.769 0.188 70.08);
     --chart-3: oklch(0.666 0.179 58.318);
@@ -82,12 +88,12 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.591 0.293 322.896);
-    --sidebar-primary-foreground: oklch(0.977 0.017 320.058);
+    --sidebar-primary: oklch(0.263 0.108 342.162);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.967 0.001 286.375);
     --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
     --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.705 0.015 286.067);
+    --sidebar-ring: oklch(0.263 0.108 342.162);
 }
 
 .dark {
@@ -97,14 +103,18 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.21 0.006 285.885);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.452 0.211 324.591);
-    --primary-foreground: oklch(0.977 0.017 320.058);
+    /* Lifted maroon for dark-mode legibility, same brand hue as light mode
+       (mirrors legacy's own light->dark lift: HSL 14%L -> 38%L). */
+    --primary: oklch(0.497 0.194 341.840);
+    --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.274 0.006 286.033);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.274 0.006 286.033);
     --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.452 0.211 324.591);
-    --accent-foreground: oklch(0.977 0.017 320.058);
+    /* Same #F29913 orange spark; it's already bright enough to need no
+       dark-mode lift, only a hair more chroma the way legacy tuned it. */
+    --accent: oklch(0.775 0.155 71.181);
+    --accent-foreground: oklch(0.141 0.005 285.823);
     --destructive: oklch(0.704 0.191 22.216);
     --warning: oklch(0.769 0.188 70.08);
     --warning-foreground: oklch(0.148 0.042 73.684);
@@ -112,7 +122,7 @@
     --success-foreground: oklch(0.148 0.063 164.2);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.552 0.016 285.938);
+    --ring: oklch(0.497 0.194 341.840);
     --chart-1: oklch(0.879 0.169 91.605);
     --chart-2: oklch(0.769 0.188 70.08);
     --chart-3: oklch(0.666 0.179 58.318);
@@ -120,12 +130,12 @@
     --chart-5: oklch(0.473 0.137 46.201);
     --sidebar: oklch(0.21 0.006 285.885);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.667 0.295 322.15);
-    --sidebar-primary-foreground: oklch(0.977 0.017 320.058);
+    --sidebar-primary: oklch(0.497 0.194 341.840);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.274 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.552 0.016 285.938);
+    --sidebar-ring: oklch(0.497 0.194 341.840);
 }
 
 @layer base {
