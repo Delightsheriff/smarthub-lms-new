@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Bell, CheckCheck, BookOpen, Award, Megaphone } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDateTime } from "@/lib/utils";
+import { notificationTypeStyle } from "../lib/notification-type";
 import {
   useNotifications,
   useUnreadCount,
@@ -31,19 +32,6 @@ export function NotificationBell() {
   const handleItemClick = (id: string, read: boolean) => {
     if (!read) {
       markReadMutation.mutate(id);
-    }
-  };
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "grade":
-        return <Award className="h-4 w-4 text-emerald-600" />;
-      case "material":
-        return <BookOpen className="h-4 w-4 text-blue-600" />;
-      case "announcement":
-        return <Megaphone className="h-4 w-4 text-amber-600" />;
-      default:
-        return <Bell className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -111,31 +99,42 @@ export function NotificationBell() {
         {/* List */}
         <div className="divide-y max-h-80 overflow-y-auto scrollbar-none">
           {items.length > 0 ? (
-            items.map((n) => (
-              <div
-                key={n.id}
-                onClick={() => handleItemClick(n.id, n.read)}
-                className={cn(
-                  "p-3 transition-colors cursor-pointer text-xs space-y-1",
-                  !n.read ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/40",
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 font-semibold text-foreground">
-                    {getIcon(n.type)}
-                    <span className="truncate">{n.title}</span>
+            items.map((n) => {
+              const style = notificationTypeStyle(n.type);
+              const Icon = style.icon;
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => handleItemClick(n.id, n.read)}
+                  className={cn(
+                    "p-3 transition-colors cursor-pointer text-xs space-y-1",
+                    !n.read ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/40",
+                  )}
+                >
+                  <div className="flex items-center gap-2 justify-between">
+                    <div className="flex min-w-0 items-center gap-2 font-semibold text-foreground">
+                      <span
+                        className={cn(
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-md",
+                          style.className,
+                        )}
+                      >
+                        <Icon className="h-3 w-3" />
+                      </span>
+                      <span className="truncate">{n.title}</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 font-mono">
+                      {formatDateTime(n.createdAt)}
+                    </span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0 font-mono">
-                    {formatDateTime(n.createdAt)}
-                  </span>
+                  {n.body && (
+                    <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed pl-7">
+                      {n.body}
+                    </p>
+                  )}
                 </div>
-                {n.body && (
-                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed pl-6">
-                    {n.body}
-                  </p>
-                )}
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-xs text-muted-foreground text-center py-6">
               No notifications yet.
