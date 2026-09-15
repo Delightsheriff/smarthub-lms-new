@@ -66,14 +66,14 @@ export function AttendancePinSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         {showing ? (
-          <div className="rounded-lg border border-emerald-600/30 bg-emerald-600/5 p-4">
+          <div className="rounded-lg border border-success/30 bg-success/5 p-4">
             <p className="text-xs text-muted-foreground">Your new PIN (shown once)</p>
             <div className="mt-1 flex items-center justify-between gap-3">
-              <span className="font-mono text-3xl font-bold tracking-widest text-emerald-700">
+              <span className="font-mono text-3xl font-bold tracking-widest text-success">
                 {showing.rawPin}
               </span>
               <Button type="button" size="sm" variant="outline" onClick={copyPin}>
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
             </div>

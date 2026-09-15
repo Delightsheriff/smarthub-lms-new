@@ -56,27 +56,27 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <Card className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-      <CardHeader className="p-0 border-b pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
-          <Lock className="h-4 w-4 text-primary" /> Change Account Password
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Lock className="h-4 w-4" /> Change password
         </CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          Update your account password to maintain security.
+        <CardDescription>
+          Update your account password to keep it secure.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-0 pt-2">
+      <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
               control={form.control}
               name="currentPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-foreground">Current Password</FormLabel>
+                  <FormLabel>Current password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                    <PasswordInput placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,9 +88,9 @@ export function ChangePasswordForm() {
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-foreground">New Password</FormLabel>
+                  <FormLabel>New password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                    <PasswordInput placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,23 +102,21 @@ export function ChangePasswordForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-foreground">Confirm New Password</FormLabel>
+                  <FormLabel>Confirm new password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                    <PasswordInput placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={changeMutation.isPending}
-              className="rounded-xl font-semibold"
-            >
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              {changeMutation.isPending ? "Updating..." : "Update Password"}
-            </Button>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={changeMutation.isPending}>
+                <CheckCircle2 className="h-4 w-4" />
+                {changeMutation.isPending ? "Updating…" : "Update password"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

@@ -1,17 +1,21 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
+  Bell,
+  Briefcase,
   Calendar,
   CheckCircle2,
-  ChevronRight,
   GraduationCap,
+  Landmark,
   LogOut,
   Mail,
   MapPin,
   Pencil,
   Phone,
+  ShieldCheck,
+  Trophy,
   User as UserIcon,
 } from "lucide-react";
 import { EditProfileDetailsDialog } from "@/modules/profile/components/EditProfileDetailsDialog";
@@ -24,13 +28,8 @@ import { ChangePasswordForm } from "@/modules/auth/components/ChangePasswordForm
 import { NotificationSettingsCard } from "@/modules/push/components/NotificationSettingsCard";
 import { AchievementsList } from "@/modules/progress/components/AchievementsList";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,13 +43,32 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+
+type SectionId =
+  | "overview"
+  | "professional"
+  | "siwes"
+  | "banking"
+  | "notifications"
+  | "achievements"
+  | "security";
+
+const SECTIONS: { id: SectionId; label: string; icon: React.ElementType }[] = [
+  { id: "overview", label: "Overview", icon: UserIcon },
+  { id: "professional", label: "Professional", icon: Briefcase },
+  { id: "siwes", label: "SIWES", icon: GraduationCap },
+  { id: "banking", label: "Banking", icon: Landmark },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "achievements", label: "Achievements", icon: Trophy },
+  { id: "security", label: "Security", icon: ShieldCheck },
+];
 
 /**
- * Profile surface — identity card up top, tab strip below with
- * `?tab=` deep-link support (dashboard "Achievements" pulse card
- * points here). Notifications + Achievements render as placeholder
- * panels until those modules ship in a later slice.
+ * Profile / Settings surface — entity header up top, a persistent left
+ * settings rail (solid active-state, like the main sidebar) driving a
+ * single content pane. Replaces the old horizontal `TabsList`, which
+ * wrapped onto 2-3 lines once "Professional" was in play.
  *
  * Client half of the route: reads `?tab=`, so it must live under a
  * `<Suspense>` boundary (the server `page.tsx` provides it) for the
@@ -63,24 +81,31 @@ export default function ProfilePageContent() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [editOpen, setEditOpen] = useState(false);
-  // Honour `?tab=…` so deep-links from the dashboard pulse card
-  // (which points at the achievements tab) land on the right view.
-  const initialTab = searchParams.get("tab") || "overview";
-  const [tab, setTab] = useState(initialTab);
+  const reduceMotion = useReducedMotion();
 
-  const handleTabChange = (value: string) => {
+  // Professional details (job title / department / bio / etc.) are an
+  // instructor concern — the fields exist on every User row but only
+  // make sense for someone teaching. Hide the section for pure
+  // students; show for instructors and dual-role users.
+  const { mode } = useEffectiveMode();
+  const showProfessional = mode !== "student";
+
+  const sections = SECTIONS.filter((s) => s.id !== "professional" || showProfessional);
+
+  // Honour `?tab=…` so deep-links from the dashboard pulse card (which
+  // points at the achievements tab) land on the right section, and fall
+  // back to overview if the tab is hidden (e.g. a student who lands on
+  // `?tab=professional` from a stale link).
+  const requestedTab = (searchParams.get("tab") as SectionId | null) || "overview";
+  const initialTab = sections.some((s) => s.id === requestedTab) ? requestedTab : "overview";
+  const [tab, setTab] = useState<SectionId>(initialTab);
+
+  const handleTabChange = (value: SectionId) => {
     setTab(value);
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", value);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
-
-  // Professional details (job title / department / bio / etc.) are an
-  // instructor concern — the fields exist on every User row but only
-  // make sense for someone teaching. Hide the tab for pure students;
-  // show for instructors and dual-role users.
-  const { mode } = useEffectiveMode();
-  const showProfessional = mode !== "student";
 
   const handleLogout = () => {
     logout();
@@ -95,26 +120,29 @@ export default function ProfilePageContent() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-        {tab === "overview" && (
-          <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
-            <Pencil className="h-3.5 w-3.5 mr-1.5" />
-            Edit details
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        title="Profile"
+        description="Your details, security and preferences."
+        actions={
+          tab === "overview" && (
+            <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+              <Pencil className="h-3.5 w-3.5" />
+              Edit details
+            </Button>
+          )
+        }
+      />
 
-      {/* Identity card — always visible above the tab strip so the
+      {/* Identity card — always visible above the settings rail so the
           user always sees who they're editing. */}
-      <Card className="p-5 md:p-6 flex items-start gap-4">
+      <Card className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center md:p-6">
         <AvatarUploader
           imageUrl={user?.imageUrl}
           initial={initial}
-          size="lg"
+          size="xl"
           className="shrink-0"
         />
-        <div className="min-w-0 flex-1 space-y-1">
+        <div className="min-w-0 flex-1 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-lg font-semibold truncate">{fullName || "—"}</p>
             {user?.isVerified && (
@@ -144,182 +172,205 @@ export default function ProfilePageContent() {
           <p className="text-sm text-muted-foreground truncate">
             {user?.email}
           </p>
-          {user?.studentCode && (
-            <p className="text-xs font-mono tracking-wide text-muted-foreground">
-              {user.studentCode}
-            </p>
-          )}
-          {user?.createdAt && (
-            <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 pt-1">
-              <Calendar className="h-3.5 w-3.5" />
-              Joined {formatDate(user.createdAt, "long")}
-            </p>
-          )}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-0.5">
+            {user?.studentCode && (
+              <p className="text-xs font-mono tracking-wide text-muted-foreground">
+                {user.studentCode}
+              </p>
+            )}
+            {user?.createdAt && (
+              <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                Joined {formatDate(user.createdAt, "long")}
+              </p>
+            )}
+          </div>
         </div>
       </Card>
 
-      <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          {showProfessional && (
-            <TabsTrigger value="professional">Professional</TabsTrigger>
-          )}
-          <TabsTrigger value="siwes">SIWES</TabsTrigger>
-          <TabsTrigger value="banking">Banking</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Settings rail — solid active-state, same visual language as
+            the main sidebar. Horizontally scrollable pill row on
+            mobile, a persistent vertical rail from `lg` up. */}
+        <nav
+          aria-label="Profile sections"
+          className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:w-52 lg:shrink-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
+        >
+          {sections.map((section) => {
+            const isActive = tab === section.id;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => handleTabChange(section.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium whitespace-nowrap transition-colors lg:w-full",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <section.icon className="h-4 w-4 shrink-0" />
+                {section.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Details — every populated field shows; null/missing
-              ones are silently dropped so an incomplete record
-              doesn't leave dashes everywhere. */}
-          <Card className="divide-y">
-            <Row icon={Mail} label="Email" value={user?.email} />
-            {user?.studentCode && (
-              <Row
-                icon={GraduationCap}
-                label="Student code"
-                value={user.studentCode}
-              />
-            )}
-            {user?.phone && (
-              <Row icon={Phone} label="Phone" value={user.phone} />
-            )}
-            <div className="flex items-center gap-4 p-4">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                <UserIcon className="h-4 w-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Gender
-                </p>
-                <p className="text-sm font-medium truncate">
-                  {user?.gender || (
-                    <span className="text-muted-foreground italic">
-                      Not set
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-            {(() => {
-              // country / state arrive as `{ isoCode, name }` from
-              // smarthub-api (or plain strings on legacy accounts).
-              // Normalise to a string before joining so the cell never
-              // ends up rendering "[object Object]".
-              const locName = (
-                v: { isoCode?: string; name?: string } | string | undefined,
-              ): string | undefined =>
-                !v ? undefined : typeof v === "string" ? v : v.name;
-              const parts = [
-                user?.city,
-                locName(user?.state),
-                locName(user?.country),
-              ].filter(Boolean);
-              if (parts.length === 0) return null;
-              return (
-                <Row icon={MapPin} label="Location" value={parts.join(", ")} />
-              );
-            })()}
-            {user?.address && (
-              <Row icon={MapPin} label="Address" value={user.address} />
-            )}
-            {/* Institution + department — read-only. Admin-editable on
-                the Student doc; students with corrections reach out to
-                ops. Hidden unless at least one is set so non-SIWES
-                profiles don't grow a stranded row. */}
-            {(user?.institution || user?.department) && (
-              <Row
-                icon={GraduationCap}
-                label="School"
-                value={
-                  [user?.institution, user?.department]
-                    .filter(Boolean)
-                    .join(" · ") || undefined
-                }
-              />
-            )}
-          </Card>
-
-          {/* Settings entry points */}
-          <Card className="divide-y">
-            <SettingsRow
-            label="Change password"
-            href="/profile?tab=security"
-          />
-            <SettingsRow label="Notifications" />
-            <SettingsRow label="Help & support" href="/help" />
-          </Card>
-
-          <AttendancePinSection />
-
-          {/* Sign out — confirmation modal prevents accidental session loss */}
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="outline"
-                  className="w-full text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/40 hover:bg-destructive/5"
-                />
-              }
+        {/* Content pane */}
+        <div className="min-w-0 flex-1">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={tab}
+              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Sign out of SmartHub?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  You&apos;ll need to sign back in to access your courses.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleLogout}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Sign out
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </TabsContent>
+              {tab === "overview" && (
+                <div className="space-y-6">
+                  {/* Details — every populated field shows; null/missing
+                      ones are silently dropped so an incomplete record
+                      doesn't leave dashes everywhere. */}
+                  <Card>
+                    <CardHeader className="border-b">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <UserIcon className="h-4 w-4" /> Personal details
+                      </CardTitle>
+                      <CardDescription>Your basic account information.</CardDescription>
+                    </CardHeader>
+                    <div className="divide-y">
+                    <Row icon={Mail} label="Email" value={user?.email} />
+                    {user?.studentCode && (
+                      <Row
+                        icon={GraduationCap}
+                        label="Student code"
+                        value={user.studentCode}
+                      />
+                    )}
+                    {user?.phone && (
+                      <Row icon={Phone} label="Phone" value={user.phone} />
+                    )}
+                    <div className="flex items-center gap-4 p-4">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <UserIcon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                          Gender
+                        </p>
+                        <p className="text-sm font-medium truncate">
+                          {user?.gender || (
+                            <span className="text-muted-foreground italic">
+                              Not set
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    {(() => {
+                      // country / state arrive as `{ isoCode, name }` from
+                      // smarthub-api (or plain strings on legacy accounts).
+                      // Normalise to a string before joining so the cell
+                      // never ends up rendering "[object Object]".
+                      const locName = (
+                        v: { isoCode?: string; name?: string } | string | undefined,
+                      ): string | undefined =>
+                        !v ? undefined : typeof v === "string" ? v : v.name;
+                      const parts = [
+                        user?.city,
+                        locName(user?.state),
+                        locName(user?.country),
+                      ].filter(Boolean);
+                      if (parts.length === 0) return null;
+                      return (
+                        <Row icon={MapPin} label="Location" value={parts.join(", ")} />
+                      );
+                    })()}
+                    {user?.address && (
+                      <Row icon={MapPin} label="Address" value={user.address} />
+                    )}
+                    {/* Institution + department — read-only. Admin-editable
+                        on the Student doc; students with corrections reach
+                        out to ops. Hidden unless at least one is set so
+                        non-SIWES profiles don't grow a stranded row. */}
+                    {(user?.institution || user?.department) && (
+                      <Row
+                        icon={GraduationCap}
+                        label="School"
+                        value={
+                          [user?.institution, user?.department]
+                            .filter(Boolean)
+                            .join(" · ") || undefined
+                        }
+                      />
+                    )}
+                    </div>
+                  </Card>
 
-        <TabsContent value="professional">
-          <ProfessionalTab
-            current={{
-              jobTitle: user?.jobTitle,
-              department: user?.department,
-              bio: user?.bio,
-              altPhone: user?.altPhone,
-              timeZone: user?.timeZone,
-            }}
-          />
-        </TabsContent>
+                  <AttendancePinSection />
 
-        <TabsContent value="siwes">
-          <SiwesPlacementTab />
-        </TabsContent>
+                  {/* Sign out — confirmation modal prevents accidental
+                      session loss */}
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          className="w-full text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/40 hover:bg-destructive/5"
+                        />
+                      }
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Sign out of SmartHub?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          You&apos;ll need to sign back in to access your courses.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleLogout}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Sign out
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
 
-        <TabsContent value="banking">
-          <BankingTab />
-        </TabsContent>
+              {tab === "professional" && showProfessional && (
+                <ProfessionalTab
+                  current={{
+                    jobTitle: user?.jobTitle,
+                    department: user?.department,
+                    bio: user?.bio,
+                    altPhone: user?.altPhone,
+                    timeZone: user?.timeZone,
+                  }}
+                />
+              )}
 
-        <TabsContent value="notifications">
-          <NotificationSettingsCard />
-        </TabsContent>
+              {tab === "siwes" && <SiwesPlacementTab />}
 
-        <TabsContent value="achievements">
-          <AchievementsList />
-        </TabsContent>
+              {tab === "banking" && <BankingTab />}
 
-        <TabsContent value="security">
-          <ChangePasswordForm />
-        </TabsContent>
-      </Tabs>
+              {tab === "notifications" && <NotificationSettingsCard />}
+
+              {tab === "achievements" && <AchievementsList />}
+
+              {tab === "security" && <ChangePasswordForm />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
 
       <EditProfileDetailsDialog
         open={editOpen}
@@ -357,28 +408,5 @@ function Row({
         <p className="text-sm font-medium truncate">{value || "—"}</p>
       </div>
     </div>
-  );
-}
-
-function SettingsRow({ label, href }: { label: string; href?: string }) {
-  const className =
-    "flex items-center justify-between gap-4 p-4 w-full hover:bg-muted/50 transition-colors first:rounded-t-2xl last:rounded-b-2xl";
-  const body = (
-    <>
-      <span className="text-sm font-medium">{label}</span>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-    </>
-  );
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {body}
-      </Link>
-    );
-  }
-  return (
-    <button type="button" className={className}>
-      {body}
-    </button>
   );
 }

@@ -1,16 +1,20 @@
 "use client";
 import { useState } from "react";
+import { Landmark } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo } from "@/lib/utils";
 import { useMyBankingDetails, useUpdateMyBankingDetails } from "../api/profile.queries";
 import type { BankingDetails, BankingDetailsPatch } from "../types";
 
 /**
  * Profile-owned banking sub-doc editor. Sends a dirty-diff PATCH; account
- * number must be ≥4 chars when present (NUBAN is 10).
+ * number must be ≥4 chars when present (NUBAN is 10). Also feeds referral
+ * and instructor-earnings payouts, hence the header copy.
  *
  * The form lives in its own component remounted via `key` whenever the
  * fetched details change, so local state is freshly seeded without any
@@ -19,15 +23,28 @@ import type { BankingDetails, BankingDetailsPatch } from "../types";
 export function BankingTab() {
   const { data, isLoading } = useMyBankingDetails();
 
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading banking details…</p>;
-  }
-
   return (
-    <BankingForm
-      key={data?.updatedAt ?? "empty"}
-      data={data ?? {}}
-    />
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Landmark className="h-4 w-4" /> Banking details
+        </CardTitle>
+        <CardDescription>
+          Used to pay out referral earnings and instructor pay.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="grid gap-4">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        ) : (
+          <BankingForm key={data?.updatedAt ?? "empty"} data={data ?? {}} />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

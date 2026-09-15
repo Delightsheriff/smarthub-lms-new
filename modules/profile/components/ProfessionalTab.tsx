@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
+import { Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,66 +55,78 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
   };
 
   return (
-    <form
-      className="grid gap-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        submit();
-      }}
-    >
-      <div className="grid gap-1.5">
-        <Label htmlFor="job-title">Job title</Label>
-        <Input
-          id="job-title"
-          value={jobTitle}
-          onChange={(e) => setJobTitle(e.target.value)}
-          placeholder="e.g. Frontend Engineer"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="dept">Department</Label>
-        <Input
-          id="dept"
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-          placeholder="e.g. Engineering"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="bio">Short bio</Label>
-        <Textarea
-          id="bio"
-          rows={4}
-          maxLength={500}
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="A sentence or two about you."
-        />
-        <p className="text-right text-xs text-muted-foreground">{bio.length} / 500</p>
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="alt-phone">Alternative phone</Label>
-        <Input
-          id="alt-phone"
-          value={altPhone}
-          onChange={(e) => setAltPhone(e.target.value)}
-          placeholder="+234…"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="timezone">Time zone</Label>
-        <Input
-          id="timezone"
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
-          placeholder="e.g. Africa/Lagos"
-        />
-      </div>
-      <div className="flex justify-end">
-        <Button type="submit" disabled={!hasChanges || update.isPending}>
-          {update.isPending ? "Saving…" : "Save professional profile"}
-        </Button>
-      </div>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Briefcase className="h-4 w-4" /> Professional details
+        </CardTitle>
+        <CardDescription>
+          Shown to students on your instructor profile.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+        >
+          <div className="grid gap-1.5">
+            <Label htmlFor="job-title">Job title</Label>
+            <Input
+              id="job-title"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g. Frontend Engineer"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="dept">Department</Label>
+            <Input
+              id="dept"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g. Engineering"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="bio">Short bio</Label>
+            <Textarea
+              id="bio"
+              rows={4}
+              maxLength={500}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="A sentence or two about you."
+            />
+            <p className="text-right text-xs text-muted-foreground">{bio.length} / 500</p>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="alt-phone">Alternative phone</Label>
+            <Input
+              id="alt-phone"
+              value={altPhone}
+              onChange={(e) => setAltPhone(e.target.value)}
+              placeholder="+234…"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="timezone">Time zone</Label>
+            <Input
+              id="timezone"
+              value={timeZone}
+              onChange={(e) => setTimeZone(e.target.value)}
+              placeholder="e.g. Africa/Lagos"
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={!hasChanges || update.isPending}>
+              {update.isPending ? "Saving…" : "Save professional profile"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
