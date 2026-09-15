@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 /**
@@ -170,9 +171,9 @@ export function ProgramShareLink({
   if (compact) return Body;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <Card className="p-4">
       <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
@@ -192,6 +193,6 @@ export function ProgramShareLink({
         </div>
       </div>
       {Body}
-    </div>
+    </Card>
   );
 }

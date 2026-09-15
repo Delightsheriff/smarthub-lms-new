@@ -1,16 +1,15 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { CheckCircle2, Clock, Receipt, Share2, Wallet } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { formatPrice } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn, formatPrice } from "@/lib/utils";
 import {
   useBankingDetails,
   useCancelPayout,
@@ -54,11 +53,12 @@ function StatusBadge({ status }: { status: string }) {
     STATUS_STYLES[status?.toLowerCase()] || "bg-muted text-muted-foreground";
   return (
     <span
-      className={
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize " +
-        cls
-      }
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+        cls,
+      )}
     >
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
       {status || "unknown"}
     </span>
   );
@@ -88,9 +88,9 @@ export function ReferralsPanel() {
 
   if (isLoading) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-6">
+        <Skeleton className="h-9 w-48" />
         <Skeleton className="h-28 w-full rounded-2xl" />
-        <Skeleton className="h-10 w-64" />
         <Skeleton className="h-40 w-full rounded-2xl" />
       </div>
     );
@@ -114,17 +114,11 @@ export function ReferralsPanel() {
   // is the direct-URL fallback rather than something people hit.
   if (data?.eligible === false) {
     return (
-      <Card className="p-6 sm:p-8 text-center space-y-3">
-        <h2 className="text-lg font-semibold">
-          Refer &amp; earn isn&apos;t available for your account
-        </h2>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          This account isn&apos;t enrolled on a course and isn&apos;t
-          teaching one, so there&apos;s nothing to refer from yet. Enrol on
-          a cohort — or get assigned to teach one — and your referral link
-          appears here.
-        </p>
-      </Card>
+      <EmptyState
+        icon={Share2}
+        title="Refer & earn isn't available for your account"
+        description="This account isn't enrolled on a course and isn't teaching one, so there's nothing to refer from yet. Enrol on a cohort — or get assigned to teach one — and your referral link appears here."
+      />
     );
   }
 
@@ -136,10 +130,25 @@ export function ReferralsPanel() {
   const records = data?.records ?? [];
 
   return (
-    <div className="space-y-5">
-      {/* Code-pill header — persistent across tabs so the user's
-          "identity" stays in view as they toggle between Share /
-          Earnings / Ledger. */}
+    <div className="space-y-6">
+      <PageHeader
+        title="Refer & earn"
+        description="Share your link, track sign-ups, and withdraw what you earn."
+        actions={
+          <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+            <TabsList className="rounded-xl bg-muted/60 p-1">
+              {TABS.map((t) => (
+                <TabsTrigger key={t.key} value={t.key} className="rounded-lg text-xs">
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        }
+      />
+
+      {/* Code-pill card — persistent across tabs so the user's
+          "identity" stays in view as they toggle between sections. */}
       <Card className="p-5 sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -172,109 +181,96 @@ export function ReferralsPanel() {
         )}
       </Card>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-        <TabsList variant="line" className="w-fit overflow-x-auto">
-          {TABS.map((t) => (
-            <TabsTrigger key={t.key} value={t.key}>
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {tab === "share" && (
+        <section className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Pick a program to share
+          </h3>
+          <ProgramShareLink
+            program="scholarship"
+            code={data?.code}
+            commissionRate={data?.commissionRate}
+          />
+          <ProgramShareLink
+            program="siwes"
+            code={data?.code}
+            commissionRate={data?.commissionRate}
+          />
+          <ProgramShareLink
+            program="course"
+            code={data?.code}
+            commissionRate={data?.commissionRate}
+          />
+        </section>
+      )}
 
-        {tab === "share" && (
-          <TabsContent value="share">
-            <section className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Pick a program to share
-              </h3>
-              <ProgramShareLink
-                program="scholarship"
-                code={data?.code}
-                commissionRate={data?.commissionRate}
-              />
-              <ProgramShareLink
-                program="siwes"
-                code={data?.code}
-                commissionRate={data?.commissionRate}
-              />
-              <ProgramShareLink
-                program="course"
-                code={data?.code}
-                commissionRate={data?.commissionRate}
-              />
-            </section>
-          </TabsContent>
-        )}
-
-        {tab === "earnings" && (
-          <TabsContent value="earnings">
-            <section className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <Tile
-                  label="Pending"
-                  amount={totals.pendingNaira}
-                  tone="warning"
-                />
-                <Tile
-                  label="Earned"
-                  amount={totals.earnedNaira}
-                  tone="success"
-                />
-                <Tile
-                  label="Paid"
-                  amount={totals.paidNaira}
-                  tone="primary"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                You earn on every payment a referee makes — not just the
-                first. <strong>Pending</strong> — potential earnings, the
-                referee hasn&apos;t paid yet. <strong>Earned</strong> —
-                payments have landed and accrued commission is sitting in
-                your clawback window. <strong>Paid</strong> — withdrawn to
-                your bank.
-              </p>
-            </section>
-          </TabsContent>
-        )}
-
-        {tab === "ledger" && (
-          <TabsContent value="ledger">
-            <Card className="overflow-hidden p-0">
-              {records.length === 0 ? (
-                <div className="px-5 py-12 text-center sm:px-6">
-                  <p className="text-sm text-muted-foreground">
-                    No referrals yet. Share your link to get started.
-                  </p>
-                </div>
-              ) : (
-                <LedgerTable records={records} />
-              )}
-            </Card>
-          </TabsContent>
-        )}
-
-        {tab === "payouts" && (
-          <TabsContent value="payouts">
-            <PayoutsTab
-              earnedNaira={totals.earnedNaira}
-              banking={banking.data}
-              payouts={payouts}
-              requestPayout={requestPayout}
-              cancelPayout={cancelPayout}
+      {tab === "earnings" && (
+        <section className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Tile
+              icon={Clock}
+              label="Pending"
+              amount={totals.pendingNaira}
+              tone="warning"
             />
-          </TabsContent>
-        )}
-      </Tabs>
+            <Tile
+              icon={Wallet}
+              label="Earned"
+              amount={totals.earnedNaira}
+              tone="success"
+            />
+            <Tile
+              icon={CheckCircle2}
+              label="Paid"
+              amount={totals.paidNaira}
+              tone="primary"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            You earn on every payment a referee makes — not just the
+            first. <strong>Pending</strong> — potential earnings, the
+            referee hasn&apos;t paid yet. <strong>Earned</strong> —
+            payments have landed and accrued commission is sitting in
+            your clawback window. <strong>Paid</strong> — withdrawn to
+            your bank.
+          </p>
+        </section>
+      )}
+
+      {tab === "ledger" && (
+        records.length === 0 ? (
+          <EmptyState
+            icon={Share2}
+            title="No referrals yet"
+            description="Share your link to get started."
+          />
+        ) : (
+          <Card className="overflow-hidden p-0">
+            <LedgerTable records={records} />
+          </Card>
+        )
+      )}
+
+      {tab === "payouts" && (
+        <PayoutsTab
+          earnedNaira={totals.earnedNaira}
+          banking={banking.data}
+          payouts={payouts}
+          requestPayout={requestPayout}
+          cancelPayout={cancelPayout}
+        />
+      )}
     </div>
   );
 }
 
 function Tile({
+  icon: Icon,
   label,
   amount,
   tone,
 }: {
+  icon: React.ElementType;
   label: string;
   amount: number;
   tone: "warning" | "success" | "primary";
@@ -285,11 +281,14 @@ function Tile({
     primary: "bg-primary/5 border-primary/20 text-primary",
   };
   return (
-    <div className={"rounded-lg border p-4 " + palette[tone]}>
-      <p className="text-xs font-medium uppercase tracking-wide opacity-80">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">
+    <div className={cn("rounded-xl border p-4", palette[tone])}>
+      <div className="flex items-center gap-2">
+        <Icon className="h-3.5 w-3.5" />
+        <p className="text-xs font-medium uppercase tracking-wide opacity-80">
+          {label}
+        </p>
+      </div>
+      <p className="mt-2 text-2xl font-bold tabular-nums">
         {formatPrice(amount)}
       </p>
     </div>
@@ -371,11 +370,11 @@ function PayoutsTab({
       {payouts.isLoading ? (
         <Skeleton className="h-32 w-full rounded-2xl" />
       ) : !payouts.data?.items?.length ? (
-        <Card className="px-5 py-12 text-center sm:px-6">
-          <p className="text-sm text-muted-foreground">
-            No payout requests yet.
-          </p>
-        </Card>
+        <EmptyState
+          icon={Receipt}
+          title="No payout requests yet"
+          description="Requests you make will show up here."
+        />
       ) : (
         <Card className="overflow-hidden p-0">
           <PayoutsTable
@@ -472,12 +471,21 @@ function LedgerTable({ records }: { records: ReferralRecord[] }) {
             return (
               <tr key={r._id}>
                 <td className="px-5 py-3 sm:px-6">
-                  <div className="font-medium text-foreground">{fullName}</div>
-                  {r.referred?.email && (
-                    <div className="text-xs text-muted-foreground">
-                      {r.referred.email}
+                  <div className="flex items-center gap-2.5">
+                    <Avatar size="sm">
+                      <AvatarFallback>
+                        {fullName.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="font-medium text-foreground">{fullName}</div>
+                      {r.referred?.email && (
+                        <div className="text-xs text-muted-foreground">
+                          {r.referred.email}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </td>
                 <td className="px-5 py-3 text-muted-foreground sm:px-6">
                   {(typeof r.registration?.course === "object"
