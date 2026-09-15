@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
+import { useLearnerShape } from "@/modules/self-paced/hooks/use-learner-shape";
 
 /**
  * Mobile-first bottom nav. Hidden on md+ where the side rail takes over.
@@ -32,10 +33,11 @@ export function BottomNav() {
   const user = useAuthStore((s) => s.user);
   const { mode, canSwitch } = useEffectiveMode();
   const inboxUnread = useInboxUnreadCount();
+  const learner = useLearnerShape();
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const pinned = getPinnedNavItems(mode);
-  const allItems = getNavItemsForMode(mode, user);
+  const pinned = getPinnedNavItems(mode, learner);
+  const allItems = getNavItemsForMode(mode, user, learner);
   const pinnedHrefs = new Set(pinned.map((i) => i.href));
   const overflow = allItems.filter((i) => !pinnedHrefs.has(i.href));
 

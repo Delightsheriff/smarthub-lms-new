@@ -8,6 +8,7 @@ import { groupNavItems, type NavSection } from "@/lib/nav-grouping";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
+import { useLearnerShape } from "@/modules/self-paced/hooks/use-learner-shape";
 import {
   Sidebar,
   SidebarContent,
@@ -46,7 +47,8 @@ export function AppSidebar() {
   const { mode, canSwitch } = useEffectiveMode();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const navItems = getNavItemsForMode(mode, user);
+  const learner = useLearnerShape();
+  const navItems = getNavItemsForMode(mode, user, learner);
   const sections = groupNavItems(navItems);
   const inboxUnread = useInboxUnreadCount();
 
