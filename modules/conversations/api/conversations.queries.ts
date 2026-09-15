@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { conversationsService } from "./conversations.service";
 import { normaliseConversation } from "./normalise";
 import type { ConversationListItem } from "../types";
@@ -15,6 +15,17 @@ export function useConversations() {
     queryFn: async () => {
       const raw = await conversationsService.getConversations();
       return (raw || []).map((conv) => normaliseConversation(conv));
+    },
+  });
+}
+
+/** Marks a conversation read on open so its unread badge clears. */
+export function useMarkConversationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => conversationsService.markRead(conversationId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEYS.all });
     },
   });
 }

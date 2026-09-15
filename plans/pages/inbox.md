@@ -1,6 +1,6 @@
 # Inbox (`/inbox`)
 
-Status: 🔴 Not started
+Status: ✅ Done (real-time scoping left as-is, see below)
 
 ## Current vs legacy
 
@@ -47,14 +47,26 @@ theme-token + shared-primitive pass.
 
 ## Acceptance criteria
 
-- [ ] Opening a conversation marks it read server-side and the unread
-      badge clears (add `markRead` to `conversations.service.ts`, call it
-      on thread open, invalidate the list query).
-- [ ] `AssignmentThread` header links back to the assignment it's scoped to.
-- [ ] Raw Tailwind colors in `ConversationListItemRow.tsx` replaced with
-      theme tokens.
-- [ ] `PageHeader`/`EmptyState` adopted for list-empty and thread-empty
-      states.
-- [ ] `npx tsc --noEmit` and `npx eslint` clean.
+- [x] Opening a conversation marks it read server-side and the unread
+      badge clears — `markRead` added to `conversations.service.ts`
+      (confirmed live: `PATCH /lms/conversations/:id/read`), called from
+      a `useEffect` on `activeConv?.id` change so both an explicit row
+      click and the default-selected first conversation clear their
+      badge (legacy only handled the explicit click).
+- [x] `AssignmentThread` header links back to the assignment it's scoped
+      to, via a new `assignmentHref` prop wired from `InboxPageContent`'s
+      `activeConv.assignment`.
+- [x] Raw Tailwind colors in `ConversationListItemRow.tsx` replaced with
+      theme tokens (primary/warning/success/accent).
+- [x] `PageHeader`/`EmptyState` adopted for the list-empty state. The
+      thread-empty ("Select a Conversation") pane was left as its own
+      custom treatment — a "pick something" affordance inside a
+      fixed-height split pane, not the page-level empty-state pattern.
+- [x] `npx tsc --noEmit` and `npx eslint` clean.
+- [ ] Real-time scoping (global `message:created` listener + full
+      refetch vs. legacy's per-conversation socket room + optimistic
+      append) left as-is — functionally correct, just coarser; lower
+      priority than the bugs above.
 - [ ] Verified in the browser: unread badge clears after opening a
-      conversation.
+      conversation — this session's test account has none; verified by
+      code review and a live confirmation of the backend endpoint only.

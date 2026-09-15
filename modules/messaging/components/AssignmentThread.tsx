@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Send, MessageSquare } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,9 +13,13 @@ import { MessageBubble } from "./MessageBubble";
 interface AssignmentThreadProps {
   conversationId: string;
   title?: string;
+  /** Deep-links the thread header back to the assignment it's scoped
+   *  to, e.g. `/assignments/${assignmentId}`. Omitted for non-
+   *  assignment conversations. */
+  assignmentHref?: string;
 }
 
-export function AssignmentThread({ conversationId, title }: AssignmentThreadProps) {
+export function AssignmentThread({ conversationId, title, assignmentHref }: AssignmentThreadProps) {
   const [content, setContent] = useState("");
   const feedRef = useRef<HTMLDivElement>(null);
 
@@ -73,11 +78,20 @@ export function AssignmentThread({ conversationId, title }: AssignmentThreadProp
     <div className="flex flex-col h-full border rounded-2xl bg-card overflow-hidden shadow-xs">
       {/* Thread Header */}
       {title && (
-        <div className="p-3 border-b bg-muted/30 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
+        <div className="p-3 border-b bg-muted/30 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <MessageSquare className="h-4 w-4 text-primary shrink-0" />
             <h3 className="font-semibold text-xs text-foreground truncate">{title}</h3>
           </div>
+          {assignmentHref && (
+            <Link
+              href={assignmentHref}
+              className="shrink-0 inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+            >
+              Open assignment
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          )}
         </div>
       )}
 

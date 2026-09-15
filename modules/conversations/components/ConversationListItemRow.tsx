@@ -22,13 +22,13 @@ export function ConversationListItemRow({
   const getIcon = () => {
     switch (conversation.type) {
       case "group":
-        return <Users className="h-4 w-4 text-blue-600" />;
+        return <Users className="h-4 w-4 text-primary" />;
       case "announcement":
-        return <Megaphone className="h-4 w-4 text-amber-600" />;
+        return <Megaphone className="h-4 w-4 text-warning" />;
       case "support":
-        return <LifeBuoy className="h-4 w-4 text-emerald-600" />;
+        return <LifeBuoy className="h-4 w-4 text-success" />;
       case "assignment":
-        return <FileText className="h-4 w-4 text-purple-600" />;
+        return <FileText className="h-4 w-4 text-accent" />;
       case "direct":
       default:
         return <MessageSquare className="h-4 w-4 text-primary" />;
@@ -88,7 +88,7 @@ export function ConversationListItemRow({
       {conversation.assignment && (
         <div className="pt-1 border-t border-muted/50 flex items-center justify-between text-[11px]">
           <span className="text-muted-foreground flex items-center gap-1">
-            <FileText className="h-3 w-3 text-purple-600 shrink-0" />
+            <FileText className="h-3 w-3 text-accent shrink-0" />
             <span className="truncate max-w-[180px] font-medium text-foreground">
               {conversation.assignment.title}
             </span>
