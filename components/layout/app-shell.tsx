@@ -1,5 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
+import { useSession } from "next-auth/react";
 import {
   SidebarInset,
   SidebarProvider,
@@ -12,7 +13,6 @@ import { CommandPaletteListener } from "@/components/layout/command-palette-list
 import { ProfilePhotoGate } from "@/modules/profile/components/ProfilePhotoGate";
 import { PaymentGate } from "@/modules/payment-proofs/components/PaymentGate";
 import { PaymentStatusBanner } from "@/modules/payment-proofs/components/PaymentStatusBanner";
-import { useAuthStore } from "@/store/slices/authStore";
 import { useSidebarStore } from "@/store/slices/sidebarStore";
 import { CONTENT_MAX_WIDTH } from "@/configs/brand";
 import { cn } from "@/lib/utils";
@@ -20,10 +20,17 @@ import { cn } from "@/lib/utils";
 /**
  * The `(app)` LMS shell.
  *
- * Owns the **gate**: redirects to `/login` when `isAuthenticated` is not
- * set, exactly like a middleware would for the protected region (the
- * legacy used `middleware.ts`; we gate in the layout shell instead — see
- * ADR 0006 / ADR 0007).
+ * Owns the **gate**: redirects to `/login` once NextAuth's session is
+ * *confirmed* absent (`status === "unauthenticated"`), exactly like a
+ * middleware would for the protected region (the legacy used
+ * `middleware.ts`; we gate in the layout shell instead — see ADR 0006 /
+ * ADR 0007). Checking `status` rather than the Zustand `isAuthenticated`
+ * flag directly matters: the root layout passes NextAuth's server-
+ * fetched session into `SessionProvider`, so `status` is correct from
+ * the first render — but the flag is populated by `AuthSessionBridge`
+ * a tick later via `useEffect`, and gating on it directly would flash
+ * every already-authenticated page load to /login before that effect
+ * runs (this was the "logs out on every reload" bug).
  *
  * Then it hosts the navigation chrome:
  * - `SidebarProvider` — **controlled** and bound to the persisted
@@ -42,11 +49,11 @@ import { InstallAppPrompt } from "@/modules/push/components/InstallAppPrompt";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { status } = useSession();
   const collapsed = useSidebarStore((s) => s.collapsed);
   const setCollapsed = useSidebarStore((s) => s.setCollapsed);
 
-  if (!isAuthenticated) {
+  if (status === "unauthenticated") {
     const nextUrl = pathname && pathname !== "/dashboard" ? `/login?next=${encodeURIComponent(pathname)}` : "/login";
     redirect(nextUrl);
   }
