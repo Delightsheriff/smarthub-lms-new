@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Bell, CheckCheck, BookOpen, Award, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion();
 
   const { data: notifications } = useNotifications();
   const { data: unreadCount = 0 } = useUnreadCount();
@@ -60,11 +62,25 @@ export function NotificationBell() {
         }
       >
         <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <Badge className="absolute -top-1 -right-1 bg-red-600 text-white font-bold text-[10px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center p-0 border-2 border-background">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </Badge>
-        )}
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            // Contextual icon animation (better-ui): opacity + scale +
+            // blur, exact values (0.25→1, 4px→0px) — never a plain
+            // visibility toggle for a badge that comes and goes.
+            <motion.span
+              key="unread-badge"
+              initial={reduce ? false : { opacity: 0, scale: 0.25, filter: "blur(4px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={reduce ? undefined : { opacity: 0, scale: 0.25, filter: "blur(4px)" }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+              className="absolute -top-1 -right-1"
+            >
+              <Badge className="bg-accent text-white font-bold text-[10px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center p-0 border-2 border-background">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </Badge>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-80 sm:w-96 p-0 rounded-2xl shadow-md">

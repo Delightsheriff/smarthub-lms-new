@@ -19,7 +19,7 @@ export function SearchTrigger() {
         variant="outline"
         onClick={() => setOpen(true)}
         aria-label="Search"
-        className="hidden h-9 w-auto justify-start gap-2 rounded-lg border-border/70 bg-muted/40 px-3 text-sm font-normal text-muted-foreground shadow-none hover:bg-muted hover:text-foreground md:inline-flex"
+        className="hidden h-9 w-56 justify-start gap-2 rounded-lg border-border/70 bg-muted/40 px-3 text-sm font-normal text-muted-foreground shadow-none transition-colors duration-150 hover:bg-muted hover:text-foreground md:inline-flex lg:w-72"
       >
         <Search className="size-4 shrink-0" />
         <span>Search&hellip;</span>
