@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getNavItemsForMode } from "@/configs/nav";
-import { groupNavItems } from "@/lib/nav-grouping";
+import { ChevronDown } from "lucide-react";
+import { getNavItemsForMode, type NavItem } from "@/configs/nav";
+import { groupNavItems, type NavSection } from "@/lib/nav-grouping";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
@@ -21,6 +23,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Logo } from "@/components/layout/logo";
 import { RoleSwitcher } from "@/components/layout/role-switcher";
@@ -76,42 +79,13 @@ export function AppSidebar() {
 
         <SidebarContent>
           {sections.map((section, i) => (
-            <SidebarGroup key={section.group ?? `ungrouped-${i}`}>
-              {section.group && (
-                <SidebarGroupLabel className="uppercase tracking-wider text-[10.5px] font-semibold text-sidebar-foreground/50">
-                  {section.group}
-                </SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {section.items.map((item) => {
-                    const active = isActive(item.href);
-                    const Icon = item.icon;
-                    const isInbox = item.href === "/inbox";
-                    const badge = isInbox ? inboxUnread : 0;
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          render={
-                            <Link href={item.href}>
-                              <Icon />
-                              <span>{item.label}</span>
-                            </Link>
-                          }
-                          isActive={active}
-                          tooltip={item.label}
-                        />
-                        {badge > 0 && (
-                          <SidebarMenuBadge>
-                            {badge > 99 ? "99+" : badge}
-                          </SidebarMenuBadge>
-                        )}
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <NavSectionGroup
+              key={section.group ?? `ungrouped-${i}`}
+              section={section}
+              isActive={isActive}
+              inboxUnread={inboxUnread}
+              railCollapsed={collapsed}
+            />
           ))}
         </SidebarContent>
 
@@ -135,5 +109,101 @@ export function AppSidebar() {
         <SidebarRail />
       </Sidebar>
     </TooltipProvider>
+  );
+}
+
+/** One nav section. Ungrouped runs (no `group` label — Home/Ask Oreo up
+ *  top, the common items at the footer) render as a plain, always-open
+ *  group, same as before. Labeled sections (Learning, Money, Teaching,
+ *  Internship) are individually collapsible via a chevron on the label,
+ *  matching shadcn's own documented `Collapsible` + `SidebarGroupLabel`
+ *  pattern (ui.shadcn.com/docs/components/sidebar).
+ *
+ *  Collapse state is forced open whenever the rail itself is in
+ *  icon-only mode — a group the user closed while expanded must not
+ *  swallow its own icons once there's no label left to reopen it by. */
+function NavSectionGroup({
+  section,
+  isActive,
+  inboxUnread,
+  railCollapsed,
+}: {
+  section: NavSection;
+  isActive: (href: string) => boolean;
+  inboxUnread: number;
+  railCollapsed: boolean;
+}) {
+  const [open, setOpen] = useState(true);
+  const effectiveOpen = railCollapsed || open;
+
+  const menu = (
+    <SidebarMenu>
+      {section.items.map((item) => (
+        <NavMenuRow
+          key={item.href}
+          item={item}
+          active={isActive(item.href)}
+          badge={item.href === "/inbox" ? inboxUnread : 0}
+        />
+      ))}
+    </SidebarMenu>
+  );
+
+  if (!section.group) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupContent>{menu}</SidebarGroupContent>
+      </SidebarGroup>
+    );
+  }
+
+  return (
+    <Collapsible
+      open={effectiveOpen}
+      onOpenChange={railCollapsed ? undefined : setOpen}
+      className="group/collapsible"
+    >
+      <SidebarGroup>
+        <SidebarGroupLabel
+          render={<CollapsibleTrigger />}
+          className="cursor-pointer uppercase tracking-wider text-[10.5px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+        >
+          {section.group}
+          <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out group-data-open/collapsible:rotate-180" />
+        </SidebarGroupLabel>
+        <CollapsibleContent>
+          <SidebarGroupContent>{menu}</SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
+function NavMenuRow({
+  item,
+  active,
+  badge,
+}: {
+  item: NavItem;
+  active: boolean;
+  badge: number;
+}) {
+  const Icon = item.icon;
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        render={
+          <Link href={item.href}>
+            <Icon />
+            <span>{item.label}</span>
+          </Link>
+        }
+        isActive={active}
+        tooltip={item.label}
+      />
+      {badge > 0 && (
+        <SidebarMenuBadge>{badge > 99 ? "99+" : badge}</SidebarMenuBadge>
+      )}
+    </SidebarMenuItem>
   );
 }
