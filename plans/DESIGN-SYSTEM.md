@@ -92,9 +92,9 @@ new page surface, check this list first.
 
 Pages already migrated to this set: Courses, Help, Notifications
 (+ `NotificationBell`), Activity, Webinars, both self-paced page-level
-surfaces, and all four auth screens. Not yet migrated: Profile/Settings
-(the big one — 856 LOC, 7 tabs, its own slice), Referrals (882 LOC, 4
-tabs), Billing, Internships, Tech Scholarship, Oreo, Assigned-modules.
+surfaces, Profile/Settings, and all four auth screens. Not yet
+migrated: Referrals (882 LOC, 4 tabs), Billing, Internships, Tech
+Scholarship, Oreo, Assigned-modules.
 
 ---
 
@@ -258,7 +258,7 @@ checkout.
 | Shared primitives: `PageHeader`, `EmptyState`, `FilterDropdown`/`FilterBar` | ✅ Done |
 | Courses, Help, Notifications, Activity, Webinars migrated to shared primitives | ✅ Done |
 | Self-paced module: raw-color cleanup + `PageHeader`/`EmptyState` adoption | ✅ Done |
-| Profile/Settings redesign | ⬜ Not started — biggest remaining surface (7 tabs, 856 LOC) |
+| Profile/Settings redesign | ✅ Done — left settings rail (solid active-state, replaces the wrapping `TabsList`), every section wrapped in a matching `Card` header, dead "Notifications" row removed from Overview, `notification-prefs` endpoint path fixed, `Switch` dark-mode contrast fixed |
 | Referrals, Billing, Internships, Tech Scholarship, Oreo, Assigned-modules | ⬜ Not started |
 | Per-page segmented header tabs (the CRM inspiration's "Companies · Active" pattern) | ⬜ Deliberately deferred — a per-page decision, not a chrome concern |
-| Full profile "entity drawer" (CRM-style avatar/stat-grid/list panel) | ⬜ Deferred to the Profile/Settings slice, where it's actually needed |
+| Full profile "entity drawer" (CRM-style avatar/stat-grid/list panel) | ⬜ Superseded — the left-rail + header-card shape shipped instead; revisit only if a future page specifically needs the CRM stat-grid layout |
