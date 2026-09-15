@@ -7,30 +7,28 @@ import type { Notification } from "../types";
 
 export const NOTIFICATIONS_QUERY_KEYS = {
   all: ["notifications", "list"] as const,
-  unreadCount: ["notifications", "unread-count"] as const,
 } as const;
+
+const fetchNotifications = async (): Promise<Notification[]> => {
+  const raw = await notificationsService.getNotifications();
+  return (raw || []).map((n) => normaliseNotification(n));
+};
 
 export function useNotifications() {
   return useQuery<Notification[]>({
     queryKey: NOTIFICATIONS_QUERY_KEYS.all,
-    queryFn: async () => {
-      const raw = await notificationsService.getNotifications();
-      return (raw || []).map((n) => normaliseNotification(n));
-    },
+    queryFn: fetchNotifications,
   });
 }
 
+/** Derived from the same list query (shares its cache — no extra
+ *  request). There is no server-side unread-count endpoint; smarthub-api
+ *  only ever returns the full list, same as the legacy app. */
 export function useUnreadCount() {
-  const { data: notifications } = useNotifications();
-
-  return useQuery<number>({
-    queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount,
-    queryFn: async () => {
-      const res = await notificationsService.getUnreadCount();
-      return res.count;
-    },
-    // Fall back to client calculation if unread endpoint returns undefined
-    placeholderData: (notifications || []).filter((n) => !n.read).length,
+  return useQuery<Notification[], unknown, number>({
+    queryKey: NOTIFICATIONS_QUERY_KEYS.all,
+    queryFn: fetchNotifications,
+    select: (notifications) => notifications.filter((n) => !n.read).length,
   });
 }
 
@@ -43,7 +41,6 @@ export function useMarkRead() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.all });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount });
     },
   });
 }
@@ -57,7 +54,6 @@ export function useMarkAllRead() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.all });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount });
     },
   });
 }
