@@ -30,16 +30,20 @@ export function MonthGrid({
 }: MonthGridProps) {
   const days = getMonthDays(year, month);
 
+  // The wire tone union names don't line up with this app's real
+  // tokens 1:1 — "blue"/"violet" have no dedicated token (folded into
+  // primary/accent) and the wire value "accent" was actually rendered
+  // as green, so it maps to `success`, not this app's (orange) accent.
   const getToneClass = (tone: CalendarEventUI["typeTone"]) => {
     switch (tone) {
       case "blue":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300";
+        return "bg-primary/15 text-primary";
       case "amber":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
+        return "bg-warning/15 text-warning";
       case "violet":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300";
+        return "bg-accent/15 text-accent";
       case "accent":
-        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+        return "bg-success/15 text-success";
       case "primary":
         return "bg-primary/15 text-primary font-medium";
       default:

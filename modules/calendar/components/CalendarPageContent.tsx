@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,14 +22,33 @@ import { CourseFilterChips } from "./CourseFilterChips";
 import { EventDetailDialog } from "./EventDetailDialog";
 import type { CalendarEventUI } from "../types";
 
+type ViewMode = "month" | "week" | "day" | "agenda";
+const VALID_VIEWS: ViewMode[] = ["month", "week", "day", "agenda"];
+
 export function CalendarPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week" | "day" | "agenda">("month");
+  // ?view= persists in the URL so a refresh/deep-link restores the
+  // active view instead of always resetting to Month.
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const fromUrl = searchParams.get("view");
+    return fromUrl && VALID_VIEWS.includes(fromUrl as ViewMode) ? (fromUrl as ViewMode) : "month";
+  });
   const [hiddenScopes, setHiddenScopes] = useState<Set<string>>(() => new Set());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: events, isLoading, error } = useStudentCalendar();
+
+  const handleViewChange = (next: ViewMode) => {
+    setViewMode(next);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", next);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const handlePrev = () => {
     const next = new Date(currentDate);
@@ -70,38 +91,20 @@ export function CalendarPageContent() {
 
   return (
     <div className="container max-w-6xl py-8 space-y-6">
-      {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Academic Calendar
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Class sessions, assignment deadlines, office hours, and academic events.
-          </p>
-        </div>
-
-        {/* View Mode Tabs */}
-        <Tabs
-          value={viewMode}
-          onValueChange={(v) => setViewMode(v as "month" | "week" | "day" | "agenda")}
-        >
-          <TabsList className="rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="month" className="rounded-lg text-xs">
-              Month
-            </TabsTrigger>
-            <TabsTrigger value="week" className="rounded-lg text-xs">
-              Week
-            </TabsTrigger>
-            <TabsTrigger value="day" className="rounded-lg text-xs">
-              Day
-            </TabsTrigger>
-            <TabsTrigger value="agenda" className="rounded-lg text-xs">
-              Agenda
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <PageHeader
+        title="Academic Calendar"
+        description="Class sessions, assignment deadlines, office hours, and academic events."
+        actions={
+          <Tabs value={viewMode} onValueChange={(v) => handleViewChange(v as ViewMode)}>
+            <TabsList className="rounded-xl bg-muted/60 p-1">
+              <TabsTrigger value="month" className="rounded-lg text-xs">Month</TabsTrigger>
+              <TabsTrigger value="week" className="rounded-lg text-xs">Week</TabsTrigger>
+              <TabsTrigger value="day" className="rounded-lg text-xs">Day</TabsTrigger>
+              <TabsTrigger value="agenda" className="rounded-lg text-xs">Agenda</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {/* Date Navigator Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">

@@ -21,7 +21,7 @@ export function UpcomingDeadlinesPanel({ limit = 3 }: UpcomingDeadlinesPanelProp
     <Card className="rounded-2xl border bg-card shadow-sm h-full flex flex-col justify-between">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <Clock className="h-5 w-5 text-warning" />
           <CardTitle className="text-base font-semibold">Upcoming Deadlines</CardTitle>
         </div>
         <Button

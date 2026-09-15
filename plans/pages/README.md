@@ -23,7 +23,7 @@ are met and committed.
 | 7 | [assigned-to-you.md](assigned-to-you.md) | Assigned to you | ✅ Redesigned earlier this session |
 | 8 | [billing-earnings.md](billing-earnings.md) | Billing (student) / Earnings (instructor) / Payments | ✅ Redesigned earlier this session |
 | 9 | [internship.md](internship.md) | Internship | ✅ Redesigned earlier this session |
-| 10 | [calendar.md](calendar.md) | Calendar | 🔴 Not started |
+| 10 | [calendar.md](calendar.md) | Calendar | 🟡 Partial |
 | 11 | [inbox.md](inbox.md) | Inbox | ✅ Done |
 | 12 | [activity.md](activity.md) | Activity | ✅ Done |
 | 13 | [refer-and-earn.md](refer-and-earn.md) | Refer & earn | ✅ Redesigned earlier this session |

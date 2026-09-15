@@ -32,16 +32,18 @@ export function EventDetailDialog({
 }: EventDetailDialogProps) {
   if (!event) return null;
 
+  // See calendar/components/MonthGrid.tsx's getToneClass for why the
+  // wire tone names don't map 1:1 to this app's tokens.
   const getToneBadgeVariant = () => {
     switch (event.typeTone) {
       case "blue":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300";
+        return "bg-primary/10 text-primary";
       case "amber":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
+        return "bg-warning/10 text-warning";
       case "violet":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300";
+        return "bg-accent/10 text-accent";
       case "accent":
-        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+        return "bg-success/10 text-success";
       case "primary":
         return "bg-primary/10 text-primary";
       default:

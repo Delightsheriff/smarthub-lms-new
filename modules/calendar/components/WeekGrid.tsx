@@ -32,16 +32,18 @@ export function WeekGrid({
   const weekDays = getWeekDays(currentDate);
   const hours = Array.from({ length: totalHours }, (_, i) => dayStartHour + i);
 
+  // See MonthGrid's getToneClass for why the wire tone names don't map
+  // 1:1 to this app's tokens.
   const getToneClass = (tone: CalendarEventUI["typeTone"]) => {
     switch (tone) {
       case "blue":
-        return "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-200";
+        return "bg-primary/10 text-primary border-primary/30";
       case "amber":
-        return "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-200";
+        return "bg-warning/10 text-warning border-warning/30";
       case "violet":
-        return "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200";
+        return "bg-accent/10 text-accent border-accent/30";
       case "accent":
-        return "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200";
+        return "bg-success/10 text-success border-success/30";
       case "primary":
         return "bg-primary/10 text-primary border-primary/30";
       default:
