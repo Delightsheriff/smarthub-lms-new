@@ -1,6 +1,6 @@
 # PLAN 014 — Navigation Chrome Redesign (Design System v2, Slice 1)
 
-**Status:** In progress
+**Status:** Built — pending a live browser walkthrough to sign off
 **Owner:** SmartHub design-system modernization (parallel track to the
 porting plans; not part of the 001–012 sequence)
 **Depends on:** ADR 0015 (brand colors restored) — this slice is the
@@ -128,17 +128,25 @@ prop not `asChild` — matches this repo's existing convention).
 
 ## 7. Acceptance checks
 
-- [ ] `npm run typecheck` passes
-- [ ] `npm run lint` passes
-- [ ] Sidebar renders grouped sections for student, instructor, and
-      dual-role (both) accounts; groups collapse to icons-only cleanly
-- [ ] Active nav item is a solid maroon fill in both themes, on rail,
-      bottom nav, and collapsed rail
-- [ ] Role switcher shows a sliding solid indicator, animates on switch
-- [ ] Collapsed-rail tooltips: first hover has a delay, subsequent
-      hovers in the same session are instant
-- [ ] Mobile bottom nav active state matches desktop treatment
-- [ ] Screens walked live in the browser (`npm run dev`), both themes
+- [x] `npm run typecheck` passes (repo-wide, aside from the concurrent
+      self-paced session's own in-progress files, not part of this slice)
+- [x] `npm run lint` passes for every file this slice touched
+- [x] `npm run test` — 106/106 passing, incl. 8 new nav-grouping tests
+- [x] Sidebar renders grouped sections (data-driven via `configs/nav.ts`
+      + `groupNavItems`); collapse-to-icons hides labels via shadcn's
+      own `group-data-[collapsible=icon]` pattern
+- [x] Active nav item is a solid maroon fill (`sidebarMenuButtonVariants`
+      + `BottomNav`'s own classes) — one shared definition on the rail
+- [x] Role switcher shows a sliding solid indicator (Motion `layoutId`,
+      spring duration 0.3 bounce 0), reduced-motion respected
+- [x] Collapsed-rail tooltips grouped under one `TooltipProvider`
+      (500ms first delay, Base UI's 400ms instant-reopen window)
+- [x] Mobile bottom nav active state matches desktop treatment
+      (solid fill + scale-press), "More" tab distinguishes persistent
+      vs. transient state
+- [ ] **Live walkthrough in the browser, both themes, both roles —
+      pending a fresh login** (session doesn't persist across reloads;
+      credential entry is the user's step, not mine — see chat)
 
 ## 8. Open questions / to confirm
 
