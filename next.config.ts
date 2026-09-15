@@ -1,6 +1,19 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  // Dev-only proxy so the browser talks to the same origin (3000) that
+  // fronts the app; the Next server (not the browser) reaches the API
+  // on 6001 server-side. Local dev convenience only — production points
+  // NEXT_PUBLIC_API_URL straight at the real API host.
+  async rewrites() {
+    if (process.env.NODE_ENV !== "development") return []
+    return [
+      {
+        source: "/api-proxy/:path*",
+        destination: "http://localhost:6001/api/v1/:path*",
+      },
+    ]
+  },
   async headers() {
     return [
       {
