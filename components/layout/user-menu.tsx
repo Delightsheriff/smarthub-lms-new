@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ClipboardList, HelpCircle, LogOut, Settings, User } from "lucide-react";
+import { ClipboardList, HelpCircle, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/slices/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -85,17 +85,13 @@ export function UserMenu() {
 
           <DropdownMenuItem onClick={() => router.push("/profile")}>
             <User />
-            Profile
+            Profile &amp; settings
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/assignments")}>
             <ClipboardList />
             My tasks
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/profile")}>
-            <Settings />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/profile")}>
+          <DropdownMenuItem onClick={() => router.push("/help")}>
             <HelpCircle />
             Help &amp; support
           </DropdownMenuItem>
