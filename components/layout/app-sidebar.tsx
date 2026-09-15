@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getNavItemsForMode, type NavItem } from "@/configs/nav";
+import { getNavItemsForMode } from "@/configs/nav";
+import { groupNavItems } from "@/lib/nav-grouping";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useInboxUnreadCount } from "@/hooks/use-inbox-unread-count";
@@ -24,26 +25,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Logo } from "@/components/layout/logo";
 import { RoleSwitcher } from "@/components/layout/role-switcher";
 import { UserMenu } from "@/components/layout/user-menu";
-
-/** Splits a flat, ordered nav-item list into contiguous runs sharing
- *  the same `group` — a pure rendering concern layered on top of
- *  `getNavItemsForMode`'s data, never a re-ordering of it. Runs, not
- *  a group-name merge: the ungrouped items at the top (Home, Ask
- *  Oreo) and the ungrouped footer items (Calendar, Inbox, …) stay in
- *  their original positions as two separate unlabeled sections,
- *  rather than collapsing into one bucket at the top. */
-function groupNavItems(items: NavItem[]): { group?: string; items: NavItem[] }[] {
-  const sections: { group?: string; items: NavItem[] }[] = [];
-  for (const item of items) {
-    const last = sections[sections.length - 1];
-    if (last && last.group === item.group) {
-      last.items.push(item);
-    } else {
-      sections.push({ group: item.group, items: [item] });
-    }
-  }
-  return sections;
-}
 
 /**
  * Desktop application rail (shadcn `Sidebar`). Two states, handled by the
