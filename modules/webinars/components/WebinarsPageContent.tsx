@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { Presentation } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
+import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { useWebinars } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
 import type { WebinarSummary } from "../types";
@@ -23,31 +26,25 @@ export function WebinarsPageContent() {
 
   return (
     <div className="container max-w-6xl py-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Webinars & Workshops
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Join live industry sessions, masterclasses, and rewatch past recorded workshops.
-          </p>
-        </div>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "upcoming" | "past")}
-        >
-          <TabsList className="rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="upcoming" className="rounded-lg text-xs">
-              Upcoming ({upcomingList.length})
-            </TabsTrigger>
-            <TabsTrigger value="past" className="rounded-lg text-xs">
-              Past Recordings
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <PageHeader
+        title="Webinars & Workshops"
+        description="Join live industry sessions, masterclasses, and rewatch past recorded workshops."
+        actions={
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "upcoming" | "past")}
+          >
+            <TabsList className="rounded-xl bg-muted/60 p-1">
+              <TabsTrigger value="upcoming" className="rounded-lg text-xs">
+                Upcoming ({upcomingList.length})
+              </TabsTrigger>
+              <TabsTrigger value="past" className="rounded-lg text-xs">
+                Past Recordings
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {/* Loading state */}
       {isLoading && (
@@ -71,25 +68,23 @@ export function WebinarsPageContent() {
       {!isLoading && !error && (
         <>
           {webinars.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {webinars.map((webinar) => (
-                <WebinarCard key={webinar.id} webinar={webinar} />
+                <StaggerItem key={webinar.id}>
+                  <WebinarCard webinar={webinar} />
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           ) : (
-            <div className="rounded-2xl border bg-card p-12 text-center space-y-3">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
-                <Presentation className="h-6 w-6" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">
-                No {activeTab} webinars available
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                {activeTab === "upcoming"
+            <EmptyState
+              icon={Presentation}
+              title={`No ${activeTab} webinars available`}
+              description={
+                activeTab === "upcoming"
                   ? "Check back soon for newly scheduled live workshops and masterclasses."
-                  : "No recorded past webinars found in the library."}
-              </p>
-            </div>
+                  : "No recorded past webinars found in the library."
+              }
+            />
           )}
         </>
       )}
