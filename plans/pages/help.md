@@ -1,6 +1,6 @@
 # Help (`/help`)
 
-Status: 🟡 Minor gap only
+Status: ✅ Done
 
 ## Current vs legacy
 

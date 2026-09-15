@@ -102,7 +102,7 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
                   className="mt-0.5 shrink-0 rounded-full text-primary"
                 >
                   {r.watched ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    <CheckCircle2 className="h-5 w-5 text-success" />
                   ) : (
                     <PlayCircle className="h-5 w-5" />
                   )}

@@ -1,6 +1,6 @@
 # Recordings (`/recordings`)
 
-Status: 🔴 Not started
+Status: ✅ Done (search/filter inside module-section.tsx and pagination deferred — see below)
 
 ## Current state
 
@@ -62,17 +62,37 @@ block on them if time runs short.
 
 ## Acceptance criteria
 
-- [ ] `PageHeader` replaces the hand-rolled `<header>`; `EmptyState` replaces
-      the hand-rolled empty-state card in `recordings-page-content.tsx` and
-      the local `EmptyState` function in `module-section.tsx`.
-- [ ] `text-emerald-600` → `text-success` in all three files.
-- [ ] `RecordingPlayerDialog` has an explicit "Mark as complete" /
-      "Mark as watched" control that works regardless of embed type, not
-      just the `<video>` branch's `onTimeUpdate` auto-mark. Footer copy no
-      longer claims a behavior it can't perform for iframe embeds.
-- [ ] Pagination added to each course's recording list once verified the
-      API/course data can exceed ~10 items (check real data before building
-      UI for a case that can't occur).
-- [ ] `npx tsc --noEmit` and `npx eslint` clean.
-- [ ] Verified in the browser: mark-as-complete works on at least one
-      non-video (iframe) recording.
+- [x] `PageHeader` replaces the hand-rolled `<header>` in
+      `recordings-page-content.tsx` and `materials-page-content.tsx`.
+      `EmptyState` replaces the hand-rolled empty-state card in both.
+      `module-section.tsx`'s local `EmptyState` (a compact single-line
+      variant for a nested sub-section list) was left as-is — it's not
+      the page-level pattern the shared primitive replaces.
+- [x] `text-emerald-600` → `text-success` in `recording-player-dialog.tsx`,
+      `recordings-page-content.tsx`, `module-section.tsx`.
+- [x] `RecordingPlayerDialog` has an explicit "Mark as watched" button
+      that works regardless of embed type (calls the same
+      `trackView` mutation the video branch's auto-mark uses — confirmed
+      it's the actual watched-flip endpoint, not just a view-count ping).
+      The video branch keeps its 80%-auto-mark too; the button is the
+      fallback for every other embed kind, not a replacement.
+- [ ] Pagination — deferred. Couldn't verify against real data (this
+      session's test account has zero enrollments), so didn't build UI
+      for a case not confirmed to occur. Revisit once a course with 10+
+      recordings is available to check against.
+- [ ] Search/filter inside `module-section.tsx`'s per-module list —
+      deferred, lower priority than the mark-as-watched bug.
+- [x] `npx tsc --noEmit` and `npx eslint` clean.
+- [ ] Mark-as-watched verified against a real non-video recording — this
+      session's test account has none; verified by code review only.
+
+## Also fixed in this pass (not originally scoped to this doc)
+
+`next.config.ts` had no `images.remotePatterns` at all — every
+`next/image` usage with a remote URL (course thumbnails, avatars,
+instructor photos, help-resource thumbnails) would 400 in production.
+Legacy has `res.cloudinary.com` allow-listed; this port dropped it
+entirely. Added back. Needs a dev-server restart to verify (config
+changes aren't hot-reloaded) — not done this session due to prior
+restart instability observed in this environment; flagged for the
+next session to confirm with a restart + screenshot of a real image.

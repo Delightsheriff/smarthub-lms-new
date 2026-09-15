@@ -1,6 +1,6 @@
 # Materials (`/materials`)
 
-Status: 🔴 Not started
+Status: ✅ Done (module-section.tsx search/filter deferred, same as recordings.md)
 
 ## Current state
 

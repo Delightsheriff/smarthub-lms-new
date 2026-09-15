@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
@@ -69,26 +71,21 @@ export function MaterialsPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Materials</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Every course material and guide available to you, in one place.
-        </p>
-      </header>
-
-      <Tabs
-        value={filter}
-        onValueChange={(v) => setFilter(v as Filter)}
-        className="-mx-4 px-4"
-      >
-        <TabsList variant="line" className="w-fit overflow-x-auto">
-          {FILTERS.map((f) => (
-            <TabsTrigger key={f.value} value={f.value}>
-              {f.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <PageHeader
+        title="Materials"
+        description="Every course material and guide available to you, in one place."
+        actions={
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+            <TabsList className="rounded-xl bg-muted/60 p-1">
+              {FILTERS.map((f) => (
+                <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
+                  {f.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {isLoading && (
         <div className="space-y-3">
@@ -98,15 +95,15 @@ export function MaterialsPageContent() {
       )}
 
       {!isLoading && visible.length === 0 && (
-        <Card className="p-10 text-center">
-          <Library className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No materials</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filter === "all"
+        <EmptyState
+          icon={Library}
+          title="No materials"
+          description={
+            filter === "all"
               ? "Materials show up here once your tutor uploads them."
-              : "Switch the filter to see other materials."}
-          </p>
-        </Card>
+              : "Switch the filter to see other materials."
+          }
+        />
       )}
 
       {!isLoading &&

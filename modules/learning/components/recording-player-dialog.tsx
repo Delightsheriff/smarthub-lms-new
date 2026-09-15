@@ -82,7 +82,7 @@ export function RecordingPlayerDialog({
           <DialogTitle className="flex items-center gap-2 pr-8">
             {recording.title}
             {recording.watched && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Watched
               </span>
@@ -183,7 +183,24 @@ export function RecordingPlayerDialog({
                 <ExternalLink className="h-3 w-3" />
               </a>
             )}
-            <span>Auto-marked complete at 80% playback</span>
+            {/* A manual mark-complete control, not just the video
+                branch's 80%-playback auto-mark — that auto-mark can't
+                fire at all for the majority of recordings (YouTube/
+                Vimeo/Drive embeds, external links), which previously
+                had no way to ever be marked watched. */}
+            {isDirectVideo && !recording.watched && (
+              <span className="hidden sm:inline">Auto-marks at 80% playback, or</span>
+            )}
+            <Button
+              size="sm"
+              variant={recording.watched ? "ghost" : "outline"}
+              disabled={recording.watched || trackView.isPending}
+              onClick={() => trackView.mutate(recording.id)}
+              className="h-7 px-2.5 text-xs"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {recording.watched ? "Watched" : "Mark as watched"}
+            </Button>
           </div>
         </div>
       </DialogContent>

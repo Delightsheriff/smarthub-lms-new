@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
@@ -50,26 +52,21 @@ export function RecordingsPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Recordings</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Every class recording available to you, across all your courses.
-        </p>
-      </header>
-
-      <Tabs
-        value={filter}
-        onValueChange={(v) => setFilter(v as Filter)}
-        className="-mx-4 px-4"
-      >
-        <TabsList variant="line" className="w-fit overflow-x-auto">
-          {FILTERS.map((f) => (
-            <TabsTrigger key={f.value} value={f.value}>
-              {f.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <PageHeader
+        title="Recordings"
+        description="Every class recording available to you, across all your courses."
+        actions={
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+            <TabsList className="rounded-xl bg-muted/60 p-1">
+              {FILTERS.map((f) => (
+                <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
+                  {f.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {isLoading && (
         <div className="space-y-3">
@@ -79,15 +76,15 @@ export function RecordingsPageContent() {
       )}
 
       {!isLoading && visible.length === 0 && (
-        <Card className="p-10 text-center">
-          <Video className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No recordings</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filter === "all"
+        <EmptyState
+          icon={Video}
+          title="No recordings"
+          description={
+            filter === "all"
               ? "Recordings show up here once your tutor publishes them."
-              : "Switch the filter to see other recordings."}
-          </p>
-        </Card>
+              : "Switch the filter to see other recordings."
+          }
+        />
       )}
 
       {!isLoading &&
@@ -142,7 +139,7 @@ export function RecordingsPageContent() {
                           className="mt-0.5 shrink-0 rounded-full text-primary"
                         >
                           {r.watched ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                            <CheckCircle2 className="h-5 w-5 text-success" />
                           ) : (
                             <PlayCircle className="h-5 w-5" />
                           )}

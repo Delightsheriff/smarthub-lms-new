@@ -6,6 +6,7 @@ import {
   FileText,
   PlayCircle,
 } from "lucide-react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -117,7 +118,19 @@ function ResourceCard({ resource }: { resource: ApiHelpResource }) {
           preload="none"
           className="aspect-video w-full rounded-md bg-muted"
         />
-      ) : (
+      ) : resource.thumbnailUrl ? (
+        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+          <Image
+            src={resource.thumbnailUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 33vw"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+
+      {!isVideo && (
         <Button
           size="sm"
           variant="outline"
