@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ArrowUpRight, BookOpen, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { cn, formatDate, htmlToPlainText } from "@/lib/utils";
 import type { Course } from "@/modules/courses/types";
 
@@ -38,9 +38,9 @@ export function CourseCard({ course }: { course: Course }) {
           <div className="absolute top-2.5 left-2.5">
             <Badge
               variant={
-                completed ? "default" : started ? "outline" : "secondary"
+                completed ? "success" : started ? "outline" : "secondary"
               }
-              className="text-[10px] backdrop-blur"
+              className={cn("text-[10px] backdrop-blur", started && !completed && "bg-background/80")}
             >
               {completed
                 ? "Completed"
@@ -49,6 +49,19 @@ export function CourseCard({ course }: { course: Course }) {
                   : `Starts ${formatDate(course.startDate)}`}
             </Badge>
           </div>
+
+          {/* Completion ring — the at-a-glance "how far in" signal for
+              a card in a dense grid, replacing a footer progress bar
+              that competed with the title/description for attention. */}
+          {started && !completed && (
+            <div className="absolute top-2 right-2 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
+              <CircularProgress value={progress} size={34} strokeWidth={3}>
+                <span className="text-[10px] font-bold tabular-nums text-primary">
+                  {progress}
+                </span>
+              </CircularProgress>
+            </div>
+          )}
         </div>
 
         <div className="p-4 flex flex-col flex-1">
@@ -68,30 +81,13 @@ export function CourseCard({ course }: { course: Course }) {
             {htmlToPlainText(course.description)}
           </p>
 
-          {started ? (
-            <div className="mt-auto space-y-1.5">
-              <Progress value={progress} className="h-1" />
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {course.durationLabel}
-                </span>
-                <span
-                  className={cn(
-                    "font-semibold",
-                    completed ? "text-emerald-600" : "text-primary",
-                  )}
-                >
-                  {progress}%
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              {course.durationLabel}
-            </div>
-          )}
+          <div className="mt-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {course.durationLabel}
+            {completed && (
+              <span className="ml-auto font-semibold text-success">100%</span>
+            )}
+          </div>
         </div>
       </Card>
     </Link>

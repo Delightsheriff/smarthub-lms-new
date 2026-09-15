@@ -16,7 +16,7 @@ are met and committed.
 |---|---|---|---|
 | 1 | [home-dashboard.md](home-dashboard.md) | Home (student + instructor) | ✅ Done |
 | 2 | [ask-oreo.md](ask-oreo.md) | Ask Oreo | ✅ Redesigned earlier this session (chat primitives) |
-| 3 | [courses.md](courses.md) | Courses (cohort + self-paced, student + instructor) | 🔴 Not started — flagship creative redesign |
+| 3 | [courses.md](courses.md) | Courses (cohort + self-paced, student + instructor) | 🟡 Critical instructor-routing bug fixed + first creative pass done; self-paced + deeper redesign still open |
 | 4 | [recordings.md](recordings.md) | Recordings | 🔴 Not started |
 | 5 | [materials.md](materials.md) | Materials | 🔴 Not started |
 | 6 | [tasks-assignments.md](tasks-assignments.md) | Tasks / Assignments (student + instructor) | 🔴 Not started |

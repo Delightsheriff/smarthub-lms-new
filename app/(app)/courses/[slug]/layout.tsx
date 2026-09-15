@@ -75,6 +75,7 @@ export default function CourseLayout({
                 <CourseOutline
                   slug={slug}
                   modules={modulesForOutline}
+                  courseProgress={data.course.progress}
                   onItemClick={() => setDrawerOpen(false)}
                 />
               ) : null}
@@ -90,7 +91,11 @@ export default function CourseLayout({
           {isLoading ? (
             <OutlineSkeleton />
           ) : data ? (
-            <CourseOutline slug={slug} modules={modulesForOutline} />
+            <CourseOutline
+              slug={slug}
+              modules={modulesForOutline}
+              courseProgress={data.course.progress}
+            />
           ) : null}
         </aside>
         <div className="min-w-0">{children}</div>

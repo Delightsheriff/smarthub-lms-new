@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { cn } from "@/lib/utils";
 import type { Material, Module } from "@/modules/learning/types";
 
@@ -30,6 +31,11 @@ const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
 interface CourseOutlineProps {
   slug: string;
   modules: Module[];
+  /** Overall course completion (0–100) — shown as a ring at the top of
+   *  the rail so "how far in am I" doesn't require scrolling to the
+   *  overview page. Omitted on surfaces with no single progress number
+   *  (e.g. the instructor's cohort-content view). */
+  courseProgress?: number;
   /** Called when an item is selected — used by the mobile sheet to auto-close. */
   onItemClick?: () => void;
   /** Base path for every link the outline emits. Defaults to
@@ -52,6 +58,7 @@ interface CourseOutlineProps {
 export function CourseOutline({
   slug,
   modules,
+  courseProgress,
   onItemClick,
   basePath,
   assignmentHref,
@@ -85,13 +92,31 @@ export function CourseOutline({
 
   return (
     <div className="space-y-1.5 p-3">
+      {typeof courseProgress === "number" && (
+        <div className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2.5 mb-1">
+          <CircularProgress value={courseProgress} size={36} strokeWidth={3.5}>
+            <span className="text-[10px] font-bold tabular-nums">
+              {Math.round(courseProgress)}
+            </span>
+          </CircularProgress>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold leading-tight">
+              {Math.round(courseProgress)}% complete
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-tight">
+              Keep going
+            </p>
+          </div>
+        </div>
+      )}
+
       <Link
         href={rootPath}
         onClick={onItemClick}
         className={cn(
           "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors",
           pathname === rootPath
-            ? "bg-primary/10 text-primary"
+            ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:bg-muted hover:text-foreground",
         )}
       >
@@ -120,7 +145,7 @@ export function CourseOutline({
                   className={cn(
                     "flex flex-1 items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors min-w-0",
                     isActiveModule && !activeHash
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-primary text-primary-foreground"
                       : isActiveModule
                         ? "text-primary"
                         : "text-foreground hover:bg-muted",
@@ -129,9 +154,11 @@ export function CourseOutline({
                   <span
                     className={cn(
                       "flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tabular-nums",
-                      isActiveModule
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground",
+                      isActiveModule && !activeHash
+                        ? "bg-primary-foreground/20 text-primary-foreground"
+                        : isActiveModule
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground",
                     )}
                   >
                     {mod.order.toString().padStart(2, "0")}
@@ -151,9 +178,7 @@ export function CourseOutline({
                       label={r.title}
                       href={`${moduleHref}#recording-${r.id}`}
                       icon={r.watched ? CheckCircle2 : PlayCircle}
-                      iconClassName={
-                        r.watched ? "text-emerald-600" : "text-primary"
-                      }
+                      iconClassName={r.watched ? "text-success" : "text-primary"}
                       active={
                         isActiveModule && activeHash === `recording-${r.id}`
                       }
@@ -228,10 +253,10 @@ function OutlineItem({
         href={href}
         onClick={onClick}
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors",
+          "flex items-center gap-2 rounded-md border-l-2 px-3 py-1.5 text-xs transition-colors",
           active
-            ? "bg-primary/10 text-primary font-semibold"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            ? "border-primary bg-primary/10 text-primary font-semibold"
+            : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
         )}
       >
         <Icon
