@@ -1,50 +1,89 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FileText, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useMyAssignments } from "../api/assignments.queries";
 import { AssignmentListCard } from "./assignment-list-card";
+import { NeedsGradingStrip } from "@/modules/teaching/components/NeedsGradingStrip";
+import { InstructorAssignmentsList } from "@/modules/teaching/components/InstructorAssignmentsList";
+
+type Filter = "all" | "pending" | "submitted" | "graded" | "overdue";
+
+const VALID_FILTERS: Filter[] = ["all", "pending", "submitted", "graded", "overdue"];
 
 export function AssignmentListPageContent() {
+  const { mode } = useEffectiveMode();
+  if (mode === "instructor") return <InstructorTasksBody />;
+  return <StudentAssignmentsBody />;
+}
+
+/** Instructor's "Tasks" — the needs-grading inbox first (action-
+ *  oriented), then the full assignment set across every cohort taught. */
+function InstructorTasksBody() {
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Tasks"
+        description="Submissions waiting on you, plus the full set of assignments across the cohorts you teach."
+      />
+      <NeedsGradingStrip />
+      <InstructorAssignmentsList />
+    </div>
+  );
+}
+
+function StudentAssignmentsBody() {
   const { data: assignments, isLoading, error } = useMyAssignments();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-
-  const filtered = (assignments || []).filter(({ assignment, course, module }) => {
-    const searchMatch =
-      !search ||
-      assignment.title.toLowerCase().includes(search.toLowerCase()) ||
-      course?.name.toLowerCase().includes(search.toLowerCase()) ||
-      module?.title.toLowerCase().includes(search.toLowerCase());
-
-    if (!searchMatch) return false;
-
-    if (statusFilter === "all") return true;
-    if (statusFilter === "pending")
-      return assignment.status === "draft" || assignment.status === "returned";
-    if (statusFilter === "submitted") return assignment.status === "submitted";
-    if (statusFilter === "graded") return assignment.status === "graded";
-    if (statusFilter === "overdue") return assignment.status === "overdue";
-
-    return true;
+  const searchParams = useSearchParams();
+  // Honour ?filter=… deep links from the dashboard stats strip so each
+  // tile lands the student pre-filtered instead of on an unfiltered list.
+  const [statusFilter, setStatusFilter] = useState<Filter>(() => {
+    const fromUrl = searchParams.get("filter");
+    return fromUrl && VALID_FILTERS.includes(fromUrl as Filter) ? (fromUrl as Filter) : "all";
   });
 
-  return (
-    <div className="container max-w-6xl py-8 space-y-6">
-      {/* Header Banner */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          My Assignments
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          View deadlines, submit coursework, and review instructor grades across your enrolled courses.
-        </p>
-      </div>
+  const filtered = (assignments || [])
+    .filter(({ assignment, course, module }) => {
+      const searchMatch =
+        !search ||
+        assignment.title.toLowerCase().includes(search.toLowerCase()) ||
+        course?.name.toLowerCase().includes(search.toLowerCase()) ||
+        module?.title.toLowerCase().includes(search.toLowerCase());
 
-      {/* Filter and Search Bar */}
+      if (!searchMatch) return false;
+
+      if (statusFilter === "all") return true;
+      if (statusFilter === "pending")
+        return assignment.status === "draft" || assignment.status === "returned";
+      if (statusFilter === "submitted") return assignment.status === "submitted";
+      if (statusFilter === "graded") return assignment.status === "graded";
+      if (statusFilter === "overdue") return assignment.status === "overdue";
+
+      return true;
+    })
+    // Soonest/most-recently-due first, on every filter tab — not just
+    // whatever order the API happens to return.
+    .sort((a, b) => {
+      const da = a.assignment.dueAt ? Date.parse(a.assignment.dueAt) : Infinity;
+      const db = b.assignment.dueAt ? Date.parse(b.assignment.dueAt) : Infinity;
+      return da - db;
+    });
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="My Assignments"
+        description="View deadlines, submit coursework, and review instructor feedback across your enrolled courses."
+      />
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -56,28 +95,19 @@ export function AssignmentListPageContent() {
           />
         </div>
 
-        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)}>
           <TabsList className="rounded-xl bg-muted/60 p-1">
             <TabsTrigger value="all" className="rounded-lg text-xs">
               All ({assignments?.length || 0})
             </TabsTrigger>
-            <TabsTrigger value="pending" className="rounded-lg text-xs">
-              Pending
-            </TabsTrigger>
-            <TabsTrigger value="submitted" className="rounded-lg text-xs">
-              Submitted
-            </TabsTrigger>
-            <TabsTrigger value="graded" className="rounded-lg text-xs">
-              Graded
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="rounded-lg text-xs">
-              Overdue
-            </TabsTrigger>
+            <TabsTrigger value="pending" className="rounded-lg text-xs">Pending</TabsTrigger>
+            <TabsTrigger value="submitted" className="rounded-lg text-xs">Submitted</TabsTrigger>
+            <TabsTrigger value="graded" className="rounded-lg text-xs">Graded</TabsTrigger>
+            <TabsTrigger value="overdue" className="rounded-lg text-xs">Overdue</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {/* Loading state */}
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -86,7 +116,6 @@ export function AssignmentListPageContent() {
         </div>
       )}
 
-      {/* Error State */}
       {error && (
         <div className="rounded-2xl border border-destructive/50 bg-destructive/10 p-8 text-center space-y-2">
           <p className="text-sm font-medium text-destructive">
@@ -95,7 +124,6 @@ export function AssignmentListPageContent() {
         </div>
       )}
 
-      {/* Content Grid */}
       {!isLoading && !error && (
         <>
           {filtered.length > 0 ? (
@@ -110,17 +138,11 @@ export function AssignmentListPageContent() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border bg-card p-12 text-center space-y-3">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
-                <FileText className="h-6 w-6" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">
-                No assignments found
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                No assignments match your selected filter or search criteria.
-              </p>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="No assignments found"
+              description="No assignments match your selected filter or search criteria."
+            />
           )}
         </>
       )}

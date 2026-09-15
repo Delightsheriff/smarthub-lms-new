@@ -1,6 +1,6 @@
 # Tasks / Assignments (`/assignments`, student + instructor)
 
-Status: 🔴 Not started — biggest gap of the three learning surfaces
+Status: ✅ Done
 
 ## Current state
 

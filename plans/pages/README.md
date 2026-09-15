@@ -19,7 +19,7 @@ are met and committed.
 | 3 | [courses.md](courses.md) | Courses (cohort + self-paced, student + instructor) | 🟡 Critical instructor-routing bug fixed + first creative pass done; self-paced + deeper redesign still open |
 | 4 | [recordings.md](recordings.md) | Recordings | 🔴 Not started |
 | 5 | [materials.md](materials.md) | Materials | 🔴 Not started |
-| 6 | [tasks-assignments.md](tasks-assignments.md) | Tasks / Assignments (student + instructor) | 🔴 Not started |
+| 6 | [tasks-assignments.md](tasks-assignments.md) | Tasks / Assignments (student + instructor) | ✅ Done |
 | 7 | [assigned-to-you.md](assigned-to-you.md) | Assigned to you | ✅ Redesigned earlier this session |
 | 8 | [billing-earnings.md](billing-earnings.md) | Billing (student) / Earnings (instructor) / Payments | ✅ Redesigned earlier this session |
 | 9 | [internship.md](internship.md) | Internship | ✅ Redesigned earlier this session |
@@ -42,10 +42,17 @@ are met and committed.
   as "no such field" rather than "not assigned yet" for anyone comparing
   against a production account that has one. Now always visible with a
   fallback. Commit `aac86bb`.
-- 🔴 **Grading points visibility** — flagged in tasks-assignments.md. Legacy
-  explicitly hides scores/points/rubric from students ("hidden by request").
-  Current shows them. Needs a product decision, not just a code fix — see
-  that doc for the specific commit/comment that made the call in legacy.
+- ✅ **Grading points visibility** — legacy explicitly hides scores/points/
+  rubric from students ("hidden by request", see its own in-code comment).
+  Current showed them — implemented legacy's hide, matching feedback-only
+  display. **This is a reversible product decision, not a bug fix in the
+  usual sense — confirm with product that hiding points is still the
+  intended behavior before treating this as settled.** See
+  tasks-assignments.md.
+- ✅ **Instructor `/assignments` showed the student view** — same bug class
+  as the `/courses` one below; instructors had no way to see their
+  cohorts' assignments or the needs-grading inbox from the main nav.
+  Fixed alongside the rest of the Tasks/Assignments pass.
 
 ## Process for each doc
 

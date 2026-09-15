@@ -115,6 +115,14 @@ export interface InboxRow {
   content?: string;
 }
 
+/** One row per (assignment, cohort) attachment across every cohort the
+ *  caller teaches, with submission rollups — drives the instructor
+ *  Tasks list. */
+export interface InstructorAssignmentRow extends CohortAssignmentRow {
+  schedule: { id: string; name?: string };
+  course: { id: string; name: string; slug?: string };
+}
+
 export interface InstructorModuleCohort {
   scheduleId: string;
   scheduleName?: string;

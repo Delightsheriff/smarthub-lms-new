@@ -9,6 +9,7 @@ import {
   ExternalLink,
   FileText,
   AlertTriangle,
+  Lock,
   Send,
   HelpCircle,
 } from "lucide-react";
@@ -73,6 +74,11 @@ export function AssignmentPageContent({
   const isOverdue =
     assignment.status === "overdue" ||
     (deadlineStatus.isOverdue && !submission);
+  // Late submissions disallowed + already past due + nothing submitted
+  // yet: the form would only ever produce a guaranteed-rejected POST,
+  // so it's suppressed entirely rather than shown and left to fail.
+  const submissionWindowClosed =
+    isOverdue && !submission && !assignment.allowLateSubmission;
 
   return (
     <div className="container max-w-5xl py-8 space-y-6">
@@ -100,19 +106,13 @@ export function AssignmentPageContent({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="font-semibold text-xs">
-                {assignment.totalPoints} Points
-              </Badge>
               {assignment.type && (
                 <Badge variant="outline" className="capitalize text-xs">
                   {assignment.type.replace("-", " ")}
                 </Badge>
               )}
               {assignment.priority && (
-                <Badge
-                  variant="outline"
-                  className="border-red-500/40 text-red-700 dark:text-red-300 text-xs"
-                >
+                <Badge variant="destructive" className="text-xs">
                   {assignment.priority} priority
                 </Badge>
               )}
@@ -124,10 +124,12 @@ export function AssignmentPageContent({
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <CountdownToDeadline dueAt={assignment.dueAt} className="text-sm px-3 py-1.5" />
-            <SubmissionForm
-              assignment={assignment}
-              existingSubmission={submission}
-            />
+            {!submissionWindowClosed && (
+              <SubmissionForm
+                assignment={assignment}
+                existingSubmission={submission}
+              />
+            )}
           </div>
         </div>
 
@@ -138,7 +140,7 @@ export function AssignmentPageContent({
             <span>Due: {formatDateTime(assignment.dueAt)}</span>
           </div>
           {assignment.allowLateSubmission && (
-            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+            <span className="text-success font-medium">
               Late submissions allowed
             </span>
           )}
@@ -146,12 +148,27 @@ export function AssignmentPageContent({
       </Card>
 
       {/* Overdue Warning Alert */}
-      {isOverdue && !submission && (
+      {isOverdue && !submission && !submissionWindowClosed && (
         <Alert variant="destructive" className="rounded-2xl">
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle>Past Deadline</AlertTitle>
           <AlertDescription>
-            This assignment is past its due date. If late submissions are permitted, submit your work as soon as possible.
+            This assignment is past its due date. Submit your work as soon as possible.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Submission window closed — the form is suppressed entirely
+          rather than shown and left to fail against the backend's own
+          allowLateSubmission check. */}
+      {submissionWindowClosed && (
+        <Alert variant="destructive" className="rounded-2xl">
+          <Lock className="h-5 w-5" />
+          <AlertTitle>Submissions closed</AlertTitle>
+          <AlertDescription>
+            This assignment&apos;s deadline has passed and late submissions
+            aren&apos;t allowed. Contact your instructor if you need an
+            exception.
           </AlertDescription>
         </Alert>
       )}
@@ -217,6 +234,19 @@ export function AssignmentPageContent({
               <SubmissionStatusCard submission={submission} />
               <SubmissionHistory submission={submission} />
             </>
+          ) : submissionWindowClosed ? (
+            <Card className="rounded-2xl border bg-card p-6 shadow-sm text-center space-y-4">
+              <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+                <Lock className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Submissions closed</h3>
+                <p className="text-xs text-muted-foreground">
+                  The deadline has passed and late submissions aren&apos;t
+                  allowed for this assignment.
+                </p>
+              </div>
+            </Card>
           ) : (
             <Card className="rounded-2xl border bg-card p-6 shadow-sm text-center space-y-4">
               <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">

@@ -25,14 +25,17 @@ export function AssignmentListCard({
   const getStatusBadge = () => {
     switch (assignment.status) {
       case "graded":
+        // "Reviewed", not "Graded" — points/scores are hidden from
+        // students (see grade-card.tsx), so the language shouldn't
+        // imply a number is waiting to be seen.
         return (
-          <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">
-            <CheckCircle2 className="mr-1 h-3 w-3" /> Graded
+          <Badge variant="success">
+            <CheckCircle2 className="mr-1 h-3 w-3" /> Reviewed
           </Badge>
         );
       case "submitted":
         return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+          <Badge variant="outline" className="border-primary/40 text-primary">
             <Clock className="mr-1 h-3 w-3" /> Submitted
           </Badge>
         );
@@ -55,7 +58,7 @@ export function AssignmentListCard({
   const getPriorityBadge = () => {
     if (assignment.priority === "high") {
       return (
-        <Badge variant="outline" className="border-red-500/40 text-red-700 dark:text-red-300 text-[10px]">
+        <Badge variant="destructive" className="text-[10px]">
           High Priority
         </Badge>
       );
@@ -98,12 +101,9 @@ export function AssignmentListCard({
 
         {/* Card footer details */}
         <div className="pt-2 border-t flex items-center justify-between gap-2 mt-auto">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs font-semibold">
-              {assignment.totalPoints} pts
-            </Badge>
-            <CountdownToDeadline dueAt={assignment.dueAt} />
-          </div>
+          {/* Points aren't surfaced to students (see grade-card.tsx) —
+              a written remark, not a number, is what they see. */}
+          <CountdownToDeadline dueAt={assignment.dueAt} />
 
           <Button
             render={<Link href={`/assignments/${assignment.id}`} />}

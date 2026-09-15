@@ -27,14 +27,17 @@ export function SubmissionStatusCard({
   const getStatusBadge = () => {
     switch (submission.status) {
       case "graded":
+        // "Reviewed" — points-based grading is hidden from students,
+        // so the label shouldn't imply a score is waiting. See
+        // grade-card.tsx.
         return (
-          <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">
-            <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Graded
+          <Badge variant="success">
+            <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Reviewed
           </Badge>
         );
       case "resubmitted":
         return (
-          <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+          <Badge variant="outline" className="border-accent/40 text-accent">
             <Clock className="mr-1 h-3.5 w-3.5" /> Resubmitted
           </Badge>
         );
@@ -47,7 +50,7 @@ export function SubmissionStatusCard({
       case "submitted":
       default:
         return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+          <Badge variant="outline" className="border-primary/40 text-primary">
             <FileCheck className="mr-1 h-3.5 w-3.5" /> Submitted
           </Badge>
         );

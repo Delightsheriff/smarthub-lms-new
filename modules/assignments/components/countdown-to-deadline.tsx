@@ -78,14 +78,11 @@ export function CountdownToDeadline({
         status.isOverdue
           ? "destructive"
           : status.isUrgent
-            ? "secondary"
+            ? "warning"
             : "outline"
       }
       className={cn(
         "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors",
-        status.isUrgent &&
-          !status.isOverdue &&
-          "border-amber-500/50 bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300",
         className,
       )}
     >

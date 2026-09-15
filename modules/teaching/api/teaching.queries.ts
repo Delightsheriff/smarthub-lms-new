@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teachingService } from "./teaching.service";
 import { normaliseCohort, normaliseCohortDetail, normaliseInboxRow } from "./normalise";
-import type { InboxRow, TeachingCohort, TeachingCohortDetail } from "../types";
+import type { InboxRow, InstructorAssignmentRow, TeachingCohort, TeachingCohortDetail } from "../types";
 
 export const TEACHING_QUERY_KEYS = {
   cohorts: ["teaching", "cohorts"] as const,
@@ -13,6 +13,7 @@ export const TEACHING_QUERY_KEYS = {
   submissions: (id: string) => ["teaching", "cohort", id, "submissions"] as const,
   inbox: (limit: number) => ["teaching", "inbox", limit] as const,
   recentSubmissions: (limit: number) => ["teaching", "recent-submissions", limit] as const,
+  myAssignments: ["teaching", "my-assignments"] as const,
 } as const;
 
 export function useTeachingCohorts() {
@@ -104,6 +105,15 @@ export function useGradeSubmission(scheduleId: string) {
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.submissions(scheduleId) });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId) });
     },
+  });
+}
+
+/** Every assignment across every cohort the caller teaches, with
+ *  submission rollups — powers the instructor Tasks list. */
+export function useInstructorAssignments() {
+  return useQuery<InstructorAssignmentRow[]>({
+    queryKey: TEACHING_QUERY_KEYS.myAssignments,
+    queryFn: () => teachingService.getMyAssignments(),
   });
 }
 
