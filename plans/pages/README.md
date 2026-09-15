@@ -28,7 +28,7 @@ are met and committed.
 | 12 | [activity.md](activity.md) | Activity | ✅ Done |
 | 13 | [refer-and-earn.md](refer-and-earn.md) | Refer & earn | ✅ Redesigned earlier this session |
 | 14 | [profile.md](profile.md) | Profile | ✅ Redesigned earlier this session |
-| 15 | [webinars.md](webinars.md) | Webinars | 🔴 Not started |
+| 15 | [webinars.md](webinars.md) | Webinars | ✅ Done |
 | 16 | [help.md](help.md) | Help | ✅ Done |
 | 17 | [self-paced-sales.md](self-paced-sales.md) | Self-paced sales (instructor) | 🔴 Not started |
 

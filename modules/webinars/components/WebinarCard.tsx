@@ -21,14 +21,18 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
   const getStatusBadge = () => {
     switch (status) {
       case "ongoing":
+        // Solid, not the tinted default `destructive` variant — "live
+        // now" is the one state on this card that should visually
+        // interrupt, matching the bold solid-active-state convention
+        // used elsewhere (sidebar, filters) rather than a soft tint.
         return (
-          <Badge className="bg-red-600 hover:bg-red-700 text-white animate-pulse">
+          <Badge className="bg-destructive text-destructive-foreground animate-pulse">
             <Video className="mr-1 h-3 w-3" /> Live Now
           </Badge>
         );
       case "upcoming":
         return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+          <Badge variant="outline" className="border-primary/40 text-primary">
             <Calendar className="mr-1 h-3 w-3" /> Upcoming
           </Badge>
         );

@@ -1,6 +1,6 @@
 # Webinars (`/webinars`)
 
-Status: 🔴 Not started
+Status: ✅ Done
 
 ## Current vs legacy
 

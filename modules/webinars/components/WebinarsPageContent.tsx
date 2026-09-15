@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Presentation } from "lucide-react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight, Presentation } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,14 +13,54 @@ import { useWebinars } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
 import type { WebinarSummary } from "../types";
 
+type Tab = "upcoming" | "past";
+
+const PAGE_SIZE = 12;
+
 export function WebinarsPageContent() {
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // ?tab= / ?page= persist in the URL so a bookmarked or refreshed
+  // "Past, page 3" view is restored instead of always resetting to
+  // Upcoming — previously local-state-only.
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const fromUrl = searchParams.get("tab");
+    return fromUrl === "past" ? "past" : "upcoming";
+  });
+  const [page, setPage] = useState<number>(() => {
+    const fromUrl = Number(searchParams.get("page"));
+    return Number.isFinite(fromUrl) && fromUrl > 0 ? fromUrl : 1;
+  });
+
+  const syncUrl = (tab: Tab, nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    if (tab === "past") params.set("page", String(nextPage));
+    else params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    setPage(1);
+    syncUrl(tab, 1);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    syncUrl(activeTab, nextPage);
+  };
 
   const upcomingQuery = useWebinars("upcoming");
-  const pastQuery = useWebinars("past", { page: 1, pageSize: 12 });
+  const pastQuery = useWebinars("past", { page, pageSize: PAGE_SIZE });
 
   const upcomingList = (upcomingQuery.data as WebinarSummary[]) || [];
-  const pastList = (pastQuery.data as { items: WebinarSummary[] } | undefined)?.items || [];
+  const pastPage = pastQuery.data as
+    | { items: WebinarSummary[]; meta: { totalPages: number; currentPage: number } }
+    | undefined;
+  const pastList = pastPage?.items || [];
 
   const webinars = activeTab === "upcoming" ? upcomingList : pastList;
   const isLoading = activeTab === "upcoming" ? upcomingQuery.isLoading : pastQuery.isLoading;
@@ -30,10 +72,7 @@ export function WebinarsPageContent() {
         title="Webinars & Workshops"
         description="Join live industry sessions, masterclasses, and rewatch past recorded workshops."
         actions={
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as "upcoming" | "past")}
-          >
+          <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as Tab)}>
             <TabsList className="rounded-xl bg-muted/60 p-1">
               <TabsTrigger value="upcoming" className="rounded-lg text-xs">
                 Upcoming ({upcomingList.length})
@@ -68,13 +107,41 @@ export function WebinarsPageContent() {
       {!isLoading && !error && (
         <>
           {webinars.length > 0 ? (
-            <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {webinars.map((webinar) => (
-                <StaggerItem key={webinar.id}>
-                  <WebinarCard webinar={webinar} />
-                </StaggerItem>
-              ))}
-            </Stagger>
+            <>
+              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {webinars.map((webinar) => (
+                  <StaggerItem key={webinar.id}>
+                    <WebinarCard webinar={webinar} />
+                  </StaggerItem>
+                ))}
+              </Stagger>
+
+              {activeTab === "past" && pastPage && pastPage.meta.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => handlePageChange(page - 1)}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    Previous
+                  </Button>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    Page {pastPage.meta.currentPage} of {pastPage.meta.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= pastPage.meta.totalPages}
+                    onClick={() => handlePageChange(page + 1)}
+                  >
+                    Next
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <EmptyState
               icon={Presentation}
