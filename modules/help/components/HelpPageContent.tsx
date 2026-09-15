@@ -1,6 +1,7 @@
 "use client";
 import {
   BookOpen,
+  CircleHelp,
   ExternalLink,
   FileText,
   PlayCircle,
@@ -9,9 +10,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
+import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { groupByCategory, useHelpLibrary } from "../api/help.queries";
 import type { ApiHelpResource } from "../types/api.types";
+
+/** One look per resource type — a category is metadata worth a real
+ *  color, not a bare glyph in a one-size-fits-all tint. Video keeps
+ *  the brand accent (the highest-energy surface, matches watching
+ *  something); document and link stay on primary/neutral. */
+const RESOURCE_STYLE: Record<
+  ApiHelpResource["type"],
+  { icon: typeof PlayCircle; className: string }
+> = {
+  video: { icon: PlayCircle, className: "bg-accent text-white" },
+  document: { icon: FileText, className: "bg-primary text-primary-foreground" },
+  link: { icon: ExternalLink, className: "bg-muted text-foreground" },
+};
 
 /** Help — a small library of how-to resources, filtered by the user's
  *  effective mode so students and instructors each see relevant help.
@@ -33,25 +50,33 @@ export function HelpPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          Help
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {groups.length > 0
+      <PageHeader
+        title="Help"
+        description={
+          groups.length > 0
             ? "Short guides for the things you do most."
-            : "Nothing here yet — check back soon."}
-        </p>
-      </header>
+            : undefined
+        }
+      />
+
+      {groups.length === 0 && (
+        <EmptyState
+          icon={CircleHelp}
+          title="Nothing here yet"
+          description="Check back soon — new guides land here as they're written."
+        />
+      )}
 
       {groups.map((group) => (
         <section key={group.name} className="space-y-3">
           <h2 className="font-semibold">{group.name}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <Stagger className="grid gap-3 sm:grid-cols-2">
             {group.resources.map((r) => (
-              <ResourceCard key={r._id} resource={r} />
+              <StaggerItem key={r._id}>
+                <ResourceCard resource={r} />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
       ))}
     </div>
@@ -60,18 +85,16 @@ export function HelpPageContent() {
 
 function ResourceCard({ resource }: { resource: ApiHelpResource }) {
   const isVideo = resource.type === "video";
+  const style = RESOURCE_STYLE[resource.type];
+  const Icon = style.icon;
 
   return (
-    <Card className="p-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3 min-w-0">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          {resource.type === "video" ? (
-            <PlayCircle className="h-4 w-4" />
-          ) : resource.type === "document" ? (
-            <FileText className="h-4 w-4" />
-          ) : (
-            <ExternalLink className="h-4 w-4" />
-          )}
+    <Card className="flex flex-col gap-3 p-4">
+      <div className="flex min-w-0 items-start gap-3">
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${style.className}`}
+        >
+          <Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
           <p className="text-sm font-semibold leading-tight">
