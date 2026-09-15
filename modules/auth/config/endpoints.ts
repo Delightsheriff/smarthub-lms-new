@@ -8,12 +8,11 @@
  * `src/routes/invitations.routes.ts`).
  */
 export const AUTH_ENDPOINTS = {
-  LOGIN: "/auth/login",
-  // No server-side /auth/logout route exists (JWT logout is
-  // client-side-only here) — this call 404s and is deliberately
-  // `{ silent: true }` at the call site so it's a harmless no-op
-  // rather than a user-visible error.
-  LOGOUT: "/auth/logout",
+  // LOGIN/LOGOUT aren't here: sign-in goes through NextAuth's
+  // Credentials provider (auth.ts fetches /auth/login server-side
+  // directly, bypassing this browser-facing apiClient); sign-out
+  // clears the NextAuth session cookie client-side, and no server-side
+  // /auth/logout route exists to call anyway.
   ME: "/auth/me",
   FORGOT_PASSWORD: "/auth/forgot-password",
   RESET_PASSWORD: "/auth/reset-password",

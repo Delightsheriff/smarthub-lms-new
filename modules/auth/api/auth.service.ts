@@ -1,8 +1,6 @@
 import { apiClient } from "@/lib/api";
 import { AUTH_ENDPOINTS } from "../config/endpoints";
 import type {
-  LoginRequest,
-  LoginResponse,
   AuthUser,
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -12,17 +10,9 @@ import type {
 } from "../types";
 
 class AuthService {
-  async login(payload: LoginRequest): Promise<LoginResponse> {
-    // `rememberMe` is UI-only state (no server concept of it — the
-    // login validator's allow-list is exactly `{ email, password }`
-    // and rejects any other field). Never forward it.
-    const { email, password } = payload;
-    return apiClient.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, { email, password });
-  }
-
-  async logout(): Promise<{ success: boolean }> {
-    return apiClient.post<{ success: boolean }>(AUTH_ENDPOINTS.LOGOUT, {}, { silent: true });
-  }
+  // login/logout go through NextAuth now (auth.ts calls the real
+  // /auth/login server-side; signOut() clears the session cookie) —
+  // see modules/auth/api/auth.queries.ts's useLogin/useLogout.
 
   async getMe(): Promise<AuthUser> {
     return apiClient.get<AuthUser>(AUTH_ENDPOINTS.ME, { silent: true });
