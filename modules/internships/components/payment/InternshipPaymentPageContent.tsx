@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -48,24 +50,17 @@ export function InternshipPaymentPageContent() {
 
   if (!data) {
     return (
-      <Card className="p-8 md:p-12 text-center">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <ReceiptText className="h-6 w-6" />
-        </span>
-        <h1 className="mt-4 text-xl font-semibold">No internship payment</h1>
-        <p className="mt-2 max-w-md mx-auto text-sm text-muted-foreground">
-          Your internship is fully covered or you have no active placement —
-          there&apos;s nothing to pay for right now.
-        </p>
-        <Button
-          className="mt-6"
-          variant="outline"
-          render={<Link href="/internships" />}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1.5" />
-          Back to internship
-        </Button>
-      </Card>
+      <EmptyState
+        icon={ReceiptText}
+        title="No internship payment"
+        description="Your internship is fully covered or you have no active placement — there's nothing to pay for right now."
+        action={
+          <Button variant="outline" render={<Link href="/internships" />}>
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
+            Back to internship
+          </Button>
+        }
+      />
     );
   }
 
@@ -73,16 +68,14 @@ export function InternshipPaymentPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          Internship fee
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {settled
+      <PageHeader
+        title="Internship fee"
+        description={
+          settled
             ? "Your internship fee is paid in full."
-            : "Complete your payment to keep your placement active."}
-        </p>
-      </header>
+            : "Complete your payment to keep your placement active."
+        }
+      />
 
       {settled ? (
         <ConfirmedReceipt payment={data} />

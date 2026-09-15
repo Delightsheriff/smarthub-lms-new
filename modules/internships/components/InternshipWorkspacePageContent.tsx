@@ -23,6 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
 import {
   Progress,
@@ -67,24 +69,16 @@ export function InternshipWorkspacePageContent() {
 
   if (!data) {
     return (
-      <Card className="p-8 md:p-12 text-center">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <BriefcaseBusiness className="h-6 w-6" />
-        </span>
-        <h1 className="mt-4 text-xl font-semibold">
-          No internship placement yet
-        </h1>
-        <p className="mt-2 max-w-md mx-auto text-sm text-muted-foreground">
-          Once you&apos;re accepted into the internship program, your
-          workspace shows up here with your tasks, milestones and mentor.
-        </p>
-        <Button
-          className="mt-6"
-          render={<Link href="/dashboard" />}
-        >
-          Back to dashboard
-        </Button>
-      </Card>
+      <EmptyState
+        icon={BriefcaseBusiness}
+        title="No internship placement yet"
+        description="Once you're accepted into the internship program, your workspace shows up here with your tasks, milestones and mentor."
+        action={
+          <Button render={<Link href="/dashboard" />}>
+            Back to dashboard
+          </Button>
+        }
+      />
     );
   }
 
@@ -94,14 +88,10 @@ export function InternshipWorkspacePageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          Internship workspace
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {internship.product.name} · started {formatDate(internship.startDate)}
-        </p>
-      </header>
+      <PageHeader
+        title="Internship workspace"
+        description={`${internship.product.name} · started ${formatDate(internship.startDate)}`}
+      />
 
       <Card className="p-5">
         <div className="flex items-center justify-between gap-4 flex-wrap">
