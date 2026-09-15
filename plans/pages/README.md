@@ -25,7 +25,7 @@ are met and committed.
 | 9 | [internship.md](internship.md) | Internship | ✅ Redesigned earlier this session |
 | 10 | [calendar.md](calendar.md) | Calendar | 🔴 Not started |
 | 11 | [inbox.md](inbox.md) | Inbox | ✅ Done |
-| 12 | [activity.md](activity.md) | Activity | 🔴 Not started |
+| 12 | [activity.md](activity.md) | Activity | ✅ Done |
 | 13 | [refer-and-earn.md](refer-and-earn.md) | Refer & earn | ✅ Redesigned earlier this session |
 | 14 | [profile.md](profile.md) | Profile | ✅ Redesigned earlier this session |
 | 15 | [webinars.md](webinars.md) | Webinars | 🔴 Not started |

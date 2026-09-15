@@ -1,6 +1,6 @@
 # Activity (`/activity`)
 
-Status: 🟡 Minor gap only
+Status: ✅ Done
 
 ## Current vs legacy
 

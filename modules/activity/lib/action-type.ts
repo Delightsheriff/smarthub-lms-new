@@ -2,6 +2,8 @@ import {
   Activity,
   CreditCard,
   FileCheck,
+  GraduationCap,
+  KeyRound,
   LogIn,
   LogOut,
   RefreshCw,
@@ -32,6 +34,26 @@ const STYLES: Record<string, ActionTypeStyle> = {
     label: "Signed out of portal",
     icon: LogOut,
     className: "text-muted-foreground bg-muted",
+  },
+  "auth.password.change": {
+    label: "Changed your password",
+    icon: KeyRound,
+    className: "text-primary bg-primary/10",
+  },
+  "auth.password.reset.request": {
+    label: "Requested a password reset",
+    icon: KeyRound,
+    className: "text-warning bg-warning/10",
+  },
+  "auth.password.reset.complete": {
+    label: "Reset your password",
+    icon: KeyRound,
+    className: "text-primary bg-primary/10",
+  },
+  "enrolment.create": {
+    label: "Enrolled in a course",
+    icon: GraduationCap,
+    className: "text-success bg-success/10",
   },
   "submission.submit": {
     label: "Submitted assignment work",
