@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { toAuthUser } from "@/store/slices/authStore";
+import { toAuthUser } from "@/lib/auth/to-auth-user";
 import type { AuthUser } from "@/types/auth";
 import type { ApiResponse } from "@/lib/api/types";
 
