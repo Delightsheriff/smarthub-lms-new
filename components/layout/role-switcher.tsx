@@ -1,12 +1,7 @@
 "use client";
-import { BookOpen, Check, ChevronsUpDown, GraduationCap } from "lucide-react";
+import { BookOpen, GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { cn } from "@/lib/utils";
@@ -78,43 +73,65 @@ export function RoleSwitcher({ variant = "expanded", className }: Props) {
     );
   }
 
-  const current = ITEMS.find((it) => it.value === mode) ?? ITEMS[0];
-  const CurrentIcon = current.icon;
+  return <SlidingSwitch mode={mode} onSwitch={switchTo} className={className} />;
+}
+
+/** A sliding solid-fill segmented control, not a dropdown — the switch
+ *  is binary and used constantly, so it should read (and animate) as
+ *  one continuous state change rather than a menu to open. The pill
+ *  uses `layoutId` for a shared-element slide (Motion's FLIP-style
+ *  animation) instead of hand-computed transform math. */
+function SlidingSwitch({
+  mode,
+  onSwitch,
+  className,
+}: {
+  mode: "student" | "instructor";
+  onSwitch: (value: "student" | "instructor") => void;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
+    <div
+      role="tablist"
+      aria-label="Switch workspace"
+      className={cn(
+        "relative flex w-full items-center gap-0.5 rounded-lg bg-muted p-0.5",
+        className
+      )}
+    >
+      {ITEMS.map((it) => {
+        const Icon = it.icon;
+        const active = mode === it.value;
+        return (
+          <button
+            key={it.value}
             type="button"
-            variant="outline"
-            aria-label="Switch workspace"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onSwitch(it.value)}
             className={cn(
-              "flex w-full items-center justify-between gap-2 rounded-lg bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted h-auto",
-              className
+              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors active:scale-[0.97]",
+              active ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <span className="inline-flex min-w-0 items-center gap-2">
-              <CurrentIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span className="truncate">{current.label}</span>
-            </span>
-            <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="start" className="min-w-40">
-        {ITEMS.map((it) => {
-          const Icon = it.icon;
-          const active = mode === it.value;
-          return (
-            <DropdownMenuItem key={it.value} onClick={() => switchTo(it.value)}>
-              <Icon className="text-muted-foreground" />
-              <span className="flex-1">{it.label}</span>
-              {active && <Check className="text-primary" />}
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {active && (
+              <motion.span
+                layoutId="role-switch-pill"
+                className="absolute inset-0 -z-10 rounded-md bg-primary shadow-sm"
+                transition={
+                  reduce
+                    ? { duration: 0 }
+                    : { type: "spring", duration: 0.3, bounce: 0 }
+                }
+              />
+            )}
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="truncate">{it.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
