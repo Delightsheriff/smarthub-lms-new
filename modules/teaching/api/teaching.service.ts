@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api";
 import { TEACHING_ENDPOINTS } from "../config/endpoints";
-import type { ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
+import type { ApiInboxRow, ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
 import type {
   CohortRosterRow,
   CohortAssignmentRow,
@@ -10,6 +10,18 @@ import type {
 class TeachingService {
   async getCohorts(): Promise<ApiTeachingCohort[]> {
     return apiClient.get<ApiTeachingCohort[]>(TEACHING_ENDPOINTS.COHORTS);
+  }
+
+  /** Aggregate submissions feed across every cohort the caller teaches.
+   *  `status: "ungraded"` (default) powers Needs-grading; `"all"` powers
+   *  Recent submissions — one endpoint, two dashboard tiles. */
+  async getInbox(
+    limit = 20,
+    status: "ungraded" | "all" = "ungraded",
+  ): Promise<ApiInboxRow[]> {
+    return apiClient.get<ApiInboxRow[]>(TEACHING_ENDPOINTS.INBOX, {
+      params: { limit, status },
+    });
   }
 
   async getCohortDetail(id: string): Promise<ApiTeachingCohortDetail> {

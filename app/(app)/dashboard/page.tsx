@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { TeachPageContent } from "@/modules/teaching/components/TeachPageContent";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useCourses } from "@/modules/courses/api/courses.queries";
@@ -51,10 +51,10 @@ import { formatDate, htmlToPlainText } from "@/lib/utils";
  */
 export default function DashboardPage() {
   const { mode } = useEffectiveMode();
-  // Instructor mode is deferred to Plan 011 (teaching dashboard). The
-  // shell stays in-place with a clear placeholder so the nav slot reads
-  // sensibly in either role.
-  if (mode === "instructor") return <ComingSoon title="Teaching dashboard" />;
+  // Instructor mode reuses the teaching dashboard (greeting + needs-
+  // grading inbox + cohort grid). Same nav slot, different content —
+  // "Home shows what's mine to do today" in either role.
+  if (mode === "instructor") return <TeachPageContent />;
   return <StudentDashboardBody />;
 }
 

@@ -14,7 +14,7 @@ are met and committed.
 
 | # | Doc | Nav item(s) | Status |
 |---|---|---|---|
-| 1 | [home-dashboard.md](home-dashboard.md) | Home (student + instructor) | 🔴 Not started |
+| 1 | [home-dashboard.md](home-dashboard.md) | Home (student + instructor) | ✅ Done |
 | 2 | [ask-oreo.md](ask-oreo.md) | Ask Oreo | ✅ Redesigned earlier this session (chat primitives) |
 | 3 | [courses.md](courses.md) | Courses (cohort + self-paced, student + instructor) | 🔴 Not started — flagship creative redesign |
 | 4 | [recordings.md](recordings.md) | Recordings | 🔴 Not started |

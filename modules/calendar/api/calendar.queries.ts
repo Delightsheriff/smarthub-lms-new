@@ -52,9 +52,12 @@ export function useUpcomingEvents(limit = 5) {
   const [now] = useState(() => Date.now());
 
   const data = useMemo(() => {
+    // Cancelled events stay in the list (badged "Cancelled" by
+    // consumers) rather than disappearing silently — a class vanishing
+    // with no explanation reads as a data bug, not a cancellation.
     const cutoff = now - 3600 * 2 * 1000;
     return (all.data || [])
-      .filter((e) => !e.isCancelled && e.start.getTime() >= cutoff)
+      .filter((e) => e.start.getTime() >= cutoff)
       .sort((a, b) => a.start.getTime() - b.start.getTime())
       .slice(0, limit);
   }, [all.data, limit, now]);

@@ -1,5 +1,5 @@
-import type { ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
-import type { TeachingCohort, TeachingCohortDetail, TeachingModule } from "../types";
+import type { ApiInboxRow, ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
+import type { InboxRow, TeachingCohort, TeachingCohortDetail, TeachingModule } from "../types";
 
 export function normaliseCohort(api: ApiTeachingCohort): TeachingCohort {
   const course = api.course
@@ -21,6 +21,10 @@ export function normaliseCohort(api: ApiTeachingCohort): TeachingCohort {
     startDate: api.startDate || new Date().toISOString(),
     endDate: api.endDate,
     duration: api.duration || "6 months",
+    mode: api.mode,
+    isPrivate: api.isPrivate,
+    applicationIsOpen: api.applicationIsOpen,
+    applicationEndDate: api.applicationEndDate,
     studentCount: api.studentCount || 0,
     progress: api.progress ?? 0,
     course,
@@ -46,5 +50,36 @@ export function normaliseCohortDetail(api: ApiTeachingCohortDetail): TeachingCoh
   return {
     ...base,
     modules,
+  };
+}
+
+export function normaliseInboxRow(api: ApiInboxRow): InboxRow {
+  return {
+    id: api._id,
+    assignment: {
+      id: api.assignment._id,
+      title: api.assignment.title || "Untitled",
+      totalPoints: api.assignment.totalPoints,
+    },
+    cohort: {
+      id: api.cohort._id,
+      courseName: api.cohort.courseName,
+      startDate: api.cohort.startDate,
+    },
+    student: {
+      id: api.student._id,
+      name: api.student.name,
+      email: api.student.email,
+    },
+    submittedAt: api.submittedAt,
+    isLate: api.isLate,
+    score: api.score,
+    status: api.status,
+    submissionType: api.submissionType,
+    fileUrl: api.fileUrl,
+    fileName: api.fileName,
+    fileMimeType: api.fileMimeType,
+    externalUrl: api.externalUrl,
+    content: api.content,
   };
 }

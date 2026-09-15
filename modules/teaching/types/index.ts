@@ -3,6 +3,11 @@ export interface TeachingCohort {
   startDate: string;
   endDate?: string;
   duration?: string;
+  /** Cohort-level delivery mode — falls back to `course.mode` when unset. */
+  mode?: string;
+  isPrivate?: boolean;
+  applicationIsOpen?: boolean;
+  applicationEndDate?: string;
   studentCount: number;
   progress: number;
   course: {
@@ -82,6 +87,31 @@ export interface CohortSubmissionRow {
   submissionType?: "file" | "text" | "url";
   fileName?: string;
   fileMimeType?: string;
+  content?: string;
+}
+
+/** Aggregate row for `GET /lms/teaching/inbox` — a submission across
+ *  ANY cohort the caller teaches (not scoped to one cohort, unlike
+ *  `CohortSubmissionRow`). `?status=ungraded` (default) drives the
+ *  dashboard's Needs-grading strip; `?status=all` drives Recent
+ *  submissions. */
+export interface InboxRow {
+  id: string;
+  assignment: { id: string; title: string; totalPoints?: number };
+  cohort: { id: string; courseName?: string; startDate?: string };
+  student: { id: string; name: string; email?: string };
+  submittedAt?: string;
+  isLate: boolean;
+  /** Present only on the `?status=all` feed, once graded. */
+  score?: number;
+  status?: string;
+  /** Drives the GradingDialog's preview panel — same shape as
+   *  CohortSubmissionRow so the two surfaces can share the adapter. */
+  submissionType?: "file" | "text" | "url";
+  fileUrl?: string;
+  fileName?: string;
+  fileMimeType?: string;
+  externalUrl?: string;
   content?: string;
 }
 

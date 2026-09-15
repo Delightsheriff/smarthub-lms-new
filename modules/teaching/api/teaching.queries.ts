@@ -2,8 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teachingService } from "./teaching.service";
-import { normaliseCohort, normaliseCohortDetail } from "./normalise";
-import type { TeachingCohort, TeachingCohortDetail } from "../types";
+import { normaliseCohort, normaliseCohortDetail, normaliseInboxRow } from "./normalise";
+import type { InboxRow, TeachingCohort, TeachingCohortDetail } from "../types";
 
 export const TEACHING_QUERY_KEYS = {
   cohorts: ["teaching", "cohorts"] as const,
@@ -11,6 +11,8 @@ export const TEACHING_QUERY_KEYS = {
   roster: (id: string) => ["teaching", "cohort", id, "roster"] as const,
   assignments: (id: string) => ["teaching", "cohort", id, "assignments"] as const,
   submissions: (id: string) => ["teaching", "cohort", id, "submissions"] as const,
+  inbox: (limit: number) => ["teaching", "inbox", limit] as const,
+  recentSubmissions: (limit: number) => ["teaching", "recent-submissions", limit] as const,
 } as const;
 
 export function useTeachingCohorts() {
@@ -19,6 +21,31 @@ export function useTeachingCohorts() {
     queryFn: async () => {
       const raw = await teachingService.getCohorts();
       return (raw || []).map(normaliseCohort);
+    },
+  });
+}
+
+/** Top-N ungraded submissions across every cohort the caller teaches —
+ *  the dashboard's "what needs my attention" feed. */
+export function useInstructorInbox(limit = 5) {
+  return useQuery<InboxRow[]>({
+    queryKey: TEACHING_QUERY_KEYS.inbox(limit),
+    queryFn: async () => {
+      const rows = await teachingService.getInbox(limit, "ungraded");
+      return rows.map(normaliseInboxRow);
+    },
+  });
+}
+
+/** Recent submissions across every cohort the caller teaches, regardless
+ *  of grade state. Distinct query key from useInstructorInbox so the two
+ *  dashboard tiles cache independently. */
+export function useRecentSubmissions(limit = 5) {
+  return useQuery<InboxRow[]>({
+    queryKey: TEACHING_QUERY_KEYS.recentSubmissions(limit),
+    queryFn: async () => {
+      const rows = await teachingService.getInbox(limit, "all");
+      return rows.map(normaliseInboxRow);
     },
   });
 }
@@ -76,6 +103,32 @@ export function useGradeSubmission(scheduleId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.submissions(scheduleId) });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId) });
+    },
+  });
+}
+
+/** Grade a submission from a cross-cohort context (the dashboard's
+ *  Needs-grading / Recent-submissions tiles) where there's no single
+ *  `scheduleId` to invalidate against — invalidates the inbox queries
+ *  themselves instead of one cohort's submissions list. */
+export function useGradeSubmissionFromInbox() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      submissionId,
+      score,
+      feedback,
+    }: {
+      submissionId: string;
+      score: number;
+      feedback?: string;
+    }) => {
+      return teachingService.gradeSubmission(submissionId, score, feedback);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teaching", "inbox"] });
+      queryClient.invalidateQueries({ queryKey: ["teaching", "recent-submissions"] });
     },
   });
 }

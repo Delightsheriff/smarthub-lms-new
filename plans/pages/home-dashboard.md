@@ -1,6 +1,6 @@
 # Home (`/dashboard`) — student + instructor
 
-Status: 🔴 Not started
+Status: ✅ Done — instructor dashboard implemented
 
 ## Current state
 

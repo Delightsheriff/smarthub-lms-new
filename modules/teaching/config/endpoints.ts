@@ -2,6 +2,7 @@ import { LMS_PREFIX } from "@/lib/api/constants";
 
 export const TEACHING_ENDPOINTS = {
   COHORTS: `${LMS_PREFIX}/teaching/cohorts`,
+  INBOX: `${LMS_PREFIX}/teaching/inbox`,
   COHORT_DETAIL: (id: string) => `${LMS_PREFIX}/teaching/cohorts/${id}`,
   ROSTER: (id: string) => `${LMS_PREFIX}/teaching/cohorts/${id}/roster`,
   ASSIGNMENTS: (id: string) => `${LMS_PREFIX}/teaching/cohorts/${id}/assignments`,
