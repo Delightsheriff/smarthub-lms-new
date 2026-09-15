@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError } from "axios";
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api/types";
+import { ApiError, type ApiResponse } from "@/lib/api/types";
 import { useAuthStore } from "@/store/slices/authStore";
 
 export interface ApiClientRequestOptions {
@@ -76,13 +76,15 @@ instance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshResponse = await axios.post<{ accessToken?: string }>(
-          `${API_BASE_URL}/lms/auth/refresh`,
+        const refreshResponse = await axios.post<ApiResponse<{ token?: string }>>(
+          `${API_BASE_URL}/auth/refresh-token`,
           {},
           { withCredentials: true },
         );
 
-        const newToken = refreshResponse.data.accessToken;
+        // The refresh endpoint's envelope names this field `token`, not
+        // `accessToken` (that name is only used by /auth/login's payload).
+        const newToken = refreshResponse.data.data?.token;
         if (newToken) {
           const user = useAuthStore.getState().user;
           if (user) {
@@ -128,14 +130,17 @@ async function execRequest<T>(
   options?: ApiClientRequestOptions,
 ): Promise<T> {
   try {
-    const response = await instance.request<T>({
+    const response = await instance.request<ApiResponse<T>>({
       method,
       url,
       data,
       params: options?.params,
       headers: options?.headers,
     });
-    return response.data;
+    // smarthub-api's successHandler always wraps the payload as
+    // { statusCode, message, success, data }; unwrap it here so every
+    // service gets the bare shape it's typed for.
+    return response.data.data;
   } catch (err) {
     const apiError = formatError(err);
     if (!options?.silent) {
@@ -185,18 +190,16 @@ export async function uploadFile(
   formData.append("file", file);
 
   try {
-    const response = await instance.post<{ url?: string; secure_url?: string }>(
-      "/lms/uploads",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          ...options?.headers,
-        },
-        params: options?.params,
+    const response = await instance.post<
+      ApiResponse<{ url?: string; secure_url?: string }>
+    >("/lms/uploads", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        ...options?.headers,
       },
-    );
-    const url = response.data.url || response.data.secure_url;
+      params: options?.params,
+    });
+    const url = response.data.data?.url || response.data.data?.secure_url;
     if (!url) throw new ApiError("Upload succeeded but no file URL was returned", 500);
     return url;
   } catch (err) {

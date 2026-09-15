@@ -13,7 +13,11 @@ import type {
 
 class AuthService {
   async login(payload: LoginRequest): Promise<LoginResponse> {
-    return apiClient.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, payload);
+    // `rememberMe` is UI-only state (no server concept of it — the
+    // login validator's allow-list is exactly `{ email, password }`
+    // and rejects any other field). Never forward it.
+    const { email, password } = payload;
+    return apiClient.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, { email, password });
   }
 
   async logout(): Promise<{ success: boolean }> {
