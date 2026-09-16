@@ -106,6 +106,8 @@ export function InstructorEarningsPageContent() {
     return (
       <div className="space-y-6">
         <PageHeader
+          variant="editorial"
+          eyebrow="Teaching"
           title="Earnings"
           description="Your accrued earnings and payouts across the cohorts you teach."
         />
@@ -122,6 +124,8 @@ export function InstructorEarningsPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Teaching"
         title="Earnings"
         description="Your accrued earnings and payouts across the cohorts you teach."
       />

@@ -13,6 +13,8 @@ import { NeedsGradingStrip } from "./NeedsGradingStrip";
 import { RecentSubmissionsTile } from "./RecentSubmissionsTile";
 import { UpcomingClassesTile } from "./UpcomingClassesTile";
 
+import { PageHeader } from "@/components/layout/page-header";
+
 /**
  * Instructor home (`/dashboard` in Teaching mode). Compact greeting +
  * a priority grid pairing action surfaces (Needs grading, Recent
@@ -36,21 +38,18 @@ export function TeachPageContent() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary mb-2">
-          <GraduationCap className="h-4 w-4" />
-        </div>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          Hi {greetingName}
-        </h1>
-        {!isLoading && (
-          <p className="text-sm text-muted-foreground mt-1">
-            {cohortCount === 0
+      <PageHeader
+        variant="editorial"
+        eyebrow="Teaching"
+        title={`Hi, ${greetingName}`}
+        description={
+          !isLoading
+            ? cohortCount === 0
               ? "You're not leading any cohorts yet."
-              : `Teaching ${cohortCount} ${cohortCount === 1 ? "cohort" : "cohorts"}.`}
-          </p>
-        )}
-      </header>
+              : `Teaching ${cohortCount} ${cohortCount === 1 ? "cohort" : "cohorts"}.`
+            : undefined
+        }
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">

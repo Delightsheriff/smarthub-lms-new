@@ -69,6 +69,8 @@ export function InternshipPaymentPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Internship"
         title="Internship fee"
         description={
           settled

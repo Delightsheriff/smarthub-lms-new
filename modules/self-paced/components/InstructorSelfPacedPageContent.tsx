@@ -24,7 +24,9 @@ export function InstructorSelfPacedPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Self-paced courses"
+        variant="editorial"
+        eyebrow="Teaching"
+        title="Self-paced Courses"
         description="Share your referral links, see what they've sold, and track your share of every sale."
       />
 

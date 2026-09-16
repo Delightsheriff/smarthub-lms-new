@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/page-header";
 import { useMyInstallmentPlans, useMyPaymentSurface, useSubmitPaymentProof } from "../api/payment-proofs.queries";
 import type { MyInstallmentPlanUi, MyPaymentProofUi, PlanTrancheUi } from "../types";
 import { InstallmentScheduleCard } from "./InstallmentScheduleCard";
@@ -93,13 +94,13 @@ export function PaymentsPageContent() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
-      <div>
-        <h1 className="text-xl font-semibold">Payments</h1>
-        <p className="text-sm text-muted-foreground">
-          Paid by bank transfer? Upload your receipt and we&apos;ll confirm it.
-        </p>
-      </div>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        variant="editorial"
+        eyebrow="Money"
+        title="Payments"
+        description="Paid by bank transfer? Upload your receipt and we'll confirm it."
+      />
 
       {bank && (bank.accountNumber || bank.bankName) && (
         <div className="rounded-lg border bg-muted/40 p-4">

@@ -83,6 +83,8 @@ export function OreoPageContent() {
   return (
     <div className="flex h-[calc(100dvh-8.5rem)] flex-col">
       <PageHeader
+        variant="editorial"
+        eyebrow="AI Assistant"
         className="mb-4"
         title="Ask Oreo"
         description="Your courses, fees, attendance, schedule and internship — ask anything."
@@ -92,6 +94,7 @@ export function OreoPageContent() {
             variant="outline"
             onClick={() => setTurns([])}
             disabled={turns.length === 0}
+            className="rounded-xl"
           >
             <MessageSquarePlus className="h-3.5 w-3.5 mr-1.5" />
             New chat

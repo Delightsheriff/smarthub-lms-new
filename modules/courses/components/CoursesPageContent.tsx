@@ -64,6 +64,8 @@ function InstructorCoursesBody() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Teaching"
         title="Courses"
         description="Every cohort you teach, grouped by course."
       />
