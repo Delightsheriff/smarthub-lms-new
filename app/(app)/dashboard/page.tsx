@@ -30,6 +30,7 @@ import { UpcomingDeadlinesPanel } from "@/modules/calendar/components/UpcomingDe
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
 import { CourseProgressList } from "@/modules/dashboard/components/CourseProgressList";
 import { PageHeader } from "@/components/layout/page-header";
+import { RevokedCourseNotice } from "@/modules/access/components/RevokedCourseNotice";
 import { formatDate, htmlToPlainText } from "@/lib/utils";
 
 /**
@@ -99,6 +100,9 @@ function StudentDashboardBody() {
         <InternshipDashboardCard />
         <TechScholarshipCard />
       </div>
+
+      {/* Revoked-enrolment notice — self-gates when none are revoked. */}
+      <RevokedCourseNotice />
 
       <DashboardStatsStrip />
 
