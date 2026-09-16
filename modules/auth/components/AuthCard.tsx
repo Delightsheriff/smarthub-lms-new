@@ -50,7 +50,7 @@ export function AuthCardBody({
   return (
     <Card className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
       <CardHeader className="space-y-1.5 p-0 text-center">
-        <CardTitle className="font-display text-2xl font-normal leading-tight text-foreground">
+        <CardTitle className="font-display text-2xl font-bold leading-tight text-primary">
           {title}
         </CardTitle>
         {description && (
