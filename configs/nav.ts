@@ -66,6 +66,7 @@ const STUDENT_MODE_ITEMS: NavItem[] = [
   { label: "Materials", href: "/materials", icon: Library, group: "Learning" },
   { label: "Tasks", href: "/assignments", icon: ClipboardList, group: "Learning" },
   { label: "Assigned to you", href: "/assigned", icon: ListTodo, group: "Learning" },
+  { label: "Jobs", href: "/jobs", icon: Briefcase, group: "Career" },
   { label: "Billing", href: "/billing", icon: Wallet, group: "Money" },
   { label: "Payments", href: "/payments", icon: Receipt, group: "Money" },
 ];
