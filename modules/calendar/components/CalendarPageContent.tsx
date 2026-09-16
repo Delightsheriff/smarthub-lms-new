@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
+  CalendarRange,
   ChevronLeft,
   ChevronRight,
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,10 +22,13 @@ import { WeekGrid } from "./WeekGrid";
 import { DayView } from "./DayView";
 import { CourseFilterChips } from "./CourseFilterChips";
 import { EventDetailDialog } from "./EventDetailDialog";
+import { getWeekDays } from "./grid-utils";
 import type { CalendarEventUI } from "../types";
 
 type ViewMode = "month" | "week" | "day" | "agenda";
 const VALID_VIEWS: ViewMode[] = ["month", "week", "day", "agenda"];
+type AgendaWindow = 7 | 14 | 30;
+const AGENDA_WINDOWS: AgendaWindow[] = [7, 14, 30];
 
 export function CalendarPageContent() {
   const router = useRouter();
@@ -40,8 +45,53 @@ export function CalendarPageContent() {
   const [hiddenScopes, setHiddenScopes] = useState<Set<string>>(() => new Set());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [agendaWindow, setAgendaWindow] = useState<AgendaWindow>(14);
 
-  const { data: events, isLoading, error } = useStudentCalendar();
+  // Query window depends on the active view, so an event doesn't
+  // silently sit outside the fetched range — a fixed 9-month blob
+  // (the previous default) would still miss anything further out.
+  //   month:  the visible month + a 7-day buffer for spill cells
+  //   week:   the same Sunday-start week WeekGrid renders
+  //   day:    just the 24h shown
+  //   agenda: a rolling window from today, sized by agendaWindow
+  const { from, to } = useMemo(() => {
+    if (viewMode === "month") {
+      const f = new Date(currentDate);
+      f.setDate(1);
+      f.setDate(f.getDate() - 7);
+      const t = new Date(currentDate);
+      t.setDate(1);
+      t.setMonth(t.getMonth() + 1);
+      t.setDate(t.getDate() + 7);
+      return { from: f, to: t };
+    }
+    if (viewMode === "week") {
+      const days = getWeekDays(currentDate);
+      const f = new Date(days[0].date);
+      f.setHours(0, 0, 0, 0);
+      const t = new Date(days[6].date);
+      t.setHours(23, 59, 59, 999);
+      return { from: f, to: t };
+    }
+    if (viewMode === "day") {
+      const f = new Date(currentDate);
+      f.setHours(0, 0, 0, 0);
+      const t = new Date(f);
+      t.setDate(t.getDate() + 1);
+      return { from: f, to: t };
+    }
+    const f = new Date();
+    f.setHours(0, 0, 0, 0);
+    const t = new Date(f);
+    t.setDate(t.getDate() + agendaWindow);
+    return { from: f, to: t };
+  }, [viewMode, currentDate, agendaWindow]);
+
+  const {
+    data: events,
+    isLoading,
+    error,
+  } = useStudentCalendar({ from: from.toISOString(), to: to.toISOString() });
 
   const handleViewChange = (next: ViewMode) => {
     setViewMode(next);
@@ -106,38 +156,65 @@ export function CalendarPageContent() {
         }
       />
 
-      {/* Date Navigator Bar */}
+      {/* Date Navigator Bar — Agenda swaps this for a rolling-window
+          picker, since it isn't anchored to a browsable date the way
+          the other three views are. */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleToday} className="rounded-xl">
-            Today
-          </Button>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={handlePrev}
-              className="rounded-xl"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleNext}
-              className="rounded-xl"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        {viewMode === "agenda" ? (
+          <div className="flex items-center gap-2">
+            <CalendarRange className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground mr-1">Next</span>
+            <div className="flex items-center gap-1 rounded-xl bg-muted/60 p-1">
+              {AGENDA_WINDOWS.map((w) => (
+                <Button
+                  key={w}
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setAgendaWindow(w)}
+                  className={
+                    "rounded-lg px-2.5 text-xs h-7 " +
+                    (agendaWindow === w
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                      : "text-muted-foreground")
+                  }
+                >
+                  {w} days
+                </Button>
+              ))}
+            </div>
           </div>
-          <h2 className="text-base font-semibold text-foreground ml-2">
-            {currentDate.toLocaleDateString(undefined, {
-              month: "long",
-              year: "numeric",
-              ...(viewMode === "day" && { day: "numeric" }),
-            })}
-          </h2>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleToday} className="rounded-xl">
+              Today
+            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handlePrev}
+                className="rounded-xl"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleNext}
+                className="rounded-xl"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <h2 className="text-base font-semibold text-foreground ml-2">
+              {currentDate.toLocaleDateString(undefined, {
+                month: "long",
+                year: "numeric",
+                ...(viewMode === "day" && { day: "numeric" }),
+              })}
+            </h2>
+          </div>
+        )}
 
         {/* Filter chips */}
         <CourseFilterChips
@@ -229,9 +306,15 @@ export function CalendarPageContent() {
                     </Card>
                   ))
               ) : (
-                <div className="rounded-2xl border bg-card p-12 text-center text-muted-foreground text-sm">
-                  No events found for the selected view.
-                </div>
+                <EmptyState
+                  icon={CalendarRange}
+                  title="Nothing in this window"
+                  description={
+                    viewMode === "agenda"
+                      ? `No events in the next ${agendaWindow} days. Try a wider window.`
+                      : "No events found for the selected view."
+                  }
+                />
               )}
             </div>
           )}

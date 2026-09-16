@@ -1,6 +1,6 @@
 # Calendar (`/calendar`)
 
-Status: 🟡 Safe fixes done; the two bigger data-fetching changes deferred (see below)
+Status: ✅ Done — including the previously-deferred query-range rework
 
 ## Current vs legacy
 
@@ -62,17 +62,21 @@ than reaching for raw blue/purple/emerald/amber.
       this session.
 - [x] `PageHeader` adopted for the header/view-tabs row.
 - [x] `npx tsc --noEmit` and `npx eslint` clean.
-- [ ] Query range computed per active view (month/week/day/agenda),
-      not a fixed 9-month window — **deferred**. This is a real data-
-      completeness bug (an event 7 months out is silently outside the
-      fetched range), but it's a genuine data-fetching restructure to
-      `useStudentCalendar`, and this session has no seed data with
-      events far enough out to verify the fix actually works rather than
-      just compiles. Doing it blind, this late, risked a confident-
-      looking but unverified change. Picking this up next: rework
-      `defaultRange()` in `calendar.queries.ts` to accept the active
-      view and compute month±7d / ISO week / single day / rolling
-      agenda window, per legacy's `CalendarPageContent.tsx:97-129`.
-- [ ] Agenda view's 7/14/30-day window control — deferred alongside the
-      above; the agenda view's own windowing is downstream of the same
-      query-range work.
+- [x] Query range computed per active view (month/week/day/agenda),
+      not a fixed 9-month window. `useStudentCalendar` already accepted
+      a `{from, to}` override (added for the earlier `?view=` fix) —
+      the caller just wasn't using it. Now computes month±7d / the same
+      Sunday-start week `WeekGrid` renders (via `getWeekDays`, reused
+      rather than re-implementing ISO-week math like legacy) / a single
+      day / a rolling agenda window. **Verified live** against the real
+      backend (dev servers running this session): Month fetches ~6
+      weeks, Week fetches exactly 7 days, Agenda's 14-day default and a
+      switch to 30 days both produced exactly the right `from`/`to` in
+      the network log — not just a compile-clean guess this time.
+- [x] Agenda view's 7/14/30-day window control — added, replacing the
+      Prev/Next/Today date-navigator (which was never meaningful for
+      Agenda, since that view lists events from *today* forward rather
+      than being anchored to a browsable date) with a segmented day-
+      count picker, matching legacy's actual UX model. The "no events"
+      block in Agenda also now uses the shared `EmptyState` instead of
+      a hand-rolled div.

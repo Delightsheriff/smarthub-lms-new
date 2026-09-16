@@ -16,14 +16,14 @@ are met and committed.
 |---|---|---|---|
 | 1 | [home-dashboard.md](home-dashboard.md) | Home (student + instructor) | ✅ Done |
 | 2 | [ask-oreo.md](ask-oreo.md) | Ask Oreo | ✅ Redesigned earlier this session (chat primitives) |
-| 3 | [courses.md](courses.md) | Courses (cohort + self-paced, student + instructor) | 🟡 Critical instructor-routing bug fixed + first creative pass done; self-paced + deeper redesign still open |
+| 3 | [courses.md](courses.md) | Courses (cohort, student + instructor) | 🟡 Critical instructor-routing bug fixed + first creative pass done; deeper landing-page/module-tab redesign still open (self-paced split out to #18, done) |
 | 4 | [recordings.md](recordings.md) | Recordings | ✅ Done |
 | 5 | [materials.md](materials.md) | Materials | ✅ Done |
 | 6 | [tasks-assignments.md](tasks-assignments.md) | Tasks / Assignments (student + instructor) | ✅ Done |
 | 7 | [assigned-to-you.md](assigned-to-you.md) | Assigned to you | ✅ Redesigned earlier this session |
 | 8 | [billing-earnings.md](billing-earnings.md) | Billing (student) / Earnings (instructor) / Payments | ✅ Redesigned earlier this session |
 | 9 | [internship.md](internship.md) | Internship | ✅ Redesigned earlier this session |
-| 10 | [calendar.md](calendar.md) | Calendar | 🟡 Partial |
+| 10 | [calendar.md](calendar.md) | Calendar | ✅ Done |
 | 11 | [inbox.md](inbox.md) | Inbox | ✅ Done |
 | 12 | [activity.md](activity.md) | Activity | ✅ Done |
 | 13 | [refer-and-earn.md](refer-and-earn.md) | Refer & earn | ✅ Redesigned earlier this session |
