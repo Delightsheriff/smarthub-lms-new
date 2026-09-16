@@ -1,6 +1,6 @@
 # Refer & earn (`/refer-and-earn`)
 
-Status: ✅ Done — commit `cd8874d`. Legacy compared during this redesign.
+Status: ✅ Done — editorial PageHeader, canvas-warm code card, hairline stat-strip, and TechScholarshipCard rolled out (Plan 016 Slice 4).
 
 Rebuilt with the segmented-header-tabs pattern (Share/Earnings/Ledger/
 Payouts in `PageHeader`'s actions slot), `ProgramShareLink` normalized onto

@@ -130,8 +130,10 @@ export function ReferralsPanel() {
   const records = data?.records ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       <PageHeader
+        variant="editorial"
+        eyebrow="Refer & Earn"
         title="Refer & earn"
         description="Share your link, track sign-ups, and withdraw what you earn."
         actions={
@@ -149,15 +151,19 @@ export function ReferralsPanel() {
 
       {/* Code-pill card — persistent across tabs so the user's
           "identity" stays in view as they toggle between sections. */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">
+      <div className="canvas-warm rounded-2xl border border-border p-6 md:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-xl">
+            <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+              <span className="h-px w-6 bg-accent" aria-hidden />
+              Your unique link
+            </p>
+            <h2 className="mt-2 font-display text-2xl leading-tight text-foreground">
               Your referral code
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Share a program link, track sign-ups, and earn when friends
-              enrol.
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Share a programme link, track your referee sign-ups, and earn commission
+              when friends enrol.
             </p>
           </div>
           <CopyableCode code={data?.code} />
@@ -165,21 +171,25 @@ export function ReferralsPanel() {
 
         {(typeof data?.uses === "number" ||
           typeof data?.qualifiedCount === "number") && (
-          <p className="mt-3 text-xs text-muted-foreground">
+          <div className="mt-6 flex items-center gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
             {typeof data?.uses === "number" && (
-              <span>
-                {data.uses} sign-up{data.uses === 1 ? "" : "s"}
+              <span className="font-medium text-foreground">
+                <span className="font-display text-base font-bold tabular-nums text-primary">{data.uses}</span>{" "}
+                sign-up{data.uses === 1 ? "" : "s"}
               </span>
             )}
             {typeof data?.qualifiedCount === "number" && (
               <span>
                 {" · "}
-                {data.qualifiedCount} qualified
+                <span className="font-medium text-foreground">
+                  <span className="font-display text-base font-bold tabular-nums text-accent">{data.qualifiedCount}</span>{" "}
+                  qualified
+                </span>
               </span>
             )}
-          </p>
+          </div>
         )}
-      </Card>
+      </div>
 
       {tab === "share" && (
         <section className="space-y-3">
@@ -206,24 +216,24 @@ export function ReferralsPanel() {
 
       {tab === "earnings" && (
         <section className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Tile
+          <div className="grid grid-cols-1 divide-y divide-border rounded-2xl border border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <StatTile
               icon={Clock}
               label="Pending"
               amount={totals.pendingNaira}
-              tone="warning"
+              hint="Awaiting payment"
             />
-            <Tile
+            <StatTile
               icon={Wallet}
               label="Earned"
               amount={totals.earnedNaira}
-              tone="success"
+              hint="Ready or in clawback"
             />
-            <Tile
+            <StatTile
               icon={CheckCircle2}
               label="Paid"
               amount={totals.paidNaira}
-              tone="primary"
+              hint="Withdrawn to bank"
             />
           </div>
           <p className="text-xs text-muted-foreground">
@@ -264,33 +274,27 @@ export function ReferralsPanel() {
   );
 }
 
-function Tile({
+function StatTile({
   icon: Icon,
   label,
   amount,
-  tone,
+  hint,
 }: {
   icon: React.ElementType;
   label: string;
   amount: number;
-  tone: "warning" | "success" | "primary";
+  hint?: string;
 }) {
-  const palette: Record<typeof tone, string> = {
-    warning: "bg-warning/10 border-warning/30 text-warning",
-    success: "bg-success/10 border-success/30 text-success",
-    primary: "bg-primary/5 border-primary/20 text-primary",
-  };
   return (
-    <div className={cn("rounded-xl border p-4", palette[tone])}>
-      <div className="flex items-center gap-2">
-        <Icon className="h-3.5 w-3.5" />
-        <p className="text-xs font-medium uppercase tracking-wide opacity-80">
-          {label}
-        </p>
+    <div className="p-5">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <Icon className="h-3.5 w-3.5 text-accent" />
+        <span>{label}</span>
       </div>
-      <p className="mt-2 text-2xl font-bold tabular-nums">
+      <p className="mt-2 font-display text-2xl md:text-3xl tabular-nums leading-tight text-foreground">
         {formatPrice(amount)}
       </p>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
