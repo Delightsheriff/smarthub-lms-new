@@ -3,7 +3,7 @@ import { AcceptInvitationPageContent } from "@/modules/auth/components/AcceptInv
 
 export default function AcceptInvitationPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<div className="w-full max-w-md h-80" />}>
       <AcceptInvitationPageContent />
     </Suspense>
   );

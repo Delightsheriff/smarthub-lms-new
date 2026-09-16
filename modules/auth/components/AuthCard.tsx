@@ -25,7 +25,7 @@ import { Logo } from "@/components/layout/logo";
  */
 export function AuthColumn({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="w-full max-w-md space-y-6 font-sans">
       <div className="flex justify-center">
         <Logo />
       </div>
@@ -48,13 +48,13 @@ export function AuthCardBody({
   children: ReactNode;
 }) {
   return (
-    <Card className="space-y-4 rounded-2xl border bg-card p-6 shadow-md">
-      <CardHeader className="space-y-1 p-0 text-center">
-        <CardTitle className="text-xl font-bold text-foreground">
+    <Card className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <CardHeader className="space-y-1.5 p-0 text-center">
+        <CardTitle className="font-display text-2xl font-normal leading-tight text-foreground">
           {title}
         </CardTitle>
         {description && (
-          <CardDescription className="text-xs text-muted-foreground">
+          <CardDescription className="text-xs text-muted-foreground leading-relaxed">
             {description}
           </CardDescription>
         )}

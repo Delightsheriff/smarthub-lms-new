@@ -151,7 +151,7 @@ content, tables, and forms stay exactly as they are):**
 - [x] Slice 2 — Dashboard hero
 - [x] Slice 3 — Self-paced lesson player + course landing page hero
 - [x] Slice 4 — Refer & Earn + Tech Scholarship card
-- [ ] Slice 5 — Auth screens
+- [x] Slice 5 — Auth screens
 - [ ] Slice 6 — Light-touch `PageHeader` pass (list pages)
 
 ---
