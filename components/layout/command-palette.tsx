@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CornerDownLeft, Loader2 } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -14,6 +14,9 @@ import {
 import { getNavItemsForMode, type NavItem } from "@/configs/nav";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
+import { useSearch } from "@/modules/search/api/search.queries";
+import { iconForHint } from "@/modules/search/api/normalise";
+import type { SearchResult } from "@/modules/search/types";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -23,28 +26,52 @@ interface CommandPaletteProps {
 /**
  * The global ⌘K palette.
  *
- * Two parts, matching the legacy split:
+ * Two parts:
  *  1. **Go to** — navigation shortcuts built locally from
  *     `getNavItemsForMode`, so switching student/instructor mode changes
  *     the shortcuts for free. Filtered live by the input.
- *  2. **Results** — server-backed, enrolment-scoped deep search. That
- *     group is deferred to Plan 009; this host is shaped so it slots in
- *     without touching the Go to group.
+ *  2. **Results** — server-backed, enrolment-scoped deep search (courses,
+ *     modules, tasks, recordings, materials, webinars).
  *
  * Text resets whenever the palette closes so it reopens clean.
  */
-export function CommandPalette({
-  open,
-  onOpenChange,
-}: CommandPaletteProps) {
+export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const { mode } = useEffectiveMode();
-  const [input, setInput] = useState("");
+  const [input, setInput] = React.useState("");
+  const [query, setQuery] = React.useState("");
 
-  const navItems = getNavItemsForMode(mode, user);
+  // Debounce the input into the fetched query so rapid typing issues
+  // one settled request rather than one per keystroke.
+  React.useEffect(() => {
+    const t = setTimeout(() => setQuery(input), 200);
+    return () => clearTimeout(t);
+  }, [input]);
 
-  const navMatches = (() => {
+  // Wrap onOpenChange so closing also clears the local text — no effect
+  // needed, the callback fires synchronously before React re-renders.
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      if (!next) {
+        setInput("");
+        setQuery("");
+      }
+      onOpenChange(next);
+    },
+    [onOpenChange]
+  );
+
+  const { data: groups, isFetching } = useSearch(query);
+
+  const navItems = React.useMemo(
+    () => getNavItemsForMode(mode, user),
+    [mode, user]
+  );
+
+  // Local "Go to" matches. With text, filter nav labels by every token;
+  // with no text, surface the full list as a shortcut launcher.
+  const navMatches = React.useMemo<NavItem[]>(() => {
     const q = input.trim().toLowerCase();
     const sorted = [...navItems].sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: "base" })
@@ -54,19 +81,19 @@ export function CommandPalette({
     return sorted.filter((item) =>
       tokens.every((t) => item.label.toLowerCase().includes(t))
     );
-  })();
+  }, [input, navItems]);
 
-  const go = (item: NavItem) => {
-    handleOpenChange(false);
-    router.push(item.href);
-  };
+  const go = React.useCallback(
+    (href: string) => {
+      onOpenChange(false);
+      router.push(href);
+    },
+    [onOpenChange, router]
+  );
 
-  // Clear the text when the palette closes (via dialog callback, not an
-  // effect) so it reopens cleanly.
-  const handleOpenChange = (next: boolean) => {
-    if (!next) setInput("");
-    onOpenChange(next);
-  };
+  const hasQuery = input.trim().length >= 2;
+  const resultGroups = groups ?? [];
+  const hasResults = resultGroups.some((g) => g.results.length > 0);
 
   return (
     <CommandDialog
@@ -82,10 +109,11 @@ export function CommandPalette({
           placeholder="Search your courses, tasks, recordings… or jump to a page"
         />
         <CommandList>
-          {input.trim() && navMatches.length === 0 && (
-            <CommandEmpty>No pages match &ldquo;{input.trim()}&rdquo;.</CommandEmpty>
+          {hasQuery && !hasResults && !isFetching && navMatches.length === 0 && (
+            <CommandEmpty>No matches for &ldquo;{input.trim()}&rdquo;.</CommandEmpty>
           )}
 
+          {/* Go to — navigation shortcuts, always available */}
           {navMatches.length > 0 && (
             <CommandGroup heading="Go to">
               {navMatches.map((item) => {
@@ -94,15 +122,49 @@ export function CommandPalette({
                   <CommandItem
                     key={item.href}
                     value={`nav:${item.label}:${item.href}`}
-                    onSelect={() => go(item)}
+                    onSelect={() => go(item.href)}
                   >
-                    <Icon />
+                    <Icon className="text-muted-foreground" />
                     <span className="flex-1 truncate">{item.label}</span>
                     <ArrowRight className="ml-auto size-3.5 shrink-0 text-muted-foreground/60" />
                   </CommandItem>
                 );
               })}
             </CommandGroup>
+          )}
+
+          {/* Server-grouped, deep-linked, enrolment-scoped results */}
+          {resultGroups.map((group) => (
+            <CommandGroup key={group.type} heading={group.label}>
+              {group.results.map((r: SearchResult) => {
+                const Icon = iconForHint(r.iconHint);
+                return (
+                  <CommandItem
+                    key={`${r.type}:${r.id}`}
+                    value={`${r.type}:${r.id}:${r.title}`}
+                    onSelect={() => go(r.href)}
+                  >
+                    <Icon className="text-muted-foreground" />
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-medium">{r.title}</span>
+                      {r.subtitle && (
+                        <span className="truncate text-xs text-muted-foreground">
+                          {r.subtitle}
+                        </span>
+                      )}
+                    </span>
+                    <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 opacity-0 group-data-[selected=true]:opacity-100" />
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          ))}
+
+          {isFetching && hasQuery && (
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              Searching…
+            </div>
           )}
         </CommandList>
       </Command>
