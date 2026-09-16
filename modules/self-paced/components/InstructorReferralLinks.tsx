@@ -404,7 +404,7 @@ function CourseWithoutLinkCard({
   busy: boolean;
 }) {
   return (
-    <Card className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 border-dashed">
+    <Card className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0">
         <p className="font-semibold leading-tight">{course.name}</p>
         <p className="text-xs text-muted-foreground mt-0.5">

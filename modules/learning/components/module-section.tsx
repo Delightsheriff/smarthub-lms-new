@@ -354,7 +354,7 @@ export function AssignmentsSection({
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <p className="text-sm text-muted-foreground py-6 text-center border border-dashed rounded-2xl">
+    <p className="text-sm text-muted-foreground py-6 text-center border border-border bg-card shadow-sm rounded-2xl">
       {label}
     </p>
   );

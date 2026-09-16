@@ -185,7 +185,7 @@ function Section({
 function AssignedAssignmentsList({ items }: { items: AssignedAssignment[] }) {
   if (items.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-border py-6 text-center text-sm text-muted-foreground">
+      <p className="rounded-2xl border border-border bg-card py-6 text-center text-sm text-muted-foreground shadow-sm">
         No tasks yet
       </p>
     );
