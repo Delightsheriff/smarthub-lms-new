@@ -30,13 +30,13 @@ export function AcceptanceLetterCard() {
   if (data.length === 1) {
     const letter = data[0];
     return (
-      <Card className="p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border-primary/20 bg-primary/5">
+      <Card className="rounded-2xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border-primary/20 bg-primary/5 shadow-sm hover:border-primary/40 transition-all">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <FileText className="h-4 w-4" />
           </span>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
               SIWES acceptance letter
             </p>
             <p className="text-sm font-semibold truncate">
@@ -54,9 +54,9 @@ export function AcceptanceLetterCard() {
   }
 
   return (
-    <Card className="p-0 overflow-hidden">
+    <Card className="rounded-2xl border-border bg-card p-0 overflow-hidden shadow-sm">
       <div className="px-4 pt-3 pb-2">
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
           Acceptance letters
         </p>
       </div>

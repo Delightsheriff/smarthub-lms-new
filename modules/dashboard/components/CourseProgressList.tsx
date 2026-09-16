@@ -57,8 +57,8 @@ export function CourseProgressList() {
   if (list.length === 0) return null;
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <ul className="divide-y">
+    <Card className="rounded-2xl border-border bg-card p-0 overflow-hidden shadow-sm">
+      <ul className="divide-y divide-border">
         {list.map((r) => (
           <li key={r.course.id}>
             <Link

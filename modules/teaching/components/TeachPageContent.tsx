@@ -92,8 +92,8 @@ export function TeachPageContent() {
         )}
 
         {!isLoading && cohortCount > 0 && (
-          <>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-6">
+            <div className="space-y-6">
               {grouped.active.map((g) => (
                 <CourseCard key={g.courseId} group={g} />
               ))}
@@ -103,17 +103,19 @@ export function TeachPageContent() {
               <>
                 <div className="flex items-center gap-3 pt-4">
                   <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs text-muted-foreground">Past cohorts</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Past cohorts
+                  </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 opacity-60">
+                <div className="space-y-6 opacity-70">
                   {grouped.past.map((g) => (
                     <CourseCard key={g.courseId} group={g} />
                   ))}
                 </div>
               </>
             )}
-          </>
+          </div>
         )}
       </section>
     </div>

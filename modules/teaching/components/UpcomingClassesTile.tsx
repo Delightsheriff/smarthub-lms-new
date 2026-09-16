@@ -31,11 +31,11 @@ export function UpcomingClassesTile() {
     .slice(0, 5);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarClock className="h-4 w-4" /> Upcoming classes
+          <CardTitle className="font-display flex items-center gap-2 text-base font-semibold">
+            <CalendarClock className="h-4 w-4 text-primary" /> Upcoming classes
           </CardTitle>
           <Link
             href="/calendar"

@@ -19,16 +19,12 @@ export function CohortCard({ cohort }: CohortCardProps) {
   const isEnded = isCohortEnded(cohort.endDate);
 
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm hover:border-primary/40 transition-colors flex flex-col justify-between">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <Badge
-            variant={isEnded ? "outline" : "secondary"}
-            className={
-              isEnded
-                ? "text-muted-foreground"
-                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-            }
+            variant={isEnded ? "outline" : "success"}
+            className={isEnded ? "text-muted-foreground" : undefined}
           >
             {isEnded ? (
               <span className="flex items-center gap-1">
@@ -46,7 +42,7 @@ export function CohortCard({ cohort }: CohortCardProps) {
         </div>
 
         <div className="space-y-1">
-          <h4 className="font-bold text-base text-foreground">
+          <h4 className="font-display font-semibold text-base text-foreground">
             {cohort.course.name}
           </h4>
           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -59,7 +55,7 @@ export function CohortCard({ cohort }: CohortCardProps) {
         <div className="space-y-1.5 pt-2">
           <div className="flex justify-between text-xs font-semibold text-muted-foreground">
             <span>Course Progress</span>
-            <span>{cohort.progress}%</span>
+            <span className="tabular-nums">{cohort.progress}%</span>
           </div>
           <Progress value={cohort.progress} className="h-2 rounded-full" />
         </div>

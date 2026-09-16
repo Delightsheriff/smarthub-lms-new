@@ -23,17 +23,17 @@ export function DashboardBillingWidget() {
   if (!totalDue || totalDue <= 0) return null;
 
   return (
-    <Card className="border-warning/30 bg-warning/5 p-4 md:p-5">
+    <Card className="rounded-2xl border-warning/30 bg-warning/5 p-4 md:p-5 shadow-sm hover:border-warning/50 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
             <CreditCard className="h-4 w-4" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
               Outstanding balance
             </p>
-            <p className="text-base font-semibold tabular-nums">
+            <p className="text-base font-semibold tabular-nums text-foreground">
               {formatPrice(totalDue)}
             </p>
           </div>

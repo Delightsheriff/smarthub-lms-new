@@ -35,14 +35,14 @@ export function DashboardReferralsWidget() {
     (totals?.pendingNaira ?? 0) > 0;
 
   return (
-    <Card className="border-primary/20 bg-primary/5 p-4 md:p-5">
+    <Card className="rounded-2xl border-primary/20 bg-primary/5 p-4 md:p-5 shadow-sm hover:border-primary/40 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Share2 className="h-4 w-4" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
               {hasActivity ? "Earned so far" : "Refer & earn"}
             </p>
             <div className="text-base font-semibold tabular-nums">

@@ -28,11 +28,11 @@ export function DashboardCalendarCard() {
   };
 
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm h-full flex flex-col justify-between">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm h-full flex flex-col justify-between">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5 text-primary" />
-          <CardTitle className="text-base font-semibold">Calendar & Schedule</CardTitle>
+          <CardTitle className="font-display text-base font-semibold">Calendar & Schedule</CardTitle>
         </div>
         <Button
           render={<Link href="/calendar" />}

@@ -47,11 +47,11 @@ export function NeedsGradingStrip() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
+      <Card className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ClipboardList className="h-4 w-4" /> Needs grading
+            <CardTitle className="font-display flex items-center gap-2 text-base font-semibold">
+              <ClipboardList className="h-4 w-4 text-warning" /> Needs grading
             </CardTitle>
             {rows.length > 0 && (
               <Badge variant="warning">{rows.length}</Badge>

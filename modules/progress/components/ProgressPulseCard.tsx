@@ -27,10 +27,10 @@ export function ProgressPulseCard() {
   const recent = (achievements || []).filter((a) => a.earned).slice(0, 3);
 
   return (
-    <Card className="p-5 bg-gradient-to-br from-primary/[0.04] via-card to-amber-500/[0.03] border-primary/15 rounded-2xl shadow-sm space-y-4">
+    <Card className="p-5 bg-gradient-to-br from-primary/[0.04] via-card to-accent/[0.03] border-primary/15 rounded-2xl shadow-sm space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h2 className="font-semibold text-base flex items-center gap-2 text-foreground">
+          <h2 className="font-display font-semibold text-base flex items-center gap-2 text-foreground">
             <Target className="h-4 w-4 text-primary" />
             Your Learning Pulse
           </h2>
@@ -56,7 +56,7 @@ export function ProgressPulseCard() {
         />
         <Tile
           icon={<CheckCircle2 className="h-4 w-4" />}
-          tone="emerald"
+          tone="success"
           label="Completed"
           value={
             typeof pulse?.earnedCount === "number" ? `${pulse.earnedCount}` : "—"
@@ -73,7 +73,7 @@ export function ProgressPulseCard() {
       </div>
 
       {recent.length > 0 && (
-        <div className="pt-2 flex flex-wrap items-center gap-2 border-t">
+        <div className="pt-3 flex flex-wrap items-center gap-2 border-t border-border">
           <span className="text-xs text-muted-foreground font-medium">Recent badges:</span>
           {recent.map((a) => (
             <span
@@ -99,19 +99,18 @@ function Tile({
   caption,
 }: {
   icon: React.ReactNode;
-  tone: "primary" | "accent" | "emerald";
+  tone: "primary" | "accent" | "success";
   label: string;
   value: string | number;
   caption: string;
 }) {
   const palette: Record<typeof tone, string> = {
     primary: "bg-primary/10 text-primary",
-    accent: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    emerald:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    accent: "bg-accent/15 text-accent",
+    success: "bg-success/10 text-success",
   };
   return (
-    <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
+    <div className="rounded-xl border border-border/80 bg-background/50 p-3.5 space-y-1">
       <div className="flex items-center gap-2">
         <span
           className={
@@ -125,7 +124,7 @@ function Tile({
           {label}
         </span>
       </div>
-      <p className="text-xl font-bold leading-tight text-foreground truncate">{value}</p>
+      <p className="font-display text-xl font-bold leading-tight text-foreground truncate">{value}</p>
       <p className="text-xs text-muted-foreground">{caption}</p>
     </div>
   );

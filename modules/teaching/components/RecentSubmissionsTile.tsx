@@ -50,10 +50,10 @@ export function RecentSubmissionsTile() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ClipboardList className="h-4 w-4" /> Recent submissions
+      <Card className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display flex items-center gap-2 text-base font-semibold">
+            <ClipboardList className="h-4 w-4 text-primary" /> Recent submissions
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

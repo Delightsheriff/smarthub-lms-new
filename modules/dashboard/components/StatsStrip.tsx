@@ -94,8 +94,8 @@ export function DashboardStatsStrip() {
         const inner = (
           <Card
             className={cn(
-              "p-3 md:p-4 flex items-center gap-3 transition-colors",
-              t.href && "hover:border-primary/40 hover:bg-muted/40",
+              "rounded-2xl border-border bg-card p-3 md:p-4 flex items-center gap-3 transition-all duration-200 shadow-sm",
+              t.href && "hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md",
             )}
           >
             <span

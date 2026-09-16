@@ -17,14 +17,14 @@ export function InternshipDashboardCard() {
   if (!data) return null;
 
   return (
-    <Card className="p-4 md:p-5">
+    <Card className="rounded-2xl border-border bg-card p-4 md:p-5 shadow-sm hover:border-primary/40 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <BriefcaseBusiness className="h-4 w-4" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
               Internship
             </p>
             <p className="text-base font-semibold truncate">

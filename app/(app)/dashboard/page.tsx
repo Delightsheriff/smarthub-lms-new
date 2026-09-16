@@ -111,50 +111,60 @@ function StudentDashboardBody() {
       {continueLearning && (
         <section>
           <header className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Continue learning</h2>
+            <h2 className="font-display text-lg font-semibold text-foreground">
+              Continue learning
+            </h2>
             <Sparkles className="h-4 w-4 text-primary" />
           </header>
-          <Card className="p-0 overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
-            <div className="md:grid md:grid-cols-[200px_1fr]">
-              <div className="relative h-32 md:h-full w-full bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10">
+          <Card className="p-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all duration-300">
+            <div className="md:grid md:grid-cols-[220px_1fr]">
+              <div className="relative h-36 md:h-full w-full bg-muted">
                 {continueLearning.imageUrl ? (
                   <Image
                     src={continueLearning.imageUrl}
                     alt={continueLearning.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, 200px"
+                    sizes="(max-width: 768px) 100vw, 220px"
                     className="object-cover"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Sparkles className="h-7 w-7 text-primary/30" />
+                    <BookOpen className="h-8 w-8 text-primary/30" />
                   </div>
                 )}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent md:hidden"
+                  aria-hidden
+                />
               </div>
-              <div className="p-5">
-                <Badge variant="default" className="mb-2">
-                  Pick up
-                </Badge>
-                <h3 className="font-semibold text-lg leading-tight mb-1">
-                  {continueLearning.name}
-                </h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                  {htmlToPlainText(continueLearning.description)}
-                </p>
-                <div className="flex items-center justify-end text-xs mb-4">
-                  <span className="text-muted-foreground inline-flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Started {formatDate(continueLearning.startDate)}
-                  </span>
+              <div className="p-5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <Badge variant="default" className="text-[10px]">
+                      Pick up
+                    </Badge>
+                    <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                      <Calendar className="h-3.5 w-3.5 text-primary" />
+                      Started {formatDate(continueLearning.startDate)}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-lg font-semibold leading-snug mb-1 text-foreground">
+                    {continueLearning.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    {htmlToPlainText(continueLearning.description)}
+                  </p>
                 </div>
-                <Button
-                  render={<Link href={`/courses/${continueLearning.slug}`} />}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  Resume
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <div className="pt-4 mt-2 border-t border-border flex items-center justify-end">
+                  <Button
+                    render={<Link href={`/courses/${continueLearning.slug}`} />}
+                    size="sm"
+                    className="w-full sm:w-auto"
+                  >
+                    Resume
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
@@ -171,13 +181,17 @@ function StudentDashboardBody() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Progress by course</h2>
+        <h2 className="font-display text-lg font-semibold text-foreground">
+          Progress by course
+        </h2>
         <CourseProgressList />
       </section>
 
       <section>
         <header className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Your courses</h2>
+          <h2 className="font-display text-lg font-semibold text-foreground">
+            Your courses
+          </h2>
           <Link
             href="/courses"
             className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
@@ -194,9 +208,9 @@ function StudentDashboardBody() {
         )}
 
         {!isLoading && (!courses || courses.length === 0) && (
-          <Card className="p-8 text-center">
+          <Card className="p-8 text-center rounded-2xl border-border bg-card shadow-sm">
             <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-            <p className="font-semibold">You&apos;re not enrolled yet</p>
+            <p className="font-display text-base font-semibold">You&apos;re not enrolled yet</p>
             <p className="text-sm text-muted-foreground mt-1">
               Browse the catalog to find your first programme.
             </p>

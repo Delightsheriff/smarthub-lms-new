@@ -24,10 +24,10 @@ export function TechScholarshipCard() {
   const hasCoupon = Boolean(data.siwesCouponCode);
 
   return (
-    <Card className="border-border bg-card p-4 md:p-5 overflow-hidden font-sans">
+    <Card className="rounded-2xl border-border bg-card p-4 md:p-5 overflow-hidden font-sans shadow-sm hover:border-primary/40 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <GraduationCap className="h-4 w-4" />
           </div>
           <div className="min-w-0 space-y-0.5">
