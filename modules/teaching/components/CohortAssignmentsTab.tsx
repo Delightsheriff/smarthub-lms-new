@@ -36,12 +36,14 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
       {!isLoading && assignments && assignments.length > 0 ? (
         <div className="space-y-3">
           {assignments.map((asgn) => (
-            <Card key={asgn.attachmentId} className="rounded-2xl border bg-card p-4 shadow-xs">
+            <Card key={asgn.attachmentId} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
               <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-purple-600 shrink-0" />
-                    <h4 className="font-bold text-sm text-foreground">{asgn.title}</h4>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Award className="h-4 w-4" />
+                    </div>
+                    <h4 className="font-display font-semibold text-sm text-foreground">{asgn.title}</h4>
                     {asgn.module && (
                       <Badge variant="outline" className="text-[10px]">
                         {asgn.module}

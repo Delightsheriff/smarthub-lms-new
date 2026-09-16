@@ -45,7 +45,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
               .toUpperCase();
 
             return (
-              <Card key={row.studentId} className="rounded-2xl border bg-card p-4 shadow-xs">
+              <Card key={row.studentId} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
                 <CardContent className="p-0 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 shrink-0">
@@ -55,7 +55,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
                     </Avatar>
 
                     <div className="space-y-0.5">
-                      <span className="font-bold text-sm text-foreground block">{row.name}</span>
+                      <span className="font-display font-semibold text-sm text-foreground block">{row.name}</span>
                       <span className="text-xs text-muted-foreground">{row.email}</span>
                     </div>
                   </div>

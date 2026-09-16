@@ -32,12 +32,14 @@ export function CohortSessionsTab({ scheduleId }: CohortSessionsTabProps) {
       {!isLoading && sessions.length > 0 ? (
         <div className="space-y-3">
           {sessions.map((event) => (
-            <Card key={event.id} className="rounded-2xl border bg-card p-4 shadow-xs">
+            <Card key={event.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
               <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-blue-600 shrink-0" />
-                    <h4 className="font-bold text-sm text-foreground">{event.title}</h4>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Video className="h-4 w-4" />
+                    </div>
+                    <h4 className="font-display font-semibold text-sm text-foreground">{event.title}</h4>
                     {event.location && (
                       <Badge variant="outline" className="text-[10px]">
                         {event.location}

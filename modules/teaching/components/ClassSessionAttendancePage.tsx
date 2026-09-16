@@ -105,9 +105,9 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
           </Card>
 
           {/* Roster Marking Table */}
-          <Card className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
+          <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
-              <h3 className="font-display text-base font-bold text-foreground">
+              <h3 className="font-display text-base font-semibold text-foreground">
                 Student Attendance ({rows.length} Enrolled)
               </h3>
               <Button

@@ -19,43 +19,51 @@ export function CohortOverviewTab({ cohort }: CohortOverviewTabProps) {
     <div className="space-y-6">
       {/* Snapshot Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-2xl border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>Enrolled Students</span>
-            <Users className="h-4 w-4 text-primary" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Users className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-foreground">{cohort.studentCount}</div>
+          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{cohort.studentCount}</div>
         </Card>
 
-        <Card className="rounded-2xl border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>Total Modules</span>
-            <BookOpen className="h-4 w-4 text-blue-600" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <BookOpen className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-foreground">{totalModules}</div>
+          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalModules}</div>
         </Card>
 
-        <Card className="rounded-2xl border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>Assigned Tasks</span>
-            <Award className="h-4 w-4 text-purple-600" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15 text-accent">
+              <Award className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-foreground">{totalAssignments}</div>
+          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalAssignments}</div>
         </Card>
 
-        <Card className="rounded-2xl border bg-card p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>Recorded Sessions</span>
-            <Clock className="h-4 w-4 text-emerald-600" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 text-success">
+              <Clock className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-foreground">{totalRecordings}</div>
+          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalRecordings}</div>
         </Card>
       </div>
 
       {/* Progress & Description Card */}
-      <Card className="rounded-2xl border bg-card p-6 space-y-4">
-        <CardHeader className="p-0 border-b pb-3">
-          <CardTitle className="text-base font-bold">Course Overview</CardTitle>
+      <Card className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-sm">
+        <CardHeader className="p-0 border-b border-border pb-3">
+          <CardTitle className="font-display text-base font-semibold">Course Overview</CardTitle>
         </CardHeader>
         <CardContent className="p-0 space-y-3">
           {cohort.course.description && (
@@ -67,9 +75,9 @@ export function CohortOverviewTab({ cohort }: CohortOverviewTabProps) {
           <div className="space-y-1.5 pt-2">
             <div className="flex justify-between text-xs font-semibold text-muted-foreground">
               <span>Delivery Progress</span>
-              <span>{cohort.progress}%</span>
+              <span className="tabular-nums">{cohort.progress}%</span>
             </div>
-            <Progress value={cohort.progress} className="h-2.5 rounded-full" />
+            <Progress value={cohort.progress} className="h-2 rounded-full" />
           </div>
         </CardContent>
       </Card>

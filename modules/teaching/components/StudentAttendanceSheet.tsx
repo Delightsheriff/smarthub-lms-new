@@ -31,9 +31,9 @@ export function StudentAttendanceSheet({
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case "present":
-        return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950">Present</Badge>;
+        return <Badge variant="success">Present</Badge>;
       case "late":
-        return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950">Late</Badge>;
+        return <Badge variant="warning">Late</Badge>;
       case "absent":
         return <Badge variant="destructive">Absent</Badge>;
       case "excused":
@@ -45,9 +45,9 @@ export function StudentAttendanceSheet({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] rounded-2xl">
+      <DialogContent className="sm:max-w-[500px] rounded-2xl border-border bg-card">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-foreground">
+          <DialogTitle className="font-display text-xl font-semibold text-foreground">
             Attendance Record — {studentName || data?.student.firstName || "Student"}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">

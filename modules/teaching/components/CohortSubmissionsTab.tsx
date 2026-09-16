@@ -72,11 +72,11 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
       {!isLoading && filtered.length > 0 ? (
         <div className="space-y-3">
           {filtered.map((sub) => (
-            <Card key={sub.id} className="rounded-2xl border bg-card p-4 shadow-xs">
+            <Card key={sub.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
               <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-foreground">{sub.student.name}</span>
+                    <span className="font-display font-semibold text-sm text-foreground">{sub.student.name}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {sub.assignment.title}
                     </Badge>
@@ -94,7 +94,7 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
                 <div className="flex items-center gap-3 shrink-0">
                   {sub.status === "graded" ? (
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 font-bold">
+                      <Badge variant="success" className="font-mono text-xs">
                         Score: {sub.score} / {sub.assignment.totalPoints || 100}
                       </Badge>
                       <Button
