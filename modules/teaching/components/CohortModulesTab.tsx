@@ -4,6 +4,7 @@ import React from "react";
 import { Award, Video } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RichText } from "@/components/ui/rich-text";
 import type { TeachingModule } from "../types";
 
 interface CohortModulesTabProps {
@@ -23,11 +24,10 @@ export function CohortModulesTab({ modules }: CohortModulesTabProps) {
                 </Badge>
                 <h4 className="font-display font-semibold text-sm text-foreground">{m.title}</h4>
               </div>
-              {m.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                  {m.description}
-                </p>
-              )}
+              <RichText
+                html={m.description}
+                className="line-clamp-2 text-xs text-muted-foreground leading-relaxed"
+              />
             </div>
 
             <div className="flex items-center gap-2 shrink-0 text-xs">

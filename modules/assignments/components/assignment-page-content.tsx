@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RichText } from "@/components/ui/rich-text";
 import { formatDateTime } from "@/lib/utils";
 import { useAssignmentDetail } from "../api/assignments.queries";
 import { CountdownToDeadline, getDeadlineStatus } from "./countdown-to-deadline";
@@ -181,10 +182,10 @@ export function AssignmentPageContent({
             <h2 className="font-display text-lg font-semibold flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" /> Instructions & Brief
             </h2>
-            <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-muted-foreground">
-              <p className="whitespace-pre-wrap">{assignment.instructions}</p>
+            <div className="max-w-none leading-relaxed text-muted-foreground">
+              <RichText html={assignment.instructions} />
               {assignment.description && (
-                <p className="mt-3 text-foreground">{assignment.description}</p>
+                <RichText html={assignment.description} className="mt-3 text-foreground" />
               )}
             </div>
 
