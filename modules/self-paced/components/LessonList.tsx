@@ -13,12 +13,16 @@ export function LessonList({
   currentLessonId,
   nextLessonId,
   compact = false,
+  onItemClick,
 }: {
   slug: string;
   lessons: SelfPacedLesson[];
   currentLessonId?: string;
   nextLessonId?: string;
   compact?: boolean;
+  /** Called when a lesson link is clicked — used by the mobile drawer
+   *  to auto-close on selection. */
+  onItemClick?: () => void;
 }) {
   if (!lessons.length) {
     return (
@@ -39,15 +43,21 @@ export function LessonList({
             <Link
               href={SELF_PACED_ROUTES.LESSON(slug, lesson.id)}
               aria-current={current ? "page" : undefined}
+              onClick={onItemClick}
               className={cn(
-                "flex items-center gap-3 px-4 transition-colors",
+                "flex items-center gap-3 border-l-2 px-4 transition-colors",
                 compact ? "py-2.5" : "py-3",
-                current ? "bg-primary/10" : "hover:bg-muted/50"
+                current
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-transparent hover:bg-muted/50"
               )}
             >
               {lesson.completed ? (
                 <CheckCircle2
-                  className="h-5 w-5 shrink-0 text-success"
+                  className={cn(
+                    "h-5 w-5 shrink-0",
+                    current ? "text-primary-foreground" : "text-success"
+                  )}
                   aria-label="Completed"
                 />
               ) : (
@@ -55,7 +65,7 @@ export function LessonList({
                   className={cn(
                     "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold tabular-nums",
                     current
-                      ? "border-primary text-primary"
+                      ? "border-primary-foreground text-primary-foreground"
                       : "text-muted-foreground"
                   )}
                   aria-label="Not completed"
@@ -68,13 +78,18 @@ export function LessonList({
                   className={cn(
                     "text-sm leading-snug",
                     compact ? "line-clamp-2" : "truncate",
-                    current ? "font-semibold text-primary" : "font-medium"
+                    current ? "font-semibold" : "font-medium"
                   )}
                 >
                   {lesson.title}
                 </p>
                 {(duration || lesson.assetCount > 0) && (
-                  <p className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <p
+                    className={cn(
+                      "mt-0.5 flex items-center gap-2 text-[11px]",
+                      current ? "text-primary-foreground/80" : "text-muted-foreground"
+                    )}
+                  >
                     {duration && <span>{duration}</span>}
                     {lesson.assetCount > 0 && (
                       <span className="inline-flex items-center gap-0.5">

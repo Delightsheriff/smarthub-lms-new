@@ -48,19 +48,11 @@ export function PassMembershipCard({ compact = false }: { compact?: boolean }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-semibold leading-tight">All-access pass</p>
             {endingSoon ? (
-              <Badge
-                variant="outline"
-                className="border-warning/30 text-warning bg-warning/10"
-              >
+              <Badge variant="warning">
                 Ends in {daysLeft} {daysLeft === 1 ? "day" : "days"}
               </Badge>
             ) : (
-              <Badge
-                variant="outline"
-                className="border-success/30 text-success bg-success/10"
-              >
-                Active
-              </Badge>
+              <Badge variant="success">Active</Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground">

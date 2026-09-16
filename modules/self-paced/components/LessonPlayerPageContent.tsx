@@ -10,6 +10,7 @@ import {
   Circle,
   ExternalLink,
   FileText,
+  ListTree,
   PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +35,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { RichText } from "@/components/ui/rich-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -78,6 +86,7 @@ export function LessonPlayerPageContent({
   const [upNext, setUpNext] = useState<SelfPacedLesson | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useCertificateRefetch(
     celebrating && !!course && !course.certificate,
@@ -151,11 +160,52 @@ export function LessonPlayerPageContent({
           <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
           <span className="truncate">{course.name}</span>
         </Link>
-        <div className="flex w-32 shrink-0 items-center gap-2 sm:w-44">
-          <Progress value={course.progress.percent} className="h-1.5" />
-          <span className="text-[11px] font-semibold tabular-nums text-muted-foreground">
-            {course.progress.percent}%
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="hidden text-[11px] text-muted-foreground sm:inline">
+            {course.progress.completedLessons}/{course.progress.totalLessons} lessons
           </span>
+          <CircularProgress value={course.progress.percent} size={30} strokeWidth={3}>
+            <span className="text-[9px] font-bold tabular-nums">
+              {course.progress.percent}
+            </span>
+          </CircularProgress>
+
+          {/* Mobile-only lesson-list drawer — on small screens the
+              sticky sidebar rail is hidden (it can't stick to
+              anything), and reaching the lesson list otherwise means
+              scrolling past the whole lesson body. Mirrors the cohort
+              course layout's "Course outline" drawer trigger. */}
+          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <SheetTrigger
+              render={
+                <Button variant="outline" size="sm" className="lg:hidden gap-1.5 text-xs">
+                  <ListTree className="h-3.5 w-3.5" />
+                  Lessons
+                </Button>
+              }
+            />
+            <SheetContent side="left" className="p-0">
+              <SheetHeader>
+                <SheetTitle>{course.name}</SheetTitle>
+              </SheetHeader>
+              <div className="overflow-y-auto h-[calc(100dvh-65px)]">
+                <div className="flex items-center justify-between border-b px-4 py-3">
+                  <h2 className="text-sm font-semibold">Lessons</h2>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {course.progress.completedLessons}/{course.progress.totalLessons}
+                  </span>
+                </div>
+                <LessonList
+                  slug={course.slug}
+                  lessons={course.lessons}
+                  currentLessonId={lesson.id}
+                  nextLessonId={course.completedAt ? undefined : course.nextLessonId}
+                  compact
+                  onItemClick={() => setDrawerOpen(false)}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
@@ -278,7 +328,7 @@ export function LessonPlayerPageContent({
           )}
         </div>
 
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <aside className="hidden lg:sticky lg:top-20 lg:block lg:self-start">
           <Card className="p-0 overflow-hidden lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto">
             <header className="flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-sm font-semibold">Lessons</h2>

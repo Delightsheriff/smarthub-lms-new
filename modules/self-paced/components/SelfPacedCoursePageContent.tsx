@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { Progress } from "@/components/ui/progress";
 import { RichText } from "@/components/ui/rich-text";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -63,11 +64,18 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
           )}
 
           <Card className="p-0 overflow-hidden">
-            <header className="flex items-center justify-between px-4 py-3 border-b">
+            <header className="flex items-center justify-between gap-3 px-4 py-3 border-b">
               <h2 className="font-semibold">Lessons</h2>
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {course.progress.completedLessons}/{course.progress.totalLessons} done
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {course.progress.completedLessons}/{course.progress.totalLessons} done
+                </span>
+                <CircularProgress value={course.progress.percent} size={28} strokeWidth={3}>
+                  <span className="text-[9px] font-bold tabular-nums">
+                    {course.progress.percent}
+                  </span>
+                </CircularProgress>
+              </div>
             </header>
             <LessonList
               slug={course.slug}
@@ -194,10 +202,7 @@ function CourseHero({ course }: { course: SelfPacedCourse }) {
                 </Badge>
               )}
               {completed && (
-                <Badge
-                  variant="outline"
-                  className="border-success/30 text-success bg-success/10"
-                >
+                <Badge variant="success">
                   Completed
                 </Badge>
               )}

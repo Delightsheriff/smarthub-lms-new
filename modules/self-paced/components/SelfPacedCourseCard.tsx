@@ -4,7 +4,7 @@ import { ArrowRight, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { htmlToPlainText } from "@/lib/utils";
 import { SELF_PACED_ROUTES } from "../config/endpoints";
 import type { SelfPacedCourseSummary } from "../types";
@@ -37,16 +37,28 @@ export function SelfPacedCourseCard({
             <Badge variant="secondary" className="text-[10px] backdrop-blur">
               Self-paced
             </Badge>
-            <Badge
-              variant={completed ? "outline" : started ? "default" : "outline"}
-              className={
-                "text-[10px] backdrop-blur bg-background/80 " +
-                (completed ? "border-success/40 text-success" : "")
-              }
-            >
-              {completed ? "Completed" : started ? "In progress" : "Not started"}
-            </Badge>
+            {(!started || completed) && (
+              <Badge
+                variant={completed ? "success" : "outline"}
+                className="text-[10px] backdrop-blur bg-background/80"
+              >
+                {completed ? "Completed" : "Not started"}
+              </Badge>
+            )}
           </div>
+
+          {/* Completion ring — same "how far in" signal as the cohort
+              course card, replacing a footer progress bar that competed
+              with the title/description for attention. */}
+          {started && !completed && (
+            <div className="absolute top-2 right-2 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
+              <CircularProgress value={progress.percent} size={34} strokeWidth={3}>
+                <span className="text-[10px] font-bold tabular-nums text-primary">
+                  {progress.percent}
+                </span>
+              </CircularProgress>
+            </div>
+          )}
         </div>
       </Link>
 
@@ -61,16 +73,13 @@ export function SelfPacedCourseCard({
         </p>
 
         <div className="mt-auto space-y-3">
-          <div className="space-y-1.5">
-            <Progress value={progress.percent} className="h-1.5" />
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>
-                {progress.completedLessons} of {progress.totalLessons} lessons
-              </span>
-              <span className="font-semibold text-primary tabular-nums">
-                {progress.percent}%
-              </span>
-            </div>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>
+              {progress.completedLessons} of {progress.totalLessons} lessons
+            </span>
+            {completed && (
+              <span className="font-semibold text-success tabular-nums">100%</span>
+            )}
           </div>
 
           {course.certificate && (

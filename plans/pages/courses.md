@@ -76,9 +76,8 @@ real visual upgrade, but did not touch:
   — could take more from Udemy's lesson-adjacent tab pattern (Overview /
   Q&A / Notes), though that implies new backend-supported features
   (per-lesson notes, Q&A) not yet confirmed to exist.
-- Self-paced courses' own UI (`modules/self-paced`) — explicitly called
-  out by name as needing the same creative treatment; not yet audited or
-  touched in this pass. Pick this up next under this same doc.
+- Self-paced courses' own UI (`modules/self-paced`) — now done, see
+  [self-paced-courses.md](self-paced-courses.md).
 - Visual verification blocked by the dev seed data: the test account
   available in this session has zero course enrollments, so the
   `CircularProgress` ring on `CourseCard` and the outline's progress
