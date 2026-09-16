@@ -24,34 +24,41 @@ export function SelfPacedCourseCard({
     : courseHref;
 
   return (
-    <Card className="p-0 overflow-hidden h-full flex flex-col hover:border-primary/40 hover:shadow-md transition-all">
+    <Card className="p-0 overflow-hidden h-full flex flex-col border-border transition-all duration-300 hover:-translate-y-1 hover:border-primary/40">
       <Link href={courseHref} className="block">
         <div className="relative">
           <CourseCover
             imageUrl={course.imageUrl}
             name={course.name}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="aspect-16/9"
+            className="aspect-[16/10]"
           />
-          <div className="absolute top-2.5 left-2.5 flex gap-1">
-            <Badge variant="secondary" className="text-[10px] backdrop-blur">
-              Self-paced
-            </Badge>
-            {(!started || completed) && (
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent"
+            aria-hidden
+          />
+
+          <span className="absolute bottom-3 left-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-background">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            Self-paced
+          </span>
+
+          {(!started || completed) && (
+            <div className="absolute right-3 top-3">
               <Badge
-                variant={completed ? "success" : "outline"}
-                className="text-[10px] backdrop-blur bg-background/80"
+                variant={completed ? "success" : "secondary"}
+                className="text-[10px] backdrop-blur"
               >
                 {completed ? "Completed" : "Not started"}
               </Badge>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Completion ring — same "how far in" signal as the cohort
               course card, replacing a footer progress bar that competed
               with the title/description for attention. */}
           {started && !completed && (
-            <div className="absolute top-2 right-2 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
+            <div className="absolute bottom-3 right-3 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
               <CircularProgress value={progress.percent} size={34} strokeWidth={3}>
                 <span className="text-[10px] font-bold tabular-nums text-primary">
                   {progress.percent}
@@ -62,17 +69,17 @@ export function SelfPacedCourseCard({
         </div>
       </Link>
 
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-5 flex flex-col flex-1">
         <Link href={courseHref} className="group">
-          <h3 className="font-semibold text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-display text-lg leading-snug line-clamp-2 transition-colors group-hover:text-accent">
             {course.name}
           </h3>
         </Link>
-        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-3">
+        <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
           {htmlToPlainText(course.description)}
         </p>
 
-        <div className="mt-auto space-y-3">
+        <div className="mt-auto space-y-3 border-t border-border pt-4">
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>
               {progress.completedLessons} of {progress.totalLessons} lessons

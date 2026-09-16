@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { auth } from "@/auth";
@@ -13,6 +13,19 @@ const fontSans = Inter({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+});
+
+// Editorial display face (see plans/015-editorial-design-sync.md). Used
+// only via the `font-display` utility on narrative surfaces (course
+// pages, dashboard hero, certificates) — dense operator surfaces (nav,
+// tables, forms) keep Inter. Wonk/opsz axes let headline sizes carry
+// character while sub-headings stay sober; dialled in per-size via the
+// `.font-display` variation-settings rule in globals.css.
+const fontDisplay = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +61,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fontSans.variable} ${jetbrainsMono.variable} antialiased`}
+      className={`${fontSans.variable} ${jetbrainsMono.variable} ${fontDisplay.variable} antialiased`}
     >
       <body>
         <AppProviders session={session}>{children}</AppProviders>

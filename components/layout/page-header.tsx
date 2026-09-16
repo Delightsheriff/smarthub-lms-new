@@ -14,12 +14,54 @@ export function PageHeader({
   description,
   actions,
   className,
+  eyebrow,
+  variant = "default",
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   className?: string;
+  /** Small uppercase label above the title. Editorial variant only. */
+  eyebrow?: string;
+  /**
+   * "editorial" swaps the plain sans title for the serif display
+   * treatment (see plans/015-editorial-design-sync.md) — reserved for
+   * narrative surfaces (course pages, dashboard hero). Dense operator
+   * surfaces (tables, forms, settings) stay on "default".
+   */
+  variant?: "default" | "editorial";
 }) {
+  if (variant === "editorial") {
+    return (
+      <div
+        className={cn(
+          "flex flex-col gap-6 font-sans sm:flex-row sm:items-end sm:justify-between",
+          className,
+        )}
+      >
+        <div className="max-w-2xl space-y-4">
+          {eyebrow && (
+            <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              <span className="h-px w-8 bg-accent" aria-hidden />
+              {eyebrow}
+            </p>
+          )}
+          <h1 className="font-display text-3xl leading-[1.05] text-balance text-foreground md:text-4xl lg:text-5xl">
+            {title}
+          </h1>
+          {description && (
+            <p className="text-base leading-relaxed text-muted-foreground text-pretty">
+              {description}
+            </p>
+          )}
+        </div>
+        {actions && (
+          <div className="flex shrink-0 items-center gap-3">{actions}</div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(

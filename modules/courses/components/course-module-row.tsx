@@ -71,14 +71,11 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
     >
       <AccordionTrigger className="px-5 py-3.5 hover:no-underline">
         <span className="flex items-center gap-4 min-w-0 flex-1 text-left">
-          <Badge
-            variant="secondary"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg px-0 font-bold tabular-nums"
-          >
+          <span className="shrink-0 font-display text-xl tabular-nums text-muted-foreground">
             {m.order.toString().padStart(2, "0")}
-          </Badge>
+          </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-medium leading-tight truncate">
+            <span className="block font-display text-base leading-tight truncate">
               {m.title}
             </span>
             <span className="block text-xs text-muted-foreground mt-0.5">

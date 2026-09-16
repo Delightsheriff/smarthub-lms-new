@@ -185,8 +185,10 @@ function StudentCoursesBody() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="Your courses"
         description="Pick up where you left off, or jump into a new module."
       />

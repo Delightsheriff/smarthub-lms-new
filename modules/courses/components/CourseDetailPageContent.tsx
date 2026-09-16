@@ -12,10 +12,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Accordion } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCourseBySlug,
@@ -73,9 +71,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Hero */}
-      <Card className="p-0 overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
+    <div className="space-y-6 font-sans">
+      {/* Hero — editorial treatment (plans/015-editorial-design-sync.md):
+          eyebrow + serif display title in place of the old boxed
+          gradient card + font-semibold heading. */}
+      <div className="canvas-warm overflow-hidden rounded-2xl border border-border">
         {course.imageUrl && (
           <div className="relative aspect-[3/1] w-full bg-muted">
             <Image
@@ -86,21 +86,26 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
               className="object-cover"
               priority
             />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent"
+              aria-hidden
+            />
           </div>
         )}
-        <div className="p-5 md:p-6">
-          <Badge variant="secondary" className="mb-3">
+        <div className="p-6 md:p-8">
+          <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            <span className="h-px w-8 bg-accent" aria-hidden />
             {course.category}
-          </Badge>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight leading-tight">
+          </p>
+          <h1 className="mt-3 font-display text-3xl leading-[1.05] text-balance md:text-4xl">
             {course.name}
           </h1>
           <CollapsibleRichText
             html={course.description}
-            className="text-muted-foreground mt-2"
+            className="mt-3 max-w-2xl text-muted-foreground"
           />
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground mt-4">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground mt-5">
             <span className="inline-flex items-center gap-1.5">
               <GraduationCap className="h-3.5 w-3.5" />
               {course.instructor.name}
@@ -116,17 +121,8 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
             </span>
           </div>
 
-          {/* Course progress */}
-          <div className="mt-5 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Course progress</span>
-              <span className="font-bold tabular-nums">{course.progress}%</span>
-            </div>
-            <Progress value={course.progress} />
-          </div>
-
           {pickUp && (
-            <div className="mt-5">
+            <div className="mt-6">
               <Button
                 size="lg"
                 className="w-full sm:w-auto"
@@ -142,10 +138,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
             </div>
           )}
         </div>
-      </Card>
+      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Stats — hairline-divided strip instead of four boxed cards. */}
+      <div className="grid grid-cols-2 divide-x divide-y divide-border rounded-2xl border border-border sm:grid-cols-5 sm:divide-y-0">
+        <Stat label="Progress" value={`${course.progress}%`} />
         <Stat label="Modules" value={modules.length} />
         <Stat label="Recordings" value={totalRecordings} />
         <Stat label="Materials" value={totalMaterials} />
@@ -154,7 +151,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
 
       {/* About */}
       <Card className="p-5 space-y-3">
-        <h2 className="font-semibold">About this programme</h2>
+        <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+          <span className="h-px w-6 bg-accent" aria-hidden />
+          About
+        </p>
+        <h2 className="font-display text-xl">About this programme</h2>
         <CollapsibleRichText
           html={course.description}
           className="text-muted-foreground"
@@ -170,7 +171,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       {/* Instructors */}
       {course.instructors && course.instructors.length > 0 && (
         <Card className="p-5 space-y-4">
-          <h2 className="font-semibold">
+          <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+            <span className="h-px w-6 bg-accent" aria-hidden />
+            Meet the team
+          </p>
+          <h2 className="font-display text-xl">
             Your {course.instructors.length > 1 ? "instructors" : "instructor"}
           </h2>
           <ul className="space-y-4">
@@ -227,7 +232,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       {/* Modules at a glance */}
       <Card className="p-0 overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-semibold">Course modules</h2>
+          <h2 className="font-display text-xl">Course modules</h2>
           <Button
             variant="outline"
             size="sm"
@@ -255,12 +260,14 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl border bg-card p-3 text-center">
-      <p className="text-2xl font-bold tabular-nums leading-tight">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">
+    <div className="p-4">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
+      </p>
+      <p className="mt-1 font-display text-2xl tabular-nums leading-tight md:text-3xl">
+        {value}
       </p>
     </div>
   );

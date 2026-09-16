@@ -12,8 +12,10 @@ export function SelfPacedCoursesPageContent() {
   const empty = !isLoading && !isError && (data?.length ?? 0) === 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="Self-paced courses"
         description="Work through lessons in order and pick up exactly where you left off."
       />

@@ -18,6 +18,8 @@
 @theme inline {
     --font-heading: var(--font-mono);
     --font-mono: var(--font-mono);
+    --font-display: var(--font-display);
+    --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -162,4 +164,99 @@
   html {
     @apply font-mono;
     }
+
+  /* Fraunces ships a "wonk" axis and optical sizing (see
+     smarthub-core-client, which this is ported from). Dialling wonk in
+     and opsz up only at display sizes keeps headlines characterful
+     while sub-headings stay sober. */
+  .font-display {
+    font-variation-settings:
+      "SOFT" 0,
+      "WONK" 1,
+      "opsz" 120;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  /*
+   * Editorial surfaces — see plans/015-editorial-design-sync.md. Scoped
+   * token reassignment (same mechanism as smarthub-core-client's
+   * `.canvas-deep`) so any existing component dropped inside adapts
+   * without a single one-off override. Two variants:
+   *
+   *   .canvas-warm  — a warm-paper "page" surface for narrative
+   *                   content (course landing pages, dashboard hero
+   *                   background) instead of the app's neutral gray.
+   *   .canvas-brand — the deep maroon "brand slab" for hero moments.
+   *                   Orange leads as primary inside it (maroon-on-
+   *                   maroon has too little contrast), matching the
+   *                   marketing site's own light/dark-canvas split.
+   *
+   * Reserved for the surfaces plan 015 §3.1 calls "narrative" — never
+   * applied to nav chrome, tables, or forms.
+   */
+  .canvas-warm {
+    /* The app's base font is JetBrains Mono (`html { @apply font-mono }`
+       above) — deliberate for dense operator surfaces, but it fights the
+       serif display face here. Editorial surfaces read body copy in the
+       grotesque sans instead, matching smarthub-core-client's own
+       "the serif does the persuading; the grotesque does the reading." */
+    font-family: var(--font-sans);
+    --background: oklch(0.979 0.005 78.298);
+    --foreground: oklch(0.196 0.039 337.724);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.196 0.039 337.724);
+    --secondary: oklch(0.941 0.007 71.385);
+    --secondary-foreground: oklch(0.196 0.039 337.724);
+    --muted: oklch(0.949 0.006 71.394);
+    --muted-foreground: oklch(0.45 0.02 340);
+    --border: oklch(0.88 0.011 67.687);
+    --input: oklch(0.88 0.011 67.687);
+
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  .dark .canvas-warm {
+    --background: oklch(0.171 0.003 67.636);
+    --foreground: oklch(0.965 0.007 78.29);
+    --card: oklch(0.228 0.004 67.618);
+    --card-foreground: oklch(0.965 0.007 78.29);
+    --secondary: oklch(0.259 0.045 337.371);
+    --secondary-foreground: oklch(0.965 0.007 78.29);
+    --muted: oklch(0.239 0.04 337.264);
+    --muted-foreground: oklch(0.758 0.021 72.989);
+    --border: oklch(0.313 0.007 67.584);
+    --input: oklch(0.313 0.007 67.584);
+  }
+
+  .canvas-brand {
+    font-family: var(--font-sans);
+    --background: oklch(0.224 0.084 341.024);
+    --foreground: oklch(0.965 0.007 78.29);
+    --card: oklch(0.217 0.046 337.946);
+    --card-foreground: oklch(0.965 0.007 78.29);
+    --secondary: oklch(0.259 0.045 337.371);
+    --secondary-foreground: oklch(0.965 0.007 78.29);
+    --muted: oklch(0.239 0.04 337.264);
+    --muted-foreground: oklch(0.758 0.021 72.989);
+    --primary: var(--accent);
+    --primary-foreground: oklch(0.214 0.086 341.282);
+    --border: oklch(1 0 0 / 12%);
+    --input: oklch(1 0 0 / 12%);
+
+    background-color: var(--background);
+    color: var(--foreground);
+  }
 }
