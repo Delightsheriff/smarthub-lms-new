@@ -111,7 +111,9 @@ export function InstructorAssignmentsList() {
   return (
     <section className="space-y-3">
       <div>
-        <h2 className="text-sm font-semibold tracking-wide">All assignments</h2>
+        <h2 className="font-display text-base font-semibold tracking-wide text-foreground">
+          All assignments
+        </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
           Every assignment across the cohorts you teach.
         </p>
@@ -153,8 +155,8 @@ export function InstructorAssignmentsList() {
       )}
 
       {!isLoading && visible.length > 0 && (
-        <Card className="p-0 overflow-hidden">
-          <ul className="divide-y">
+        <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
+          <ul className="divide-y divide-border">
             {visible.map((row) => (
               <li key={row.attachmentId}>
                 <AssignmentRow row={row} />

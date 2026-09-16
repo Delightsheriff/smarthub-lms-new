@@ -147,7 +147,7 @@ export function SubmissionForm({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={triggerElement} />
-      <DialogContent className="sm:max-w-[540px] rounded-2xl">
+      <DialogContent className="sm:max-w-[540px] rounded-2xl border-border bg-card shadow-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="font-display text-xl font-semibold">

@@ -37,7 +37,7 @@ export function AssignmentPageContent({
 
   if (isLoading) {
     return (
-      <div className="container max-w-5xl py-8 space-y-6">
+      <div className="space-y-6">
         <Skeleton className="h-8 w-48 rounded-xl" />
         <Skeleton className="h-44 w-full rounded-2xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -50,7 +50,7 @@ export function AssignmentPageContent({
 
   if (error || !data) {
     return (
-      <div className="container max-w-4xl py-12 text-center space-y-4">
+      <div className="space-y-6 text-center">
         <Alert variant="destructive" className="max-w-md mx-auto rounded-2xl">
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle>Assignment Not Found</AlertTitle>
@@ -81,7 +81,7 @@ export function AssignmentPageContent({
     isOverdue && !submission && !assignment.allowLateSubmission;
 
   return (
-    <div className="container max-w-5xl py-8 space-y-6">
+    <div className="space-y-6">
       {/* Top Breadcrumb & Navigation */}
       <div className="flex items-center justify-between">
         <Button
@@ -235,12 +235,12 @@ export function AssignmentPageContent({
               <SubmissionHistory submission={submission} />
             </>
           ) : submissionWindowClosed ? (
-            <Card className="rounded-2xl border bg-card p-6 shadow-sm text-center space-y-4">
+            <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm text-center space-y-4">
               <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
                 <Lock className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold">Submissions closed</h3>
+                <h3 className="font-display text-base font-semibold">Submissions closed</h3>
                 <p className="text-xs text-muted-foreground">
                   The deadline has passed and late submissions aren&apos;t
                   allowed for this assignment.
@@ -248,12 +248,12 @@ export function AssignmentPageContent({
               </div>
             </Card>
           ) : (
-            <Card className="rounded-2xl border bg-card p-6 shadow-sm text-center space-y-4">
+            <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm text-center space-y-4">
               <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
                 <HelpCircle className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold">No Submission Yet</h3>
+                <h3 className="font-display text-base font-semibold">No Submission Yet</h3>
                 <p className="text-xs text-muted-foreground">
                   Upload your file, paste a link, or write your solution before the deadline.
                 </p>
