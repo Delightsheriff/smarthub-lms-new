@@ -81,7 +81,7 @@ export function GradingDialog({
             </div>
 
             {submission.submissionType === "url" && submission.externalUrl && (
-              <div className="pt-1">
+              <div className="pt-1 space-y-1.5">
                 <Button
                   render={
                     <a
@@ -92,16 +92,20 @@ export function GradingDialog({
                   }
                   variant="outline"
                   size="sm"
-                  className="rounded-xl"
+                  className="w-full justify-start rounded-xl"
                 >
-                  <ExternalLink className="mr-2 h-4 w-4 text-primary" /> Open Link: {submission.externalUrl}
+                  <ExternalLink className="mr-2 h-4 w-4 shrink-0 text-primary" />
+                  Open submission link
                 </Button>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">
+                  {submission.externalUrl}
+                </p>
               </div>
             )}
 
             {submission.submissionType === "file" && submission.fileUrl && (
-              <div className="pt-1 flex items-center justify-between">
-                <span className="font-mono text-muted-foreground">{submission.fileName || "submission-file.zip"}</span>
+              <div className="pt-1 flex items-center justify-between gap-3">
+                <span className="min-w-0 flex-1 truncate font-mono text-muted-foreground">{submission.fileName || "submission-file.zip"}</span>
                 <Button
                   render={
                     <a
@@ -113,7 +117,7 @@ export function GradingDialog({
                   }
                   variant="outline"
                   size="sm"
-                  className="rounded-xl"
+                  className="shrink-0 rounded-xl"
                 >
                   <Download className="mr-1.5 h-3.5 w-3.5" /> Download File
                 </Button>
