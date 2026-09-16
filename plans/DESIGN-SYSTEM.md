@@ -197,10 +197,11 @@ actual `plans/`/`docs/adr/` directories, before picking a number.**
 | 014 | Navigation chrome redesign (this track) |
 | 015 | Editorial design sync from `smarthub-core-client` (this track) — slice 1 (Courses) shipped, see `plans/015-editorial-design-sync.md` |
 | 016 | Editorial rollout handoff prompts — per-page prompts for slices 2+, see `plans/016-editorial-rollout-prompts.md` |
+| 017 | Handoff prompts: dialog spacing, form standardization (react-hook-form + zod everywhere, backend/legacy validation audit), data-page refresh + coordinated loading — see `plans/017-forms-dialogs-data-pages-prompts.md` |
 
 Follow-ups mentioned for the self-paced track (access-revocation
 notices, a jobs/career surface, global search) are **not yet files** —
-whoever builds them starts at **017**.
+whoever builds them starts at **018**.
 
 | ADRs taken | Decision |
 |---|---|
