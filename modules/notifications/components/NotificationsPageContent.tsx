@@ -36,6 +36,8 @@ export function NotificationsPageContent() {
   return (
     <div className="container max-w-4xl py-8 space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Notifications"
         title="Notifications Center"
         description="Grade alerts, material announcements, and cohort updates."
         actions={

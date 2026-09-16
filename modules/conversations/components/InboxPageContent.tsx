@@ -35,6 +35,8 @@ export function InboxPageContent() {
   return (
     <div className="container max-w-6xl py-8 space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Inbox"
         title="Inbox & Messages"
         description="Direct messages, cohort announcements, course discussions, and instructor support."
         actions={

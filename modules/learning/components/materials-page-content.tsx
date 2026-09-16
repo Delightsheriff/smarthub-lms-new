@@ -72,6 +72,8 @@ export function MaterialsPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="Materials"
         description="Every course material and guide available to you, in one place."
         actions={

@@ -52,6 +52,8 @@ export function HelpPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Support"
         title="Help"
         description={
           groups.length > 0

@@ -30,6 +30,8 @@ export function AssignedModulesPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="Assigned to you"
         description="Extra modules your instructors have shared with you."
       />

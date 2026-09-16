@@ -142,6 +142,8 @@ export function CalendarPageContent() {
   return (
     <div className="container max-w-6xl py-8 space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Calendar"
         title="Academic Calendar"
         description="Class sessions, assignment deadlines, office hours, and academic events."
         actions={

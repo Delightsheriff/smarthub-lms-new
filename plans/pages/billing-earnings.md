@@ -1,6 +1,6 @@
 # Billing (student) / Earnings (instructor) / Payments
 
-Status: ✅ Design pass done — commit `cc9bdd1`. Legacy-parity not yet fully audited.
+Status: ✅ Done — editorial PageHeader rolled out on Billing header (Plan 016 Slice 6). Legacy-parity not yet fully audited.
 
 `PageHeader`/`EmptyState` adopted on both `BillingPageContent` and
 `InstructorEarningsPageContent`. The summary/registration/cohort-breakdown

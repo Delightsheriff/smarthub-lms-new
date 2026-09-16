@@ -1,6 +1,6 @@
 # Recordings (`/recordings`)
 
-Status: ✅ Done (search/filter inside module-section.tsx and pagination deferred — see below)
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6).
 
 ## Current state
 

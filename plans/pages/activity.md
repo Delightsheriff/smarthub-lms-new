@@ -1,6 +1,6 @@
 # Activity (`/activity`)
 
-Status: ✅ Done
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6).
 
 ## Current vs legacy
 

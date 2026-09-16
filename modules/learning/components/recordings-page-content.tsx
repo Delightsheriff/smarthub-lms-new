@@ -53,6 +53,8 @@ export function RecordingsPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="Recordings"
         description="Every class recording available to you, across all your courses."
         actions={

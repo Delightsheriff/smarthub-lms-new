@@ -1,6 +1,6 @@
 # Materials (`/materials`)
 
-Status: ✅ Done (module-section.tsx search/filter deferred, same as recordings.md)
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6).
 
 ## Current state
 

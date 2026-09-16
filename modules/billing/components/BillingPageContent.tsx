@@ -24,6 +24,8 @@ export function BillingPageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Money"
         title="Billing"
         description="Track your payments, instalments, and outstanding balance."
       />

@@ -1,6 +1,6 @@
 # Inbox (`/inbox`)
 
-Status: ✅ Done (real-time scoping left as-is, see below)
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6). Real-time scoping left as-is.
 
 ## Current vs legacy
 

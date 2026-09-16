@@ -1,6 +1,6 @@
 # Tasks / Assignments (`/assignments`, student + instructor)
 
-Status: ✅ Done
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6).
 
 ## Current state
 

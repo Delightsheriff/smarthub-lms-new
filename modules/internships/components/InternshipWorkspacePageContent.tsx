@@ -89,6 +89,8 @@ export function InternshipWorkspacePageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Internship"
         title="Internship workspace"
         description={`${internship.product.name} · started ${formatDate(internship.startDate)}`}
       />

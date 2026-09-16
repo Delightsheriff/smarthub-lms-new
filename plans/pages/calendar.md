@@ -1,6 +1,6 @@
 # Calendar (`/calendar`)
 
-Status: ✅ Done — including the previously-deferred query-range rework
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6).
 
 ## Current vs legacy
 

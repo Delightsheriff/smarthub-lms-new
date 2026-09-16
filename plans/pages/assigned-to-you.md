@@ -1,6 +1,6 @@
 # Assigned to you (`/assigned`)
 
-Status: ✅ Design pass done — commit `5581a68`. Legacy-parity not yet audited.
+Status: ✅ Done — editorial PageHeader rolled out (Plan 016 Slice 6). Legacy-parity not yet audited.
 
 `PageHeader`/`EmptyState` adopted. The accordion-card content (recordings/
 materials/tasks sections per assigned module) was already well-built and

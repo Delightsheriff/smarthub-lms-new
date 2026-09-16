@@ -40,6 +40,8 @@ export function MyActivityPageContent() {
   return (
     <div className="container max-w-4xl py-8 space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Activity"
         title="Activity Log"
         description="A security and audit timeline of your recent account actions, submissions, and payments."
       />

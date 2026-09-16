@@ -30,6 +30,8 @@ function InstructorTasksBody() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Teaching"
         title="Tasks"
         description="Submissions waiting on you, plus the full set of assignments across the cohorts you teach."
       />
@@ -80,6 +82,8 @@ function StudentAssignmentsBody() {
   return (
     <div className="space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Learning"
         title="My Assignments"
         description="View deadlines, submit coursework, and review instructor feedback across your enrolled courses."
       />

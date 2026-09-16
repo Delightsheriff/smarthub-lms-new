@@ -69,6 +69,8 @@ export function WebinarsPageContent() {
   return (
     <div className="container max-w-6xl py-8 space-y-6">
       <PageHeader
+        variant="editorial"
+        eyebrow="Webinars"
         title="Webinars & Workshops"
         description="Join live industry sessions, masterclasses, and rewatch past recorded workshops."
         actions={
