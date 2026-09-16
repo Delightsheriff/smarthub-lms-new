@@ -140,14 +140,14 @@ export function ProgramShareLink({
         readOnly
         value={shareUrl}
         onClick={(e) => (e.target as HTMLInputElement).select()}
-        className="flex-1"
+        className="flex-1 h-9 rounded-lg bg-card font-mono text-xs"
       />
       <div className="flex gap-2">
         <Button
           type="button"
           size="sm"
           onClick={onCopy}
-          className="h-11 px-3"
+          className="h-9 px-3.5 rounded-lg"
         >
           <Copy className="h-3.5 w-3.5" />
           Copy
@@ -159,7 +159,7 @@ export function ProgramShareLink({
           render={
             <a href={waUrl} target="_blank" rel="noopener noreferrer" />
           }
-          className="h-11 px-3"
+          className="h-9 px-3.5 rounded-lg bg-card hover:bg-card/90"
         >
           <MessageCircle className="h-3.5 w-3.5" />
           WhatsApp

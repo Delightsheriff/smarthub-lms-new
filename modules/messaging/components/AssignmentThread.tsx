@@ -121,7 +121,7 @@ export function AssignmentThread({ conversationId, title, assignmentHref }: Assi
       </div>
 
       {/* Composer Footer */}
-      <div className="p-3 border-t bg-background flex items-center gap-2">
+      <div className="p-3 border-t bg-card flex items-center gap-2">
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}

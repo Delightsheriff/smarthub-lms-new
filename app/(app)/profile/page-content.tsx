@@ -121,11 +121,13 @@ export default function ProfilePageContent() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Profile"
+        variant="editorial"
+        eyebrow="Account"
+        title="Profile & Settings"
         description="Your details, security and preferences."
         actions={
           tab === "overview" && (
-            <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+            <Button size="sm" variant="outline" onClick={() => setEditOpen(true)} className="rounded-xl">
               <Pencil className="h-3.5 w-3.5" />
               Edit details
             </Button>

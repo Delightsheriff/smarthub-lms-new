@@ -104,7 +104,7 @@ export function EventDetailDialog({
 
           {/* Description */}
           {event.description && (
-            <div className="space-y-1 rounded-xl border bg-background p-3">
+            <div className="space-y-1 rounded-xl border bg-muted/20 p-3">
               <div className="text-xs font-semibold text-foreground">Details</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {event.description}
