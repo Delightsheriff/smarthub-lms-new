@@ -16,7 +16,8 @@
 }
 
 @theme inline {
-    --font-heading: var(--font-mono);
+    --font-heading: var(--font-display);
+    --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
     --font-display: var(--font-display);
     --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -65,33 +66,41 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
+    /* Editorial Warm Paper Surface (corresponds to core-client's HSL 36 33% 97%) */
+    --background: oklch(0.979 0.005 78.298);
+    --foreground: oklch(0.196 0.039 337.724);
+
+    /* Crisp white cards sitting physically elevated on warm paper */
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
+    --card-foreground: oklch(0.196 0.039 337.724);
+
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    /* SmartHub brand — #430330 deep maroon, converted from the source
-       HSL(316 91% 14%) to OKLCH. See docs/adr/0016-restore-smarthub-brand-colors.md. */
+    --popover-foreground: oklch(0.196 0.039 337.724);
+
+    /* SmartHub brand — #430330 deep maroon, converted from source HSL(316 91% 14%) */
     --primary: oklch(0.263 0.108 342.162);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    /* SmartHub brand — #F29913 orange spark, converted from HSL(36 89% 51%).
-       A real, independent accent (previously aliased to --primary). */
+
+    --secondary: oklch(0.941 0.007 71.385);
+    --secondary-foreground: oklch(0.196 0.039 337.724);
+
+    --muted: oklch(0.949 0.006 71.394);
+    --muted-foreground: oklch(0.45 0.02 340);
+
+    /* SmartHub brand — #F29913 orange spark, converted from HSL(36 89% 51%) */
     --accent: oklch(0.754 0.162 67.889);
     --accent-foreground: oklch(0.141 0.005 285.823);
+
     --destructive: oklch(0.577 0.245 27.325);
     --warning: oklch(0.769 0.188 70.08);
     --warning-foreground: oklch(0.98 0.016 73.684);
     --success: oklch(0.696 0.17 162.48);
     --success-foreground: oklch(0.984 0.014 180.72);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    /* Focus rings, active nav state and progress carry the brand maroon
-       (matches legacy: "maroon owns CTAs, focus rings, progress, active nav"). */
+
+    /* Warm hairline borders */
+    --border: oklch(0.88 0.011 67.687);
+    --input: oklch(0.88 0.011 67.687);
+
     --ring: oklch(0.263 0.108 342.162);
     --chart-1: oklch(0.879 0.169 91.605);
     --chart-2: oklch(0.769 0.188 70.08);
@@ -99,33 +108,31 @@
     --chart-4: oklch(0.555 0.163 48.998);
     --chart-5: oklch(0.473 0.137 46.201);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
+
+    --sidebar: oklch(0.965 0.006 75);
+    --sidebar-foreground: oklch(0.196 0.039 337.724);
     --sidebar-primary: oklch(0.263 0.108 342.162);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
+    --sidebar-accent: oklch(0.941 0.007 71.385);
+    --sidebar-accent-foreground: oklch(0.196 0.039 337.724);
+    --sidebar-border: oklch(0.88 0.011 67.687);
     --sidebar-ring: oklch(0.263 0.108 342.162);
 }
 
 .dark {
     --background: oklch(0.141 0.005 285.823);
-    --foreground: oklch(0.985 0 0);
+    --foreground: oklch(0.965 0.007 78.29);
     --card: oklch(0.21 0.006 285.885);
-    --card-foreground: oklch(0.985 0 0);
+    --card-foreground: oklch(0.965 0.007 78.29);
     --popover: oklch(0.21 0.006 285.885);
-    --popover-foreground: oklch(0.985 0 0);
-    /* Lifted maroon for dark-mode legibility, same brand hue as light mode
-       (mirrors legacy's own light->dark lift: HSL 14%L -> 38%L). */
+    --popover-foreground: oklch(0.965 0.007 78.29);
+    /* Lifted maroon for dark-mode legibility */
     --primary: oklch(0.497 0.194 341.840);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    /* Same #F29913 orange spark; it's already bright enough to need no
-       dark-mode lift, only a hair more chroma the way legacy tuned it. */
+    --secondary: oklch(0.259 0.045 337.371);
+    --secondary-foreground: oklch(0.965 0.007 78.29);
+    --muted: oklch(0.239 0.04 337.264);
+    --muted-foreground: oklch(0.758 0.021 72.989);
     --accent: oklch(0.775 0.155 71.181);
     --accent-foreground: oklch(0.141 0.005 285.823);
     --destructive: oklch(0.704 0.191 22.216);
@@ -142,11 +149,11 @@
     --chart-4: oklch(0.555 0.163 48.998);
     --chart-5: oklch(0.473 0.137 46.201);
     --sidebar: oklch(0.21 0.006 285.885);
-    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.965 0.007 78.29);
     --sidebar-primary: oklch(0.497 0.194 341.840);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.259 0.045 337.371);
+    --sidebar-accent-foreground: oklch(0.965 0.007 78.29);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.497 0.194 341.840);
 }
@@ -154,16 +161,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
-    @apply bg-background text-foreground;
-    }
+    @apply bg-background text-foreground font-sans antialiased;
+  }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
-    }
-  html {
-    @apply font-mono;
-    }
+  }
 
   /* Fraunces ships a "wonk" axis and optical sizing (see
      smarthub-core-client, which this is ported from). Dialling wonk in
@@ -258,5 +262,63 @@
 
     background-color: var(--background);
     color: var(--foreground);
+  }
+}
+
+@layer utilities {
+  /*
+   * Light sections had all the atmosphere stripped out — every gradient
+   * and texture lived on the deep slabs. This is a very quiet warm wash
+   * off the top edge, adding designed depth across the warm paper background.
+   */
+  .paper-wash::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      90% 55% at 50% 0%,
+      oklch(0.754 0.162 67.889 / 0.04),
+      transparent 68%
+    );
+  }
+
+  /*
+   * Film grain. Breaks up flat digital fields to create a printed surface.
+   */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+
+  /* Warm bloom behind hero banners and brand moments */
+  .bloom::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        60% 50% at 15% 0%,
+        oklch(0.754 0.162 67.889 / 0.16),
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 45% at 92% 20%,
+        oklch(0.263 0.108 342.162 / 0.28),
+        transparent 72%
+      );
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
   }
 }
