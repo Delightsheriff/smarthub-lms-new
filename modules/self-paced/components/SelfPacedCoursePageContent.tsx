@@ -70,8 +70,8 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {course.progress.completedLessons}/{course.progress.totalLessons} done
                 </span>
-                <CircularProgress value={course.progress.percent} size={28} strokeWidth={3}>
-                  <span className="text-[9px] font-bold tabular-nums">
+                <CircularProgress value={course.progress.percent} size={34} strokeWidth={3}>
+                  <span className="text-[11px] font-bold tabular-nums">
                     {course.progress.percent}
                   </span>
                 </CircularProgress>

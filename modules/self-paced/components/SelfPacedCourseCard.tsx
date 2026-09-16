@@ -59,8 +59,8 @@ export function SelfPacedCourseCard({
               with the title/description for attention. */}
           {started && !completed && (
             <div className="absolute bottom-3 right-3 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
-              <CircularProgress value={progress.percent} size={34} strokeWidth={3}>
-                <span className="text-[10px] font-bold tabular-nums text-primary">
+              <CircularProgress value={progress.percent} size={42} strokeWidth={3.5}>
+                <span className="text-sm font-bold tabular-nums text-primary">
                   {progress.percent}
                 </span>
               </CircularProgress>

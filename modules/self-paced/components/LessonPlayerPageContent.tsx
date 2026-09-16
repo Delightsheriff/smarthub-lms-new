@@ -164,8 +164,8 @@ export function LessonPlayerPageContent({
           <span className="hidden text-[11px] text-muted-foreground sm:inline">
             {course.progress.completedLessons}/{course.progress.totalLessons} lessons
           </span>
-          <CircularProgress value={course.progress.percent} size={30} strokeWidth={3}>
-            <span className="text-[9px] font-bold tabular-nums">
+          <CircularProgress value={course.progress.percent} size={34} strokeWidth={3}>
+            <span className="text-[11px] font-bold tabular-nums">
               {course.progress.percent}
             </span>
           </CircularProgress>

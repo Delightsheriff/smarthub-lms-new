@@ -94,8 +94,8 @@ export function CourseOutline({
     <div className="space-y-1.5 p-3">
       {typeof courseProgress === "number" && (
         <div className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2.5 mb-1">
-          <CircularProgress value={courseProgress} size={36} strokeWidth={3.5}>
-            <span className="text-[10px] font-bold tabular-nums">
+          <CircularProgress value={courseProgress} size={42} strokeWidth={3.5}>
+            <span className="text-xs font-bold tabular-nums">
               {Math.round(courseProgress)}
             </span>
           </CircularProgress>
