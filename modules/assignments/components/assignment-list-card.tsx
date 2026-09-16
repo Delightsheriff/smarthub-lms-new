@@ -67,9 +67,9 @@ export function AssignmentListCard({
   };
 
   return (
-    <Card className="rounded-2xl border bg-card hover:border-primary/40 transition-all duration-200 shadow-sm overflow-hidden group">
+    <Card className="rounded-2xl border border-border bg-card hover:-translate-y-1 hover:border-primary/40 transition-all duration-300 shadow-sm overflow-hidden group">
       <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {/* Context header: Course & Module */}
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 truncate max-w-[70%]">
@@ -87,7 +87,7 @@ export function AssignmentListCard({
           </div>
 
           {/* Title */}
-          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          <h3 className="font-display text-base font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
             {assignment.title}
           </h3>
 
@@ -100,7 +100,7 @@ export function AssignmentListCard({
         </div>
 
         {/* Card footer details */}
-        <div className="pt-2 border-t flex items-center justify-between gap-2 mt-auto">
+        <div className="pt-3 border-t border-border flex items-center justify-between gap-2 mt-auto">
           {/* Points aren't surfaced to students (see grade-card.tsx) —
               a written remark, not a number, is what they see. */}
           <CountdownToDeadline dueAt={assignment.dueAt} />

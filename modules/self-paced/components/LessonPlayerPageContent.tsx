@@ -351,9 +351,9 @@ export function LessonPlayerPageContent({
         open={!!unmarking}
         onOpenChange={(open) => !open && setUnmarking(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Mark this lesson as not done?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display text-xl">Mark this lesson as not done?</AlertDialogTitle>
             <AlertDialogDescription>
               <strong>{unmarking?.title}</strong> will be un-ticked and your
               course progress will go down. A course you&apos;ve already
@@ -361,9 +361,10 @@ export function LessonPlayerPageContent({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={toggle.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={toggle.isPending} className="rounded-xl">Cancel</AlertDialogCancel>
             <Button
               variant="destructive"
+              className="rounded-xl"
               disabled={toggle.isPending}
               onClick={() => void confirmUnmark()}
             >
@@ -374,13 +375,13 @@ export function LessonPlayerPageContent({
       </AlertDialog>
 
       <Dialog open={celebrating} onOpenChange={setCelebrating}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl">
           <DialogHeader>
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <PartyPopper className="h-6 w-6 text-primary" />
             </div>
-            <DialogTitle className="text-center">Course complete</DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogTitle className="text-center font-display text-2xl">Course complete</DialogTitle>
+            <DialogDescription className="text-center text-sm text-muted-foreground">
               You finished every lesson in {course.name}. Well done.
             </DialogDescription>
           </DialogHeader>

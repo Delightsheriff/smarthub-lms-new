@@ -84,14 +84,14 @@ function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
   return (
     <AccordionItem
       value={mod.id}
-      className="rounded-2xl border bg-card overflow-hidden"
+      className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm"
     >
-      <AccordionTrigger className="px-4 py-4 hover:no-underline">
+      <AccordionTrigger className="px-5 py-4 hover:no-underline">
         <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">
-          <span className="text-base font-semibold leading-tight">
+          <span className="font-display text-lg font-semibold leading-tight text-foreground">
             {mod.title}
           </span>
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-sans">
             {mod.estimatedDuration && (
               <span className="inline-flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
         </div>
       </AccordionTrigger>
 
-      <AccordionContent className="px-4 pb-4 pt-0">
+      <AccordionContent className="px-5 pb-5 pt-0">
         <div className="space-y-5">
           {mod.description && (
             <div className="text-sm text-muted-foreground">
@@ -167,8 +167,8 @@ function Section({
 }) {
   return (
     <section className="space-y-2">
-      <h3 className="flex items-center gap-2 text-sm font-semibold">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+      <h3 className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
+        <Icon className="h-4 w-4 text-primary" />
         {title}
       </h3>
       {children}
@@ -185,14 +185,14 @@ function Section({
 function AssignedAssignmentsList({ items }: { items: AssignedAssignment[] }) {
   if (items.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed py-6 text-center text-sm text-muted-foreground">
+      <p className="rounded-2xl border border-dashed border-border py-6 text-center text-sm text-muted-foreground">
         No tasks yet
       </p>
     );
   }
 
   return (
-    <ul className="divide-y rounded-2xl border bg-card">
+    <ul className="divide-y rounded-2xl border border-border bg-card">
       {items.map((a) => (
         <li key={a.id} className="px-4 py-3">
           <p className="text-sm font-medium leading-tight">{a.title}</p>

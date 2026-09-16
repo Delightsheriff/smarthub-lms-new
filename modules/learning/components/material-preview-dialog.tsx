@@ -73,15 +73,16 @@ export function MaterialPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 rounded-2xl overflow-hidden">
         <DialogHeader className="px-5 py-3 border-b border-border flex-row items-center justify-between gap-3 space-y-0">
-          <DialogTitle className="text-base truncate">{title}</DialogTitle>
+          <DialogTitle className="text-base truncate font-display font-semibold">{title}</DialogTitle>
           {/* "Open in new tab" uses the original URL — opening a
               blob:// URL in a new tab is jarring (the address bar
               shows `blob:https://…` and the page closes on tab close). */}
           <Button
             variant="outline"
             size="sm"
+            className="rounded-xl"
             render={<a href={url} target="_blank" rel="noreferrer" />}
           >
             <ExternalLink className="h-3.5 w-3.5 mr-1.5" />

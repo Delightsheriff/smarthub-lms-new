@@ -150,10 +150,10 @@ export function SubmissionForm({
       <DialogContent className="sm:max-w-[540px] rounded-2xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-display text-xl font-semibold">
               {existingSubmission ? "Resubmit Work" : "Submit Assignment"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm text-muted-foreground">
               {assignment.title} · Max {assignment.totalPoints} points
             </DialogDescription>
           </DialogHeader>

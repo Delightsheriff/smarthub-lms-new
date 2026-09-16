@@ -36,11 +36,11 @@ function StateCard({
 }) {
   return (
     <div className="mx-auto max-w-xl py-10">
-      <Card className="p-6 sm:p-8">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+      <Card className="p-6 sm:p-8 rounded-2xl border-border bg-card shadow-sm">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
           {icon}
         </div>
-        <h1 className="mt-4 text-xl font-semibold">{title}</h1>
+        <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
         <div className="mt-6 flex flex-wrap gap-2">{actions}</div>
       </Card>

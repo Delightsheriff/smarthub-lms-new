@@ -23,10 +23,10 @@ export function GradeCard({ submission }: GradeCardProps) {
   if (!feedback) return null;
 
   return (
-    <Card className="p-5 md:p-6 space-y-5 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
+    <Card className="p-5 md:p-6 space-y-5 rounded-2xl bg-gradient-to-br from-primary/5 via-card to-accent/5 border-primary/20">
       {feedback.general && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Instructor feedback</h3>
+          <h3 className="font-display text-base font-semibold">Instructor feedback</h3>
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
             {feedback.general}
           </p>

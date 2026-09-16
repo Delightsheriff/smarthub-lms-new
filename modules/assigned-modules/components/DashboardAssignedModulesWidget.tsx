@@ -28,12 +28,12 @@ export function DashboardAssignedModulesWidget() {
   const preview = data.slice(0, 2);
 
   return (
-    <Card className="rounded-2xl">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="inline-flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-semibold">
+            <CardTitle className="font-display text-sm font-semibold">
               Assigned to you
             </CardTitle>
           </div>

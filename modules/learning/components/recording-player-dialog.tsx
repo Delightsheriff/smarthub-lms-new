@@ -77,19 +77,19 @@ export function RecordingPlayerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-4 md:p-6 gap-3">
+      <DialogContent className="max-w-3xl p-4 md:p-6 gap-3 rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 pr-8">
+          <DialogTitle className="flex items-center gap-2 pr-8 font-display text-xl">
             {recording.title}
             {recording.watched && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
+              <span className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-success">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Watched
               </span>
             )}
           </DialogTitle>
           {recording.description && (
-            <DialogDescription>{recording.description}</DialogDescription>
+            <DialogDescription className="text-sm leading-relaxed">{recording.description}</DialogDescription>
           )}
         </DialogHeader>
 

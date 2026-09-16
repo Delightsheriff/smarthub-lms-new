@@ -58,10 +58,10 @@ export function SubmissionStatusCard({
   };
 
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <div className="flex items-center gap-2">
-          <CardTitle className="text-base font-semibold">Your Submission</CardTitle>
+          <CardTitle className="font-display text-base font-semibold">Your Submission</CardTitle>
           <Badge variant="outline" className="text-xs font-mono">
             v{submission.version}
           </Badge>

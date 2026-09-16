@@ -102,9 +102,9 @@ export function AssignmentPageContent({
       </div>
 
       {/* Main Header Banner */}
-      <Card className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
+      <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               {assignment.type && (
                 <Badge variant="outline" className="capitalize text-xs">
@@ -117,7 +117,7 @@ export function AssignmentPageContent({
                 </Badge>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
               {assignment.title}
             </h1>
           </div>
@@ -134,7 +134,7 @@ export function AssignmentPageContent({
         </div>
 
         {/* Due date info strip */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
+        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-primary" />
             <span>Due: {formatDateTime(assignment.dueAt)}</span>
@@ -177,8 +177,8 @@ export function AssignmentPageContent({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: Instructions & Resources */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
-            <h2 className="text-base font-semibold flex items-center gap-2">
+          <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
+            <h2 className="font-display text-lg font-semibold flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" /> Instructions & Brief
             </h2>
             <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-muted-foreground">
@@ -190,7 +190,7 @@ export function AssignmentPageContent({
 
             {/* Attached links */}
             {(assignment.assignmentLink || (assignment.links && assignment.links.length > 0)) && (
-              <div className="pt-4 border-t space-y-2">
+              <div className="pt-4 border-t border-border space-y-2">
                 <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
                   Resource Links & Attachments
                 </h4>

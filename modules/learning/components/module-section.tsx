@@ -67,7 +67,7 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
 
   return (
     <>
-      <ul className="divide-y rounded-2xl border bg-card">
+      <ul className="divide-y rounded-2xl border border-border bg-card">
         {items.map((r) => {
           const locked = r.isLocked;
           const open = () => {
@@ -178,7 +178,7 @@ export function MaterialsSection({ items }: { items: Material[] }) {
 
   return (
     <>
-      <ul className="divide-y rounded-2xl border bg-card">
+      <ul className="divide-y rounded-2xl border border-border bg-card">
         {items.map((m) => {
           const Icon = MATERIAL_ICON[m.type];
           const links = m.links;
@@ -204,10 +204,10 @@ export function MaterialsSection({ items }: { items: Material[] }) {
                   }
                 }}
                 disabled={!hasFile && !instructionsOnly}
-                className="flex h-auto items-center gap-3 w-full justify-start px-4 py-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex h-auto items-center gap-3 w-full justify-start px-4 py-3 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-muted/40"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium leading-tight">
@@ -321,12 +321,12 @@ export function AssignmentsSection({
   if (items.length === 0) return <EmptyState label="No assignments yet" />;
 
   return (
-    <ul className="divide-y rounded-2xl border bg-card">
+    <ul className="divide-y rounded-2xl border border-border bg-card">
       {items.map((a) => (
         <li key={a.id} id={`assignment-${a.id}`} className="scroll-mt-24">
           <Link
             href={`/courses/${courseSlug}/modules/${moduleSlug}/assignments/${a.id}`}
-            className="group flex items-start justify-between gap-3 px-4 py-3 hover:bg-muted/60 transition-colors"
+            className="group flex items-start justify-between gap-3 px-4 py-3 hover:bg-muted/40 transition-colors"
           >
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium leading-tight group-hover:text-primary transition-colors">

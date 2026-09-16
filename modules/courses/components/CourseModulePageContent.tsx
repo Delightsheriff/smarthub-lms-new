@@ -160,25 +160,25 @@ export function CourseModulePageContent({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <Card className="p-5 md:p-6">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
+      <Card className="p-6 md:p-8 rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge variant="outline">
             Module {mod.order.toString().padStart(2, "0")} · {course.name}
           </Badge>
           <ModuleStatusBadge status={mod.cohortStatus} />
         </div>
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight leading-tight">
+        <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight leading-tight text-foreground">
           {mod.title}
         </h1>
       </Card>
 
       {(mod.summary ||
         (mod.learningObjectives && mod.learningObjectives.length > 0)) && (
-        <Card className="px-5 md:px-6">
+        <Card className="px-5 md:px-6 rounded-2xl border border-border">
           <Accordion defaultValue={["overview", "objectives"]}>
             {mod.summary && (
               <AccordionItem value="overview">
-                <AccordionTrigger className="text-sm font-semibold">
+                <AccordionTrigger className="font-display text-base font-semibold">
                   Overview
                 </AccordionTrigger>
                 <AccordionContent>
@@ -192,7 +192,7 @@ export function CourseModulePageContent({
 
             {mod.learningObjectives && mod.learningObjectives.length > 0 && (
               <AccordionItem value="objectives" className="border-b-0">
-                <AccordionTrigger className="text-sm font-semibold">
+                <AccordionTrigger className="font-display text-base font-semibold">
                   What you&apos;ll learn
                 </AccordionTrigger>
                 <AccordionContent>
@@ -218,7 +218,7 @@ export function CourseModulePageContent({
 
       {/* Lanes — tabs when there's content, friendly empty state otherwise */}
       {visibleTabs.length === 0 ? (
-        <Card className="p-8 text-center">
+        <Card className="p-8 text-center rounded-2xl border border-border">
           <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
           <p className="font-semibold">Content on the way</p>
           <p className="text-sm text-muted-foreground mt-1">
@@ -269,13 +269,13 @@ export function CourseModulePageContent({
         {prev ? (
           <Link
             href={`/courses/${slug}/modules/${prev.slug}`}
-            className="group flex flex-col gap-0.5 text-sm rounded-xl border bg-card p-3 max-w-[48%] hover:border-primary/40 transition-colors"
+            className="group flex flex-col gap-0.5 text-sm rounded-2xl border border-border bg-card p-4 max-w-[48%] hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm"
           >
             <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" />
               Previous
             </span>
-            <span className="font-medium truncate group-hover:text-primary transition-colors">
+            <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
               {prev.title}
             </span>
           </Link>
@@ -285,13 +285,13 @@ export function CourseModulePageContent({
         {next ? (
           <Link
             href={`/courses/${slug}/modules/${next.slug}`}
-            className="group flex flex-col items-end gap-0.5 text-sm rounded-xl border bg-card p-3 max-w-[48%] hover:border-primary/40 transition-colors text-right"
+            className="group flex flex-col items-end gap-0.5 text-sm rounded-2xl border border-border bg-card p-4 max-w-[48%] hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm text-right"
           >
             <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
               Next
               <ArrowRight className="h-3 w-3" />
             </span>
-            <span className="font-medium truncate group-hover:text-primary transition-colors">
+            <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
               {next.title}
             </span>
           </Link>

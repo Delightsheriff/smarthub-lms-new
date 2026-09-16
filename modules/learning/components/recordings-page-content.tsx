@@ -92,23 +92,23 @@ export function RecordingsPageContent() {
       {!isLoading &&
         groups.map((g) => (
           <section key={g.course.id} className="space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span
-                className="h-2.5 w-2.5 rounded-full shrink-0"
+                className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm"
                 style={{ backgroundColor: g.course.color || "var(--primary)" }}
               />
               <Link
                 href={`/courses/${g.course.slug}`}
-                className="text-sm font-semibold hover:text-primary transition-colors"
+                className="font-display text-base font-semibold hover:text-accent transition-colors"
               >
                 {g.course.name}
               </Link>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground font-sans">
                 {g.items.length} recording{g.items.length === 1 ? "" : "s"}
               </span>
             </div>
 
-            <Card className="p-0 overflow-hidden">
+            <Card className="p-0 overflow-hidden rounded-2xl border-border">
               <ul className="divide-y">
                 {g.items.map((row) => {
                   const r = row.recording;
