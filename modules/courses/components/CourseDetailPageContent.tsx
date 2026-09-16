@@ -141,7 +141,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       </div>
 
       {/* Stats — hairline-divided strip instead of four boxed cards. */}
-      <div className="grid grid-cols-2 divide-x divide-y divide-border rounded-2xl border border-border sm:grid-cols-5 sm:divide-y-0">
+      <div className="grid grid-cols-2 divide-x divide-y divide-border rounded-2xl border border-border bg-card shadow-sm sm:grid-cols-5 sm:divide-y-0 overflow-hidden">
         <Stat label="Progress" value={`${course.progress}%`} />
         <Stat label="Modules" value={modules.length} />
         <Stat label="Recordings" value={totalRecordings} />
@@ -150,12 +150,12 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       </div>
 
       {/* About */}
-      <Card className="p-5 space-y-3">
+      <Card className="p-5 md:p-6 space-y-3 rounded-2xl border-border bg-card shadow-sm">
         <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
           <span className="h-px w-6 bg-accent" aria-hidden />
           About
         </p>
-        <h2 className="font-display text-xl">About this programme</h2>
+        <h2 className="font-display text-xl font-semibold">About this programme</h2>
         <CollapsibleRichText
           html={course.description}
           className="text-muted-foreground"
@@ -170,12 +170,12 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
 
       {/* Instructors */}
       {course.instructors && course.instructors.length > 0 && (
-        <Card className="p-5 space-y-4">
+        <Card className="p-5 md:p-6 space-y-4 rounded-2xl border-border bg-card shadow-sm">
           <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
             <span className="h-px w-6 bg-accent" aria-hidden />
             Meet the team
           </p>
-          <h2 className="font-display text-xl">
+          <h2 className="font-display text-xl font-semibold">
             Your {course.instructors.length > 1 ? "instructors" : "instructor"}
           </h2>
           <ul className="space-y-4">
@@ -230,9 +230,9 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       )}
 
       {/* Modules at a glance */}
-      <Card className="p-0 overflow-hidden">
+      <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
         <div className="px-5 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl">Course modules</h2>
+          <h2 className="font-display text-xl font-semibold">Course modules</h2>
           <Button
             variant="outline"
             size="sm"

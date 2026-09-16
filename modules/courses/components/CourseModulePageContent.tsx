@@ -174,7 +174,7 @@ export function CourseModulePageContent({
 
       {(mod.summary ||
         (mod.learningObjectives && mod.learningObjectives.length > 0)) && (
-        <Card className="px-5 md:px-6 rounded-2xl border border-border">
+        <Card className="px-5 md:px-6 rounded-2xl border border-border bg-card shadow-sm">
           <Accordion defaultValue={["overview", "objectives"]}>
             {mod.summary && (
               <AccordionItem value="overview">
@@ -218,9 +218,9 @@ export function CourseModulePageContent({
 
       {/* Lanes — tabs when there's content, friendly empty state otherwise */}
       {visibleTabs.length === 0 ? (
-        <Card className="p-8 text-center rounded-2xl border border-border">
+        <Card className="p-8 text-center rounded-2xl border border-border bg-card shadow-sm">
           <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-          <p className="font-semibold">Content on the way</p>
+          <p className="font-display text-base font-semibold">Content on the way</p>
           <p className="text-sm text-muted-foreground mt-1">
             Recordings, materials, and assignments for this module will
             appear here once they&apos;re published.

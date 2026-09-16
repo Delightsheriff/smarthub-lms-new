@@ -42,7 +42,9 @@ export function ContinueSelfPacedCard() {
   return (
     <section>
       <header className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold">Continue learning</h2>
+        <h2 className="font-display text-lg font-semibold text-foreground">
+          Continue learning
+        </h2>
         {candidates.length > 1 ? (
           <Link
             href={SELF_PACED_ROUTES.LIST}
@@ -54,7 +56,7 @@ export function ContinueSelfPacedCard() {
           <PlayCircle className="h-4 w-4 text-primary" />
         )}
       </header>
-      <Card className="p-0 overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
+      <Card className="p-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all duration-300">
         <div className="md:grid md:grid-cols-[200px_1fr]">
           <CourseCover
             imageUrl={course.imageUrl}
@@ -66,7 +68,9 @@ export function ContinueSelfPacedCard() {
             <Badge variant="secondary" className="mb-2">
               Self-paced
             </Badge>
-            <h3 className="font-semibold text-lg leading-tight">{course.name}</h3>
+            <h3 className="font-display font-semibold text-lg leading-tight text-foreground">
+              {course.name}
+            </h3>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
               Up next: {course.nextLesson.title}
             </p>

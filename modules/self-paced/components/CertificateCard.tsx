@@ -51,7 +51,7 @@ export function CertificateCard({
   return (
     <Card
       className={cn(
-        "p-5 border-success/30 bg-gradient-to-br from-success/5 via-background to-accent/5",
+        "p-5 rounded-2xl border-success/30 bg-gradient-to-br from-success/5 via-card to-accent/5 shadow-sm",
         className
       )}
     >

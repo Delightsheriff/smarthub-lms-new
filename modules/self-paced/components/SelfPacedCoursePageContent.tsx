@@ -57,19 +57,19 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
       <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 space-y-6 lg:space-y-0">
         <div className="min-w-0 space-y-6">
           {course.overview && (
-            <Card className="p-5 space-y-3">
+            <Card className="p-5 md:p-6 space-y-3 rounded-2xl border-border bg-card shadow-sm">
               <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 <span className="h-px w-6 bg-accent" aria-hidden />
                 Overview
               </p>
-              <h2 className="font-display text-xl">About this course</h2>
+              <h2 className="font-display text-xl font-semibold">About this course</h2>
               <RichText html={course.overview} className="text-muted-foreground" />
             </Card>
           )}
 
-          <Card className="p-0 overflow-hidden">
+          <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
             <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-border">
-              <h2 className="font-display text-xl">Lessons</h2>
+              <h2 className="font-display text-xl font-semibold">Lessons</h2>
               <div className="flex items-center gap-2.5">
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {course.progress.completedLessons}/{course.progress.totalLessons} done
@@ -101,7 +101,7 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
           )}
 
           {course.whatsappGroupUrl && (
-            <Card className="p-5">
+            <Card className="p-5 rounded-2xl border-border bg-card shadow-sm">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
                   <MessageCircle className="h-5 w-5 text-success" />
@@ -137,7 +137,7 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
           )}
 
           {course.cohortTrack && (
-            <Card className="p-5 border-primary/20 bg-primary/[0.03]">
+            <Card className="p-5 rounded-2xl border-primary/20 bg-primary/[0.03] shadow-sm">
               <div className="flex gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <GraduationCap className="h-5 w-5 text-primary" />

@@ -108,8 +108,8 @@ export function RecordingsPageContent() {
               </span>
             </div>
 
-            <Card className="p-0 overflow-hidden rounded-2xl border-border">
-              <ul className="divide-y">
+            <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
+              <ul className="divide-y divide-border">
                 {g.items.map((row) => {
                   const r = row.recording;
                   const locked = r.isLocked;

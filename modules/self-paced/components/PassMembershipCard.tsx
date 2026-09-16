@@ -39,7 +39,7 @@ export function PassMembershipCard({ compact = false }: { compact?: boolean }) {
   const endingSoon = daysLeft !== undefined && daysLeft <= 14 && !pass.renewalEndsAt;
 
   return (
-    <Card className="p-5">
+    <Card className="p-5 rounded-2xl border-border bg-card shadow-sm">
       <div className="flex gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
           <Ticket className="h-5 w-5 text-primary" />

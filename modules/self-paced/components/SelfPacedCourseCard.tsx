@@ -24,7 +24,7 @@ export function SelfPacedCourseCard({
     : courseHref;
 
   return (
-    <Card className="p-0 overflow-hidden h-full flex flex-col border-border transition-all duration-300 hover:-translate-y-1 hover:border-primary/40">
+    <Card className="p-0 overflow-hidden rounded-2xl h-full flex flex-col border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40">
       <Link href={courseHref} className="block">
         <div className="relative">
           <CourseCover
