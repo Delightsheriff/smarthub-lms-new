@@ -1,6 +1,7 @@
 # PLAN 015 — Editorial Design Sync (from `smarthub-core-client`)
 
-**Status:** Draft — analysis + outline only, not yet confirmed for build
+**Status:** In progress — slice 1 (Courses) shipped and live-verified;
+remaining pages to follow incrementally per user direction
 **Owner:** SmartHub design-system modernization (same track as Plan 014;
 see `plans/DESIGN-SYSTEM.md` for the master context)
 **Depends on:** ADR 0015 (brand colors restored). Supersedes nothing —
@@ -279,22 +280,37 @@ relying on it everywhere).
 
 ---
 
-## 6. Scope for a first slice (proposed, pending confirmation)
+## 6. Scope for a first slice
 
-### In scope
-- Token additions to `app/globals.css`: warm-paper variants + `--deep`,
-  scoped under a new class rather than replacing the existing neutral
-  tokens outright (so operator-dense surfaces are unaffected until
-  explicitly opted in).
-- Add Fraunces (`--font-display`) to `app/layout.tsx`.
-- Build the `Section`/`SectionHeading` primitive against Base UI.
-- Add the `rise` keyframe + stagger convention to `app/globals.css`.
-- Apply the full editorial treatment to **one** representative surface
-  first — proposed: the dashboard welcome hero, since it's the first
-  thing every user sees and its current version is a plain card.
-- Port the course-card hover/scrim/stretched-link upgrade to
-  `CourseCard`/`SelfPacedCourseCard` (independent value even before the
-  wider pivot lands).
+### Shipped (slice 1 — Courses, commit `0e4fcb3`)
+- Token additions to `app/globals.css`: `.canvas-warm` / `.canvas-brand`
+  scoped classes (warm-paper + `--deep` brand slab, OKLCH-converted),
+  additive only — dense operator surfaces untouched.
+- Fraunces added (`--font-display`) in `app/layout.tsx`, wired through
+  `@theme inline` and the `font-display` utility.
+- `rise` keyframe registered as `--animate-rise` (Tailwind v4 CSS-first,
+  no `Section`/`SectionHeading` primitive needed yet — not used by this
+  slice; still open for a later slice that needs marketing-style
+  section composition rather than page-header + card-grid).
+- `PageHeader` gained `variant="editorial"` (eyebrow + serif title),
+  applied to both cohort and self-paced course browse pages.
+- `CourseCard` / `SelfPacedCourseCard` rebuilt on the core-client
+  course-card pattern (scrim, eyebrow label, hover-fill arrow).
+- Course landing page hero, stats strip, About/Instructors headings,
+  and the module-list numbering (serif index, no box) redesigned.
+- Found and fixed along the way: the app's actual base font is
+  JetBrains Mono at the `html` level (not Inter) — editorial surfaces
+  now explicitly set `font-sans` for body copy; operator controls
+  (filter dropdowns) intentionally keep the mono voice.
+
+### Deliberately not done this slice
+- Nav/sidebar chrome — Plan 014's operator-tool treatment stands.
+- Any data table, form, or the calendar grid.
+- Grain/bloom — not used anywhere yet; still an open call (§7.5).
+- The `Section`/`SectionHeading` composer — no surface needed
+  marketing-style section composition yet; build it when one does.
+- Dashboard hero, self-paced lesson player chrome, certificates —
+  next candidates per the user's "expand incrementally" direction.
 
 ### Out of scope (explicitly deferred)
 - Nav/sidebar chrome — Plan 014's operator-tool treatment stands.

@@ -1,6 +1,9 @@
 # Courses (`/courses`, `/courses/[slug]`, `/courses/[slug]/modules/[moduleSlug]`)
 
-Status: 🟡 Critical bug fixed + first creative pass shipped; deeper redesign still open
+Status: 🟡 Critical bug fixed + first creative pass shipped; editorial
+redesign (slice 1, serif/warm-canvas visual language) now also shipped —
+see [../015-editorial-design-sync.md](../015-editorial-design-sync.md);
+deeper landing-page/module-tab work still open
 
 ## What this doc covers
 
