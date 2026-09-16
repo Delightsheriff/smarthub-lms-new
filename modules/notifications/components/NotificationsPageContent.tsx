@@ -34,7 +34,7 @@ export function NotificationsPageContent() {
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
         eyebrow="Notifications"
@@ -95,7 +95,7 @@ export function NotificationsPageContent() {
                     <Card
                       onClick={() => !n.read && markReadMutation.mutate(n.id)}
                       className={cn(
-                        "relative overflow-hidden rounded-2xl border bg-card transition-colors shadow-xs cursor-pointer",
+                        "relative overflow-hidden rounded-2xl border border-border bg-card transition-colors shadow-xs cursor-pointer",
                         !n.read ? "hover:bg-muted/20" : "hover:bg-muted/30",
                       )}
                     >
@@ -112,7 +112,7 @@ export function NotificationsPageContent() {
                         <div className="flex items-start gap-3 min-w-0">
                           <span
                             className={cn(
-                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
                               style.className,
                             )}
                           >
@@ -121,7 +121,7 @@ export function NotificationsPageContent() {
 
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-sm text-foreground truncate">
+                              <span className="font-display font-semibold text-sm text-foreground truncate">
                                 {n.title}
                               </span>
                               {!n.read && (

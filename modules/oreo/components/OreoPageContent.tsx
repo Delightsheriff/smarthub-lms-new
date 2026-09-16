@@ -114,7 +114,7 @@ export function OreoPageContent() {
       </div>
 
       <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-        <MessageScroller className="min-h-0 flex-1 rounded-xl border bg-card">
+        <MessageScroller className="min-h-0 flex-1 rounded-2xl border border-border bg-card shadow-sm">
           <MessageScrollerViewport>
             <MessageScrollerContent className="p-4">
               {turns.length === 0 && !pending && (
@@ -123,7 +123,7 @@ export function OreoPageContent() {
                     <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                       <Bot className="h-6 w-6" />
                     </span>
-                    <p className="mt-3 font-semibold">What do you want to know?</p>
+                    <p className="mt-3 font-display text-xl font-semibold text-foreground">What do you want to know?</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Try one of the prompts below to get a real answer.
                     </p>
@@ -134,6 +134,7 @@ export function OreoPageContent() {
                         key={s.prompt}
                         size="sm"
                         variant="outline"
+                        className="rounded-xl"
                         onClick={() => void submit(s.prompt)}
                         disabled={ask.isPending}
                       >
@@ -182,9 +183,9 @@ export function OreoPageContent() {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask Oreo anything…"
-          className="flex-1"
+          className="flex-1 rounded-xl"
         />
-        <Button type="submit" disabled={ask.isPending || !question.trim()}>
+        <Button type="submit" className="rounded-xl" disabled={ask.isPending || !question.trim()}>
           {ask.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (

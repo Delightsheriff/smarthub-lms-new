@@ -48,10 +48,10 @@ export function EditProfileDetailsDialog({
 }: EditProfileDetailsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Edit personal details</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-display text-xl font-semibold">Edit personal details</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Update your name, gender or phone. Email stays managed by an admin.
           </DialogDescription>
         </DialogHeader>
@@ -194,17 +194,18 @@ function ProfileDetailsForm({
       </DialogFooter>
 
       <AlertDialog open={unlockOpen} onOpenChange={setUnlockOpen}>
-        <AlertDialogContent className="max-w-sm">
+        <AlertDialogContent className="max-w-sm rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Unlock phone edit?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-display text-lg font-semibold">Unlock phone edit?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground">
               Your phone number is used for session alerts and attendance
               verification. Confirm you want to change it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
+              className="rounded-xl"
               onClick={() => {
                 setPhoneUnlocked(true);
                 setUnlockOpen(false);

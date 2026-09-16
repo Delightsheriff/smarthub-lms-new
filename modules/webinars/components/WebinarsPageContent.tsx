@@ -67,7 +67,7 @@ export function WebinarsPageContent() {
   const error = activeTab === "upcoming" ? upcomingQuery.error : pastQuery.error;
 
   return (
-    <div className="container max-w-6xl py-8 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
         eyebrow="Webinars"

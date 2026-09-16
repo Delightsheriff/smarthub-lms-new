@@ -94,7 +94,7 @@ export function PaymentsPageContent() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
         eyebrow="Money"
@@ -103,27 +103,27 @@ export function PaymentsPageContent() {
       />
 
       {bank && (bank.accountNumber || bank.bankName) && (
-        <div className="rounded-lg border bg-muted/40 p-4">
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Transfer to
           </p>
-          <div className="space-y-1 text-sm">
+          <div className="space-y-1.5 text-sm">
             {bank.bankName && (
               <p>
                 <span className="text-muted-foreground">Bank:</span>{" "}
-                <span className="font-medium">{bank.bankName}</span>
+                <span className="font-medium text-foreground">{bank.bankName}</span>
               </p>
             )}
             {bank.accountName && (
               <p>
                 <span className="text-muted-foreground">Name:</span>{" "}
-                <span className="font-medium">{bank.accountName}</span>
+                <span className="font-medium text-foreground">{bank.accountName}</span>
               </p>
             )}
             {bank.accountNumber && (
               <p className="flex items-center gap-2">
                 <span className="text-muted-foreground">Account:</span>{" "}
-                <span className="font-mono font-semibold">
+                <span className="font-mono font-semibold text-foreground">
                   {bank.accountNumber}
                 </span>
                 <Button
@@ -139,7 +139,7 @@ export function PaymentsPageContent() {
             )}
           </div>
           {bank.paymentInstructions && (
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-3 text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-xl">
               {bank.paymentInstructions}
             </p>
           )}
@@ -157,9 +157,9 @@ export function PaymentsPageContent() {
       <form
         ref={formRef}
         onSubmit={onSubmit}
-        className="space-y-4 rounded-lg border p-4"
+        className="space-y-4 rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6"
       >
-        <p className="text-sm font-semibold">Upload a payment proof</p>
+        <p className="font-display text-base font-semibold text-foreground">Upload a payment proof</p>
 
         {tranche && (
           <p className="flex items-center justify-between gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
@@ -260,30 +260,30 @@ export function PaymentsPageContent() {
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : surface && surface.proofs.length > 0 ? (
-        <div>
-          <p className="mb-2 text-sm font-semibold">Your submissions</p>
-          <ul className="space-y-2">
+        <div className="space-y-3">
+          <p className="font-display text-base font-semibold text-foreground">Your submissions</p>
+          <ul className="space-y-2.5">
             {surface.proofs.map((p: MyPaymentProofUi) => (
               <li
                 key={p._id}
-                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm shadow-xs"
               >
                 <div>
-                  <p className="font-medium">
+                  <p className="font-medium text-foreground">
                     {`₦${(
                       p.status === "confirmed"
                         ? p.confirmedAmount ?? p.amountClaimed
                         : p.amountClaimed
                     ).toLocaleString("en-NG")}`}
                     {p.courseName ? (
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground font-normal">
                         {" "}
                         · {p.courseName}
                       </span>
                     ) : null}
                   </p>
                   {p.status === "rejected" && p.reviewNotes && (
-                    <p className="text-xs text-destructive">{p.reviewNotes}</p>
+                    <p className="text-xs text-destructive mt-0.5">{p.reviewNotes}</p>
                   )}
                 </div>
                 <span

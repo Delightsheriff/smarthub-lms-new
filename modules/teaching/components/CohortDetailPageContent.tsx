@@ -27,7 +27,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
   const { data: cohort, isLoading, error } = useTeachingCohortDetail(scheduleId);
 
   return (
-    <div className="container max-w-6xl py-8 space-y-6">
+    <div className="space-y-6">
       {/* Back Button */}
       <div>
         <Button
@@ -53,7 +53,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
       {!isLoading && cohort && (
         <>
           {/* Cohort Workspace Header Card */}
-          <Card className="rounded-2xl border bg-card p-6 shadow-sm space-y-4">
+          <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
                     ID: {cohort.id}
                   </Badge>
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                   Cohort Workspace — {cohort.course.name}
                 </h1>
                 <p className="text-xs text-muted-foreground flex items-center gap-2">

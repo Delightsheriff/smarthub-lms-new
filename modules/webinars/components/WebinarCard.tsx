@@ -47,7 +47,7 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
   };
 
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm overflow-hidden flex flex-col justify-between hover:border-primary/40 transition-colors">
+    <Card className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden flex flex-col justify-between hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
       <div className="relative w-full h-44 bg-muted overflow-hidden">
         {webinar.posterUrl ? (
           <Image
@@ -65,7 +65,7 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
       </div>
 
       <CardContent className="p-5 space-y-3 flex-1">
-        <h3 className="text-base font-bold text-foreground line-clamp-2">
+        <h3 className="font-display text-base font-bold text-foreground line-clamp-2">
           {webinar.title}
         </h3>
 

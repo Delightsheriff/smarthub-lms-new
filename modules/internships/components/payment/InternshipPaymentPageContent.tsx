@@ -92,13 +92,13 @@ export function InternshipPaymentPageContent() {
 
 function ConfirmedReceipt({ payment }: { payment: ApiInternshipPayment }) {
   return (
-    <Card className="p-6 border-success/30 bg-success/5">
+    <Card className="p-6 rounded-2xl border border-success/30 bg-success/5 shadow-sm">
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
           <CheckCircle2 className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">
+          <p className="font-display text-lg font-semibold text-foreground">
             {formatPrice(payment.fee)} — paid in full
           </p>
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -118,13 +118,13 @@ function ConfirmedReceipt({ payment }: { payment: ApiInternshipPayment }) {
 
 function AwaitingConfirmation({ payment }: { payment: ApiInternshipPayment }) {
   return (
-    <Card className="p-6 border-info/30 bg-info/5">
+    <Card className="p-6 rounded-2xl border border-info/30 bg-info/5 shadow-sm">
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
           <Clock3 className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">Proof submitted — awaiting confirmation</p>
+          <p className="font-display text-lg font-semibold text-foreground">Proof submitted — awaiting confirmation</p>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Your receipt is in for{" "}
             {formatPrice(payment.fee - payment.paidAmount)}, submitted{" "}
@@ -155,7 +155,7 @@ function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
 
   return (
     <div className="space-y-4">
-      <Card className="p-5">
+      <Card className="p-5 md:p-6 rounded-2xl border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
             <Landmark className="h-4 w-4 text-primary" />
@@ -172,12 +172,12 @@ function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
           <Field label="Fee" value={formatPrice(payment.fee)} />
         </div>
         {payment.bank?.paymentInstructions && (
-          <p className="mt-4 rounded-lg bg-accent/50 px-3 py-2 text-xs text-muted-foreground">
+          <p className="mt-4 rounded-xl bg-accent/50 px-3 py-2 text-xs text-muted-foreground">
             {payment.bank.paymentInstructions}
           </p>
         )}
         <div className="mt-5 flex justify-end">
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={() => setOpen(true)} className="rounded-xl">
             <UploadCloud className="h-4 w-4 mr-1.5" />
             Upload payment proof
           </Button>
@@ -246,10 +246,10 @@ function UploadProofDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Upload internship payment</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-display text-xl">Upload internship payment</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Send your transfer receipt so finance can confirm your fee.
           </DialogDescription>
         </DialogHeader>

@@ -94,7 +94,7 @@ export default function CheckInPageContent() {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
-      <Card className="w-full max-w-md p-6 md:p-8 text-center">
+      <Card className="w-full max-w-md p-6 md:p-8 text-center rounded-2xl border border-border bg-card shadow-sm">
         <Content state={state} />
       </Card>
     </div>
@@ -200,12 +200,12 @@ function Result({
     <div className="space-y-4">
       <Icon className={cn("h-14 w-14 mx-auto", toneClass)} />
       <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         <p className="text-sm text-muted-foreground">{body}</p>
       </div>
       {showHomeCta && (
         <div className="pt-2">
-          <Button render={<Link href="/" />}>Go now</Button>
+          <Button render={<Link href="/" />} className="rounded-xl">Go now</Button>
           <p className="text-[11px] text-muted-foreground mt-2">
             We&apos;ll take you home automatically.
           </p>

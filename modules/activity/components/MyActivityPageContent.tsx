@@ -38,7 +38,7 @@ export function MyActivityPageContent() {
   const groupedEntries = Array.from(groupedMap.entries());
 
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
         eyebrow="Activity"
@@ -68,9 +68,9 @@ export function MyActivityPageContent() {
             <div className="space-y-6">
               {groupedEntries.map(([dayStr, dayEvents]) => (
                 <div key={dayStr} className="space-y-3">
-                  <div className="text-xs font-semibold text-muted-foreground tracking-wide">
+                  <h2 className="font-display text-sm font-semibold text-foreground tracking-wide">
                     {dayStr}
-                  </div>
+                  </h2>
 
                   <Stagger className="space-y-2">
                     {dayEvents.map((event) => {
@@ -79,7 +79,7 @@ export function MyActivityPageContent() {
 
                       return (
                         <StaggerItem key={event.id}>
-                          <Card className="rounded-2xl border bg-card hover:border-primary/30 transition-colors shadow-xs">
+                          <Card className="rounded-2xl border border-border bg-card hover:border-primary/40 transition-colors shadow-xs">
                             <CardContent className="p-4 flex items-center justify-between gap-4">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div
@@ -89,7 +89,7 @@ export function MyActivityPageContent() {
                                 </div>
 
                                 <div className="space-y-0.5 min-w-0">
-                                  <div className="font-semibold text-sm text-foreground truncate">
+                                  <div className="font-display font-semibold text-sm text-foreground truncate">
                                     {style.label}
                                   </div>
                                   {event.resource?.label && (

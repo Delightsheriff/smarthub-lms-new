@@ -48,7 +48,7 @@ export function GradingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] rounded-2xl">
+      <DialogContent className="sm:max-w-[560px] rounded-2xl border-border bg-card">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="outline" className="text-xs">
@@ -60,7 +60,7 @@ export function GradingDialog({
               </Badge>
             )}
           </div>
-          <DialogTitle className="text-xl font-bold text-foreground">
+          <DialogTitle className="font-display text-xl font-bold text-foreground">
             Grade Submission — {submission.student.name}
           </DialogTitle>
           {submission.submittedAt && (

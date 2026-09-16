@@ -72,8 +72,8 @@ export function HelpPageContent() {
 
       {groups.map((group) => (
         <section key={group.name} className="space-y-3">
-          <h2 className="font-semibold">{group.name}</h2>
-          <Stagger className="grid gap-3 sm:grid-cols-2">
+          <h2 className="font-display text-lg font-semibold text-foreground">{group.name}</h2>
+          <Stagger className="grid gap-4 sm:grid-cols-2">
             {group.resources.map((r) => (
               <StaggerItem key={r._id}>
                 <ResourceCard resource={r} />
@@ -92,15 +92,15 @@ function ResourceCard({ resource }: { resource: ApiHelpResource }) {
   const Icon = style.icon;
 
   return (
-    <Card className="flex flex-col gap-3 p-4">
+    <Card className="flex flex-col gap-3 p-5 rounded-2xl border-border bg-card shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex min-w-0 items-start gap-3">
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${style.className}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${style.className}`}
         >
           <Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-semibold leading-tight">
+          <p className="font-display text-base font-semibold leading-tight text-foreground">
             {resource.title}
           </p>
           {resource.description && (

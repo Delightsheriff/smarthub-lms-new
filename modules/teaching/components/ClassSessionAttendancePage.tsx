@@ -60,7 +60,7 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
   const rows = sessionData?.rows || [];
 
   return (
-    <div className="container max-w-5xl py-8 space-y-6">
+    <div className="space-y-6">
       {/* Back Button */}
       <div>
         <Button
@@ -86,9 +86,9 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
       {!isLoading && session && (
         <>
           {/* Header Card */}
-          <Card className="rounded-2xl border bg-card p-6 shadow-sm space-y-3">
+          <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-950">
+              <Badge className="bg-primary/10 text-primary">
                 <Video className="mr-1 h-3.5 w-3.5" /> Class Session Attendance
               </Badge>
               {session.startsAt && (
@@ -98,16 +98,16 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
               )}
             </div>
 
-            <h1 className="text-2xl font-bold text-foreground">{session.title}</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">{session.title}</h1>
             {session.location && (
               <p className="text-xs text-muted-foreground">Location: {session.location}</p>
             )}
           </Card>
 
           {/* Roster Marking Table */}
-          <Card className="rounded-2xl border bg-card p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b">
-              <h3 className="text-base font-bold text-foreground">
+          <Card className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="font-display text-base font-bold text-foreground">
                 Student Attendance ({rows.length} Enrolled)
               </h3>
               <Button

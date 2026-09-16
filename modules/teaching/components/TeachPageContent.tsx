@@ -66,7 +66,7 @@ export function TeachPageContent() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Your courses</h2>
+        <h2 className="font-display text-lg font-semibold text-foreground">Your courses</h2>
 
         {isLoading && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

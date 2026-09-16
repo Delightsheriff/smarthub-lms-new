@@ -48,7 +48,7 @@ export function BillingPageContent() {
           <BillingSummaryCard overall={data.overall} />
 
           <section className="space-y-4">
-            <h2 className="font-semibold">Per course</h2>
+            <h2 className="font-display text-lg font-semibold text-foreground">Per course</h2>
             <div className="space-y-4">
               {data.registrations.map((r) => (
                 <RegistrationBillingCard key={r.id} registration={r} />
