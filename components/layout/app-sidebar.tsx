@@ -94,8 +94,8 @@ export function AppSidebar() {
         {/* Identity card — the avatar opens the existing quick-action
             menu (UserMenu). A dedicated profile drawer replaces this
             once the Settings/Profile slice builds it end-to-end. */}
-        <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[collapsible=icon]:items-center">
-          <div className="flex items-center gap-2.5 rounded-xl p-1.5 group-data-[collapsible=icon]:justify-center">
+        <SidebarFooter className="border-t border-sidebar-border/80 p-2 group-data-[collapsible=icon]:items-center">
+          <div className="flex items-center gap-2.5 rounded-xl p-1.5 transition-colors hover:bg-sidebar-accent/50 group-data-[collapsible=icon]:justify-center">
             <UserMenu />
             <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
               <p className="truncate text-sm font-semibold text-sidebar-foreground">
@@ -168,10 +168,10 @@ function NavSectionGroup({
       <SidebarGroup>
         <SidebarGroupLabel
           render={<CollapsibleTrigger />}
-          className="cursor-pointer uppercase tracking-wider text-[10.5px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+          className="cursor-pointer uppercase tracking-wider text-[11px] font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground/90 transition-colors select-none py-1.5"
         >
           {section.group}
-          <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out group-data-open/collapsible:rotate-180" />
+          <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 transition-transform duration-150 ease-out group-data-open/collapsible:rotate-180" />
         </SidebarGroupLabel>
         <CollapsibleContent>
           <SidebarGroupContent>{menu}</SidebarGroupContent>
@@ -204,7 +204,9 @@ function NavMenuRow({
         tooltip={item.label}
       />
       {badge > 0 && (
-        <SidebarMenuBadge>{badge > 99 ? "99+" : badge}</SidebarMenuBadge>
+        <SidebarMenuBadge className="font-mono text-[10px] font-semibold">
+          {badge > 99 ? "99+" : badge}
+        </SidebarMenuBadge>
       )}
     </SidebarMenuItem>
   );

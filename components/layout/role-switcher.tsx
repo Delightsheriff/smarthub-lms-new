@@ -65,7 +65,7 @@ export function RoleSwitcher({ variant = "expanded", className }: Props) {
               title={it.label}
               className={cn("h-8 w-8 rounded-lg", !active && "text-muted-foreground")}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 stroke-[1.75]" />
             </Button>
           );
         })}
@@ -119,15 +119,15 @@ function SlidingSwitch({
             {active && (
               <motion.span
                 layoutId="role-switch-pill"
-                className="absolute inset-0 -z-10 rounded-md bg-primary shadow-sm"
+                className="absolute inset-0 -z-10 rounded-md bg-primary shadow-xs"
                 transition={
                   reduce
                     ? { duration: 0 }
-                    : { type: "spring", duration: 0.3, bounce: 0 }
+                    : { type: "spring", duration: 0.25, bounce: 0 }
                 }
               />
             )}
-            <Icon className="h-4 w-4 shrink-0" />
+            <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
             <span className="truncate">{it.label}</span>
           </button>
         );

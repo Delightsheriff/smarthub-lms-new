@@ -1,18 +1,19 @@
 import {
   Activity,
+  BadgeDollarSign,
   BookOpen,
   Briefcase,
   CalendarDays,
   CircleHelp,
   ClipboardList,
+  Gift,
   Home,
   Inbox,
   Library,
-  Link2,
+  ListTodo,
   PlayCircle,
   Presentation,
   Receipt,
-  Share2,
   Sparkles,
   User,
   Video,
@@ -64,7 +65,7 @@ const STUDENT_MODE_ITEMS: NavItem[] = [
   { label: "Recordings", href: "/recordings", icon: Video, group: "Learning" },
   { label: "Materials", href: "/materials", icon: Library, group: "Learning" },
   { label: "Tasks", href: "/assignments", icon: ClipboardList, group: "Learning" },
-  { label: "Assigned to you", href: "/assigned", icon: Sparkles, group: "Learning" },
+  { label: "Assigned to you", href: "/assigned", icon: ListTodo, group: "Learning" },
   { label: "Billing", href: "/billing", icon: Wallet, group: "Money" },
   { label: "Payments", href: "/payments", icon: Receipt, group: "Money" },
 ];
@@ -107,7 +108,7 @@ export interface NavLearnerShape {
 const INSTRUCTOR_SELF_PACED_NAV_ITEM: NavItem = {
   label: "Self-paced sales",
   href: "/teach/self-paced",
-  icon: Link2,
+  icon: BadgeDollarSign,
   group: "Teaching",
 };
 
@@ -156,7 +157,7 @@ const isReferralEligible = (
 const REFER_AND_EARN_NAV_ITEM: NavItem = {
   label: "Refer & earn",
   href: "/refer-and-earn",
-  icon: Share2,
+  icon: Gift,
 };
 
 export const getNavItemsForMode = (
