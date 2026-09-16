@@ -195,10 +195,11 @@ actual `plans/`/`docs/adr/` directories, before picking a number.**
 | 001–012 | Original porting plans |
 | 013 | Self-Paced Learning |
 | 014 | Navigation chrome redesign (this track) |
+| 015 | Editorial design sync from `smarthub-core-client` (this track) — draft/analysis only, see `plans/015-editorial-design-sync.md` |
 
 Follow-ups mentioned for the self-paced track (access-revocation
 notices, a jobs/career surface, global search) are **not yet files** —
-whoever builds them starts at **015**.
+whoever builds them starts at **016**.
 
 | ADRs taken | Decision |
 |---|---|
