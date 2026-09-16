@@ -84,7 +84,7 @@ export function FilterDropdown({
             "w-full font-medium transition-colors active:scale-[0.98]",
             isActive
               ? "border-primary/50 bg-primary/5 text-primary hover:bg-primary/10"
-              : "bg-background",
+              : "bg-card text-foreground hover:bg-card/90",
           )}
         >
           {isActive && (
