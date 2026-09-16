@@ -1,6 +1,6 @@
 # Home (`/dashboard`) — student + instructor
 
-Status: ✅ Done — instructor dashboard implemented
+Status: ✅ Done — instructor dashboard implemented; editorial greeting rolled out (Plan 016 Slice 2)
 
 ## Current state
 

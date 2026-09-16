@@ -29,6 +29,7 @@ import { DashboardCalendarCard } from "@/modules/calendar/components/DashboardCa
 import { UpcomingDeadlinesPanel } from "@/modules/calendar/components/UpcomingDeadlinesPanel";
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
 import { CourseProgressList } from "@/modules/dashboard/components/CourseProgressList";
+import { PageHeader } from "@/components/layout/page-header";
 import { formatDate, htmlToPlainText } from "@/lib/utils";
 
 /**
@@ -69,20 +70,24 @@ function StudentDashboardBody() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          Hi {firstName} 👋
-        </h1>
-        {!isLoading && (
-          <p className="text-sm text-muted-foreground mt-1">
-            {enrolledCount === 0
+      <PageHeader
+        variant="editorial"
+        eyebrow="Dashboard"
+        title={`Hi, ${firstName}`}
+        description={
+          !isLoading
+            ? enrolledCount === 0
               ? "You're not enrolled in any courses yet."
-              : `${enrolledCount} ${
-                  enrolledCount === 1 ? "course" : "courses"
-                } enrolled · pick up where you left off.`}
-          </p>
-        )}
-      </header>
+              : continueLearning
+                ? `${enrolledCount} ${
+                    enrolledCount === 1 ? "course" : "courses"
+                  } enrolled · pick up where you left off in ${continueLearning.name}.`
+                : `${enrolledCount} ${
+                    enrolledCount === 1 ? "course" : "courses"
+                  } enrolled · pick up where you left off.`
+            : undefined
+        }
+      />
 
       {/* Status nags — each self-gates; the row collapses when nothing's
           outstanding. */}

@@ -148,7 +148,7 @@ content, tables, and forms stay exactly as they are):**
 
 ## 4. Slice checklist
 
-- [ ] Slice 2 — Dashboard hero
+- [x] Slice 2 — Dashboard hero
 - [ ] Slice 3 — Self-paced lesson player + course landing page hero
 - [ ] Slice 4 — Refer & Earn + Tech Scholarship card
 - [ ] Slice 5 — Auth screens
