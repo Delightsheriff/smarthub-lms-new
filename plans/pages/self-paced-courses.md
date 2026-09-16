@@ -1,6 +1,6 @@
 # Self-paced courses (student-facing, `/learn`, `/learn/[slug]`, `/learn/[slug]/lessons/[lessonId]`)
 
-Status: ✅ Creative pass + real fixes done. Catalog filter deferred (see below).
+Status: ✅ Done — editorial landing hero & player typography rolled out (Plan 016 Slice 3). Catalog filter deferred.
 
 ## Legacy comparison
 

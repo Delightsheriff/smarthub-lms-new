@@ -41,7 +41,7 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="space-y-5 -mt-2">
+    <div className="space-y-6 -mt-2 font-sans">
       <Link
         href={SELF_PACED_ROUTES.LIST}
         className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -54,19 +54,23 @@ export function SelfPacedCoursePageContent({ slug }: { slug: string }) {
 
       <SelfPacedNudges courseId={course.id} />
 
-      <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 space-y-5 lg:space-y-0">
-        <div className="min-w-0 space-y-5">
+      <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 space-y-6 lg:space-y-0">
+        <div className="min-w-0 space-y-6">
           {course.overview && (
-            <Card className="p-5">
-              <h2 className="font-semibold mb-2">About this course</h2>
-              <RichText html={course.overview} />
+            <Card className="p-5 space-y-3">
+              <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+                <span className="h-px w-6 bg-accent" aria-hidden />
+                Overview
+              </p>
+              <h2 className="font-display text-xl">About this course</h2>
+              <RichText html={course.overview} className="text-muted-foreground" />
             </Card>
           )}
 
           <Card className="p-0 overflow-hidden">
-            <header className="flex items-center justify-between gap-3 px-4 py-3 border-b">
-              <h2 className="font-semibold">Lessons</h2>
-              <div className="flex items-center gap-2">
+            <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-border">
+              <h2 className="font-display text-xl">Lessons</h2>
+              <div className="flex items-center gap-2.5">
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {course.progress.completedLessons}/{course.progress.totalLessons} done
                 </span>
@@ -184,75 +188,78 @@ function CourseHero({ course }: { course: SelfPacedCourse }) {
       : { label: "Resume", lessonId: next.id };
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <div className="md:grid md:grid-cols-[260px_1fr]">
+    <div className="canvas-warm overflow-hidden rounded-2xl border border-border">
+      <div className="md:grid md:grid-cols-[280px_1fr]">
         <CourseCover
           imageUrl={course.imageUrl}
           name={course.name}
-          sizes="(max-width: 768px) 100vw, 260px"
-          className="h-36 md:h-full"
+          sizes="(max-width: 768px) 100vw, 280px"
+          className="h-44 md:h-full"
         />
-        <div className="p-5 space-y-4">
+        <div className="p-6 md:p-8 flex flex-col justify-between">
           <div>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              <Badge variant="secondary">Self-paced</Badge>
-              {course.difficulty && (
-                <Badge variant="outline" className="capitalize">
-                  {course.difficulty}
-                </Badge>
-              )}
-              {completed && (
-                <Badge variant="success">
-                  Completed
-                </Badge>
-              )}
-            </div>
-            <h1 className="text-xl md:text-2xl font-semibold tracking-tight leading-tight">
+            <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              <span className="h-px w-8 bg-accent" aria-hidden />
+              Self-paced course
+            </p>
+            <h1 className="mt-3 font-display text-2xl leading-[1.08] text-balance md:text-3xl lg:text-4xl text-foreground">
               {course.name}
             </h1>
             {course.description && (
-              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-3">
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {htmlToPlainText(course.description)}
               </p>
             )}
-          </div>
 
-          <div className="space-y-1.5">
-            <Progress value={progress.percent} />
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span>
-                {progress.completedLessons} of {progress.totalLessons} lessons ·{" "}
-                <span className="font-semibold text-primary">{progress.percent}%</span>
-              </span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground mt-4">
+              {course.difficulty && (
+                <span className="inline-flex items-center gap-1.5 capitalize font-medium">
+                  {course.difficulty}
+                </span>
+              )}
               {totalDuration && (
-                <span className="inline-flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
                   {totalDuration} total
                 </span>
               )}
+              <span>
+                {progress.completedLessons} of {progress.totalLessons} lessons ({progress.percent}%)
+              </span>
+              {completed && (
+                <Badge variant="success" className="text-[10px]">
+                  Completed
+                </Badge>
+              )}
             </div>
           </div>
 
-          {cta && (
-            <div className="space-y-1">
-              <Button
-                className="w-full sm:w-auto"
-                variant={completed ? "outline" : "default"}
-                render={
-                  <Link href={SELF_PACED_ROUTES.LESSON(course.slug, cta.lessonId)}>
-                    {cta.label}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                }
-              />
-              {!completed && next && progress.completedLessons > 0 && (
-                <p className="text-xs text-muted-foreground">Up next: {next.title}</p>
-              )}
-            </div>
-          )}
+          <div className="mt-6 space-y-3 pt-2">
+            <Progress value={progress.percent} className="h-1.5" />
+            {cta && (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto"
+                  variant={completed ? "outline" : "default"}
+                  render={
+                    <Link href={SELF_PACED_ROUTES.LESSON(course.slug, cta.lessonId)}>
+                      {cta.label}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  }
+                />
+                {!completed && next && progress.completedLessons > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Up next: <span className="font-medium text-foreground">{next.title}</span>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 

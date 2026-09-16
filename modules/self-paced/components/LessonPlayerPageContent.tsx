@@ -151,7 +151,7 @@ export function LessonPlayerPageContent({
   };
 
   return (
-    <div className="space-y-4 -mt-2">
+    <div className="space-y-4 -mt-2 font-sans">
       <div className="flex items-center justify-between gap-3">
         <Link
           href={courseHref}
@@ -184,9 +184,9 @@ export function LessonPlayerPageContent({
                 </Button>
               }
             />
-            <SheetContent side="left" className="p-0">
+            <SheetContent side="left" className="p-0 font-sans">
               <SheetHeader>
-                <SheetTitle>{course.name}</SheetTitle>
+                <SheetTitle className="font-display">{course.name}</SheetTitle>
               </SheetHeader>
               <div className="overflow-y-auto h-[calc(100dvh-65px)]">
                 <div className="flex items-center justify-between border-b px-4 py-3">
@@ -265,7 +265,7 @@ export function LessonPlayerPageContent({
                 {lesson.durationSeconds > 0 &&
                   ` · ${formatDuration(lesson.durationSeconds)}`}
               </p>
-              <h1 className="text-xl md:text-2xl font-semibold tracking-tight leading-tight mt-1">
+              <h1 className="font-display text-xl md:text-2xl font-semibold tracking-tight leading-tight mt-1">
                 {lesson.title}
               </h1>
             </div>
