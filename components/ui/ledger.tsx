@@ -59,20 +59,25 @@ export function LedgerItem({
   meta,
   when,
   href,
+  onClick,
 }: {
   tone?: keyof typeof DOT_TONE;
   title: ReactNode;
   meta?: ReactNode;
   when?: ReactNode;
   href?: string;
+  onClick?: () => void;
 }) {
-  const Comp = href ? "a" : "div";
+  const interactive = Boolean(href || onClick);
+  const Comp = href ? "a" : onClick ? "button" : "div";
   return (
     <Comp
       href={href}
+      onClick={onClick}
+      type={onClick && !href ? "button" : undefined}
       className={cn(
-        "flex items-baseline gap-2.5 border-t border-border py-[11px] first:border-t-0",
-        href && "-mx-1 rounded-lg px-1 transition-colors hover:bg-muted/50",
+        "flex w-full items-baseline gap-2.5 border-t border-border py-[11px] text-left first:border-t-0",
+        interactive && "-mx-1 rounded-lg px-1 transition-colors hover:bg-muted/50",
       )}
     >
       <span

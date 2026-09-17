@@ -74,7 +74,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <PaymentStatusBanner />
         <main
           className={cn(
-            "mx-auto w-full flex-1 px-4 py-6",
+            // Extra bottom padding below md: BottomNav is `fixed`, so
+            // it doesn't push content up the way static chrome would —
+            // without this, a page's last bit of content renders right
+            // under the nav bar instead of above it.
+            "mx-auto w-full flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 md:pb-6",
             CONTENT_MAX_WIDTH
           )}
         >
