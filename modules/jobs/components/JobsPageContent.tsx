@@ -2,14 +2,12 @@
 import { useMemo, useState } from "react";
 import {
   Briefcase,
-  Building2,
-  ExternalLink,
-  MapPin,
   Search,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pager } from "@/components/ui/pager";
+import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,7 +21,6 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useJobCompanies, useJobs } from "../api/jobs.queries";
-import type { Job } from "../types";
 
 const PAGE_SIZE = 20;
 
@@ -233,18 +230,29 @@ export function JobsPageContent() {
 
       {/* Job list */}
       {!isLoading && jobs.length > 0 && (
-        <Card
-          className={cn(
-            "rounded-2xl border border-border overflow-hidden transition-opacity shadow-sm p-0",
-            isFetching && "opacity-60"
-          )}
-        >
-          <ul className="divide-y divide-border">
-            {jobs.map((job) => (
-              <JobRow key={job._id} job={job} />
+        <div className={cn("transition-opacity", isFetching && "opacity-60")}>
+          <IndexList>
+            {jobs.map((job, idx) => (
+              <IndexRow
+                key={job._id}
+                index={(page - 1) * PAGE_SIZE + idx + 1}
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={job.title}
+                subtitle={[
+                  job.company,
+                  job.location,
+                  job.salary,
+                  postedLabel(job.postedAt),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                status={job.isRemote ? "Remote" : "On-site"}
+              />
             ))}
-          </ul>
-        </Card>
+          </IndexList>
+        </div>
       )}
 
       {meta && (
@@ -256,58 +264,6 @@ export function JobsPageContent() {
         />
       )}
     </div>
-  );
-}
-
-function JobRow({ job }: { job: Job }) {
-  return (
-    <li>
-      <a
-        href={job.url}
-        target="_blank"
-        // The destination is an employer's own careers page, not ours —
-        // noopener/noreferrer so it cannot reach back into this tab.
-        rel="noopener noreferrer"
-        className="flex items-start justify-between gap-3 p-4 sm:p-5 hover:bg-muted/40 transition-colors group"
-      >
-        <div className="flex items-start gap-3.5 min-w-0 flex-1">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <Building2 className="h-4 w-4" />
-          </span>
-          <div className="min-w-0 flex-1 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-mono uppercase tracking-[0.06em] text-muted-foreground font-semibold">
-                {job.company}
-              </span>
-              {job.isRemote && (
-                <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent uppercase tracking-wider">
-                  Remote
-                </span>
-              )}
-            </div>
-            <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug truncate">
-              {job.title}
-            </h3>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground pt-0.5">
-              {job.location && (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
-                  <span className="truncate max-w-[200px]">{job.location}</span>
-                </span>
-              )}
-              {job.salary && (
-                <span className="font-medium text-foreground/80">{job.salary}</span>
-              )}
-              <span>{postedLabel(job.postedAt)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground group-hover:text-foreground shrink-0 self-center">
-          <span className="hidden sm:inline font-medium text-xs">Apply</span>
-          <ExternalLink className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-        </div>
-      </a>
-    </li>
   );
 }
 
