@@ -1,17 +1,28 @@
-# PLAN 003 — Editorial Rollout Phase 1: Core Academic & Learning Surfaces
+# PLAN 003 — Editorial Rollout Phase 1 & 2: Core LMS Surfaces
 
-**Status:** In Progress
+**Status:** Completed
 **Depends on:** `plans/DESIGN-SYSTEM.md`, `plans/002-editorial-rollout-handoff.md`, Plan 001 (reference implementations)
 
 ---
 
-## 1. Scope
+## 1. Scope & Shipped Surfaces
 
-Roll out "The Brief" editorial design language across the core learning surfaces:
-1. **`modules/assignments/components/assignment-list-page-content.tsx`** (Assignments: student & instructor)
-2. **`modules/learning/components/materials-page-content.tsx`** (Materials repository)
-3. **`modules/learning/components/recordings-page-content.tsx`** (Class recordings archive)
-4. **`modules/courses/components/CoursesPageContent.tsx`** (Courses catalog & enrolled views)
+Roll out "The Brief" editorial design language and responsive tablet/mobile integrity across all 15 core surfaces:
+1. **Assignments (`/assignments`)**: HTML tag stripping (`htmlToPlainText`), `xl:grid-cols-3` grid layout preventing tablet squeeze, responsive tabs with horizontal scroll, and wrapped countdown footer (`880f3b9`).
+2. **Materials (`/materials`)**: Editorial masthead, course-grouped `IndexList` with file metadata and download actions (`0f9f208`).
+3. **Recordings (`/recordings`)**: Editorial masthead, next-up hero with direct play trigger, and course-grouped index list (`ca1ba32`).
+4. **Courses (`/courses` & detail)**: Editorial masthead, enrolled course index list, and polished course detail stats responsive layout (`d33a260`, `e596525`).
+5. **Billing (`/billing`)**: Editorial masthead with live total due/paid dynamic metrics (`f663cfb`).
+6. **Jobs (`/jobs`)**: Editorial masthead, responsive filter bar with horizontal scroll, and polished company rows (`8e62e24`).
+7. **Payments & Proofs (`/payments`)**: Editorial masthead, elevated bank credentials, and styled responsive form (`fd44406`).
+8. **Referrals (`/referrals`)**: Editorial masthead with live commission metrics and horizontal tab scroll (`60b8337`).
+9. **Internships (`/internships`)**: Editorial masthead, responsive summary cards grid, and polished task rows (`ccc0aa7`).
+10. **Activity Log (`/activity`)**: Editorial masthead and formatted event totals (`a3c805c`).
+11. **Webinars & Workshops (`/webinars`)**: Editorial masthead, responsive grid, and polished footer padding (`15dac30`).
+12. **Calendar (`/calendar`)**: Editorial masthead and consistent spacing (`8ea4979`).
+13. **Inbox & Messages (`/inbox`)**: Editorial masthead and horizontally scrollable filter tabs (`f5c5849`).
+14. **Profile & Settings (`/profile`)**: Editorial masthead and account creation metadata (`afbe161`).
+15. **Cohort Workspace (`/teach/cohorts/[scheduleId]`)**: Editorial masthead and horizontally scrollable 6-tab navigation (`b559f83`).
 
 ---
 
