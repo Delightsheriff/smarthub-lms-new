@@ -87,7 +87,7 @@ export function IndexRow({
   );
 
   const className =
-    "grid w-full grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
+    "grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
 
   if (href) {
     return (
