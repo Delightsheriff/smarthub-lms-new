@@ -124,16 +124,16 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Briefcase className="h-4 w-4" /> Professional details
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/20 p-5">
+        <CardTitle className="flex items-center gap-2 text-base font-display">
+          <Briefcase className="h-4 w-4 text-primary" /> Professional details
         </CardTitle>
         <CardDescription>
           Shown to students on your instructor profile.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5">
         <form className="grid gap-4" onSubmit={form.handleSubmit(submit)}>
           <div className="grid gap-1.5">
             <Label htmlFor="job-title">Job title</Label>
@@ -142,6 +142,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
               disabled={form.formState.isSubmitting}
               {...form.register("jobTitle")}
               placeholder="e.g. Frontend Engineer"
+              className="rounded-xl"
             />
             {form.formState.errors.jobTitle ? (
               <p className="text-xs text-destructive">
@@ -156,6 +157,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
               disabled={form.formState.isSubmitting}
               {...form.register("department")}
               placeholder="e.g. Engineering"
+              className="rounded-xl"
             />
             {form.formState.errors.department ? (
               <p className="text-xs text-destructive">
@@ -172,6 +174,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
               disabled={form.formState.isSubmitting}
               {...form.register("bio")}
               placeholder="A sentence or two about you."
+              className="rounded-xl"
             />
             {form.formState.errors.bio ? (
               <p className="text-xs text-destructive">
@@ -189,6 +192,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
               disabled={form.formState.isSubmitting}
               {...form.register("altPhone")}
               placeholder="+234…"
+              className="rounded-xl"
             />
             {form.formState.errors.altPhone ? (
               <p className="text-xs text-destructive">
@@ -203,6 +207,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
               disabled={form.formState.isSubmitting}
               {...form.register("timeZone")}
               placeholder="e.g. Africa/Lagos"
+              className="rounded-xl"
             />
             {form.formState.errors.timeZone ? (
               <p className="text-xs text-destructive">
@@ -214,6 +219,7 @@ export function ProfessionalTab({ current }: ProfessionalTabProps) {
             <Button
               type="submit"
               disabled={!hasChanges || form.formState.isSubmitting}
+              className="rounded-xl"
             >
               {form.formState.isSubmitting
                 ? "Saving…"

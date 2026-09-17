@@ -54,25 +54,27 @@ export function AttendancePinSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <KeyRound className="h-4 w-4" /> Attendance PIN
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/20 p-5">
+        <CardTitle className="flex items-center gap-2 text-base font-display">
+          <KeyRound className="h-4 w-4 text-primary" /> Attendance PIN
         </CardTitle>
         <CardDescription>
           Your PIN lets you check in for attendance at on-site sessions. Rotating
           invalidates the previous PIN.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-5 space-y-4">
         {showing ? (
-          <div className="rounded-lg border border-success/30 bg-success/5 p-4">
-            <p className="text-xs text-muted-foreground">Your new PIN (shown once)</p>
+          <div className="rounded-xl border border-success/30 bg-success/5 p-4">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-success">
+              Your new PIN (shown once)
+            </p>
             <div className="mt-1 flex items-center justify-between gap-3">
               <span className="font-mono text-3xl font-bold tracking-widest text-success">
                 {showing.rawPin}
               </span>
-              <Button type="button" size="sm" variant="outline" onClick={copyPin}>
+              <Button type="button" size="sm" variant="outline" onClick={copyPin} className="rounded-xl">
                 {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
@@ -85,7 +87,7 @@ export function AttendancePinSection() {
               : "You haven't rotated a PIN yet."}
           </p>
         )}
-        <Button type="button" variant="outline" onClick={() => setConfirmOpen(true)}>
+        <Button type="button" variant="outline" onClick={() => setConfirmOpen(true)} className="rounded-xl">
           Show / reset PIN
         </Button>
       </CardContent>

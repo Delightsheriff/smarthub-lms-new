@@ -56,17 +56,17 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Lock className="h-4 w-4" /> Change password
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/20 p-5">
+        <CardTitle className="flex items-center gap-2 text-base font-display">
+          <Lock className="h-4 w-4 text-primary" /> Change password
         </CardTitle>
         <CardDescription>
           Update your account password to keep it secure.
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -112,7 +112,7 @@ export function ChangePasswordForm() {
             />
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={changeMutation.isPending}>
+              <Button type="submit" disabled={changeMutation.isPending} className="rounded-xl">
                 <CheckCircle2 className="h-4 w-4" />
                 {changeMutation.isPending ? "Updating…" : "Update password"}
               </Button>

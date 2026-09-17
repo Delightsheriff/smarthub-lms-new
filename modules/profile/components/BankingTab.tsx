@@ -60,21 +60,21 @@ export function BankingTab() {
   const { data, isLoading } = useMyBankingDetails()
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Landmark className="h-4 w-4" /> Banking details
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/20 p-5">
+        <CardTitle className="flex items-center gap-2 text-base font-display">
+          <Landmark className="h-4 w-4 text-primary" /> Banking details
         </CardTitle>
         <CardDescription>
           Used to pay out referral earnings and instructor pay.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5">
         {isLoading ? (
           <div className="grid gap-4">
-            <Skeleton className="h-14 w-full" />
-            <Skeleton className="h-14 w-full" />
-            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
           </div>
         ) : (
           <BankingForm key={data?.updatedAt ?? "empty"} data={data ?? {}} />
@@ -154,6 +154,7 @@ function BankingForm({ data }: { data: BankingDetails }) {
           disabled={form.formState.isSubmitting}
           {...form.register("bankName")}
           placeholder="e.g. GTBank"
+          className="rounded-xl"
         />
         {form.formState.errors.bankName ? (
           <p className="text-xs text-destructive">
@@ -168,6 +169,7 @@ function BankingForm({ data }: { data: BankingDetails }) {
           disabled={form.formState.isSubmitting}
           {...form.register("accountName")}
           placeholder="Account holder name"
+          className="rounded-xl"
         />
         {form.formState.errors.accountName ? (
           <p className="text-xs text-destructive">
@@ -183,6 +185,7 @@ function BankingForm({ data }: { data: BankingDetails }) {
           {...form.register("accountNumber")}
           placeholder="10-digit account number"
           inputMode="numeric"
+          className="rounded-xl"
         />
         {form.formState.errors.accountNumber ? (
           <p className="text-xs text-destructive">
@@ -198,6 +201,7 @@ function BankingForm({ data }: { data: BankingDetails }) {
           disabled={form.formState.isSubmitting}
           {...form.register("payoutEmail")}
           placeholder="you@example.com"
+          className="rounded-xl"
         />
         {form.formState.errors.payoutEmail ? (
           <p className="text-xs text-destructive">
@@ -214,6 +218,7 @@ function BankingForm({ data }: { data: BankingDetails }) {
         <Button
           type="submit"
           disabled={!hasChanges || form.formState.isSubmitting}
+          className="rounded-xl"
         >
           {form.formState.isSubmitting ? "Saving…" : "Save banking details"}
         </Button>

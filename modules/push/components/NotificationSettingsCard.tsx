@@ -18,27 +18,27 @@ export function NotificationSettingsCard() {
   const whatsappActive = prefs?.whatsapp ?? true;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Bell className="h-4 w-4" /> Notification settings
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/20 p-5">
+        <CardTitle className="flex items-center gap-2 text-base font-display">
+          <Bell className="h-4 w-4 text-primary" /> Notification settings
         </CardTitle>
         <CardDescription>
           Manage your notification channels. Critical security & account
           updates are always delivered to your email and in-app bell.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-5 space-y-4">
         {isLoading ? (
-          <>
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </>
+          <div className="space-y-3">
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+          </div>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-4 border-t pt-4">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-start gap-3 min-w-0">
-                <span className="mt-0.5 rounded-full bg-primary/10 p-2 text-primary">
+                <span className="mt-0.5 rounded-xl bg-primary/10 p-2.5 text-primary shrink-0">
                   <Bell className="h-4 w-4" />
                 </span>
                 <div className="min-w-0">
@@ -55,9 +55,9 @@ export function NotificationSettingsCard() {
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 border-t pt-4">
+            <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
               <div className="flex items-start gap-3 min-w-0">
-                <span className="mt-0.5 rounded-full bg-primary/10 p-2 text-primary">
+                <span className="mt-0.5 rounded-xl bg-primary/10 p-2.5 text-primary shrink-0">
                   <MessageCircle className="h-4 w-4" />
                 </span>
                 <div className="min-w-0">

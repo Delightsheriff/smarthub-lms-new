@@ -251,14 +251,14 @@ export default function ProfilePageContent() {
                   {/* Details — every populated field shows; null/missing
                       ones are silently dropped so an incomplete record
                       doesn't leave dashes everywhere. */}
-                  <Card>
-                    <CardHeader className="border-b">
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <UserIcon className="h-4 w-4" /> Personal details
+                  <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden">
+                    <CardHeader className="border-b border-border bg-muted/20 p-5">
+                      <CardTitle className="flex items-center gap-2 text-base font-display">
+                        <UserIcon className="h-4 w-4 text-primary" /> Personal details
                       </CardTitle>
-                      <CardDescription>Your basic account information.</CardDescription>
+                      <CardDescription>Your verified account credentials and identity.</CardDescription>
                     </CardHeader>
-                    <div className="divide-y">
+                    <div className="divide-y divide-border">
                     <Row icon={Mail} label="Email" value={user?.email} />
                     {/* Always shown, unlike the optional fields below —
                         every enrolled student has (or will have) a
@@ -273,23 +273,17 @@ export default function ProfilePageContent() {
                     {user?.phone && (
                       <Row icon={Phone} label="Phone" value={user.phone} />
                     )}
-                    <div className="flex items-center gap-4 p-4">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                        <UserIcon className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                          Gender
-                        </p>
-                        <p className="text-sm font-medium truncate">
-                          {user?.gender || (
-                            <span className="text-muted-foreground italic">
-                              Not set
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </div>
+                    <Row
+                      icon={UserIcon}
+                      label="Gender"
+                      value={
+                        user?.gender || (
+                          <span className="text-muted-foreground italic font-normal">
+                            Not set
+                          </span>
+                        )
+                      }
+                    />
                     {(() => {
                       // country / state arrive as `{ isoCode, name }` from
                       // smarthub-api (or plain strings on legacy accounts).
@@ -415,18 +409,18 @@ function Row({
 }: {
   icon: React.ElementType;
   label: string;
-  value: string | undefined;
+  value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-4 p-4">
-      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+    <div className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/20">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground">
         <Icon className="h-4 w-4" />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
           {label}
         </p>
-        <p className="text-sm font-medium truncate">{value || "—"}</p>
+        <p className="text-sm font-medium text-foreground truncate">{value || "—"}</p>
       </div>
     </div>
   );

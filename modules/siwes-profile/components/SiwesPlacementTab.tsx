@@ -20,7 +20,7 @@ export function SiwesPlacementTab() {
 
   if (isLoading) {
     return (
-      <Card className="p-4 md:p-5">
+      <Card className="rounded-2xl border border-border bg-card shadow-xs p-5">
         <p className="text-sm text-muted-foreground">Loading…</p>
       </Card>
     );
@@ -28,7 +28,7 @@ export function SiwesPlacementTab() {
 
   if (!data || data.length === 0) {
     return (
-      <Card className="p-4 md:p-5">
+      <Card className="rounded-2xl border border-border bg-card shadow-xs p-5">
         <p className="text-sm text-muted-foreground">
           No SIWES placement on file.
         </p>
@@ -56,16 +56,16 @@ function SiwesRegistrationCard({ row }: { row: SiwesRegistration }) {
   const value = row.siwesDurationMonths;
 
   return (
-    <Card className="p-4 md:p-5 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+    <Card className="rounded-2xl border border-border bg-card shadow-xs p-5 flex flex-col gap-3">
+      <div className="flex items-start gap-3.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground">
           <GraduationCap className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
             School / institution
           </p>
-          <p className="text-sm font-medium truncate">{schoolLabel}</p>
+          <p className="text-sm font-medium truncate text-foreground">{schoolLabel}</p>
         </div>
       </div>
 
