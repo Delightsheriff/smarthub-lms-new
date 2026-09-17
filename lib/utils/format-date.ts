@@ -1,15 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-export function formatPrice(n: number | undefined | null): string {
-  if (typeof n !== "number" || !isFinite(n)) return "—";
-  return `₦${n.toLocaleString("en-NG")}`;
-}
-
 export function formatDate(
   input: Date | string | undefined,
   format: "short" | "long" = "short",
@@ -106,18 +94,12 @@ export function timeAgo(input: Date | string | undefined | null): string {
   return formatDate(d);
 }
 
-export function htmlToPlainText(html: string | undefined | null): string {
-  if (!html) return "";
-  return html
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/(p|div|h[1-6]|li)>/gi, " ")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
+/** Days between `input` and now, floor-rounded to whole days (negative = past). */
+export function daysUntil(input: Date | string | undefined | null): number {
+  if (!input) return NaN;
+  const d = typeof input === "string" ? new Date(input) : input;
+  if (isNaN(d.getTime())) return NaN;
+  const startOfDay = (x: Date) =>
+    new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  return Math.round((startOfDay(d) - startOfDay(new Date())) / (24 * 60 * 60 * 1000));
 }
