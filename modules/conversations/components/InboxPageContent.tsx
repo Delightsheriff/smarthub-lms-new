@@ -98,7 +98,7 @@ export function InboxPageContent() {
           {!isLoading && !error && (
             <>
               {filtered.length > 0 ? (
-                <div className="space-y-2.5 max-h-[580px] overflow-y-auto pr-1 scrollbar-none">
+                <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border max-h-[580px] overflow-y-auto scrollbar-none shadow-xs">
                   {filtered.map((conv) => (
                     <ConversationListItemRow
                       key={conv.id}

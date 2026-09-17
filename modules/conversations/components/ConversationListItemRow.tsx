@@ -46,10 +46,10 @@ export function ConversationListItemRow({
     <div
       onClick={onSelect}
       className={cn(
-        "p-3 rounded-2xl border transition-all cursor-pointer space-y-2 select-none",
+        "p-3.5 transition-colors cursor-pointer space-y-2 select-none",
         isActive
-          ? "border-primary bg-primary/5 shadow-xs"
-          : "border-border bg-card hover:bg-muted/40",
+          ? "bg-primary/10 border-l-2 border-l-primary"
+          : "hover:bg-muted/40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
