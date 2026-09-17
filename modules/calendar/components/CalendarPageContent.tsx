@@ -142,16 +142,31 @@ export function CalendarPageContent() {
     return !hiddenScopes.has(scopeKey);
   });
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="container max-w-6xl py-8 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Calendar"
+        divider
+        dateline={`${dateline} · Academic Schedule`}
         title="Academic Calendar"
-        description="Class sessions, assignment deadlines, office hours, and academic events."
+        description={
+          events && events.length > 0 ? (
+            <>
+              Live sessions, assignment deadlines, and milestones.{" "}
+              <strong className="text-foreground">{events.length}</strong> event{events.length === 1 ? "" : "s"} scheduled for this period.
+            </>
+          ) : (
+            "Class sessions, assignment deadlines, office hours, and academic events."
+          )
+        }
         actions={
-          <div className="flex items-center gap-2">
-            <RefreshButton loading={isFetching} onClick={() => refetch()} />
+          <div className="flex flex-wrap items-center gap-2">
             <Tabs value={viewMode} onValueChange={(v) => handleViewChange(v as ViewMode)}>
               <TabsList className="rounded-xl bg-muted/60 p-1">
                 <TabsTrigger value="month" className="rounded-lg text-xs">Month</TabsTrigger>
@@ -160,6 +175,7 @@ export function CalendarPageContent() {
                 <TabsTrigger value="agenda" className="rounded-lg text-xs">Agenda</TabsTrigger>
               </TabsList>
             </Tabs>
+            <RefreshButton loading={isFetching} onClick={() => refetch()} />
           </div>
         }
       />
