@@ -26,9 +26,9 @@ export default function CourseLayout({
   params,
 }: {
   children: ReactNode;
-  params: Promise<any>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = use(params) as { slug: string };
+  const { slug } = use(params);
   const { data, isLoading } = useCourseBySlug(slug);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
