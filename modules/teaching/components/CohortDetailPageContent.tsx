@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
@@ -66,56 +65,51 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
 
       {!isLoading && cohort && (
         <>
-          {/* Cohort Workspace Header Card */}
-          <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-                    {cohort.course.name}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    ID: {cohort.id}
-                  </Badge>
-                </div>
-                <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                  Cohort Workspace — {cohort.course.name}
-                </h1>
-                <p className="text-xs text-muted-foreground flex items-center gap-2">
-                  <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>Started {formatDate(cohort.startDate)}</span>
-                  <span>· {cohort.studentCount} Students Enrolled</span>
-                </p>
-              </div>
+          <PageHeader
+            variant="editorial"
+            divider
+            dateline={`${formatDate(cohort.startDate)} · Cohort Workspace`}
+            title={cohort.course.name}
+            description={
+              <>
+                Instructor cohort workspace.{" "}
+                <strong className="text-foreground">{cohort.studentCount}</strong> students enrolled
+                {" · "}
+                <strong className="text-foreground">{cohort.modules.length}</strong> syllabus modules.
+              </>
+            }
+            actions={
               <RefreshButton
                 loading={isFetching || isRefreshing}
                 onClick={handleRefresh}
               />
-            </div>
-          </Card>
+            }
+          />
 
           {/* 6 Tabs Workspace Shell */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="rounded-xl bg-muted/60 p-1 w-full justify-start overflow-x-auto flex-nowrap">
-              <TabsTrigger value="overview" className="rounded-lg text-xs">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="modules" className="rounded-lg text-xs">
-                Modules ({cohort.modules.length})
-              </TabsTrigger>
-              <TabsTrigger value="assignments" className="rounded-lg text-xs">
-                Assignments & Schedules
-              </TabsTrigger>
-              <TabsTrigger value="submissions" className="rounded-lg text-xs">
-                Submissions & Grading
-              </TabsTrigger>
-              <TabsTrigger value="sessions" className="rounded-lg text-xs">
-                Live Sessions & Attendance
-              </TabsTrigger>
-              <TabsTrigger value="roster" className="rounded-lg text-xs">
-                Student Roster ({cohort.studentCount})
-              </TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
+              <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
+                <TabsTrigger value="overview" className="rounded-lg text-xs">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="modules" className="rounded-lg text-xs">
+                  Modules ({cohort.modules.length})
+                </TabsTrigger>
+                <TabsTrigger value="assignments" className="rounded-lg text-xs">
+                  Assignments & Schedules
+                </TabsTrigger>
+                <TabsTrigger value="submissions" className="rounded-lg text-xs">
+                  Submissions & Grading
+                </TabsTrigger>
+                <TabsTrigger value="sessions" className="rounded-lg text-xs">
+                  Live Sessions & Attendance
+                </TabsTrigger>
+                <TabsTrigger value="roster" className="rounded-lg text-xs">
+                  Student Roster ({cohort.studentCount})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="overview">
               <CohortOverviewTab cohort={cohort} />
