@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterBar, FilterDropdown } from "@/components/ui/filter-dropdown";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useCourses } from "../api/courses.queries";
@@ -40,7 +41,7 @@ const TEACH_STATUS_FILTERS = [
  *  only its private cohorts and a course with no match drops out
  *  entirely — matches legacy's InstructorCoursesBody filtering model. */
 function InstructorCoursesBody() {
-  const { data: cohorts, isLoading, error } = useTeachingCohorts();
+  const { data: cohorts, isLoading, isFetching, error, refetch } = useTeachingCohorts();
   const [q, setQ] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
   const [privacyFilter, setPrivacyFilter] = useState("all");
@@ -61,13 +62,36 @@ function InstructorCoursesBody() {
   });
   const grouped = groupCohortsByCourse(filtered);
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const totalCohorts = cohorts?.length ?? 0;
+  const activeCohorts = grouped.active.reduce((acc, g) => acc + g.cohorts.length, 0);
+
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Teaching"
-        title="Courses"
-        description="Every cohort you teach, grouped by course."
+        divider
+        dateline={`${dateline} · Teaching Space`}
+        title="Teaching Cohorts"
+        description={
+          !isLoading ? (
+            totalCohorts === 0 ? (
+              "You're not leading any active cohorts yet."
+            ) : (
+              <>
+                <strong className="text-foreground">{activeCohorts}</strong> active{" "}
+                {activeCohorts === 1 ? "cohort" : "cohorts"} across{" "}
+                <strong className="text-foreground">{grouped.active.length}</strong>{" "}
+                {grouped.active.length === 1 ? "course" : "courses"}.
+              </>
+            )
+          ) : undefined
+        }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       <FilterBar>
@@ -171,9 +195,18 @@ function StudentCoursesBody() {
   const [filter, setFilter] = useState<Filter>("all");
   const [modeFilter, setModeFilter] = useState<string>("all");
   const [kindFilter, setKindFilter] = useState<string>("all");
-  const { data: courses, isLoading } = useCourses();
+  const { data: courses, isLoading, isFetching, refetch } = useCourses();
 
-  const visible: Course[] = (courses || []).filter((c) => {
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const allCourses = courses || [];
+  const activeCount = allCourses.filter((c) => c.status === "in-progress").length;
+  const completedCount = allCourses.filter((c) => c.status === "completed").length;
+
+  const visible: Course[] = allCourses.filter((c) => {
     const statusMatch =
       filter === "all"
         ? true
@@ -190,9 +223,27 @@ function StudentCoursesBody() {
     <div className="space-y-6 font-sans">
       <PageHeader
         variant="editorial"
-        eyebrow="Learning"
-        title="Your courses"
-        description="Pick up where you left off, or jump into a new module."
+        divider
+        dateline={dateline}
+        title="Your Courses"
+        description={
+          !isLoading ? (
+            allCourses.length === 0 ? (
+              "You're not enrolled in any courses yet. Check back once your enrollment is confirmed."
+            ) : (
+              <>
+                <strong className="text-foreground">{activeCount}</strong> active {activeCount === 1 ? "course" : "courses"} in progress
+                {completedCount > 0 && (
+                  <>
+                    {" "}
+                    · <strong className="text-foreground">{completedCount}</strong> completed
+                  </>
+                )}
+              </>
+            )
+          ) : undefined
+        }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       <FilterBar>
