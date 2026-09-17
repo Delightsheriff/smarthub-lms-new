@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -115,46 +115,47 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
             }
           />
 
-          {/* Roster Marking Table */}
-          <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <h3 className="font-display text-base font-semibold text-foreground">
-                Student Attendance Roster
-              </h3>
-            </div>
+          {/* Roster Marking Ledger */}
+          <Ledger title="Student Attendance Roster" count={rows.length}>
+            {rows.map((row) => {
+              const override = localOverrides.get(row.studentId);
+              const markStatus = override?.status ?? row.status ?? "absent";
+              const markNote = override?.note ?? row.note ?? "";
 
-            <div className="space-y-3">
-              {rows.map((row) => {
-                const override = localOverrides.get(row.studentId);
-                const markStatus = override?.status ?? row.status ?? "absent";
-                const markNote = override?.note ?? row.note ?? "";
+              const toneByStatus: Record<AttendanceStatus, "live" | "due" | "info"> = {
+                present: "live",
+                late: "due",
+                absent: "info",
+                excused: "info",
+              };
 
-                return (
-                  <div
-                    key={row.studentId}
-                    className="p-3.5 rounded-xl border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                  >
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-foreground block text-sm">
-                        {row.firstName} {row.lastName}
-                      </span>
-                      <span className="text-muted-foreground">{row.email}</span>
+              return (
+                <LedgerControlItem
+                  key={row.studentId}
+                  tone={toneByStatus[markStatus]}
+                  title={
+                    <span className="font-semibold text-foreground">
+                      {row.firstName} {row.lastName}
+                    </span>
+                  }
+                  meta={
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{row.email}</span>
                       {row.source && (
-                        <div className="pt-0.5">
-                          <Badge variant="outline" className="text-[10px]">
-                            Source: {row.source}
-                          </Badge>
-                        </div>
+                        <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-[0.05em] py-0 px-1.5 h-4">
+                          Source: {row.source}
+                        </Badge>
                       )}
                     </div>
-
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  }
+                  actions={
+                    <div className="flex w-full sm:w-auto items-center gap-2">
                       {/* Status Selector */}
                       <Select
                         value={markStatus}
                         onValueChange={(v) => handleStatusChange(row.studentId, v as AttendanceStatus)}
                       >
-                        <SelectTrigger className="w-32 rounded-xl text-xs bg-background">
+                        <SelectTrigger className="w-28 sm:w-32 rounded-xl text-xs bg-background">
                           <SelectValue>
                             {(v: string) => ATTENDANCE_STATUS_OPTIONS.find((s) => s.value === v)?.label ?? v}
                           </SelectValue>
@@ -174,14 +175,14 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
                         onChange={(e) => handleNoteChange(row.studentId, e.target.value)}
                         placeholder="Optional note..."
                         rows={1}
-                        className="w-full sm:w-48 rounded-xl text-xs resize-none py-1.5"
+                        className="flex-1 sm:w-48 rounded-xl text-xs resize-none py-1.5"
                       />
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+                  }
+                />
+              );
+            })}
+          </Ledger>
         </>
       )}
     </div>

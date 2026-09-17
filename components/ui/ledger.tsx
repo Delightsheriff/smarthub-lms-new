@@ -131,6 +131,69 @@ export function LedgerItem({
   );
 }
 
+/**
+ * A Ledger item with interactive inline controls (selects, inputs, buttons)
+ * in its trailing slot rather than a read-only timestamp. Used for rosters,
+ * bulk actions, and editable entries.
+ */
+export function LedgerControlItem({
+  tone = "info",
+  icon: Icon,
+  iconClassName,
+  title,
+  meta,
+  actions,
+  className,
+}: {
+  tone?: keyof typeof DOT_TONE;
+  icon?: LucideIcon;
+  iconClassName?: string;
+  title: ReactNode;
+  meta?: ReactNode;
+  actions: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col justify-between gap-3 border-t border-border py-3 text-left first:border-t-0 sm:flex-row sm:items-center",
+        className,
+      )}
+    >
+      <div className="flex min-w-0 flex-1 items-start gap-2.5">
+        {Icon ? (
+          <span
+            className={cn(
+              "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+              iconClassName ?? "bg-muted text-muted-foreground",
+            )}
+          >
+            <Icon className="h-4 w-4" />
+          </span>
+        ) : (
+          <span
+            className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", DOT_TONE[tone])}
+            aria-hidden
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] font-medium leading-snug text-foreground">
+            {title}
+          </div>
+          {meta && (
+            <div className="mt-0.5 text-[11.5px] text-muted-foreground">
+              {meta}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
+        {actions}
+      </div>
+    </div>
+  );
+}
+
 const RULE_TONE = {
   due: "bg-warning",
   accent: "bg-primary",
