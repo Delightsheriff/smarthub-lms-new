@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { BookOpen, GraduationCap } from "lucide-react";
-import { CourseCard } from "./CourseCard";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { FilterBar, FilterDropdown } from "@/components/ui/filter-dropdown";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
-import { Stagger, StaggerItem } from "@/components/animation/stagger";
+import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useCourses } from "../api/courses.queries";
 import { useTeachingCohorts } from "@/modules/teaching/api/teaching.queries";
@@ -268,10 +267,10 @@ function StudentCoursesBody() {
       </FilterBar>
 
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
+        <div className="space-y-3">
+          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-14 w-full rounded-xl" />
         </div>
       )}
 
@@ -284,13 +283,25 @@ function StudentCoursesBody() {
       )}
 
       {!isLoading && visible.length > 0 && (
-        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((c) => (
-            <StaggerItem key={c.id}>
-              <CourseCard course={c} />
-            </StaggerItem>
+        <IndexList>
+          {visible.map((c, idx) => (
+            <IndexRow
+              key={c.id}
+              index={idx + 1}
+              href={`/courses/${c.slug}`}
+              title={c.name}
+              subtitle={[c.mode, c.courseKind === "foundation" ? "Foundation" : null].filter(Boolean).join(" · ")}
+              progress={c.progress ?? undefined}
+              status={
+                c.status === "completed"
+                  ? "Completed"
+                  : c.status === "in-progress"
+                    ? "In progress"
+                    : undefined
+              }
+            />
           ))}
-        </Stagger>
+        </IndexList>
       )}
     </div>
   );

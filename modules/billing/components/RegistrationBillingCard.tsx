@@ -1,15 +1,16 @@
 "use client";
+import { useState } from "react";
 import {
   Calendar,
   CheckCircle2,
+  ChevronDown,
   Clock,
   GraduationCap,
-  Receipt,
   Tag,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
 import type { BillingRegistrationCard, PaymentStatus } from "../types";
 
@@ -63,23 +64,17 @@ const STATUS_LABEL: Record<PaymentStatus, string> = {
 };
 
 /**
- * Per-registration card: course meta, payment posture, history.
- * One card per Registration row the student has on the platform.
+ * Per-registration row in the billing IndexList — expandable inline
+ * to reveal the stats and payment history Ledger. No separate detail
+ * view exists, so the row expands in place.
  */
 export function RegistrationBillingCard({ registration: r }: Props) {
+  const [expanded, setExpanded] = useState(false);
   const statusTone = STATUS_TONE[r.paymentStatus] || "border-border text-muted-foreground";
   const statusLabel = STATUS_LABEL[r.paymentStatus] || r.paymentStatus;
-  // A waiver covers everything from the student's perspective — they
-  // owe nothing and have full access. Treat it the same as paid-in-
-  // full so the "Remaining / progress bar / instalment plan" UI
-  // stops nagging them about a balance they aren't expected to clear.
   const isWaived = r.paymentStatus === "waived";
   const fullyPaid =
     isWaived || (r.remainingAmount <= 0 && r.totalAmount > 0);
-
-  // Presence (> 0) toggles every discount-related bit of UI. The
-  // API only sends these fields when an admin has actually applied
-  // one, so this check stays clean across fresh / legacy rows.
   const hasDiscount = !!r.discountAmount && r.discountAmount > 0;
   const discountLabel =
     r.discountKind === "percent" && typeof r.discountValue === "number"
@@ -90,119 +85,133 @@ export function RegistrationBillingCard({ registration: r }: Props) {
   const reasonLabel = formatReason(r.discountReason);
 
   return (
-    <Card className="space-y-5 p-5 md:p-6 rounded-2xl border border-border bg-card shadow-sm">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1">
-          <Badge variant="secondary" className="mb-1">
-            <GraduationCap className="mr-1 h-3 w-3" />
-            {r.courseMode || "course"}
-          </Badge>
-          <h3 className="truncate font-display text-lg font-semibold leading-tight text-foreground">
-            {r.courseName}
-          </h3>
-          <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3" />
-            {r.cohortLabel}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <Badge variant="outline" className={cn(statusTone)}>
-            {fullyPaid && <CheckCircle2 className="mr-1 h-3 w-3" />}
-            {statusLabel}
-          </Badge>
-          {hasDiscount && (
-            <Badge
-              variant="default"
-              className="border-accent/30 bg-accent/15 text-accent"
-            >
-              <Tag className="mr-1 h-3 w-3" />
-              {reasonLabel}
-              {discountLabel ? ` · ${discountLabel}` : ""}
-            </Badge>
-          )}
-        </div>
-      </header>
+    <div className="border-b border-border">
+      {/* IndexList-style row header */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center gap-4 py-4 text-left hover:bg-muted/30 transition-colors"
+      >
+        {/* Mode badge as narrow icon */}
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <GraduationCap className="h-4 w-4" />
+        </span>
 
-      <div className="grid gap-3 text-xs sm:grid-cols-3">
-        <Stat
-          label="Total quoted"
-          value={formatPrice(r.totalAmount)}
-          struckThrough={
-            hasDiscount && r.coursePrice && r.coursePrice > r.totalAmount
-              ? formatPrice(r.coursePrice)
-              : undefined
-          }
-        />
-        <Stat
-          label="Paid"
-          value={formatPrice(r.paidAmount)}
-          tone={fullyPaid ? "success" : undefined}
-        />
-        <Stat
-          label="Remaining"
-          value={isWaived ? formatPrice(0) : formatPrice(r.remainingAmount)}
-          tone={
-            isWaived
-              ? "success"
-              : r.remainingAmount > 0
-                ? "warning"
-                : undefined
-          }
-        />
-      </div>
-
-      {hasDiscount && r.discountNote && (
-        <p className="-mt-2 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Note:</span>{" "}
-          {r.discountNote}
-        </p>
-      )}
-
-      {!fullyPaid && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">
-              Plan:{" "}
-              {r.paymentOption === "installment" ? "Instalments" : "One-time"}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-display font-semibold text-sm text-foreground truncate">
+              {r.courseName}
             </span>
-            <span className="font-bold tabular-nums">{r.paymentProgress}%</span>
+            <Badge variant="outline" className={cn("text-[10px]", statusTone)}>
+              {fullyPaid && <CheckCircle2 className="mr-1 h-3 w-3" />}
+              {statusLabel}
+            </Badge>
+            {hasDiscount && (
+              <Badge variant="default" className="border-accent/30 bg-accent/15 text-accent text-[10px]">
+                <Tag className="mr-1 h-3 w-3" />
+                {reasonLabel}{discountLabel ? ` · ${discountLabel}` : ""}
+              </Badge>
+            )}
           </div>
-          <Progress value={r.paymentProgress} />
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+            <Calendar className="h-3 w-3" />
+            <span>{r.cohortLabel}</span>
+            <span className="font-mono">·</span>
+            <span>{formatPrice(r.paidAmount)} paid</span>
+            {!fullyPaid && r.remainingAmount > 0 && (
+              <>
+                <span className="font-mono">·</span>
+                <span className="text-warning font-medium">{formatPrice(r.remainingAmount)} remaining</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Progress indicator */}
+        {!fullyPaid && (
+          <span className="hidden sm:block font-mono text-[10px] tabular-nums text-muted-foreground shrink-0">
+            {r.paymentProgress}%
+          </span>
+        )}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-muted-foreground shrink-0 transition-transform",
+            expanded && "rotate-180"
+          )}
+        />
+      </button>
+
+      {/* Expanded detail panel */}
+      {expanded && (
+        <div className="pb-5 space-y-4">
+          {/* Stats row */}
+          <div className="grid gap-3 text-xs sm:grid-cols-3">
+            <Stat
+              label="Total quoted"
+              value={formatPrice(r.totalAmount)}
+              struckThrough={
+                hasDiscount && r.coursePrice && r.coursePrice > r.totalAmount
+                  ? formatPrice(r.coursePrice)
+                  : undefined
+              }
+            />
+            <Stat
+              label="Paid"
+              value={formatPrice(r.paidAmount)}
+              tone={fullyPaid ? "success" : undefined}
+            />
+            <Stat
+              label="Remaining"
+              value={isWaived ? formatPrice(0) : formatPrice(r.remainingAmount)}
+              tone={
+                isWaived
+                  ? "success"
+                  : r.remainingAmount > 0
+                    ? "warning"
+                    : undefined
+              }
+            />
+          </div>
+
+          {hasDiscount && r.discountNote && (
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Note:</span>{" "}
+              {r.discountNote}
+            </p>
+          )}
+
+          {!fullyPaid && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Plan:{" "}
+                  {r.paymentOption === "installment" ? "Instalments" : "One-time"}
+                </span>
+                <span className="font-bold tabular-nums">{r.paymentProgress}%</span>
+              </div>
+              <Progress value={r.paymentProgress} />
+            </div>
+          )}
+
+          {/* Payment history as Ledger */}
+          <Ledger
+            title="Payment history"
+            count={r.payments.length}
+            empty="No payments recorded yet."
+          >
+            {r.payments.map((p) => (
+              <LedgerItem
+                key={p.id}
+                icon={Clock}
+                iconClassName="bg-muted text-muted-foreground"
+                title={formatPrice(p.amount)}
+                when={formatDate(p.paidAt, "long")}
+              />
+            ))}
+          </Ledger>
         </div>
       )}
-
-      <div className="space-y-2">
-        <h4 className="inline-flex items-center gap-1.5 text-sm font-semibold">
-          <Receipt className="h-3.5 w-3.5" />
-          Payment history
-          <span className="text-xs font-normal text-muted-foreground">
-            ({r.payments.length})
-          </span>
-        </h4>
-        {r.payments.length === 0 ? (
-          <p className="py-2 text-xs text-muted-foreground">
-            No payments recorded yet.
-          </p>
-        ) : (
-          <ul className="divide-y rounded-xl border bg-card">
-            {r.payments.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center justify-between gap-3 px-4 py-2.5"
-              >
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {formatDate(p.paidAt, "long")}
-                </span>
-                <span className="text-sm font-semibold tabular-nums">
-                  {formatPrice(p.amount)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </Card>
+    </div>
   );
 }
 

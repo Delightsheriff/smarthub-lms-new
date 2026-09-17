@@ -77,7 +77,9 @@ export function BillingPageContent() {
 
           <section className="space-y-4">
             <h2 className="font-display text-lg font-semibold text-foreground">Per course</h2>
-            <div className="space-y-4">
+            {/* IndexList-style container — each RegistrationBillingCard
+                renders as an expandable hairline row */}
+            <div className="border-t border-border">
               {data.registrations.map((r) => (
                 <RegistrationBillingCard key={r.id} registration={r} />
               ))}
