@@ -2,13 +2,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Clock, Receipt, Share2, Wallet } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
+import { StatTile } from "@/components/ui/stat-tile";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, formatPrice } from "@/lib/utils";
 import {
@@ -249,24 +250,27 @@ export function ReferralsPanel() {
 
       {tab === "earnings" && (
         <section className="space-y-4">
-          <div className="grid grid-cols-1 divide-y divide-border rounded-2xl border border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatTile
-              icon={Clock}
+              icon={<Clock className="h-4 w-4" />}
               label="Pending"
-              amount={totals.pendingNaira}
-              hint="Awaiting payment"
+              value={formatPrice(totals.pendingNaira)}
+              caption="Awaiting payment"
+              tone="warning"
             />
             <StatTile
-              icon={Wallet}
+              icon={<Wallet className="h-4 w-4" />}
               label="Earned"
-              amount={totals.earnedNaira}
-              hint="Ready or in clawback"
+              value={formatPrice(totals.earnedNaira)}
+              caption="Ready or in clawback"
+              tone="accent"
             />
             <StatTile
-              icon={CheckCircle2}
+              icon={<CheckCircle2 className="h-4 w-4" />}
               label="Paid"
-              amount={totals.paidNaira}
-              hint="Withdrawn to bank"
+              value={formatPrice(totals.paidNaira)}
+              caption="Withdrawn to bank"
+              tone="success"
             />
           </div>
           <p className="text-xs text-muted-foreground">
@@ -288,9 +292,7 @@ export function ReferralsPanel() {
             description="Share your link to get started."
           />
         ) : (
-          <Card className="overflow-hidden p-0">
-            <LedgerTable records={records} />
-          </Card>
+          <ReferralLedger records={records} />
         )
       )}
 
@@ -303,31 +305,6 @@ export function ReferralsPanel() {
           cancelPayout={cancelPayout}
         />
       )}
-    </div>
-  );
-}
-
-function StatTile({
-  icon: Icon,
-  label,
-  amount,
-  hint,
-}: {
-  icon: React.ElementType;
-  label: string;
-  amount: number;
-  hint?: string;
-}) {
-  return (
-    <div className="p-5">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        <Icon className="h-3.5 w-3.5 text-accent" />
-        <span>{label}</span>
-      </div>
-      <p className="mt-2 font-display text-2xl md:text-3xl tabular-nums leading-tight text-foreground">
-        {formatPrice(amount)}
-      </p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -413,19 +390,17 @@ function PayoutsTab({
           description="Requests you make will show up here."
         />
       ) : (
-        <Card className="overflow-hidden p-0">
-          <PayoutsTable
-            items={payouts.data.items}
-            onCancel={(id) => cancelPayout.mutate(id)}
-            isCancelling={cancelPayout.isPending}
-          />
-        </Card>
+        <PayoutsLedger
+          items={payouts.data.items}
+          onCancel={(id) => cancelPayout.mutate(id)}
+          isCancelling={cancelPayout.isPending}
+        />
       )}
     </section>
   );
 }
 
-function PayoutsTable({
+function PayoutsLedger({
   items,
   onCancel,
   isCancelling,
@@ -435,157 +410,102 @@ function PayoutsTable({
   isCancelling: boolean;
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-border text-sm">
-        <thead className="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <tr>
-            <th className="px-5 py-3 sm:px-6">Amount</th>
-            <th className="px-5 py-3 sm:px-6">Bank</th>
-            <th className="px-5 py-3 sm:px-6">Status</th>
-            <th className="px-5 py-3 sm:px-6">Requested</th>
-            <th className="px-5 py-3 sm:px-6">Processed</th>
-            <th className="px-5 py-3 sm:px-6">Action</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border bg-card">
-          {items.map((item) => (
-            <tr key={item._id}>
-              <td className="px-5 py-3 font-bold tabular-nums text-foreground sm:px-6">
+    <Ledger title="Payout requests" count={items.length}>
+      {items.map((item) => (
+        <LedgerControlItem
+          key={item._id}
+          icon={Receipt}
+          title={
+            <div className="flex items-center gap-2">
+              <span className="font-bold tabular-nums">
                 {formatPrice(item.totalAmount)}
-              </td>
-              <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                {item.bankSnapshot.bankName}
-              </td>
-              <td className="px-5 py-3 sm:px-6">
-                <StatusBadge status={item.status} />
-              </td>
-              <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                {formatRelative(item.createdAt)}
-              </td>
-              <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                {formatRelative(item.processedAt)}
-              </td>
-              <td className="px-5 py-3 sm:px-6">
-                {item.status === "pending" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={isCancelling}
-                    onClick={() => onCancel(item._id)}
-                  >
-                    Cancel
-                  </Button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              </span>
+              <StatusBadge status={item.status} />
+            </div>
+          }
+          meta={
+            <span>
+              {item.bankSnapshot.bankName} · Requested {formatRelative(item.createdAt)}
+              {item.processedAt ? ` · Processed ${formatRelative(item.processedAt)}` : ""}
+            </span>
+          }
+          actions={
+            item.status === "pending" ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-lg text-xs"
+                disabled={isCancelling}
+                onClick={() => onCancel(item._id)}
+              >
+                Cancel
+              </Button>
+            ) : null
+          }
+        />
+      ))}
+    </Ledger>
   );
 }
 
-function LedgerTable({ records }: { records: ReferralRecord[] }) {
+function ReferralLedger({ records }: { records: ReferralRecord[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-border text-sm">
-        <thead className="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <tr>
-            <th className="px-5 py-3 sm:px-6">Referee</th>
-            <th className="px-5 py-3 sm:px-6">Course</th>
-            <th className="px-5 py-3 sm:px-6">Rate</th>
-            <th className="px-5 py-3 sm:px-6">Amount</th>
-            <th className="px-5 py-3 sm:px-6">Status</th>
-            <th className="px-5 py-3 sm:px-6">Date</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border bg-card">
-          {records.map((r) => {
-            const fullName =
-              [r.referred?.firstName, r.referred?.lastName]
-                .filter(Boolean)
-                .join(" ") || "Anonymous";
-            return (
-              <tr key={r._id}>
-                <td className="px-5 py-3 sm:px-6">
-                  <div className="flex items-center gap-2.5">
-                    <Avatar size="sm">
-                      <AvatarFallback>
-                        {fullName.slice(0, 1).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <div className="font-medium text-foreground">{fullName}</div>
-                      {r.referred?.email && (
-                        <div className="text-xs text-muted-foreground">
-                          {r.referred.email}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                  {(typeof r.registration?.course === "object"
-                    ? r.registration?.course?.name
-                    : r.registration?.course) || "—"}
-                </td>
-                <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                  {(() => {
-                    const earned = Number(r.amount) || 0;
-                    const rate =
-                      typeof r.commission === "number" && earned > 0
-                        ? Math.round((r.commission / earned) * 100)
-                        : null;
-                    return rate !== null ? `${rate}%` : "—";
-                  })()}
-                </td>
-                <td className="px-5 py-3 font-medium tabular-nums text-foreground sm:px-6">
-                  {(() => {
-                    const earned = Number(r.amount) || 0;
-                    const potential = Number(r.potentialAmount) || 0;
-                    if (earned > 0 && potential > 0 && potential > earned) {
-                      return (
-                        <span className="text-sm">
-                          <span className="font-semibold text-success">
-                            {formatPrice(earned)}
-                          </span>{" "}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            of {formatPrice(potential)}
-                          </span>
-                        </span>
-                      );
-                    }
-                    if (earned > 0) return formatPrice(earned);
-                    if (potential > 0) {
-                      return (
-                        <span className="text-sm">
-                          <span className="text-xs font-normal italic text-muted-foreground">
-                            Potential
-                          </span>{" "}
-                          <span className="font-semibold">
-                            {formatPrice(potential)}
-                          </span>
-                        </span>
-                      );
-                    }
-                    return (
-                      <span className="text-xs font-normal italic text-muted-foreground">
-                        awaiting payment
-                      </span>
-                    );
-                  })()}
-                </td>
-                <td className="px-5 py-3 sm:px-6">
-                  <StatusBadge status={r.status} />
-                </td>
-                <td className="px-5 py-3 text-muted-foreground sm:px-6">
-                  {formatRelative(r.registration?.createdAt || r.createdAt)}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <Ledger title="Referral records" count={records.length}>
+      {records.map((r) => {
+        const fullName =
+          [r.referred?.firstName, r.referred?.lastName]
+            .filter(Boolean)
+            .join(" ") || "Anonymous";
+        const courseName =
+          (typeof r.registration?.course === "object"
+            ? r.registration?.course?.name
+            : r.registration?.course) || "—";
+        const earned = Number(r.amount) || 0;
+        const potential = Number(r.potentialAmount) || 0;
+        const amountDisplay =
+          earned > 0 && potential > 0 && potential > earned ? (
+            <span>
+              <span className="font-semibold text-success">{formatPrice(earned)}</span>{" "}
+              <span className="text-xs font-normal text-muted-foreground">of {formatPrice(potential)}</span>
+            </span>
+          ) : earned > 0 ? (
+            formatPrice(earned)
+          ) : potential > 0 ? (
+            <span>
+              <span className="text-xs font-normal italic text-muted-foreground">Potential</span>{" "}
+              <span className="font-semibold">{formatPrice(potential)}</span>
+            </span>
+          ) : (
+            <span className="italic text-muted-foreground">awaiting payment</span>
+          );
+
+        return (
+          <LedgerControlItem
+            key={r._id}
+            icon={Share2}
+            title={
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold">{fullName}</span>
+                <span className="text-muted-foreground font-normal">· {courseName}</span>
+              </div>
+            }
+            meta={
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-foreground">{amountDisplay}</span>
+                <span>·</span>
+                <span>{formatRelative(r.registration?.createdAt || r.createdAt)}</span>
+                {r.referred?.email && (
+                  <>
+                    <span>·</span>
+                    <span>{r.referred.email}</span>
+                  </>
+                )}
+              </div>
+            }
+            actions={<StatusBadge status={r.status} />}
+          />
+        );
+      })}
+    </Ledger>
   );
 }
