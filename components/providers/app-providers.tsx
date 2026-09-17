@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "./query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SocketProvider } from "@/lib/socket/socket-provider";
@@ -24,7 +24,7 @@ export function AppProviders({
         <QueryProvider>
           <SocketProvider>
             {children}
-            <Toaster position="top-right" richColors closeButton theme="system" />
+            <Toaster />
           </SocketProvider>
         </QueryProvider>
       </ThemeProvider>
