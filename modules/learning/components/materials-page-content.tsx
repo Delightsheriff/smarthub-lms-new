@@ -9,7 +9,6 @@ import {
   Link as LinkIcon,
   Notebook,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -64,6 +63,18 @@ export function MaterialsPageContent() {
 
   const groups = useMemo(() => groupByCourse(visible), [visible]);
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  const totalFiles = rows.filter((r) => !!r.material.fileUrl).length;
+  const totalGuides = rows.filter(
+    (r) => !r.material.fileUrl && !!r.material.description,
+  ).length;
+  const courseCount = groups.length;
+
   const openPreview = (m: Material) => {
     if (!m.fileUrl) return;
     trackDownload.mutate(m.id);
@@ -74,22 +85,46 @@ export function MaterialsPageContent() {
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Learning"
-        title="Materials"
-        description="Every course material and guide available to you, in one place."
-         actions={
-           <>
-           <RefreshButton loading={isFetching} onClick={refetch} />
-           <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-            <TabsList className="rounded-xl bg-muted/60 p-1">
-              {FILTERS.map((f) => (
-                <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
-                  {f.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-           </Tabs>
-           </>
+        divider
+        dateline={dateline}
+        title="Course Materials"
+        description={
+          !isLoading ? (
+            rows.length === 0 ? (
+              "Course readings, handouts, and guides will appear here as modules unlock."
+            ) : (
+              <>
+                <strong className="text-foreground">{rows.length}</strong> resources across{" "}
+                <strong className="text-foreground">{courseCount}</strong> {courseCount === 1 ? "course" : "courses"}
+                {totalFiles > 0 && (
+                  <>
+                    {" "}
+                    · <strong className="text-foreground">{totalFiles}</strong> {totalFiles === 1 ? "file" : "files"}
+                  </>
+                )}
+                {totalGuides > 0 && (
+                  <>
+                    {" "}
+                    · <strong className="text-foreground">{totalGuides}</strong> {totalGuides === 1 ? "guide" : "guides"}
+                  </>
+                )}
+              </>
+            )
+          ) : undefined
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <RefreshButton loading={isFetching} onClick={refetch} />
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+              <TabsList className="rounded-xl bg-muted/60 p-1">
+                {FILTERS.map((f) => (
+                  <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
+                    {f.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
         }
       />
 
@@ -114,37 +149,38 @@ export function MaterialsPageContent() {
 
       {!isLoading &&
         groups.map((g) => (
-          <section key={g.course.id} className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <span
-                className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm"
-                style={{ backgroundColor: g.course.color || "var(--primary)" }}
-              />
-              <Link
-                href={`/courses/${g.course.slug}`}
-                className="font-display text-base font-semibold hover:text-accent transition-colors"
-              >
-                {g.course.name}
-              </Link>
-              <span className="text-xs text-muted-foreground font-sans">
-                {g.items.length} item{g.items.length === 1 ? "" : "s"}
+          <section key={g.course.id} className="space-y-2">
+            <div className="flex items-baseline justify-between border-b border-border pb-2.5 pt-3">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm"
+                  style={{ backgroundColor: g.course.color || "var(--primary)" }}
+                />
+                <Link
+                  href={`/courses/${g.course.slug}`}
+                  className="font-display text-lg font-semibold text-foreground hover:text-accent transition-colors"
+                >
+                  {g.course.name}
+                </Link>
+              </div>
+              <span className="font-mono text-xs text-muted-foreground">
+                {g.items.length} {g.items.length === 1 ? "resource" : "resources"}
               </span>
             </div>
 
-            <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
-              <ul className="divide-y divide-border">
-                {g.items.map((row) => {
-                  const m = row.material;
-                  const Icon = MATERIAL_ICON[m.type];
-                  const hasFile = !!m.fileUrl;
-                  const hasBody = !!m.description;
-                  const instructionsOnly = !hasFile && hasBody;
-                  const expanded = expandedId === m.id;
-                  return (
-                    <li key={m.id}>
-                      <Button
-                        type="button"
-                        variant="ghost"
+            <ul className="divide-y divide-border border-b border-border">
+              {g.items.map((row) => {
+                const m = row.material;
+                const Icon = MATERIAL_ICON[m.type];
+                const hasFile = !!m.fileUrl;
+                const hasBody = !!m.description;
+                const instructionsOnly = !hasFile && hasBody;
+                const expanded = expandedId === m.id;
+                return (
+                  <li key={m.id} className="transition-colors hover:bg-muted/30">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 py-3.5">
+                      <div
+                        className="flex flex-1 items-start sm:items-center gap-3 min-w-0 cursor-pointer"
                         onClick={() => {
                           if (instructionsOnly) {
                             setExpandedId(expanded ? null : m.id);
@@ -152,14 +188,12 @@ export function MaterialsPageContent() {
                             openPreview(m);
                           }
                         }}
-                        disabled={!hasFile && !instructionsOnly}
-                        className="flex h-auto items-center gap-3 w-full justify-start px-4 py-3 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-muted/40"
                       >
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                           <Icon className="h-4 w-4" />
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                        <div className="min-w-0 flex-1">
+                          <span className="block font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground truncate">
                             {row.module.order != null
                               ? `Module ${row.module.order
                                   .toString()
@@ -167,63 +201,69 @@ export function MaterialsPageContent() {
                               : ""}
                             {row.module.title}
                           </span>
-                          <span className="block text-sm font-medium leading-tight">
+                          <span className="block text-sm font-medium leading-snug text-foreground">
                             {m.title}
                           </span>
-                          <span className="block text-xs text-muted-foreground mt-0.5">
-                            {m.size || (instructionsOnly ? "Guide" : null)}
+                          <span className="block font-mono text-xs text-muted-foreground mt-0.5">
+                            {m.size || (instructionsOnly ? "Reading guide" : null)}
                           </span>
-                        </span>
-                        {hasFile ? (
-                          <Eye className="h-4 w-4 text-muted-foreground shrink-0" />
-                        ) : instructionsOnly ? (
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground shrink-0">
-                            {expanded ? "Hide" : "Read"}
-                          </span>
-                        ) : null}
-                      </Button>
-
-                      {hasBody && (instructionsOnly ? expanded : true) && (
-                        <div className="border-t border-border bg-muted/20 px-4 py-3">
-                          <CollapsibleRichText
-                            html={m.description}
-                            maxHeight={instructionsOnly ? 9999 : 88}
-                          />
-                          {hasFile && (
-                            <div className="mt-3 flex gap-2">
-                              <Button
-                                type="button"
-                                variant="link"
-                                size="sm"
-                                className="h-auto p-0 text-xs"
-                                onClick={() => openPreview(m)}
-                              >
-                                <Eye className="h-3 w-3" /> Preview
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground"
-                                onClick={() => {
-                                  void downloadFile(
-                                    m.fileUrl,
-                                    m.title,
-                                    m.fileType,
-                                  );
-                                }}
-                              >
-                                <ExternalLink className="h-3 w-3" /> Download
-                              </Button>
-                            </div>
-                          )}
                         </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </Card>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pl-12 sm:pl-0">
+                        {hasFile ? (
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 rounded-lg px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={() => openPreview(m)}
+                            >
+                              <Eye className="mr-1 h-3.5 w-3.5" /> Preview
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 rounded-lg px-2.5 text-xs"
+                              onClick={() => {
+                                void downloadFile(
+                                  m.fileUrl,
+                                  m.title,
+                                  m.fileType,
+                                );
+                              }}
+                            >
+                              <ExternalLink className="mr-1 h-3.5 w-3.5" /> Download
+                            </Button>
+                          </div>
+                        ) : instructionsOnly ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-lg px-3 text-xs font-medium"
+                            onClick={() => setExpandedId(expanded ? null : m.id)}
+                          >
+                            {expanded ? "Hide guide" : "Read guide"}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {hasBody && (instructionsOnly ? expanded : false) && (
+                      <div className="border-t border-border bg-muted/20 px-4 py-3.5 sm:px-6">
+                        <CollapsibleRichText
+                          html={m.description}
+                          maxHeight={instructionsOnly ? 9999 : 88}
+                        />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         ))}
 
