@@ -33,24 +33,45 @@ export function InboxPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConv?.id]);
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="container max-w-6xl py-8 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Inbox"
+        divider
+        dateline={`${dateline} · Student Communications`}
         title="Inbox & Messages"
-        description="Direct messages, cohort announcements, course discussions, and instructor support."
-         actions={
-           <><RefreshButton loading={isFetching} onClick={refetch} /><Tabs value={typeFilter} onValueChange={setTypeFilter}>
-            <TabsList className="rounded-xl bg-muted/60 p-1 flex-wrap">
-              <TabsTrigger value="all" className="rounded-lg text-xs">All</TabsTrigger>
-              <TabsTrigger value="direct" className="rounded-lg text-xs">Direct</TabsTrigger>
-              <TabsTrigger value="group" className="rounded-lg text-xs">Group</TabsTrigger>
-              <TabsTrigger value="assignment" className="rounded-lg text-xs">Assignments</TabsTrigger>
-              <TabsTrigger value="announcement" className="rounded-lg text-xs">Announcements</TabsTrigger>
-              <TabsTrigger value="support" className="rounded-lg text-xs">Support</TabsTrigger>
-            </TabsList>
-           </Tabs></>
+        description={
+          conversations && conversations.length > 0 ? (
+            <>
+              Direct messages, cohort announcements, and instructor support.{" "}
+              <strong className="text-foreground">{conversations.length}</strong> active thread{conversations.length === 1 ? "" : "s"}.
+            </>
+          ) : (
+            "Direct messages, cohort announcements, course discussions, and instructor support."
+          )
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="overflow-x-auto pb-0.5 max-w-full -mx-1 px-1">
+              <Tabs value={typeFilter} onValueChange={setTypeFilter}>
+                <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
+                  <TabsTrigger value="all" className="rounded-lg text-xs">All</TabsTrigger>
+                  <TabsTrigger value="direct" className="rounded-lg text-xs">Direct</TabsTrigger>
+                  <TabsTrigger value="group" className="rounded-lg text-xs">Group</TabsTrigger>
+                  <TabsTrigger value="assignment" className="rounded-lg text-xs">Assignments</TabsTrigger>
+                  <TabsTrigger value="announcement" className="rounded-lg text-xs">Announcements</TabsTrigger>
+                  <TabsTrigger value="support" className="rounded-lg text-xs">Support</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            <RefreshButton loading={isFetching} onClick={refetch} />
+          </div>
         }
       />
 
