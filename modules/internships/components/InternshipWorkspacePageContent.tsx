@@ -18,6 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
+import { StatTile } from "@/components/ui/stat-tile";
 import {
   Dialog,
   DialogContent,
@@ -186,21 +188,24 @@ export function InternshipWorkspacePageContent() {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <PlacementSummaryCard
-          title="Mentor"
-          detail={internship.mentor.name}
+        <StatTile
+          label="Mentor"
+          value={internship.mentor.name}
           icon={<UserRound className="h-4 w-4" />}
+          tone="primary"
         />
-        <PlacementSummaryCard
-          title="Mentor contact"
-          detail={internship.mentor.email}
+        <StatTile
+          label="Mentor contact"
+          value={<span className="text-sm truncate block font-normal">{internship.mentor.email}</span>}
           icon={<Mail className="h-4 w-4" />}
+          tone="neutral"
         />
-        <PlacementSummaryCard
-          title="Placement window"
-          detail={`${formatDate(internship.startDate)} – ${formatDate(internship.endDate)}`}
-          sub={`${tasks.filter((t) => t.status === "done").length} of ${tasks.length} tasks done`}
+        <StatTile
+          label="Placement window"
+          value={<span className="text-sm truncate block">{formatDate(internship.startDate)} – {formatDate(internship.endDate)}</span>}
+          caption={`${tasks.filter((t) => t.status === "done").length} of ${tasks.length} tasks completed`}
           icon={<CalendarDays className="h-4 w-4" />}
+          tone="accent"
         />
       </div>
 
@@ -211,42 +216,14 @@ export function InternshipWorkspacePageContent() {
   );
 }
 
-function PlacementSummaryCard({
-  title,
-  detail,
-  sub,
-  icon,
-}: {
-  title: string;
-  detail?: string;
-  sub?: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card className="p-4">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1.5">
-        <span className="text-primary">{icon}</span>
-        {title}
-      </p>
-      <p className="mt-1 text-sm font-semibold truncate">{detail || "—"}</p>
-      {sub && (
-        <p className="text-xs text-muted-foreground truncate mt-0.5">{sub}</p>
-      )}
-    </Card>
-  );
-}
-
 function TaskListSection({ tasks }: { tasks: ApiInternshipTask[] }) {
   if (tasks.length === 0) return null;
   return (
-    <section className="space-y-3">
-      <h2 className="font-semibold text-foreground">Tasks</h2>
-      <Card className="p-0 divide-y divide-border rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        {tasks.map((task) => (
-          <TaskRow key={task._id} task={task} />
-        ))}
-      </Card>
-    </section>
+    <Ledger title="Tasks" count={tasks.length}>
+      {tasks.map((task) => (
+        <TaskRow key={task._id} task={task} />
+      ))}
+    </Ledger>
   );
 }
 
@@ -258,81 +235,80 @@ function TaskRow({ task }: { task: ApiInternshipTask }) {
     await mutation.mutateAsync({ taskId: task._id, ...input });
   };
 
+  const isDone = task.status === "done";
+  const isSubmitted = task.status === "submitted";
+  const Icon = isDone ? FileCheck2 : FlaskConical;
+  const iconTone = isDone
+    ? "text-success bg-success/10"
+    : isSubmitted
+      ? "text-info bg-info/10"
+      : "text-primary bg-primary/10";
+
   return (
-    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-        <span
-          className={
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl " +
-            (task.status === "done"
-              ? "bg-success/10 text-success"
-              : task.status === "submitted"
-                ? "bg-info/10 text-info"
-                : "bg-primary/10 text-primary")
-          }
-        >
-          {task.status === "done" ? (
-            <FileCheck2 className="h-4 w-4" />
-          ) : (
-            <FlaskConical className="h-4 w-4" />
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-tight text-foreground truncate">{task.title}</p>
-          {task.description && (
-            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-              {task.description}
-            </p>
-          )}
-          {task.dueDate && (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Due {formatDate(task.dueDate)}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-center">
-        <Badge variant="outline" className={"normal-case text-xs " + TASK_STATUS_STYLES[task.status]}>
-          {task.status.replace("_", " ")}
-        </Badge>
-        {task.status === "todo" && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-xl"
-            disabled={mutation.isPending}
-            onClick={() => progress({ status: "in_progress" })}
-          >
-            Start
-          </Button>
-        )}
-        {task.status === "in_progress" && (
-          <Button
-            size="sm"
-            className="rounded-xl bg-primary text-primary-foreground font-semibold"
-            disabled={mutation.isPending}
-            onClick={() => setSubmitOpen(true)}
-          >
-            Submit
-          </Button>
-        )}
-        {task.status === "submitted" && task.submissionUrl && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-xl"
-            render={<a href={task.submissionUrl} target="_blank" rel="noreferrer" />}
-          >
-            <ArrowUpRight className="h-3.5 w-3.5 mr-1" />
-            View
-          </Button>
-        )}
-        {task.status === "done" && task.reviewNotes && (
-          <p className="text-xs text-muted-foreground max-w-xs truncate">
-            {task.reviewNotes}
-          </p>
-        )}
-      </div>
+    <>
+      <LedgerControlItem
+        icon={Icon}
+        iconClassName={iconTone}
+        title={
+          <div>
+            <div className="font-semibold text-foreground text-sm leading-tight truncate">
+              {task.title}
+            </div>
+            {task.description && (
+              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1 font-normal">
+                {task.description}
+              </p>
+            )}
+          </div>
+        }
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            {task.dueDate && <span>Due {formatDate(task.dueDate)}</span>}
+            {isDone && task.reviewNotes && (
+              <span className="truncate max-w-xs text-muted-foreground">· Note: {task.reviewNotes}</span>
+            )}
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className={"normal-case text-xs " + TASK_STATUS_STYLES[task.status]}>
+              {task.status.replace("_", " ")}
+            </Badge>
+            {task.status === "todo" && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl h-7 text-xs"
+                disabled={mutation.isPending}
+                onClick={() => progress({ status: "in_progress" })}
+              >
+                Start
+              </Button>
+            )}
+            {task.status === "in_progress" && (
+              <Button
+                size="sm"
+                className="rounded-xl bg-primary text-primary-foreground font-semibold h-7 text-xs"
+                disabled={mutation.isPending}
+                onClick={() => setSubmitOpen(true)}
+              >
+                Submit
+              </Button>
+            )}
+            {task.status === "submitted" && task.submissionUrl && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl h-7 text-xs"
+                render={<a href={task.submissionUrl} target="_blank" rel="noreferrer" />}
+              >
+                <ArrowUpRight className="h-3.5 w-3.5 mr-1" />
+                View
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {task.status === "in_progress" && (
         <SubmitTaskDialog
@@ -342,7 +318,7 @@ function TaskRow({ task }: { task: ApiInternshipTask }) {
           pending={mutation.isPending}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -460,53 +436,54 @@ function CheckInsSection({
   };
 
   return (
-    <section className="space-y-3">
-      <header className="flex items-center justify-between">
-        <h2 className="font-semibold">Check-ins</h2>
-        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-          <Send className="h-3.5 w-3.5 mr-1.5" />
-          New check-in
-        </Button>
-      </header>
-
-      {checkIns.length === 0 ? (
-        <Card className="p-6 text-center text-sm text-muted-foreground">
-          No check-ins yet this placement.
-        </Card>
-      ) : (
-        <Card className="p-0 divide-y">
-          {checkIns.map((ci) => (
-            <div key={ci._id} className="p-4 gap-3 flex flex-col sm:flex-row sm:items-start">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <CircleDot className="h-4 w-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3 flex-wrap">
-                  <p className="text-sm font-semibold">
-                    {ci.weekOf || "Weekly check-in"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {ci.submittedAt ? formatDate(ci.submittedAt) : ""}
-                    {ci.hoursLogged ? ` · ${ci.hoursLogged}h logged` : ""}
-                  </p>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{ci.summary}</p>
+    <>
+      <Ledger
+        title="Check-ins"
+        count={checkIns.length}
+        actions={
+          <Button size="sm" variant="outline" className="rounded-xl h-7 text-xs" onClick={() => setOpen(true)}>
+            <Send className="h-3.5 w-3.5 mr-1.5" />
+            New check-in
+          </Button>
+        }
+        empty="No check-ins yet this placement."
+      >
+        {checkIns.map((ci) => (
+          <LedgerControlItem
+            key={ci._id}
+            icon={CircleDot}
+            iconClassName="bg-primary/10 text-primary"
+            title={
+              <div>
+                <span className="font-semibold text-sm text-foreground">
+                  {ci.weekOf || "Weekly check-in"}
+                </span>
+                <p className="mt-1 text-xs text-muted-foreground font-normal leading-relaxed">
+                  {ci.summary}
+                </p>
                 {ci.blockers && (
-                  <p className="mt-1 text-xs text-warning">
+                  <p className="mt-1 text-xs text-warning font-normal">
                     Blockers: {ci.blockers}
                   </p>
                 )}
                 {ci.mentorFeedback && (
-                  <p className="mt-2 rounded-lg bg-accent/50 px-3 py-2 text-sm">
-                    <span className="font-semibold">Mentor: </span>
+                  <p className="mt-2 rounded-lg bg-accent/30 px-3 py-2 text-xs font-normal">
+                    <span className="font-semibold text-foreground">Mentor: </span>
                     {ci.mentorFeedback}
                   </p>
                 )}
               </div>
-            </div>
-          ))}
-        </Card>
-      )}
+            }
+            meta={null}
+            actions={
+              <span className="text-xs text-muted-foreground font-mono">
+                {ci.submittedAt ? formatDate(ci.submittedAt) : ""}
+                {ci.hoursLogged ? ` · ${ci.hoursLogged}h logged` : ""}
+              </span>
+            }
+          />
+        ))}
+      </Ledger>
 
       <CheckInDialog
         open={open}
@@ -514,7 +491,7 @@ function CheckInsSection({
         onSubmit={submit}
         pending={mutation.isPending}
       />
-    </section>
+    </>
   );
 }
 
