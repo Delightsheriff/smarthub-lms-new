@@ -80,14 +80,34 @@ export function OreoPageContent() {
     }
   };
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="flex h-[calc(100dvh-8.5rem)] flex-col">
+    <div className="flex h-[calc(100dvh-8.5rem)] flex-col space-y-4">
       <PageHeader
         variant="editorial"
-        eyebrow="AI Assistant"
-        className="mb-4"
+        divider
+        dateline={`${dateline} · AI Knowledge Assistant`}
         title="Ask Oreo"
-        description="Your courses, fees, attendance, schedule and internship — ask anything."
+        description={
+          usage.data ? (
+            usage.data.unlimited ? (
+              <>
+                Your personal LMS guide. <strong className="text-foreground">Unlimited</strong> queries enabled.
+              </>
+            ) : (
+              <>
+                Your personal LMS guide. <strong className="text-foreground">{usage.data.tokensLeft.toLocaleString()}</strong> tokens available this cycle.
+              </>
+            )
+          ) : (
+            "Your courses, fees, attendance, schedule, and internship — ask anything."
+          )
+        }
         actions={
           <Button
             size="sm"
@@ -102,43 +122,55 @@ export function OreoPageContent() {
         }
       />
 
-      <div className="mb-3 flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
-        {usage.data ? (
-          usage.data.unlimited
-            ? "Unlimited usage this month"
-            : `${usage.data.tokensUsed.toLocaleString()} used · ${usage.data.tokensLeft.toLocaleString()} left`
-        ) : (
-          "Usage meter…"
-        )}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-3.5 py-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-accent shrink-0" />
+          <span>
+            {usage.data ? (
+              usage.data.unlimited ? (
+                "Unlimited AI usage tier active"
+              ) : (
+                <>
+                  <strong className="text-foreground font-mono">{usage.data.tokensUsed.toLocaleString()}</strong> tokens used ·{" "}
+                  <strong className="text-foreground font-mono">{usage.data.tokensLeft.toLocaleString()}</strong> tokens remaining
+                </>
+              )
+            ) : (
+              "Checking usage quota…"
+            )}
+          </span>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80 hidden sm:inline">
+          LMS Grounded
+        </span>
       </div>
 
       <MessageScrollerProvider autoScroll defaultScrollPosition="end">
         <MessageScroller className="min-h-0 flex-1 rounded-2xl border border-border bg-card shadow-sm">
           <MessageScrollerViewport>
-            <MessageScrollerContent className="p-4">
+            <MessageScrollerContent className="p-4 sm:p-6">
               {turns.length === 0 && !pending && (
-                <div className="space-y-6 pt-2">
+                <div className="space-y-6 pt-4">
                   <div className="mx-auto max-w-md text-center">
-                    <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <Bot className="h-6 w-6" />
+                    <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-xs">
+                      <Bot className="h-7 w-7" />
                     </span>
-                    <p className="mt-3 font-display text-xl font-semibold text-foreground">What do you want to know?</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Try one of the prompts below to get a real answer.
+                    <p className="mt-4 font-display text-xl sm:text-2xl font-semibold text-foreground">What do you want to know?</p>
+                    <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground">
+                      Ask about your upcoming deadlines, grades, timetable, or pick a prompt below.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2">
+                  <div className="flex flex-wrap justify-center gap-2.5 max-w-2xl mx-auto">
                     {suggestions.map((s) => (
                       <Button
                         key={s.prompt}
                         size="sm"
                         variant="outline"
-                        className="rounded-xl"
+                        className="rounded-xl border-border bg-background hover:border-primary/50 hover:bg-muted/40 transition-all text-xs"
                         onClick={() => void submit(s.prompt)}
                         disabled={ask.isPending}
                       >
-                        <CircleHelp className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                        <CircleHelp className="h-3.5 w-3.5 mr-1.5 text-accent" />
                         {s.prompt}
                       </Button>
                     ))}
