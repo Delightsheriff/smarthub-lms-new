@@ -6,15 +6,13 @@ import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
-  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils";
 import { useStudentCalendar } from "../api/calendar.queries";
@@ -296,51 +294,57 @@ export function CalendarPageContent() {
           )}
 
           {viewMode === "agenda" && (
-            <div className="space-y-3">
-              {filteredEvents.length > 0 ? (
-                filteredEvents
+            filteredEvents.length > 0 ? (
+              <Ledger
+                title={`Upcoming in the next ${agendaWindow} days`}
+                count={filteredEvents.length}
+              >
+                {filteredEvents
                   .sort((a, b) => a.start.getTime() - b.start.getTime())
-                  .map((event) => (
-                    <Card
-                      key={event.id}
-                      onClick={() => handleEventClick(event)}
-                      className="rounded-2xl border bg-card hover:border-primary/40 transition-colors cursor-pointer shadow-xs"
-                    >
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div className="space-y-1">
+                  .map((event) => {
+                    const tone: "due" | "live" | "info" =
+                      event.type === "class-session"
+                        ? "live"
+                        : event.type === "assignment"
+                          ? "due"
+                          : "info";
+
+                    return (
+                      <LedgerItem
+                        key={event.id}
+                        tone={tone}
+                        title={
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {event.typeLabel}
-                            </Badge>
-                            <span className="font-semibold text-sm text-foreground">
+                            <span className="font-semibold text-foreground text-sm">
                               {event.title}
                             </span>
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                              · {event.typeLabel}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5 text-primary" />
-                              <span>{formatDateTime(event.start.toISOString())}</span>
-                            </div>
-                            {event.courseName && (
-                              <span>· {event.courseName}</span>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-              ) : (
-                <EmptyState
-                  icon={CalendarRange}
-                  title="Nothing in this window"
-                  description={
-                    viewMode === "agenda"
-                      ? `No events in the next ${agendaWindow} days. Try a wider window.`
-                      : "No events found for the selected view."
-                  }
-                />
-              )}
-            </div>
+                        }
+                        meta={
+                          event.courseName ? (
+                            <span>{event.courseName}</span>
+                          ) : null
+                        }
+                        when={formatDateTime(event.start.toISOString())}
+                        onClick={() => handleEventClick(event)}
+                      />
+                    );
+                  })}
+              </Ledger>
+            ) : (
+              <EmptyState
+                icon={CalendarRange}
+                title="Nothing in this window"
+                description={
+                  viewMode === "agenda"
+                    ? `No events in the next ${agendaWindow} days. Try a wider window.`
+                    : "No events found for the selected view."
+                }
+              />
+            )
           )}
         </>
       )}
