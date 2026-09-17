@@ -57,8 +57,8 @@ export function InboxPageContent() {
           )
         }
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="overflow-x-auto pb-0.5 max-w-full -mx-1 px-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <div className="min-w-0 overflow-x-auto pb-0.5 max-w-full -mx-1 px-1">
               <Tabs value={typeFilter} onValueChange={setTypeFilter}>
                 <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
                   <TabsTrigger value="all" className="rounded-lg text-xs">All</TabsTrigger>
