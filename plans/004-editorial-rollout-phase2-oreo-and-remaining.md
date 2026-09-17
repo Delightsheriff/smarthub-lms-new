@@ -1,6 +1,6 @@
 # PLAN 004 — Editorial Modernization: Oreo AI & Final Unmigrated Surfaces
 
-**Status:** Proposed (Awaiting User Review)
+**Status:** Completed
 **Owner:** SmartHub Design System ("The Brief" rollout phase 2)
 **Depends on:** `plans/DESIGN-SYSTEM.md`, `plans/002-editorial-rollout-handoff.md`, `plans/003-editorial-rollout-phase1.md`
 
