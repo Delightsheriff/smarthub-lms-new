@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Award } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDate } from "@/lib/utils";
 import { useCohortAssignments, useUpdateAssignmentSchedule } from "../api/teaching.queries";
 
@@ -34,43 +34,45 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
       )}
 
       {!isLoading && assignments && assignments.length > 0 ? (
-        <div className="space-y-3">
+        <Ledger title="Assignments" count={assignments.length}>
           {assignments.map((asgn) => (
-            <Card key={asgn.attachmentId} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
-              <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Award className="h-4 w-4" />
-                    </div>
-                    <h4 className="font-display font-semibold text-sm text-foreground">{asgn.title}</h4>
-                    {asgn.module && (
-                      <Badge variant="outline" className="text-[10px]">
-                        {asgn.module}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>Due: {asgn.dueDate ? formatDate(asgn.dueDate) : "No due date"}</span>
-                    <span>· {asgn.submissionCount} {asgn.submissionCount === 1 ? "Submission" : "Submissions"}</span>
-                    <span>· {asgn.pendingCount} Pending {asgn.pendingCount === 1 ? "Grade" : "Grades"}</span>
-                  </div>
+            <LedgerControlItem
+              key={asgn.attachmentId}
+              icon={Award}
+              iconClassName="bg-primary/10 text-primary"
+              title={
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm text-foreground">{asgn.title}</span>
+                  {asgn.module && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {asgn.module}
+                    </Badge>
+                  )}
                 </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="text-[11px]">Visible to students</span>
-                    <Switch
-                      checked={asgn.isVisible ?? true}
-                      onCheckedChange={() => handleToggleVisibility(asgn.attachmentId, !!asgn.isVisible)}
-                    />
-                  </div>
+              }
+              meta={
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span>Due: {asgn.dueDate ? formatDate(asgn.dueDate) : "No due date"}</span>
+                  <span>·</span>
+                  <span>{asgn.submissionCount} {asgn.submissionCount === 1 ? "Submission" : "Submissions"}</span>
+                  <span>·</span>
+                  <span className={asgn.pendingCount > 0 ? "text-warning font-medium" : ""}>
+                    {asgn.pendingCount} Pending {asgn.pendingCount === 1 ? "Grade" : "Grades"}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              }
+              actions={
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-muted-foreground">Visible to students</span>
+                  <Switch
+                    checked={asgn.isVisible ?? true}
+                    onCheckedChange={() => handleToggleVisibility(asgn.attachmentId, !!asgn.isVisible)}
+                  />
+                </div>
+              }
+            />
           ))}
-        </div>
+        </Ledger>
       ) : !isLoading ? (
         <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
           No assignments attached to this cohort schedule yet.

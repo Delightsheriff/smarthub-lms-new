@@ -3,10 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { Video, CheckCircle2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDateTime } from "@/lib/utils";
 import { useStudentCalendar } from "@/modules/calendar/api/calendar.queries";
 
@@ -29,46 +29,45 @@ export function CohortSessionsTab({ scheduleId }: CohortSessionsTabProps) {
         </div>
       )}
 
-      {!isLoading && sessions.length > 0 ? (
-        <div className="space-y-3">
+      {!isLoading && (
+        <Ledger
+          title="Live Sessions"
+          count={sessions.length}
+          empty="No live class sessions scheduled for this cohort."
+        >
           {sessions.map((event) => (
-            <Card key={event.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
-              <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Video className="h-4 w-4" />
-                    </div>
-                    <h4 className="font-display font-semibold text-sm text-foreground">{event.title}</h4>
-                    {event.location && (
-                      <Badge variant="outline" className="text-[10px]">
-                        {event.location}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Starts: {formatDateTime(event.start.toISOString())}
-                  </div>
+            <LedgerControlItem
+              key={event.id}
+              icon={Video}
+              iconClassName="bg-primary/10 text-primary"
+              title={
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm text-foreground">{event.title}</span>
+                  {event.location && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {event.location}
+                    </Badge>
+                  )}
                 </div>
-
-                <div className="shrink-0">
-                  <Button
-                    render={<Link href={`/teaching/sessions/${event.sourceId || "cs_1"}`} />}
-                    size="sm"
-                    className="rounded-xl text-xs"
-                  >
-                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Mark Attendance
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              }
+              meta={
+                <span className="text-xs text-muted-foreground font-mono">
+                  Starts: {formatDateTime(event.start.toISOString())}
+                </span>
+              }
+              actions={
+                <Button
+                  render={<Link href={`/teaching/sessions/${event.sourceId || "cs_1"}`} />}
+                  size="sm"
+                  className="rounded-xl text-xs h-7"
+                >
+                  <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Mark Attendance
+                </Button>
+              }
+            />
           ))}
-        </div>
-      ) : !isLoading ? (
-        <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
-          No live class sessions scheduled for this cohort.
-        </div>
-      ) : null}
+        </Ledger>
+      )}
     </div>
   );
 }

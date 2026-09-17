@@ -4,6 +4,7 @@ import React from "react";
 import { BookOpen, Users, Award, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { StatTile } from "@/components/ui/stat-tile";
 import type { TeachingCohortDetail } from "../types";
 
 interface CohortOverviewTabProps {
@@ -19,45 +20,30 @@ export function CohortOverviewTab({ cohort }: CohortOverviewTabProps) {
     <div className="space-y-6">
       {/* Snapshot Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Enrolled Students</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Users className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{cohort.studentCount}</div>
-        </Card>
-
-        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Total Modules</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <BookOpen className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalModules}</div>
-        </Card>
-
-        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Assigned Tasks</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15 text-accent">
-              <Award className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalAssignments}</div>
-        </Card>
-
-        <Card className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Recorded Sessions</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 text-success">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="font-display text-2xl font-bold text-foreground tabular-nums">{totalRecordings}</div>
-        </Card>
+        <StatTile
+          label="Enrolled Students"
+          value={cohort.studentCount}
+          icon={<Users className="h-4 w-4" />}
+          tone="primary"
+        />
+        <StatTile
+          label="Total Modules"
+          value={totalModules}
+          icon={<BookOpen className="h-4 w-4" />}
+          tone="primary"
+        />
+        <StatTile
+          label="Assigned Tasks"
+          value={totalAssignments}
+          icon={<Award className="h-4 w-4" />}
+          tone="accent"
+        />
+        <StatTile
+          label="Recorded Sessions"
+          value={totalRecordings}
+          icon={<Clock className="h-4 w-4" />}
+          tone="success"
+        />
       </div>
 
       {/* Progress & Description Card */}

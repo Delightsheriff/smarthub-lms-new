@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
-import { Award, Video } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { IndexList } from "@/components/ui/index-list";
 import { RichText } from "@/components/ui/rich-text";
+import { cn } from "@/lib/utils";
 import type { TeachingModule } from "../types";
 
 interface CohortModulesTabProps {
@@ -12,35 +12,68 @@ interface CohortModulesTabProps {
 }
 
 export function CohortModulesTab({ modules }: CohortModulesTabProps) {
-  return (
-    <div className="space-y-3">
-      {modules.map((m, idx) => (
-        <Card key={m.id} className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm hover:border-primary/40 transition-all">
-          <CardContent className="p-0 flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px]">
-                  Module {m.order ?? idx + 1}
-                </Badge>
-                <h4 className="font-display font-semibold text-sm text-foreground">{m.title}</h4>
-              </div>
-              <RichText
-                html={m.description}
-                className="line-clamp-2 text-xs text-muted-foreground leading-relaxed"
-              />
-            </div>
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-            <div className="flex items-center gap-2 shrink-0 text-xs">
-              <Badge variant="secondary" className="text-[10px]">
-                <Award className="mr-1 h-3 w-3 text-accent" /> {m.assignmentCount ?? 0} Tasks
-              </Badge>
-              <Badge variant="secondary" className="text-[10px]">
-                <Video className="mr-1 h-3 w-3 text-primary" /> {m.recordingCount ?? 0} Videos
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+  if (modules.length === 0) {
+    return (
+      <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
+        No modules created for this syllabus yet.
+      </div>
+    );
+  }
+
+  return (
+    <IndexList>
+      {modules.map((m, idx) => {
+        const expanded = expandedId === m.id;
+        const taskCount = m.assignmentCount ?? 0;
+        const videoCount = m.recordingCount ?? 0;
+        const indexNum = m.order ?? idx + 1;
+
+        return (
+          <div key={m.id} className="border-b border-border">
+            <button
+              type="button"
+              onClick={() => setExpandedId(expanded ? null : m.id)}
+              className="grid w-full grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-4 py-4 text-left transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_160px_20px]"
+            >
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                {String(indexNum).padStart(2, "0")}
+              </span>
+
+              <div className="min-w-0">
+                <div className="truncate font-display text-sm font-semibold text-foreground">
+                  {m.title}
+                </div>
+                {m.description && (
+                  <div className="truncate text-xs text-muted-foreground">
+                    {m.description.replace(/<[^>]*>/g, "")}
+                  </div>
+                )}
+              </div>
+
+              <div className="hidden items-center gap-2 sm:flex text-[11px] text-muted-foreground font-mono">
+                <span>{taskCount} {taskCount === 1 ? "task" : "tasks"}</span>
+                <span>·</span>
+                <span>{videoCount} {videoCount === 1 ? "video" : "videos"}</span>
+              </div>
+
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform",
+                  expanded && "rotate-180"
+                )}
+              />
+            </button>
+
+            {expanded && m.description && (
+              <div className="px-10 pb-4 pt-1 text-xs text-muted-foreground">
+                <RichText html={m.description} className="leading-relaxed" />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </IndexList>
   );
 }

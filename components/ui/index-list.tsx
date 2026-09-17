@@ -28,6 +28,8 @@ export function IndexRow({
   progress,
   status,
   href,
+  onClick,
+  actions,
   target,
   rel,
 }: {
@@ -37,17 +39,14 @@ export function IndexRow({
   /** 0–100. Omit for a row with no progress concept (e.g. a cohort that hasn't started). */
   progress?: number;
   status?: ReactNode;
-  href: string;
+  href?: string;
+  onClick?: () => void;
+  actions?: ReactNode;
   target?: string;
   rel?: string;
 }) {
-  return (
-    <Link
-      href={href}
-      target={target}
-      rel={rel}
-      className="grid grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-4 border-b border-border py-4 transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_20px]"
-    >
+  const content = (
+    <>
       <span className="font-mono text-xs tabular-nums text-muted-foreground">
         {String(index).padStart(2, "0")}
       </span>
@@ -83,7 +82,28 @@ export function IndexRow({
       )}
       {!status && <span className="hidden sm:block" />}
 
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-    </Link>
+      {actions ?? <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+    </>
   );
+
+  const className =
+    "grid w-full grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
+
+  if (href) {
+    return (
+      <Link href={href} target={target} rel={rel} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }

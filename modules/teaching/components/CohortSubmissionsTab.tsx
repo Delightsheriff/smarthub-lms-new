@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { Award } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDate } from "@/lib/utils";
 import { useCohortSubmissions, useGradeSubmission } from "../api/teaching.queries";
 import { GradingDialog } from "./GradingDialog";
@@ -46,22 +46,6 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "pending" | "graded")}>
-          <TabsList className="rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="all" className="rounded-lg text-xs">
-              All ({submissions?.length || 0})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="rounded-lg text-xs">
-              Needs Grading ({submissions?.filter((s) => s.status !== "graded").length || 0})
-            </TabsTrigger>
-            <TabsTrigger value="graded" className="rounded-lg text-xs">
-              Graded ({submissions?.filter((s) => s.status === "graded").length || 0})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
       {isLoading && (
         <div className="space-y-3">
           <Skeleton className="h-20 w-full rounded-2xl" />
@@ -69,14 +53,43 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
         </div>
       )}
 
-      {!isLoading && filtered.length > 0 ? (
-        <div className="space-y-3">
-          {filtered.map((sub) => (
-            <Card key={sub.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition-all">
-              <CardContent className="p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
+      {!isLoading && (
+        <Ledger
+          title="Submissions"
+          count={filtered.length}
+          actions={
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "pending" | "graded")}>
+              <TabsList className="rounded-xl bg-muted/60 p-1">
+                <TabsTrigger value="all" className="rounded-lg text-xs">
+                  All ({submissions?.length || 0})
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="rounded-lg text-xs">
+                  Needs Grading ({submissions?.filter((s) => s.status !== "graded").length || 0})
+                </TabsTrigger>
+                <TabsTrigger value="graded" className="rounded-lg text-xs">
+                  Graded ({submissions?.filter((s) => s.status === "graded").length || 0})
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          }
+          empty="No submissions found in this filter."
+        >
+          {filtered.map((sub) => {
+            const isGraded = sub.status === "graded";
+            return (
+              <LedgerControlItem
+                key={sub.id}
+                icon={Award}
+                iconClassName={
+                  isGraded
+                    ? "bg-success/10 text-success"
+                    : sub.isLate
+                      ? "bg-warning/10 text-warning"
+                      : "bg-primary/10 text-primary"
+                }
+                title={
                   <div className="flex items-center gap-2">
-                    <span className="font-display font-semibold text-sm text-foreground">{sub.student.name}</span>
+                    <span className="font-semibold text-sm text-foreground">{sub.student.name}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {sub.assignment.title}
                     </Badge>
@@ -86,22 +99,23 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                }
+                meta={
+                  <span className="text-xs text-muted-foreground">
                     Submitted: {sub.submittedAt ? formatDate(sub.submittedAt) : "N/A"}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  {sub.status === "graded" ? (
+                  </span>
+                }
+                actions={
+                  isGraded ? (
                     <div className="flex items-center gap-2">
-                      <Badge variant="success" className="font-mono text-xs">
-                        Score: {sub.score} / {sub.assignment.totalPoints || 100}
-                      </Badge>
+                      <span className="font-mono text-xs font-semibold text-success">
+                        {sub.score} / {sub.assignment.totalPoints || 100}
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenGrading(sub)}
-                        className="rounded-xl text-xs"
+                        className="rounded-xl text-xs h-7"
                       >
                         Edit Grade
                       </Button>
@@ -110,21 +124,17 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
                     <Button
                       size="sm"
                       onClick={() => handleOpenGrading(sub)}
-                      className="rounded-xl text-xs"
+                      className="rounded-xl text-xs h-7"
                     >
                       <Award className="mr-1.5 h-3.5 w-3.5" /> Grade Submission
                     </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : !isLoading ? (
-        <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
-          No submissions found in this filter.
-        </div>
-      ) : null}
+                  )
+                }
+              />
+            );
+          })}
+        </Ledger>
+      )}
 
       <GradingDialog
         submission={selectedSub}
