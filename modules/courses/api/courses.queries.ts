@@ -15,6 +15,7 @@ import type { Module } from "@/modules/learning/types";
  * UI-first phase.
  */
 export const COURSES_QUERY_KEYS = {
+  all: ["courses"] as const,
   enrolled: ["courses", "enrolled"] as const,
   bySlug: (slug?: string) => ["courses", "by-slug", slug] as const,
   module: (slug?: string, moduleSlug?: string) =>

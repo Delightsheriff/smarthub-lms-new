@@ -29,6 +29,7 @@ export function useRegenerateScholarshipBanner() {
     mutationFn: () => techScholarshipService.getBanner(true),
     onSuccess: (banner) => {
       qc.setQueryData(SCHOLARSHIP_QUERY_KEYS.banner, banner);
+      qc.invalidateQueries({ queryKey: SCHOLARSHIP_QUERY_KEYS.me });
     },
   });
 }

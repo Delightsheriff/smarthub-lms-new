@@ -11,8 +11,14 @@ export const TEACHING_QUERY_KEYS = {
   roster: (id: string) => ["teaching", "cohort", id, "roster"] as const,
   assignments: (id: string) => ["teaching", "cohort", id, "assignments"] as const,
   submissions: (id: string) => ["teaching", "cohort", id, "submissions"] as const,
-  inbox: (limit: number) => ["teaching", "inbox", limit] as const,
-  recentSubmissions: (limit: number) => ["teaching", "recent-submissions", limit] as const,
+  inbox: (limit?: number) =>
+    limit !== undefined
+      ? (["teaching", "inbox", limit] as const)
+      : (["teaching", "inbox"] as const),
+  recentSubmissions: (limit?: number) =>
+    limit !== undefined
+      ? (["teaching", "recent-submissions", limit] as const)
+      : (["teaching", "recent-submissions"] as const),
   myAssignments: ["teaching", "my-assignments"] as const,
 } as const;
 
@@ -104,6 +110,9 @@ export function useGradeSubmission(scheduleId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.submissions(scheduleId) });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId) });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.inbox() });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.recentSubmissions() });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.myAssignments });
     },
   });
 }
@@ -137,8 +146,9 @@ export function useGradeSubmissionFromInbox() {
       return teachingService.gradeSubmission(submissionId, score, feedback);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teaching", "inbox"] });
-      queryClient.invalidateQueries({ queryKey: ["teaching", "recent-submissions"] });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.inbox() });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.recentSubmissions() });
+      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.myAssignments });
     },
   });
 }

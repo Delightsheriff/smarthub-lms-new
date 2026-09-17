@@ -6,7 +6,10 @@ import type { MarkAttendancePayload } from "../types/attendance";
 
 export const ATTENDANCE_QUERY_KEYS = {
   session: (id: string) => ["teaching", "attendance", "session", id] as const,
-  student: (id: string) => ["teaching", "attendance", "student", id] as const,
+  student: (id?: string) =>
+    id
+      ? (["teaching", "attendance", "student", id] as const)
+      : (["teaching", "attendance", "student"] as const),
 } as const;
 
 export function useSessionAttendance(sessionId: string) {
@@ -26,6 +29,7 @@ export function useMarkSessionAttendance(sessionId: string) {
       attendanceService.markSessionAttendance(sessionId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ATTENDANCE_QUERY_KEYS.session(sessionId) });
+      queryClient.invalidateQueries({ queryKey: ATTENDANCE_QUERY_KEYS.student() });
     },
   });
 }

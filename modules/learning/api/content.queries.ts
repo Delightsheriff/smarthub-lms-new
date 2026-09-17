@@ -2,12 +2,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { learningService } from "./learning.service";
+import { COURSES_QUERY_KEYS } from "@/modules/courses/api/courses.queries";
 import {
   normaliseRecording,
   normaliseMaterial,
   normaliseRecordingWithContext,
   normaliseMaterialWithContext,
 } from "./normalise";
+
+export const LEARNING_QUERY_KEYS = {
+  recordingsByModule: (moduleId?: string) =>
+    moduleId !== undefined
+      ? (["learning", "recordings", "by-module", moduleId] as const)
+      : (["learning", "recordings", "by-module"] as const),
+  materialsByModule: (moduleId?: string) =>
+    moduleId !== undefined
+      ? (["learning", "materials", "by-module", moduleId] as const)
+      : (["learning", "materials", "by-module"] as const),
+  myRecordings: ["learning", "recordings", "mine"] as const,
+  myMaterials: ["learning", "materials", "mine"] as const,
+} as const;
 
 /** Fire-and-forget tracking pings used by the recording dialog and
  *  the materials list. Real implementations live behind PATCH /lms/...
@@ -21,7 +35,8 @@ export function useTrackRecordingView() {
     // Flipping `watched` must refresh the course detail / module data so
     // the outline tick and the recordings "Watched" filter re-render.
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["courses"] });
+      qc.invalidateQueries({ queryKey: COURSES_QUERY_KEYS.all });
+      qc.invalidateQueries({ queryKey: LEARNING_QUERY_KEYS.myRecordings });
     },
   });
 }
@@ -40,7 +55,7 @@ export function useTrackMaterialDownload() {
  *  regardless of cohort) which is fine for tutors managing content. */
 export function useRecordingsByModule(moduleId: string | undefined) {
   return useQuery({
-    queryKey: ["learning", "recordings", "by-module", moduleId] as const,
+    queryKey: LEARNING_QUERY_KEYS.recordingsByModule(moduleId),
     queryFn: async () => {
       const rows = await learningService.getRecordingsByModule(
         moduleId as string,
@@ -53,7 +68,7 @@ export function useRecordingsByModule(moduleId: string | undefined) {
 
 export function useMaterialsByModule(moduleId: string | undefined) {
   return useQuery({
-    queryKey: ["learning", "materials", "by-module", moduleId] as const,
+    queryKey: LEARNING_QUERY_KEYS.materialsByModule(moduleId),
     queryFn: async () => {
       const rows = await learningService.getMaterialsByModule(
         moduleId as string,
@@ -69,7 +84,7 @@ export function useMaterialsByModule(moduleId: string | undefined) {
  *  Backs the /recordings sidebar route. */
 export function useMyRecordings() {
   return useQuery({
-    queryKey: ["learning", "recordings", "mine"] as const,
+    queryKey: LEARNING_QUERY_KEYS.myRecordings,
     queryFn: async () => {
       const rows = await learningService.getMyRecordings();
       return rows.map(normaliseRecordingWithContext);
@@ -80,7 +95,7 @@ export function useMyRecordings() {
 /** Cross-course "All materials" feed. Backs the /materials route. */
 export function useMyMaterials() {
   return useQuery({
-    queryKey: ["learning", "materials", "mine"] as const,
+    queryKey: LEARNING_QUERY_KEYS.myMaterials,
     queryFn: async () => {
       const rows = await learningService.getMyMaterials();
       return rows.map(normaliseMaterialWithContext);

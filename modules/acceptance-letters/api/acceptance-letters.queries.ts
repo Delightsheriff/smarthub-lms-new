@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptanceLettersService } from "./acceptance-letters.service";
 import { dedupeAcceptanceLetters, normaliseAcceptanceLetter } from "./normalise";
 import { STALE_TIME } from "@/lib/query-config";
+import { SIWES_PROFILE_QUERY_KEYS } from "@/modules/siwes-profile/api/siwes-profile.queries";
 
 export const ACCEPTANCE_LETTERS_QUERY_KEYS = {
   list: ["acceptance-letters", "list"] as const,
@@ -45,7 +46,7 @@ export function useUpdateSiwesDuration() {
       qc.invalidateQueries({ queryKey: ACCEPTANCE_LETTERS_QUERY_KEYS.list });
       // Also refresh the profile-tab list so the new duration shows
       // up immediately without a page navigation.
-      qc.invalidateQueries({ queryKey: ["siwes-profile", "my-registrations"] });
+      qc.invalidateQueries({ queryKey: SIWES_PROFILE_QUERY_KEYS.myRegistrations });
     },
   });
 }
