@@ -28,6 +28,8 @@ export function IndexRow({
   progress,
   status,
   href,
+  target,
+  rel,
 }: {
   index: number;
   title: ReactNode;
@@ -36,10 +38,14 @@ export function IndexRow({
   progress?: number;
   status?: ReactNode;
   href: string;
+  target?: string;
+  rel?: string;
 }) {
   return (
     <Link
       href={href}
+      target={target}
+      rel={rel}
       className="grid grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-4 border-b border-border py-4 transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_20px]"
     >
       <span className="font-mono text-xs tabular-nums text-muted-foreground">

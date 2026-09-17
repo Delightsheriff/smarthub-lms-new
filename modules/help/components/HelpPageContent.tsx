@@ -1,39 +1,19 @@
 "use client";
-import {
-  BookOpen,
-  CircleHelp,
-  ExternalLink,
-  FileText,
-  PlayCircle,
-} from "lucide-react";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { CircleHelp, PlayCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Stagger, StaggerItem } from "@/components/animation/stagger";
+import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { groupByCategory, useHelpLibrary } from "../api/help.queries";
 import type { ApiHelpResource } from "../types/api.types";
 
-/** One look per resource type — a category is metadata worth a real
- *  color, not a bare glyph in a one-size-fits-all tint. Video keeps
- *  the brand accent (the highest-energy surface, matches watching
- *  something); document and link stay on primary/neutral. */
-const RESOURCE_STYLE: Record<
-  ApiHelpResource["type"],
-  { icon: typeof PlayCircle; className: string }
-> = {
-  video: { icon: PlayCircle, className: "bg-accent text-white" },
-  document: { icon: FileText, className: "bg-primary text-primary-foreground" },
-  link: { icon: ExternalLink, className: "bg-muted text-foreground" },
-};
-
-/** Help — a small library of how-to resources, filtered by the user's
- *  effective mode so students and instructors each see relevant help.
- *  Videos play natively (not embedded iframes). */
+/**
+ * Help — a library of how-to resources, split into:
+ * 1. Video Walkthroughs — visual player grid with posters.
+ * 2. Documentation & Links — magazine IndexList with numbered rows.
+ */
 export function HelpPageContent() {
   const { mode } = useEffectiveMode();
   const { data, isLoading } = useHelpLibrary(mode);
@@ -57,7 +37,7 @@ export function HelpPageContent() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         variant="editorial"
         divider
@@ -84,89 +64,88 @@ export function HelpPageContent() {
         />
       )}
 
-      {groups.map((group) => (
-        <section key={group.name} className="space-y-3">
-          <h2 className="font-display text-lg font-semibold text-foreground">{group.name}</h2>
-          <Stagger className="grid gap-4 sm:grid-cols-2">
-            {group.resources.map((r) => (
-              <StaggerItem key={r._id}>
-                <ResourceCard resource={r} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </section>
-      ))}
+      {groups.map((group) => {
+        const videos = group.resources.filter((r) => r.type === "video");
+        const docsAndLinks = group.resources.filter((r) => r.type !== "video");
+
+        return (
+          <section key={group.name} className="space-y-4">
+            <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+              {group.name}
+            </h2>
+
+            {/* Video section — only rendered if videos exist in this category */}
+            {videos.length > 0 && (
+              <div className="space-y-3">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
+                  Video Walkthroughs
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {videos.map((v) => (
+                    <VideoCard key={v._id} resource={v} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Documents & links section — magazine IndexList */}
+            {docsAndLinks.length > 0 && (
+              <div className="space-y-2">
+                {videos.length > 0 && (
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground pt-2">
+                    Articles & Documentation
+                  </p>
+                )}
+                <IndexList>
+                  {docsAndLinks.map((doc, idx) => (
+                    <IndexRow
+                      key={doc._id}
+                      index={idx + 1}
+                      title={doc.title}
+                      subtitle={doc.description}
+                      status={doc.type === "document" ? "Guide" : "Link"}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    />
+                  ))}
+                </IndexList>
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
 
-function ResourceCard({ resource }: { resource: ApiHelpResource }) {
-  const isVideo = resource.type === "video";
-  const style = RESOURCE_STYLE[resource.type];
-  const Icon = style.icon;
-
+function VideoCard({ resource }: { resource: ApiHelpResource }) {
   return (
-    <Card className="flex flex-col gap-3 p-5 rounded-2xl border-border bg-card shadow-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+    <Card className="flex flex-col gap-3 p-5 rounded-2xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all duration-300">
       <div className="flex min-w-0 items-start gap-3">
-        <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${style.className}`}
-        >
-          <Icon className="h-4 w-4" />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-xs">
+          <PlayCircle className="h-4 w-4" />
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="font-display text-base font-semibold leading-tight text-foreground">
             {resource.title}
           </p>
           {resource.description && (
-            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+            <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
               {resource.description}
             </p>
           )}
         </div>
       </div>
 
-      {isVideo ? (
-        <video
-          src={resource.url}
-          poster={resource.thumbnailUrl}
-          controls
-          playsInline
-          preload="none"
-          className="aspect-video w-full rounded-md bg-muted"
-        />
-      ) : resource.thumbnailUrl ? (
-        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-          <Image
-            src={resource.thumbnailUrl}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, 33vw"
-            className="object-cover"
-          />
-        </div>
-      ) : null}
-
-      {!isVideo && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="mt-auto"
-          render={
-            <a href={resource.url} target="_blank" rel="noreferrer noopener" />
-          }
-        >
-          {resource.type === "document" ? (
-            <BookOpen className="h-3.5 w-3.5 mr-1.5" />
-          ) : (
-            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-          )}
-          {resource.type === "document" ? "Read the guide" : "Open resource"}
-        </Button>
-      )}
-
-      <Badge variant="secondary" className="w-fit">
-        {resource.type}
-      </Badge>
+      <video
+        src={resource.url}
+        poster={resource.thumbnailUrl}
+        controls
+        playsInline
+        preload="none"
+        className="aspect-video w-full rounded-xl bg-muted/60"
+      />
     </Card>
   );
 }
