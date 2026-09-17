@@ -30,10 +30,10 @@ export function useMarkSessionAttendance(sessionId: string) {
   });
 }
 
-export function useStudentAttendanceHistory(studentId: string | null) {
+export function useStudentAttendanceHistory(scheduleId: string | null, studentId: string | null) {
   return useQuery({
-    queryKey: ATTENDANCE_QUERY_KEYS.student(studentId || ""),
-    enabled: !!studentId,
-    queryFn: () => attendanceService.getStudentAttendanceHistory(studentId!),
+    queryKey: ATTENDANCE_QUERY_KEYS.student(`${scheduleId || ""}:${studentId || ""}`),
+    enabled: !!scheduleId && !!studentId,
+    queryFn: () => attendanceService.getStudentAttendanceHistory(scheduleId!, studentId!),
   });
 }

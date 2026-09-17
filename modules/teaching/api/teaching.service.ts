@@ -52,9 +52,9 @@ class TeachingService {
     score: number,
     feedback?: string,
   ): Promise<{ success: boolean }> {
-    return apiClient.put<{ success: boolean }>(
+    return apiClient.patch<{ success: boolean }>(
       TEACHING_ENDPOINTS.GRADE_SUBMISSION(submissionId),
-      { score, feedback },
+      { score, generalFeedback: feedback },
     );
   }
 

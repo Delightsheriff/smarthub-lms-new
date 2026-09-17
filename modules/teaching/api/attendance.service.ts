@@ -18,15 +18,15 @@ class AttendanceService {
     sessionId: string,
     payload: MarkAttendancePayload,
   ): Promise<MarkAttendanceResult> {
-    return apiClient.post<MarkAttendanceResult>(
+    return apiClient.patch<MarkAttendanceResult>(
       TEACHING_ENDPOINTS.MARK_ATTENDANCE(sessionId),
       payload,
     );
   }
 
-  async getStudentAttendanceHistory(studentId: string): Promise<StudentAttendanceHistory> {
+  async getStudentAttendanceHistory(scheduleId: string, studentId: string): Promise<StudentAttendanceHistory> {
     return apiClient.get<StudentAttendanceHistory>(
-      TEACHING_ENDPOINTS.STUDENT_ATTENDANCE(studentId),
+      TEACHING_ENDPOINTS.STUDENT_ATTENDANCE(scheduleId, studentId),
     );
   }
 }

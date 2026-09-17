@@ -14,6 +14,7 @@ import { formatDateTime } from "@/lib/utils";
 import { useStudentAttendanceHistory } from "../api/attendance.queries";
 
 interface StudentAttendanceSheetProps {
+  scheduleId: string;
   studentId: string | null;
   studentName?: string;
   open: boolean;
@@ -21,12 +22,13 @@ interface StudentAttendanceSheetProps {
 }
 
 export function StudentAttendanceSheet({
+  scheduleId,
   studentId,
   studentName,
   open,
   onOpenChange,
 }: StudentAttendanceSheetProps) {
-  const { data, isLoading } = useStudentAttendanceHistory(open ? studentId : null);
+  const { data, isLoading } = useStudentAttendanceHistory(open ? scheduleId : null, open ? studentId : null);
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {

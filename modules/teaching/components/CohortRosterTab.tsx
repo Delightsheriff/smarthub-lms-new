@@ -91,6 +91,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
       ) : null}
 
       <StudentAttendanceSheet
+        scheduleId={scheduleId}
         studentId={selectedStudent?.id || null}
         studentName={selectedStudent?.name}
         open={sheetOpen}

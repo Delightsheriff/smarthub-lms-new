@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Award, ExternalLink, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -29,20 +33,34 @@ export function GradingDialog({
   onOpenChange,
   onGradeSubmit,
 }: GradingDialogProps) {
-  const [score, setScore] = useState<number>(submission?.score ?? 100);
-  const [feedback, setFeedback] = useState<string>("");
-  const [submitting, setSubmitting] = useState(false);
-
   if (!submission) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
+  return <GradingForm key={submission.id} submission={submission} open={open} onOpenChange={onOpenChange} onGradeSubmit={onGradeSubmit} />;
+}
+
+function GradingForm({
+  submission,
+  open,
+  onOpenChange,
+  onGradeSubmit,
+}: GradingDialogProps & { submission: CohortSubmissionRow }) {
+  const totalPoints = submission.assignment.totalPoints || 100;
+  const schema = z.object({
+    score: z.coerce.number().min(0, "Score cannot be negative").max(totalPoints, `Score cannot exceed ${totalPoints}`),
+    feedback: z.string().max(2000, "Feedback must be 2,000 characters or fewer"),
+  });
+  const form = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { score: submission.score ?? 0, feedback: "" },
+  });
+
+  const handleSubmit = async (values: z.infer<typeof schema>) => {
     try {
-      await onGradeSubmit(score, feedback);
+      await onGradeSubmit(values.score, values.feedback.trim() || undefined);
+      form.reset();
       onOpenChange(false);
-    } finally {
-      setSubmitting(false);
+    } catch {
+      // Keep entered values for retry.
     }
   };
 
@@ -132,50 +150,40 @@ export function GradingDialog({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Score (Out of {submission.assignment.totalPoints || 100})
-              </label>
-              <Input
-                type="number"
-                min={0}
-                max={submission.assignment.totalPoints || 100}
-                value={score}
-                onChange={(e) => setScore(Number(e.target.value))}
-                required
-                className="rounded-xl"
-              />
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField control={form.control} name="score" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold">Score (Out of {totalPoints})</FormLabel>
+                  <FormControl><Input type="number" min={0} max={totalPoints} className="rounded-xl" disabled={form.formState.isSubmitting} {...field} value={field.value as number} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="feedback" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold">Instructor Feedback & Comments</FormLabel>
+                  <FormControl><Textarea placeholder="Provide constructive feedback for the student..." rows={3} className="rounded-xl text-xs" disabled={form.formState.isSubmitting} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Instructor Feedback & Comments
-              </label>
-              <Textarea
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Provide constructive feedback for the student..."
-                rows={3}
-                className="rounded-xl text-xs"
-              />
-            </div>
-
-            <div className="pt-2 border-t flex items-center justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="rounded-xl"
+              <div className="pt-2 border-t flex items-center justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="rounded-xl"
+                  disabled={form.formState.isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting} className="rounded-xl">
+              <Button type="submit" disabled={form.formState.isSubmitting} className="rounded-xl">
                 <Award className="mr-2 h-4 w-4" />
-                {submitting ? "Saving..." : "Record Grade"}
+                {form.formState.isSubmitting ? "Saving..." : "Record Grade"}
               </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>
