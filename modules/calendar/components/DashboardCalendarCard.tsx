@@ -73,7 +73,7 @@ export function DashboardCalendarCard() {
         <div className="pt-2 border-t space-y-2">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>
-              {selectedDate.toLocaleDateString(undefined, {
+              {selectedDate.toLocaleDateString("en-GB", {
                 weekday: "short",
                 month: "short",
                 day: "numeric",

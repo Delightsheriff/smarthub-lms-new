@@ -156,7 +156,7 @@ function BadgeCard({
         {badge.awardedAt && (
           <p className="font-mono text-[10px] text-muted-foreground mt-1.5 font-medium">
             Earned{" "}
-            {new Date(badge.awardedAt).toLocaleDateString(undefined, {
+            {new Date(badge.awardedAt).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "short",
               year: "numeric",

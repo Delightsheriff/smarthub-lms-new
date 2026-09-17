@@ -62,7 +62,7 @@ export function DayView({
       {/* Day header */}
       <div className="border-b bg-muted/40 p-3 text-center">
         <h3 className="text-base font-bold text-foreground">
-          {currentDate.toLocaleDateString(undefined, {
+          {currentDate.toLocaleDateString("en-GB", {
             weekday: "long",
             month: "long",
             day: "numeric",

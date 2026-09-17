@@ -141,7 +141,7 @@ export function InternshipWorkspacePageContent() {
 
   const { internship, tasks, checkIns, progressPercent } = data;
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

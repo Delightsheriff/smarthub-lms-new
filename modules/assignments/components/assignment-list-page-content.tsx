@@ -34,7 +34,7 @@ export function AssignmentListPageContent() {
 /** Instructor's "Tasks" — the needs-grading inbox first (action-
  *  oriented), then the full assignment set across every cohort taught. */
 function InstructorTasksBody() {
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -66,7 +66,7 @@ function StudentAssignmentsBody() {
     return fromUrl && VALID_FILTERS.includes(fromUrl as Filter) ? (fromUrl as Filter) : "all";
   });
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

@@ -77,7 +77,7 @@ export function JobsPageContent() {
     refetch: refetchCompanies,
   } = useJobCompanies();
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -274,7 +274,7 @@ function postedLabel(iso: string): string {
   if (days <= 0) return "Today";
   if (days === 1) return "Yesterday";
   if (days < 30) return `${days} days ago`;
-  return posted.toLocaleDateString(undefined, {
+  return posted.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",

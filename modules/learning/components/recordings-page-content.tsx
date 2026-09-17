@@ -46,7 +46,7 @@ export function RecordingsPageContent() {
   // Group the flat feed into course / recordings.
   const groups = useMemo(() => groupByCourse(visible), [visible]);
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

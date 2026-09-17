@@ -140,7 +140,7 @@ export function CalendarPageContent() {
     return !hiddenScopes.has(scopeKey);
   });
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -229,7 +229,7 @@ export function CalendarPageContent() {
               </Button>
             </div>
             <h2 className="text-base font-semibold text-foreground ml-2">
-              {currentDate.toLocaleDateString(undefined, {
+              {currentDate.toLocaleDateString("en-GB", {
                 month: "long",
                 year: "numeric",
                 ...(viewMode === "day" && { day: "numeric" }),

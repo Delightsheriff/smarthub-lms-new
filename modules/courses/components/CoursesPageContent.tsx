@@ -61,7 +61,7 @@ function InstructorCoursesBody() {
   });
   const grouped = groupCohortsByCourse(filtered);
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -196,7 +196,7 @@ function StudentCoursesBody() {
   const [kindFilter, setKindFilter] = useState<string>("all");
   const { data: courses, isLoading, isFetching, refetch } = useCourses();
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

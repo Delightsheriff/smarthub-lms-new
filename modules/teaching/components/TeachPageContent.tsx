@@ -77,7 +77,7 @@ export function TeachPageContent() {
     .filter((e) => e.type === "class-session")
     .slice(0, 5);
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -195,7 +195,7 @@ export function TeachPageContent() {
                   key={c.id}
                   index={i + 1}
                   title={c.course.name}
-                  subtitle={`${c.studentCount} ${c.studentCount === 1 ? "student" : "students"} · started ${new Date(c.startDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}`}
+                  subtitle={`${c.studentCount} ${c.studentCount === 1 ? "student" : "students"} · started ${new Date(c.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                   progress={c.progress}
                   status={isCohortEnded(c.endDate) ? "Ended" : "Active"}
                   href={`/teach/cohorts/${c.id}`}

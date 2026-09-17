@@ -30,7 +30,7 @@ export function HelpPageContent() {
   const groups = groupByCategory(data ?? []);
   const totalGuides = (data ?? []).length;
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

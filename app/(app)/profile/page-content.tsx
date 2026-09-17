@@ -118,7 +118,7 @@ export default function ProfilePageContent() {
     "";
   const initial = (fullName || "?").slice(0, 1).toUpperCase();
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

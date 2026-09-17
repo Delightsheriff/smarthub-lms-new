@@ -67,7 +67,7 @@ export function WebinarsPageContent() {
   const isLoading = activeTab === "upcoming" ? upcomingQuery.isLoading : pastQuery.isLoading;
   const error = activeTab === "upcoming" ? upcomingQuery.error : pastQuery.error;
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

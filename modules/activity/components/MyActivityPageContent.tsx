@@ -22,7 +22,7 @@ export function MyActivityPageContent() {
   // Group events by day string
   const groupedMap = new Map<string, ActivityEvent[]>();
   for (const event of events) {
-    const dayStr = new Date(event.createdAt).toLocaleDateString(undefined, {
+    const dayStr = new Date(event.createdAt).toLocaleDateString("en-GB", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -33,7 +33,7 @@ export function MyActivityPageContent() {
     groupedMap.set(dayStr, existing);
   }
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -86,7 +86,7 @@ export function MyActivityPageContent() {
                   {dayEvents.map((event) => {
                     const style = actionTypeStyle(event.action);
                     const Icon = style.icon;
-                    const timeStr = new Date(event.createdAt).toLocaleTimeString(undefined, {
+                    const timeStr = new Date(event.createdAt).toLocaleTimeString("en-GB", {
                       hour: "2-digit",
                       minute: "2-digit",
                     });

@@ -33,7 +33,7 @@ export function InboxPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConv?.id]);
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

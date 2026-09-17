@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function BillingPageContent() {
   const { data, isLoading, isFetching, error, refetch } = useBillingBreakdown();
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",

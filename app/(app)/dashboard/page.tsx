@@ -78,7 +78,7 @@ function StudentDashboardBody() {
   const enrolledCount = courses?.length || 0;
   const nextDeadline = deadlines?.[0];
 
-  const dateline = new Date().toLocaleDateString(undefined, {
+  const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     month: "long",
     day: "numeric",
