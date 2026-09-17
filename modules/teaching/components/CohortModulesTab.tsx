@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { IndexList } from "@/components/ui/index-list";
 import { RichText } from "@/components/ui/rich-text";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
 import type { TeachingModule } from "../types";
 
 interface CohortModulesTabProps {
@@ -47,7 +47,7 @@ export function CohortModulesTab({ modules }: CohortModulesTabProps) {
                 </div>
                 {m.description && (
                   <div className="truncate text-xs text-muted-foreground">
-                    {m.description.replace(/<[^>]*>/g, "")}
+                    {htmlToPlainText(m.description)}
                   </div>
                 )}
               </div>
