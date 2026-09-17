@@ -69,6 +69,9 @@ export function InternshipPaymentPageContent() {
   }
 
   const settled = data.paymentStatus === "completed";
+  const dateline = settled
+    ? `${formatPrice(data.fee)} · Settled in full`
+    : `${formatPrice(data.fee - data.paidAmount)} Outstanding`;
 
   return (
     <div className="space-y-6">
@@ -76,10 +79,18 @@ export function InternshipPaymentPageContent() {
         variant="editorial"
         eyebrow="Internship"
         title="Internship fee"
+        dateline={dateline}
+        divider
         description={
           settled
-            ? "Your internship fee is paid in full."
-            : "Complete your payment to keep your placement active."
+            ? "Your internship fee is paid in full. Your placement credentials are fully confirmed."
+            : "Complete your transfer and upload proof to keep your placement active."
+        }
+        actions={
+          <Button variant="outline" size="sm" render={<Link href="/internships" />} className="rounded-xl">
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
+            Back to internship
+          </Button>
         }
       />
 
@@ -176,7 +187,7 @@ function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
           <Field label="Fee" value={formatPrice(payment.fee)} />
         </div>
         {payment.bank?.paymentInstructions && (
-          <p className="mt-4 rounded-xl bg-accent/50 px-3 py-2 text-xs text-muted-foreground">
+          <p className="mt-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-xs text-muted-foreground">
             {payment.bank.paymentInstructions}
           </p>
         )}
