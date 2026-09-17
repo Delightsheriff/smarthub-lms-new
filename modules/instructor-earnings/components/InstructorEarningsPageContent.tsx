@@ -1,13 +1,23 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Wallet, ChevronRight } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Hourglass,
+  Shield,
+  Sparkles,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatTile } from "@/components/ui/stat-tile";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { useBankingDetails } from "@/modules/referrals/queries/use-my-referrals";
 import { useMyInstructorEarnings } from "../api/instructor-earnings.queries";
@@ -168,13 +178,27 @@ export function InstructorEarningsPageContent() {
         )}
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Tile label="Pending" amount={totals.pendingNaira} tone="warning" />
-        <Tile
-          label="Processing"
-          amount={totals.processingNaira}
-          tone="neutral"
+        <StatTile
+          label="Pending"
+          value={formatPrice(totals.pendingNaira)}
+          tone="warning"
+          icon={<Clock className="h-3.5 w-3.5" />}
+          caption="Accrued from payments"
         />
-        <Tile label="Paid" amount={totals.paidNaira} tone="success" />
+        <StatTile
+          label="Processing"
+          value={formatPrice(totals.processingNaira)}
+          tone="neutral"
+          icon={<Hourglass className="h-3.5 w-3.5" />}
+          caption="Bundled into payout"
+        />
+        <StatTile
+          label="Paid"
+          value={formatPrice(totals.paidNaira)}
+          tone="success"
+          icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+          caption="Settled to bank"
+        />
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -191,20 +215,25 @@ export function InstructorEarningsPageContent() {
           data.byKind.variableNaira > 0 ||
           data.byKind.bonusNaira > 0) && (
           <div className="grid gap-3 sm:grid-cols-3">
-            <MiniStat
+            <StatTile
               label="Guaranteed base"
-              amount={data.byKind.baseNaira}
-              hint="Paid each cohort regardless of enrolment"
+              value={formatPrice(data.byKind.baseNaira)}
+              caption="Paid each cohort regardless of enrolment"
+              icon={<Shield className="h-3.5 w-3.5" />}
             />
-            <MiniStat
+            <StatTile
               label="Revenue share"
-              amount={data.byKind.variableNaira}
-              hint="Your share of what the cohort collects"
+              value={formatPrice(data.byKind.variableNaira)}
+              tone="primary"
+              caption="Your share of what the cohort collects"
+              icon={<TrendingUp className="h-3.5 w-3.5" />}
             />
-            <MiniStat
+            <StatTile
               label="Bonuses & fees"
-              amount={data.byKind.bonusNaira}
-              hint="Completion, conversion, session fees"
+              value={formatPrice(data.byKind.bonusNaira)}
+              tone="accent"
+              caption="Completion, conversion, session fees"
+              icon={<Sparkles className="h-3.5 w-3.5" />}
             />
           </div>
         )}
@@ -231,7 +260,7 @@ export function InstructorEarningsPageContent() {
               <Card className="overflow-hidden p-0">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-border text-sm">
-                    <thead className="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <thead className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       <tr>
                         <th className="px-5 py-3 sm:px-6">Cohort</th>
                         <th className="px-5 py-3 sm:px-6">Stream</th>
@@ -322,61 +351,11 @@ export function InstructorEarningsPageContent() {
   );
 }
 
-function MiniStat({
-  label,
-  amount,
-  hint,
-}: {
-  label: string;
-  amount: number;
-  hint: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-sans">
-        {label}
-      </p>
-      <p className="mt-2 text-xl font-bold font-display tabular-nums text-foreground">
-        {formatPrice(amount)}
-      </p>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-        {hint}
-      </p>
-    </div>
-  );
-}
-
-function Tile({
-  label,
-  amount,
-  tone,
-}: {
-  label: string;
-  amount: number;
-  tone: "warning" | "neutral" | "success";
-}) {
-  const palette: Record<typeof tone, string> = {
-    warning: "bg-warning/10 border-warning/30 text-warning",
-    neutral: "bg-muted/40 border-border text-foreground",
-    success: "bg-success/10 border-success/30 text-success",
-  };
-  return (
-    <div className={"rounded-2xl border p-5 shadow-xs " + palette[tone]}>
-      <p className="text-xs font-semibold uppercase tracking-wider opacity-80 font-sans">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-bold font-display tabular-nums">
-        {formatPrice(amount)}
-      </p>
-    </div>
-  );
-}
-
 function PayoutsTable({ payouts }: { payouts: EarningsPayout[] }) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-border text-sm">
-        <thead className="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <thead className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
           <tr>
             <th className="px-5 py-3 sm:px-6">Amount</th>
             <th className="px-5 py-3 sm:px-6">Bank</th>
