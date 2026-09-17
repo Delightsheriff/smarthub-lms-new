@@ -77,7 +77,7 @@ export function RecordingPlayerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-4 md:p-6 gap-3 rounded-2xl">
+      <DialogContent className="max-w-3xl rounded-2xl p-4 md:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 pr-8 font-display text-xl">
             {recording.title}

@@ -1,5 +1,8 @@
 "use client";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -24,6 +27,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +64,47 @@ const TASK_STATUS_STYLES: Record<ApiInternshipTask["status"], string> = {
   submitted: "bg-info/10 text-info",
   done: "bg-success/10 text-success",
 };
+
+const submitTaskSchema = z.object({
+  submissionUrl: z
+    .string()
+    .trim()
+    .refine(
+      (value) => !value || /^https?:\/\/[^\s]+$/i.test(value),
+      "Enter a valid http(s) URL",
+    ),
+  submissionNote: z
+    .string()
+    .max(2000, "Note must be 2,000 characters or fewer"),
+});
+
+const checkInSchema = z.object({
+  weekOf: z
+    .string()
+    .trim()
+    .refine(
+      (value) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+        const date = new Date(`${value}T00:00:00Z`);
+        return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+      },
+      "Week date must be a valid ISO date",
+    ),
+  summary: z
+    .string()
+    .trim()
+    .min(1, "Summary is required")
+    .max(2000, "Summary must be 2,000 characters or fewer"),
+  blockers: z.string().max(1000, "Blockers must be 1,000 characters or fewer"),
+  hoursLogged: z.string().refine(
+    (value) => {
+      if (!value) return true;
+      const hours = Number(value);
+      return Number.isFinite(hours) && hours >= 0 && hours <= 168;
+    },
+    "Hours logged must be between 0 and 168",
+  ),
+});
 
 export function InternshipWorkspacePageContent() {
   const { data, isLoading, isError } = useInternshipWorkspace();
@@ -185,8 +237,8 @@ function TaskRow({ task }: { task: ApiInternshipTask }) {
   const mutation = useUpdateInternshipTask();
   const [submitOpen, setSubmitOpen] = useState(false);
 
-  const progress = (input: InternshipTaskUpdateInput) => {
-    mutation.mutate({ taskId: task._id, ...input });
+  const progress = async (input: InternshipTaskUpdateInput) => {
+    await mutation.mutateAsync({ taskId: task._id, ...input });
   };
 
   return (
@@ -278,18 +330,21 @@ function SubmitTaskDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: InternshipTaskUpdateInput) => void;
+  onSubmit: (input: InternshipTaskUpdateInput) => Promise<void>;
   pending: boolean;
 }) {
-  const [submissionUrl, setSubmissionUrl] = useState("");
-  const [note, setNote] = useState("");
+  const form = useForm<z.infer<typeof submitTaskSchema>>({
+    resolver: zodResolver(submitTaskSchema),
+    defaultValues: { submissionUrl: "", submissionNote: "" },
+  });
 
-  const submit = () => {
-    onSubmit({
+  const submit = async (values: z.infer<typeof submitTaskSchema>) => {
+    await onSubmit({
       status: "submitted",
-      submissionUrl: submissionUrl.trim() || undefined,
-      submissionNote: note.trim() || undefined,
+      submissionUrl: values.submissionUrl.trim() || undefined,
+      submissionNote: values.submissionNote.trim() || undefined,
     });
+    form.reset();
     onOpenChange(false);
   };
 
@@ -302,43 +357,58 @@ function SubmitTaskDialog({
             Paste the link to your work, then add a short note if helpful.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label htmlFor="submission-url" className="text-sm font-medium">
-              Work link
-            </label>
-            <Input
-              id="submission-url"
-              value={submissionUrl}
-              onChange={(e) => setSubmissionUrl(e.target.value)}
-              placeholder="https://…"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+            <FormField
+              control={form.control}
+              name="submissionUrl"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel>Work link</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://…"
+                      disabled={pending || form.formState.isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="submission-note" className="text-sm font-medium">
-              Note (optional)
-            </label>
-            <Textarea
-              id="submission-note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              placeholder="What did you change since the draft?"
+            <FormField
+              control={form.control}
+              name="submissionNote"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel>Note (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={3}
+                      placeholder="What did you change since the draft?"
+                      disabled={pending || form.formState.isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={pending}
-          >
-            Cancel
-          </Button>
-          <Button onClick={submit} disabled={pending || !submissionUrl.trim()}>
-            Submit
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={pending || form.formState.isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={pending || form.formState.isSubmitting}>
+                Submit
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
@@ -360,8 +430,8 @@ function CheckInsSection({
   const [open, setOpen] = useState(false);
   const mutation = useCreateInternshipCheckIn();
 
-  const submit = (input: InternshipCheckInInput) => {
-    mutation.mutate(input);
+  const submit = async (input: InternshipCheckInInput) => {
+    await mutation.mutateAsync(input);
     setOpen(false);
   };
 
@@ -432,21 +502,23 @@ function CheckInDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: InternshipCheckInInput) => void;
+  onSubmit: (input: InternshipCheckInInput) => Promise<void>;
   pending: boolean;
 }) {
-  const [weekOf, setWeekOf] = useState("");
-  const [summary, setSummary] = useState("");
-  const [blockers, setBlockers] = useState("");
-  const [hoursLogged, setHoursLogged] = useState("");
+  const form = useForm<z.infer<typeof checkInSchema>>({
+    resolver: zodResolver(checkInSchema),
+    defaultValues: { weekOf: "", summary: "", blockers: "", hoursLogged: "" },
+  });
 
-  const submit = () => {
-    onSubmit({
-      weekOf: weekOf.trim(),
-      summary: summary.trim(),
-      blockers: blockers.trim() || undefined,
-      hoursLogged: hoursLogged ? Number(hoursLogged) : undefined,
+  const submit = async (values: z.infer<typeof checkInSchema>) => {
+    await onSubmit({
+      weekOf: values.weekOf.trim(),
+      summary: values.summary.trim(),
+      blockers: values.blockers.trim() || undefined,
+      hoursLogged: values.hoursLogged ? Number(values.hoursLogged) : undefined,
     });
+    form.reset();
+    onOpenChange(false);
   };
 
   return (
@@ -458,72 +530,48 @@ function CheckInDialog({
             Note your progress so your mentor can review it before class.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label htmlFor="week-of" className="text-sm font-medium">
-              Week covering
-            </label>
-            <Input
-              id="week-of"
-              value={weekOf}
-              onChange={(e) => setWeekOf(e.target.value)}
-              placeholder="Week 3 — e.g. 1–7 September"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="checkin-summary" className="text-sm font-medium">
-              What did you do this week?
-            </label>
-            <Textarea
-              id="checkin-summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              rows={3}
-              placeholder="Tasks delivered, classes attended, blockers…"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label htmlFor="hours-logged" className="text-sm font-medium">
-                Hours logged
-              </label>
-              <Input
-                id="hours-logged"
-                type="number"
-                min={0}
-                value={hoursLogged}
-                onChange={(e) => setHoursLogged(e.target.value)}
-                placeholder="0"
-              />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+            <FormField control={form.control} name="weekOf" render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Week covering</FormLabel>
+                <FormControl><Input type="date" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="summary" render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>What did you do this week?</FormLabel>
+                <FormControl><Textarea rows={3} placeholder="Tasks delivered, classes attended, blockers…" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField control={form.control} name="hoursLogged" render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel>Hours logged</FormLabel>
+                  <FormControl><Input type="number" min={0} max={168} step="any" placeholder="0" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="blockers" render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel>Blockers</FormLabel>
+                  <FormControl><Input placeholder="None" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
             </div>
-            <div className="space-y-1.5">
-              <label htmlFor="checkin-blockers" className="text-sm font-medium">
-                Blockers
-              </label>
-              <Input
-                id="checkin-blockers"
-                value={blockers}
-                onChange={(e) => setBlockers(e.target.value)}
-                placeholder="None"
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={pending}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={submit}
-            disabled={pending || !weekOf.trim() || !summary.trim()}
-          >
-            Send check-in
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending || form.formState.isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={pending || form.formState.isSubmitting}>
+                Send check-in
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

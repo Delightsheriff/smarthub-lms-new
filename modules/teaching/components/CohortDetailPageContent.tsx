@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { formatDate } from "@/lib/utils";
 import { useTeachingCohortDetail } from "../api/teaching.queries";
 import { CohortOverviewTab } from "./CohortOverviewTab";
@@ -24,7 +25,7 @@ interface CohortDetailPageContentProps {
 export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: cohort, isLoading, error } = useTeachingCohortDetail(scheduleId);
+  const { data: cohort, isLoading, isFetching, error, refetch } = useTeachingCohortDetail(scheduleId);
 
   return (
     <div className="space-y-6">
@@ -73,6 +74,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
                   <span>· {cohort.studentCount} Students Enrolled</span>
                 </p>
               </div>
+              <RefreshButton loading={isFetching} onClick={refetch} />
             </div>
           </Card>
 

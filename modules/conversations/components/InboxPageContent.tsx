@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { useConversations, useMarkConversationRead } from "../api/conversations.queries";
 import { ConversationListItemRow } from "./ConversationListItemRow";
 import { AssignmentThread } from "@/modules/messaging/components/AssignmentThread";
@@ -14,7 +15,7 @@ export function InboxPageContent() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const { data: conversations, isLoading, error } = useConversations();
+  const { data: conversations, isLoading, isFetching, error, refetch } = useConversations();
   const markRead = useMarkConversationRead();
 
   const filtered = (conversations || []).filter((c) => {
@@ -39,8 +40,8 @@ export function InboxPageContent() {
         eyebrow="Inbox"
         title="Inbox & Messages"
         description="Direct messages, cohort announcements, course discussions, and instructor support."
-        actions={
-          <Tabs value={typeFilter} onValueChange={setTypeFilter}>
+         actions={
+           <><RefreshButton loading={isFetching} onClick={refetch} /><Tabs value={typeFilter} onValueChange={setTypeFilter}>
             <TabsList className="rounded-xl bg-muted/60 p-1 flex-wrap">
               <TabsTrigger value="all" className="rounded-lg text-xs">All</TabsTrigger>
               <TabsTrigger value="direct" className="rounded-lg text-xs">Direct</TabsTrigger>
@@ -49,7 +50,7 @@ export function InboxPageContent() {
               <TabsTrigger value="announcement" className="rounded-lg text-xs">Announcements</TabsTrigger>
               <TabsTrigger value="support" className="rounded-lg text-xs">Support</TabsTrigger>
             </TabsList>
-          </Tabs>
+           </Tabs></>
         }
       />
 

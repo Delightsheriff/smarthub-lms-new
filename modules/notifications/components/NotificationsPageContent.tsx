@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { cn, formatDateTime } from "@/lib/utils";
 import { notificationTypeStyle } from "../lib/notification-type";
@@ -22,7 +23,7 @@ import {
 export function NotificationsPageContent() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
-  const { data: notifications, isLoading, error } = useNotifications();
+  const { data: notifications, isLoading, isFetching, error, refetch } = useNotifications();
   const markReadMutation = useMarkRead();
   const markAllReadMutation = useMarkAllRead();
 
@@ -40,9 +41,10 @@ export function NotificationsPageContent() {
         eyebrow="Notifications"
         title="Notifications Center"
         description="Grade alerts, material announcements, and cohort updates."
-        actions={
-          <>
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "unread")}>
+         actions={
+           <>
+             <RefreshButton loading={isFetching} onClick={refetch} />
+             <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "unread")}>
               <TabsList className="rounded-xl bg-muted/60 p-1">
                 <TabsTrigger value="all" className="rounded-lg text-xs">
                   All

@@ -1,5 +1,8 @@
 "use client";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,11 +18,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useUpdateMyDetails } from "../api/profile.queries";
 import type { ProfileDetailsPatch } from "../types";
+
+const profileDetailsSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(100),
+  middleName: z.string().trim().max(100),
+  lastName: z.string().trim().min(1, "Last name is required").max(100),
+  gender: z.enum(["", "Male", "Female"]),
+  phone: z.string().trim().refine((value) => value.length === 0 || (value.length >= 7 && value.length <= 20), "Phone must be 7–20 characters"),
+});
 
 interface EditProfileDetailsProps {
   current: {
@@ -81,31 +93,28 @@ function ProfileDetailsForm({
   onSaved: () => void;
   onCancel: () => void;
 }) {
-  const [firstName, setFirstName] = useState(current.firstName ?? "");
-  const [middleName, setMiddleName] = useState(current.middleName ?? "");
-  const [lastName, setLastName] = useState(current.lastName ?? "");
-  const [gender, setGender] = useState<"" | "Male" | "Female">(
-    current.gender ?? "",
-  );
-  const [phone, setPhone] = useState(current.phone ?? "");
+  type Values = z.infer<typeof profileDetailsSchema>;
+  const form = useForm<Values>({
+    resolver: zodResolver(profileDetailsSchema),
+    defaultValues: { firstName: current.firstName ?? "", middleName: current.middleName ?? "", lastName: current.lastName ?? "", gender: current.gender ?? "", phone: current.phone ?? "" },
+  });
   const [phoneUnlocked, setPhoneUnlocked] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
   const update = useUpdateMyDetails();
 
-  const dirty: ProfileDetailsPatch = {
-    ...(firstName.trim() !== (current.firstName ?? "") && { firstName: firstName.trim() }),
-    ...(middleName.trim() !== (current.middleName ?? "") && { middleName: middleName.trim() }),
-    ...(lastName.trim() !== (current.lastName ?? "") && { lastName: lastName.trim() }),
-    ...(gender && gender !== (current.gender ?? "") && { gender }),
-    ...(phoneUnlocked && phone.trim() !== (current.phone ?? "") && { phone: phone.trim() }),
-  };
-  const hasChanges = Object.keys(dirty).length > 0;
-
-  const submit = async () => {
-    if (!hasChanges) return;
+  const submit = async (values: Values) => {
+    const dirty: ProfileDetailsPatch = {
+      ...(values.firstName !== (current.firstName ?? "") && { firstName: values.firstName }),
+      ...(values.middleName !== (current.middleName ?? "") && { middleName: values.middleName }),
+      ...(values.lastName !== (current.lastName ?? "") && { lastName: values.lastName }),
+      ...(values.gender && values.gender !== (current.gender ?? "") && { gender: values.gender }),
+      ...(phoneUnlocked && values.phone !== (current.phone ?? "") && { phone: values.phone }),
+    };
+    if (!Object.keys(dirty).length) return;
     try {
       await update.mutateAsync(dirty);
       toast.success("Profile updated");
+      form.reset(values);
       onSaved();
     } catch {
       /* interceptor toasts */
@@ -113,55 +122,15 @@ function ProfileDetailsForm({
   };
 
   return (
-    <form
-      className="grid gap-4 py-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        submit();
-      }}
-    >
-      <div className="grid gap-1.5">
-        <Label htmlFor="first-name">First name</Label>
-        <Input
-          id="first-name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          placeholder="First name"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="middle-name">Middle name</Label>
-        <Input
-          id="middle-name"
-          value={middleName}
-          onChange={(e) => setMiddleName(e.target.value)}
-          placeholder="Middle name"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="last-name">Last name</Label>
-        <Input
-          id="last-name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Last name"
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label>Gender</Label>
-        <Select
-          value={gender || undefined}
-          onValueChange={(v) => setGender(v ?? "")}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select gender" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Male">Male</SelectItem>
-            <SelectItem value="Female">Female</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <Form {...form}><form className="grid gap-4 py-2" onSubmit={form.handleSubmit(submit)}>
+      {(["firstName", "middleName", "lastName"] as const).map((name) => (
+        <FormField key={name} control={form.control} name={name} render={({ field }) => (
+          <FormItem><FormLabel>{name === "firstName" ? "First name" : name === "lastName" ? "Last name" : "Middle name"}</FormLabel><FormControl><Input placeholder={name} disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+      ))}
+      <FormField control={form.control} name="gender" render={({ field }) => (
+        <FormItem><FormLabel>Gender</FormLabel><Select value={field.value || undefined} onValueChange={(value) => field.onChange(value ?? "")} disabled={form.formState.isSubmitting}><FormControl><SelectTrigger className="w-full"><SelectValue placeholder="Select gender" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+      )} />
       <div className="grid gap-1.5">
         <div className="flex items-center justify-between">
           <Label htmlFor="phone">Phone</Label>
@@ -176,20 +145,14 @@ function ProfileDetailsForm({
             </Button>
           ) : null}
         </div>
-        <Input
-          id="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="+234…"
-          disabled={!phoneUnlocked}
-        />
+        <FormField control={form.control} name="phone" render={({ field }) => <FormItem><FormControl><Input id="phone" placeholder="+234…" disabled={!phoneUnlocked || form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
       </div>
-      <DialogFooter className="gap-2 pt-2 sm:gap-2">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+      <DialogFooter className="pt-2">
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={form.formState.isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!hasChanges || update.isPending}>
-          {update.isPending ? "Saving…" : "Save changes"}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Saving…" : "Save changes"}
         </Button>
       </DialogFooter>
 
@@ -216,6 +179,6 @@ function ProfileDetailsForm({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </form>
+    </form></Form>
   );
 }

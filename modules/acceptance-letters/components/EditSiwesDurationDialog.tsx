@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUpdateSiwesDuration } from "../api/acceptance-letters.queries";
+
+const durationSchema = z.object({
+  siwesDurationMonths: z.coerce.number().int().min(1).max(12),
+});
 
 interface Props {
   open: boolean;
@@ -41,9 +47,10 @@ export function EditSiwesDurationDialog({
     try {
       await mutation.mutateAsync({ registrationId, siwesDurationMonths: value });
       onOpenChange(false);
-    } catch {
+    } catch (error) {
       // Interceptor toasts the error; keep the dialog open so the
       // student can retry without reopening.
+      throw error;
     }
   };
 
@@ -80,15 +87,20 @@ function DurationPicker({
 }: {
   currentValue: number | undefined;
   disabled: boolean;
-  onSave: (value: number) => void;
+  onSave: (value: number) => Promise<void>;
   onCancel: () => void;
 }) {
-  // Default to the current value when present, otherwise 6 (the most
-  // common SIWES duration).
-  const [value, setValue] = useState<number>(currentValue ?? 6);
+  const form = useForm<z.input<typeof durationSchema>, unknown, z.output<typeof durationSchema>>({
+    resolver: zodResolver(durationSchema),
+    defaultValues: { siwesDurationMonths: currentValue ?? 6 },
+  });
+  const duration = useWatch({ control: form.control, name: "siwesDurationMonths" });
 
   return (
-    <>
+    <form onSubmit={form.handleSubmit(async (values) => {
+      await onSave(values.siwesDurationMonths);
+      form.reset(values);
+    })}>
       <div className="space-y-2">
         <label
           htmlFor="siwes-duration-select"
@@ -97,8 +109,8 @@ function DurationPicker({
           Duration (months)
         </label>
         <Select
-          value={String(value)}
-          onValueChange={(v) => setValue(Number(v ?? ""))}
+          value={String(duration)}
+          onValueChange={(v) => form.setValue("siwesDurationMonths", Number(v ?? ""), { shouldValidate: true })}
         >
           <SelectTrigger
             id="siwes-duration-select"
@@ -115,6 +127,9 @@ function DurationPicker({
             ))}
           </SelectContent>
         </Select>
+        {form.formState.errors.siwesDurationMonths && (
+          <p className="text-sm text-destructive">Choose between 1 and 12 months.</p>
+        )}
         <p className="text-xs text-muted-foreground">
           Your admin will regenerate the letter after this change.
         </p>
@@ -124,18 +139,17 @@ function DurationPicker({
           type="button"
           variant="outline"
           onClick={onCancel}
-          disabled={disabled}
+          disabled={disabled || form.formState.isSubmitting}
         >
           Cancel
         </Button>
         <Button
-          type="button"
-          onClick={() => onSave(value)}
-          disabled={disabled}
+          type="submit"
+          disabled={disabled || form.formState.isSubmitting}
         >
-          {disabled ? "Saving…" : "Save"}
+          {disabled || form.formState.isSubmitting ? "Saving…" : "Save"}
         </Button>
       </DialogFooter>
-    </>
+    </form>
   );
 }

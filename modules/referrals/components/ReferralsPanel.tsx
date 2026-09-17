@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, formatPrice } from "@/lib/utils";
 import {
@@ -79,7 +80,7 @@ const TABS: Array<{ key: TabKey; label: string }> = [
  * LMS's shadcn primitives and brand tokens (no inline hex).
  */
 export function ReferralsPanel() {
-  const { data, isLoading, error } = useMyReferrals();
+  const { data, isLoading, isFetching, error, refetch } = useMyReferrals();
   const [tab, setTab] = useState<TabKey>("share");
   const banking = useBankingDetails();
   const payouts = useMyPayouts();
@@ -136,8 +137,9 @@ export function ReferralsPanel() {
         eyebrow="Refer & Earn"
         title="Refer & earn"
         description="Share your link, track sign-ups, and withdraw what you earn."
-        actions={
-          <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+         actions={
+           <>
+           <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
             <TabsList className="rounded-xl bg-muted/60 p-1">
               {TABS.map((t) => (
                 <TabsTrigger key={t.key} value={t.key} className="rounded-lg text-xs">
@@ -145,8 +147,13 @@ export function ReferralsPanel() {
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
-        }
+           </Tabs>
+           <RefreshButton
+             loading={isFetching || banking.isFetching || payouts.isFetching}
+             onClick={() => Promise.allSettled([refetch(), banking.refetch(), payouts.refetch()])}
+           />
+           </>
+         }
       />
 
       {/* Code-pill card — persistent across tabs so the user's

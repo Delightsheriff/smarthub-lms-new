@@ -1,5 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -23,6 +26,7 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -230,15 +234,21 @@ function UploadProofDialog({
   onSubmit: (input: { file: File; reference?: string }) => Promise<void>;
 }) {
   const [file, setFile] = useState<File | null>(null);
-  const [reference, setReference] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const form = useForm<{ reference: string }>({
+    resolver: zodResolver(z.object({ reference: z.string().max(500, "Reference must be 500 characters or fewer") })),
+    defaultValues: { reference: "" },
+  });
 
-  const submit = async () => {
-    if (!file) return;
+  const submit = async ({ reference }: { reference: string }) => {
+    if (!file) {
+      form.setError("reference", { message: "Attach your transfer receipt first." });
+      return;
+    }
     try {
       await onSubmit({ file, reference: reference.trim() || undefined });
       setFile(null);
-      setReference("");
+      form.reset();
     } catch {
       // Interceptor toasts the error; keep the dialog open for retry.
     }
@@ -253,7 +263,7 @@ function UploadProofDialog({
             Send your transfer receipt so finance can confirm your fee.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <Form {...form}><form className="space-y-3" onSubmit={form.handleSubmit(submit)}>
           <Label
             htmlFor="internship-proof-file"
             className="block cursor-pointer rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground hover:border-primary/40"
@@ -270,31 +280,22 @@ function UploadProofDialog({
               type="file"
               accept="image/*,application/pdf"
               className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+               disabled={pending || form.formState.isSubmitting}
             />
           </Label>
-          <div className="grid gap-1.5">
-            <Label htmlFor="internship-proof-reference">
-              Transfer reference (optional)
-            </Label>
-            <Input
-              id="internship-proof-reference"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="From your bank app"
-            />
-          </div>
-        </div>
+           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input placeholder="From your bank app" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+         </form></Form>
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={pending}
+             onClick={() => onOpenChange(false)}
+             disabled={pending || form.formState.isSubmitting}
           >
             Cancel
           </Button>
-          <Button onClick={submit} disabled={pending || !file}>
-            {pending ? (
+           <Button type="submit" form={undefined} onClick={() => void form.handleSubmit(submit)()} disabled={pending || !file || form.formState.isSubmitting}>
+            {pending || form.formState.isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               "Submit proof"

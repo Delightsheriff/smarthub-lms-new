@@ -1,11 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, Loader2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -19,6 +23,10 @@ import type { MyInstallmentPlanUi, MyPaymentProofUi, PlanTrancheUi } from "../ty
 import { InstallmentScheduleCard } from "./InstallmentScheduleCard";
 
 const GENERAL = "general";
+const paymentProofSchema = z.object({
+  amount: z.string().trim().refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, "Enter an amount greater than zero"),
+  reference: z.string().max(500, "Reference must be 500 characters or fewer"),
+});
 
 const statusTone: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -31,25 +39,25 @@ export function PaymentsPageContent() {
   const { data: plans } = useMyInstallmentPlans();
   const submit = useSubmitPaymentProof();
 
-  const [amount, setAmount] = useState("");
   const [registration, setRegistration] = useState("general");
-  const [reference, setReference] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [done, setDone] = useState(false);
   const [tranche, setTranche] = useState<PlanTrancheUi | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const form = useForm<z.infer<typeof paymentProofSchema>>({
+    resolver: zodResolver(paymentProofSchema),
+    defaultValues: { amount: "", reference: "" },
+  });
 
   const payTranche = (t: PlanTrancheUi, plan: MyInstallmentPlanUi) => {
     setTranche(t);
-    setAmount(String(t.amount));
+    form.setValue("amount", String(t.amount), { shouldDirty: true });
     setDone(false);
     const reg = surface?.registrations.find(
       (r) => r.courseName && plan.courseName && r.courseName === plan.courseName,
     );
     if (reg) setRegistration(reg._id);
     else setRegistration(GENERAL);
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const bank = surface?.bank;
@@ -61,29 +69,22 @@ export function PaymentsPageContent() {
     }
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) {
-      toast.error("Enter the amount you paid");
-      return;
-    }
+  const onSubmit = async (values: z.infer<typeof paymentProofSchema>) => {
     if (!file) {
-      toast.error("Attach your transfer receipt");
+      form.setError("amount", { message: "Attach your transfer receipt before submitting" });
       return;
     }
     try {
       await submit.mutateAsync({
         file,
-        amount: amt,
+         amount: Number(values.amount),
         registration: registration === GENERAL ? undefined : registration,
         installment: tranche?.id,
-        reference: reference.trim() || undefined,
+         reference: values.reference.trim() || undefined,
       });
       toast.success("Submitted — we'll confirm your transfer shortly.");
       setDone(true);
-      setAmount("");
-      setReference("");
+      form.reset();
       setTranche(null);
       setRegistration(GENERAL);
       setFile(null);
@@ -154,9 +155,10 @@ export function PaymentsPageContent() {
         />
       ))}
 
-      <form
-        ref={formRef}
-        onSubmit={onSubmit}
+      <Form {...form}><form
+        onSubmit={(event) => {
+          void form.handleSubmit(onSubmit)(event);
+        }}
         className="space-y-4 rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6"
       >
         <p className="font-display text-base font-semibold text-foreground">Upload a payment proof</p>
@@ -180,8 +182,8 @@ export function PaymentsPageContent() {
 
         {surface && surface.registrations.length > 0 && (
           <div className="grid gap-1.5">
-            <Label>What is this payment for?</Label>
-            <Select value={registration} onValueChange={(v) => setRegistration(v ?? GENERAL)}>
+             <Label>What is this payment for?</Label>
+             <Select value={registration} onValueChange={(v) => setRegistration(v ?? GENERAL)} disabled={form.formState.isSubmitting}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="General / other" />
               </SelectTrigger>
@@ -201,26 +203,8 @@ export function PaymentsPageContent() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="grid gap-1.5">
-            <Label>Amount paid (₦)</Label>
-            <Input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 50000"
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Transfer reference (optional)</Label>
-            <Input
-              type="text"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="From your bank app"
-            />
-          </div>
+           <FormField control={form.control} name="amount" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Amount paid (₦)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={1} placeholder="e.g. 50000" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input type="text" placeholder="From your bank app" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
         </div>
 
         <Label
@@ -239,7 +223,8 @@ export function PaymentsPageContent() {
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+               disabled={form.formState.isSubmitting}
           />
         </Label>
 
@@ -249,11 +234,11 @@ export function PaymentsPageContent() {
           </p>
         )}
 
-        <Button type="submit" disabled={submit.isPending}>
+        <Button type="submit" disabled={submit.isPending || form.formState.isSubmitting}>
           {submit.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           {submit.isPending ? "Submitting…" : "Submit payment proof"}
         </Button>
-      </form>
+      </form></Form>
 
       {isLoading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

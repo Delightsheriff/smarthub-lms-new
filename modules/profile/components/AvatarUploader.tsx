@@ -147,7 +147,7 @@ export function AvatarUploader({
               </Avatar>
             ) : null}
           </div>
-          <DialogFooter className="gap-2 sm:gap-2">
+          <DialogFooter>
             <Button
               type="button"
               variant="secondary"
@@ -174,7 +174,7 @@ export function AvatarUploader({
               Your photo will be removed. You can upload a new one any time.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
+          <DialogFooter>
             <Button
               type="button"
               variant="secondary"

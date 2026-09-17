@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
 import { useMyMaterials, useTrackMaterialDownload } from "../api/content.queries";
@@ -40,7 +41,7 @@ const FILTERS: { value: Filter; label: string }[] = [
  *  of the student's enrolled courses, grouped by course. Visibility is
  *  module-level (materials have no cohort attachment layer). */
 export function MaterialsPageContent() {
-  const { data, isLoading } = useMyMaterials();
+  const { data, isLoading, isFetching, refetch } = useMyMaterials();
   const [filter, setFilter] = useState<Filter>("all");
   const [previewing, setPreviewing] = useState<Material | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -76,8 +77,10 @@ export function MaterialsPageContent() {
         eyebrow="Learning"
         title="Materials"
         description="Every course material and guide available to you, in one place."
-        actions={
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+         actions={
+           <>
+           <RefreshButton loading={isFetching} onClick={refetch} />
+           <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
             <TabsList className="rounded-xl bg-muted/60 p-1">
               {FILTERS.map((f) => (
                 <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
@@ -85,7 +88,8 @@ export function MaterialsPageContent() {
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
+           </Tabs>
+           </>
         }
       />
 

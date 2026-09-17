@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { useJobCompanies, useJobs } from "../api/jobs.queries";
 import type { Job } from "../types";
 
@@ -71,7 +72,7 @@ export function JobsPageContent() {
   const changeRemote = (v: RemoteFilter) => { setRemote(v); setPage(1); };
   const changeScope = (v: Scope) => { setScope(v); setPage(1); };
 
-  const { data, isLoading, isFetching } = useJobs({
+  const { data, isLoading, isFetching, refetch } = useJobs({
     page,
     pageSize: PAGE_SIZE,
     keyword: keyword || undefined,
@@ -79,7 +80,7 @@ export function JobsPageContent() {
     remote: remote === "all" ? undefined : remote === "remote",
     scope,
   });
-  const { data: companies } = useJobCompanies();
+  const { data: companies, isFetching: companiesFetching, refetch: refetchCompanies } = useJobCompanies();
 
   const jobs = useMemo(() => data?.jobs ?? [], [data]);
   const meta = data?.meta;
@@ -111,7 +112,8 @@ export function JobsPageContent() {
 
       {/* Filter row */}
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
+         <div className="flex flex-wrap items-center gap-2">
+           <RefreshButton loading={isFetching || companiesFetching} onClick={() => Promise.allSettled([refetch(), refetchCompanies()])} />
           <div className="relative min-w-0 flex-1 sm:max-w-xs">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useMyAssignments } from "../api/assignments.queries";
 import { AssignmentListCard } from "./assignment-list-card";
@@ -42,7 +43,7 @@ function InstructorTasksBody() {
 }
 
 function StudentAssignmentsBody() {
-  const { data: assignments, isLoading, error } = useMyAssignments();
+  const { data: assignments, isLoading, isFetching, error, refetch } = useMyAssignments();
   const [search, setSearch] = useState("");
   const searchParams = useSearchParams();
   // Honour ?filter=… deep links from the dashboard stats strip so each
@@ -99,7 +100,7 @@ function StudentAssignmentsBody() {
           />
         </div>
 
-        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)}>
+        <div className="flex items-center gap-2"><RefreshButton loading={isFetching} onClick={refetch} /><Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)}>
           <TabsList className="rounded-xl bg-muted/60 p-1">
             <TabsTrigger value="all" className="rounded-lg text-xs">
               All ({assignments?.length || 0})
@@ -109,7 +110,7 @@ function StudentAssignmentsBody() {
             <TabsTrigger value="graded" className="rounded-lg text-xs">Graded</TabsTrigger>
             <TabsTrigger value="overdue" className="rounded-lg text-xs">Overdue</TabsTrigger>
           </TabsList>
-        </Tabs>
+        </Tabs></div>
       </div>
 
       {isLoading && (

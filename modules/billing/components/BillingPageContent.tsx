@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingBreakdown } from "../api/billing.queries";
 import { BillingSummaryCard } from "./BillingSummaryCard";
 import { RegistrationBillingCard } from "./RegistrationBillingCard";
+import { RefreshButton } from "@/components/ui/refresh-button";
 
 export function BillingPageContent() {
-  const { data, isLoading, error } = useBillingBreakdown();
+  const { data, isLoading, isFetching, error, refetch } = useBillingBreakdown();
 
   if (isLoading) {
     return (
@@ -27,7 +28,8 @@ export function BillingPageContent() {
         variant="editorial"
         eyebrow="Money"
         title="Billing"
-        description="Track your payments, instalments, and outstanding balance."
+         description="Track your payments, instalments, and outstanding balance."
+         actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {error ? (

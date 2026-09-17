@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { useMyRecordings } from "../api/content.queries";
@@ -25,7 +26,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 /** All recordings surface. Every visible recording across the
  *  student's enrolments, grouped by course / module. */
 export function RecordingsPageContent() {
-  const { data, isLoading } = useMyRecordings();
+  const { data, isLoading, isFetching, refetch } = useMyRecordings();
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -58,7 +59,9 @@ export function RecordingsPageContent() {
         title="Recordings"
         description="Every class recording available to you, across all your courses."
         actions={
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+          <>
+           <RefreshButton loading={isFetching} onClick={refetch} />
+           <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
             <TabsList className="rounded-xl bg-muted/60 p-1">
               {FILTERS.map((f) => (
                 <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
@@ -66,7 +69,8 @@ export function RecordingsPageContent() {
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
+           </Tabs>
+          </>
         }
       />
 

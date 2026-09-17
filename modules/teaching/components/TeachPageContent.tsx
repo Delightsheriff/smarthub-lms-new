@@ -14,6 +14,7 @@ import { RecentSubmissionsTile } from "./RecentSubmissionsTile";
 import { UpcomingClassesTile } from "./UpcomingClassesTile";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 
 /**
  * Instructor home (`/dashboard` in Teaching mode). Compact greeting +
@@ -30,7 +31,7 @@ import { PageHeader } from "@/components/layout/page-header";
  */
 export function TeachPageContent() {
   const user = useAuthStore((s) => s.user);
-  const { data: cohorts, isLoading, error } = useTeachingCohorts();
+  const { data: cohorts, isLoading, isFetching, error, refetch } = useTeachingCohorts();
 
   const greetingName = user?.firstName?.trim() || "there";
   const cohortCount = cohorts?.length ?? 0;
@@ -49,6 +50,7 @@ export function TeachPageContent() {
               : `Teaching ${cohortCount} ${cohortCount === 1 ? "cohort" : "cohorts"}.`
             : undefined
         }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">

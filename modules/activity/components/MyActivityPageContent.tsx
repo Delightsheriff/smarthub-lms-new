@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { formatDateTime } from "@/lib/utils";
 import { actionTypeStyle } from "../lib/action-type";
@@ -16,7 +17,7 @@ import type { ActivityEvent } from "../types";
 
 export function MyActivityPageContent() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, error } = useMyActivity(page);
+  const { data, isLoading, isFetching, error, refetch } = useMyActivity(page);
 
   const events = data?.events || [];
   const meta = data?.meta;
@@ -43,7 +44,8 @@ export function MyActivityPageContent() {
         variant="editorial"
         eyebrow="Activity"
         title="Activity Log"
-        description="A security and audit timeline of your recent account actions, submissions, and payments."
+         description="A security and audit timeline of your recent account actions, submissions, and payments."
+         actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {isLoading && (

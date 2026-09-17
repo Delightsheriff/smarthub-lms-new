@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Upload, Link as LinkIcon, FileText, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -37,6 +41,13 @@ interface SubmissionFormProps {
   onSuccess?: () => void;
 }
 
+const submissionSchema = z.object({
+  submissionType: z.enum(["file", "text", "url"]),
+  content: z.string().trim().refine((value) => value.length === 0 || value.length >= 5, "Text must be at least 5 characters"),
+  externalUrl: z.string().trim().refine((value) => value.length === 0 || /^https?:\/\/.+/i.test(value), "Enter a valid http(s) URL"),
+  notes: z.string().max(2000, "Notes must be 2,000 characters or fewer"),
+});
+
 export function SubmissionForm({
   assignment,
   existingSubmission,
@@ -44,15 +55,12 @@ export function SubmissionForm({
   onSuccess,
 }: SubmissionFormProps) {
   const [open, setOpen] = useState(false);
-  const [submissionType, setSubmissionType] = useState<"file" | "text" | "url">(
-    existingSubmission?.submissionType || "file",
-  );
-  const [content, setContent] = useState(existingSubmission?.content || "");
-  const [externalUrl, setExternalUrl] = useState(
-    existingSubmission?.externalUrl || "",
-  );
-  const [notes, setNotes] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const form = useForm<z.input<typeof submissionSchema>, unknown, z.output<typeof submissionSchema>>({
+    resolver: zodResolver(submissionSchema),
+    defaultValues: { submissionType: existingSubmission?.submissionType || "file", content: existingSubmission?.content || "", externalUrl: existingSubmission?.externalUrl || "", notes: "" },
+  });
+  const submissionType = useWatch({ control: form.control, name: "submissionType" });
 
   const submitMutation = useSubmitAssignment();
   const resubmitMutation = useResubmitAssignment();
@@ -63,8 +71,8 @@ export function SubmissionForm({
     resubmitMutation.isPending ||
     uploadMutation.isPending;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: z.output<typeof submissionSchema>) => {
+    const submissionType = values.submissionType;
 
     let uploadedFileDetails:
       | {
@@ -84,22 +92,22 @@ export function SubmissionForm({
           return;
         }
       } else if (!existingSubmission?.fileUrl) {
-        toast.error("Please select a file to submit.");
-        return;
+         form.setError("submissionType", { message: "Please select a file to submit." });
+         return;
       }
-    } else if (submissionType === "url" && !externalUrl) {
-      toast.error("Please enter a valid external URL.");
+    } else if (submissionType === "url" && !values.externalUrl) {
+      form.setError("externalUrl", { message: "Enter an external URL." });
       return;
-    } else if (submissionType === "text" && !content) {
-      toast.error("Please enter text content for your submission.");
+    } else if (submissionType === "text" && !values.content) {
+      form.setError("content", { message: "Enter text content for your submission." });
       return;
     }
 
     const payload = {
       assignmentId: assignment.id,
       submissionType,
-      content: submissionType === "text" ? content : undefined,
-      externalUrl: submissionType === "url" ? externalUrl : undefined,
+       content: submissionType === "text" ? values.content : undefined,
+       externalUrl: submissionType === "url" ? values.externalUrl : undefined,
       fileUrl:
         uploadedFileDetails?.fileUrl ||
         (submissionType === "file" ? existingSubmission?.fileUrl : undefined),
@@ -114,7 +122,7 @@ export function SubmissionForm({
         (submissionType === "file"
           ? existingSubmission?.fileMimeType
           : undefined),
-      notes: notes || undefined,
+       notes: values.notes.trim() || undefined,
     };
 
     try {
@@ -128,6 +136,8 @@ export function SubmissionForm({
         await submitMutation.mutateAsync(payload);
         toast.success("Assignment submitted successfully!");
       }
+      form.reset({ submissionType: "file", content: "", externalUrl: "", notes: "" });
+      setSelectedFile(null);
       setOpen(false);
       onSuccess?.();
     } catch {
@@ -148,7 +158,7 @@ export function SubmissionForm({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={triggerElement} />
       <DialogContent className="sm:max-w-[540px] rounded-2xl border-border bg-card shadow-lg">
-        <form onSubmit={handleSubmit}>
+        <Form {...form}><form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
             <DialogTitle className="font-display text-xl font-semibold">
               {existingSubmission ? "Resubmit Work" : "Submit Assignment"}
@@ -160,15 +170,16 @@ export function SubmissionForm({
 
           <div className="space-y-4 py-4">
             {/* Submission Type Selector */}
-            <div className="space-y-2">
-              <Label htmlFor="submissionType">Submission Format</Label>
-              <Select
-                value={submissionType}
-                onValueChange={(v) => setSubmissionType(v as "file" | "text" | "url")}
-              >
-                <SelectTrigger id="submissionType" className="rounded-xl">
-                  <SelectValue placeholder="Select submission type" />
-                </SelectTrigger>
+             <FormField control={form.control} name="submissionType" render={({ field }) => <FormItem className="space-y-2">
+               <FormLabel>Submission Format</FormLabel>
+               <Select
+                 value={field.value}
+                 onValueChange={(v) => field.onChange(v)}
+                 disabled={form.formState.isSubmitting}
+               >
+                 <FormControl><SelectTrigger id="submissionType" className="rounded-xl">
+                   <SelectValue placeholder="Select submission type" />
+                 </SelectTrigger></FormControl>
                 <SelectContent className="rounded-xl">
                   <SelectItem value="file">
                     <div className="flex items-center gap-2">
@@ -186,17 +197,18 @@ export function SubmissionForm({
                     </div>
                   </SelectItem>
                 </SelectContent>
-              </Select>
-            </div>
+               </Select><FormMessage />
+             </FormItem>} />
 
             {/* File Upload Input */}
-            {submissionType === "file" && (
+             {submissionType === "file" && (
               <div className="space-y-2">
                 <Label htmlFor="fileInput">Choose File</Label>
                 <Input
                   id="fileInput"
                   type="file"
-                  className="rounded-xl cursor-pointer"
+                   className="rounded-xl cursor-pointer"
+                   disabled={form.formState.isSubmitting}
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                 />
                 {existingSubmission?.fileName && !selectedFile && (
@@ -208,47 +220,17 @@ export function SubmissionForm({
             )}
 
             {/* URL Input */}
-            {submissionType === "url" && (
-              <div className="space-y-2">
-                <Label htmlFor="externalUrl">External Repository / Link</Label>
-                <Input
-                  id="externalUrl"
-                  type="url"
-                  placeholder="https://github.com/username/project"
-                  className="rounded-xl"
-                  value={externalUrl}
-                  onChange={(e) => setExternalUrl(e.target.value)}
-                />
-              </div>
-            )}
+             {submissionType === "url" && (
+               <FormField control={form.control} name="externalUrl" render={({ field }) => <FormItem className="space-y-2"><FormLabel>External Repository / Link</FormLabel><FormControl><Input type="url" placeholder="https://github.com/username/project" className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+             )}
 
             {/* Text Input */}
-            {submissionType === "text" && (
-              <div className="space-y-2">
-                <Label htmlFor="textContent">Submission Answer / Code</Label>
-                <Textarea
-                  id="textContent"
-                  rows={6}
-                  placeholder="Paste or write your solution here..."
-                  className="rounded-xl font-mono text-xs"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-              </div>
-            )}
+             {submissionType === "text" && (
+               <FormField control={form.control} name="content" render={({ field }) => <FormItem className="space-y-2"><FormLabel>Submission Answer / Code</FormLabel><FormControl><Textarea rows={6} placeholder="Paste or write your solution here..." className="rounded-xl font-mono text-xs" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+             )}
 
             {/* Notes field */}
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes for Instructor (Optional)</Label>
-              <Textarea
-                id="notes"
-                rows={2}
-                placeholder="Any comments, questions, or instructions for grading..."
-                className="rounded-xl"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-            </div>
+             <FormField control={form.control} name="notes" render={({ field }) => <FormItem className="space-y-2"><FormLabel>Notes for Instructor (Optional)</FormLabel><FormControl><Textarea rows={2} placeholder="Any comments, questions, or instructions for grading..." className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
           </div>
 
           <DialogFooter className="gap-2 sm:gap-3">
@@ -257,12 +239,12 @@ export function SubmissionForm({
               variant="outline"
               className="rounded-xl"
               onClick={() => setOpen(false)}
-              disabled={isPending}
+               disabled={isPending || form.formState.isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-xl" disabled={isPending}>
-              {isPending ? (
+            <Button type="submit" className="rounded-xl" disabled={isPending || form.formState.isSubmitting}>
+              {isPending || form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
                 </>
@@ -271,7 +253,7 @@ export function SubmissionForm({
               )}
             </Button>
           </DialogFooter>
-        </form>
+        </form></Form>
       </DialogContent>
     </Dialog>
   );
