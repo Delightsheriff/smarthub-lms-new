@@ -34,17 +34,25 @@ export function NotificationsPageContent() {
 
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
+  const dateline = `${(notifications || []).length} Total · ${unreadCount} Unread`;
+
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
         eyebrow="Notifications"
         title="Notifications Center"
-        description="Grade alerts, material announcements, and cohort updates."
-         actions={
-           <>
-             <RefreshButton loading={isFetching} onClick={refetch} />
-             <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "unread")}>
+        dateline={dateline}
+        divider
+        description={
+          unreadCount > 0
+            ? `You have ${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}. Stay updated on grades, materials, and cohort activity.`
+            : "All caught up! Grade alerts, material announcements, and cohort updates appear here."
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <RefreshButton loading={isFetching} onClick={refetch} />
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "unread")}>
               <TabsList className="rounded-xl bg-muted/60 p-1">
                 <TabsTrigger value="all" className="rounded-lg text-xs">
                   All
@@ -65,7 +73,7 @@ export function NotificationsPageContent() {
                 <CheckCheck className="mr-1.5 h-4 w-4" /> Mark All Read
               </Button>
             )}
-          </>
+          </div>
         }
       />
 
