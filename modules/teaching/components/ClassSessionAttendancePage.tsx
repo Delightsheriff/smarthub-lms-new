@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Video, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatDateTime } from "@/lib/utils";
 import { useSessionAttendance, useMarkSessionAttendance } from "../api/attendance.queries";
 import type { AttendanceStatus } from "../types/attendance";
+
+import { PageHeader } from "@/components/layout/page-header";
 
 interface ClassSessionAttendancePageProps {
   sessionId: string;
@@ -50,6 +52,9 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
     });
   };
 
+  const session = sessionData?.session;
+  const rows = sessionData?.rows || [];
+
   const handleSaveAll = async () => {
     const marksArray = rows.map((row) => {
       const override = localOverrides.get(row.studentId);
@@ -63,21 +68,16 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
     await markMutation.mutateAsync({ marks: marksArray });
   };
 
-  const session = sessionData?.session;
-  const rows = sessionData?.rows || [];
-
   return (
     <div className="space-y-6">
-      {/* Back Button */}
+      {/* Back Link */}
       <div>
-        <Button
-          render={<Link href={session ? `/teach/cohorts/${session.scheduleId}` : "/teach"} />}
-          variant="ghost"
-          size="sm"
-          className="rounded-xl text-muted-foreground hover:text-foreground"
+        <Link
+          href={session ? `/teach/cohorts/${session.scheduleId}` : "/teach"}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Cohort Workspace
-        </Button>
+          <ArrowLeft className="h-4 w-4" /> Back to Cohort Workspace
+        </Link>
       </div>
 
       {isLoading && <Skeleton className="h-44 w-full rounded-2xl" />}
@@ -92,31 +92,18 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
 
       {!isLoading && session && (
         <>
-          {/* Header Card */}
-          <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <Badge className="bg-primary/10 text-primary">
-                <Video className="mr-1 h-3.5 w-3.5" /> Class Session Attendance
-              </Badge>
-              {session.startsAt && (
-                <span className="text-xs text-muted-foreground font-mono">
-                  {formatDateTime(session.startsAt)}
-                </span>
-              )}
-            </div>
-
-            <h1 className="font-display text-2xl font-bold text-foreground">{session.title}</h1>
-            {session.location && (
-              <p className="text-xs text-muted-foreground">Location: {session.location}</p>
-            )}
-          </Card>
-
-          {/* Roster Marking Table */}
-          <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <h3 className="font-display text-base font-semibold text-foreground">
-                Student Attendance ({rows.length} Enrolled)
-              </h3>
+          <PageHeader
+            variant="editorial"
+            eyebrow="Teaching · Session Attendance"
+            title={session.title}
+            dateline={session.startsAt ? formatDateTime(session.startsAt) : undefined}
+            divider
+            description={
+              session.location
+                ? `Location: ${session.location} · ${rows.length} enrolled student${rows.length === 1 ? "" : "s"}`
+                : `Mark attendance and add notes for ${rows.length} enrolled student${rows.length === 1 ? "" : "s"}.`
+            }
+            actions={
               <Button
                 onClick={handleSaveAll}
                 disabled={markMutation.isPending}
@@ -125,6 +112,15 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
                 <Save className="mr-1.5 h-4 w-4" />
                 {markMutation.isPending ? "Saving..." : "Save All Marks"}
               </Button>
+            }
+          />
+
+          {/* Roster Marking Table */}
+          <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="font-display text-base font-semibold text-foreground">
+                Student Attendance Roster
+              </h3>
             </div>
 
             <div className="space-y-3">
