@@ -90,7 +90,7 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="px-5 pb-5 pt-0 border-t mt-auto">
+      <CardFooter className="px-5 pb-5 pt-4 border-t border-border mt-auto">
         {status === "passed" && webinar.watchLink ? (
           <Button
             render={

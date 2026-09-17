@@ -67,19 +67,31 @@ export function WebinarsPageContent() {
   const isLoading = activeTab === "upcoming" ? upcomingQuery.isLoading : pastQuery.isLoading;
   const error = activeTab === "upcoming" ? upcomingQuery.error : pastQuery.error;
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Webinars"
+        divider
+        dateline={`${dateline} · Live Sessions & Masterclasses`}
         title="Webinars & Workshops"
-        description="Join live industry sessions, masterclasses, and rewatch past recorded workshops."
+        description={
+          upcomingList.length > 0 ? (
+            <>
+              Join live industry sessions, masterclasses, and workshops.{" "}
+              <strong className="text-foreground">{upcomingList.length}</strong> upcoming session{upcomingList.length === 1 ? "" : "s"}.
+            </>
+          ) : (
+            "Join live industry sessions, masterclasses, and rewatch past recorded workshops."
+          )
+        }
         actions={
-          <div className="flex items-center gap-2">
-            <RefreshButton
-              loading={upcomingQuery.isFetching || pastQuery.isFetching}
-              onClick={() => Promise.allSettled([upcomingQuery.refetch(), pastQuery.refetch()])}
-            />
+          <div className="flex flex-wrap items-center gap-2">
             <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as Tab)}>
               <TabsList className="rounded-xl bg-muted/60 p-1">
                 <TabsTrigger value="upcoming" className="rounded-lg text-xs">
@@ -90,13 +102,17 @@ export function WebinarsPageContent() {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+            <RefreshButton
+              loading={upcomingQuery.isFetching || pastQuery.isFetching}
+              onClick={() => Promise.allSettled([upcomingQuery.refetch(), pastQuery.refetch()])}
+            />
           </div>
         }
       />
 
       {/* Loading state */}
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-80 w-full rounded-2xl" />
           ))}
@@ -117,7 +133,7 @@ export function WebinarsPageContent() {
         <>
           {webinars.length > 0 ? (
             <>
-              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Stagger className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {webinars.map((webinar) => (
                   <StaggerItem key={webinar.id}>
                     <WebinarCard webinar={webinar} />
