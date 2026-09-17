@@ -199,13 +199,14 @@ actual `plans/`/`docs/adr/` directories, before picking a number.**
 | 016 | Editorial rollout handoff prompts — per-page prompts for slices 2+, see `plans/016-editorial-rollout-prompts.md` |
 | 017 | Handoff prompts: dialog spacing, form standardization (react-hook-form + zod everywhere, backend/legacy validation audit), data-page refresh + coordinated loading — see `plans/017-forms-dialogs-data-pages-prompts.md` |
 | 018 | Handoff prompt: fix Select trigger label resolution app-wide (Base UI `Select.Value` doesn't auto-resolve labels) — see `plans/018-select-value-label-fix-prompt.md` |
+| 019 | Handoff prompt: data-fetching/caching tiering, cache-invalidation gaps, coordinated vs. staggered loading, refresh-button coverage, shared debounce hook — see `plans/019-data-fetching-caching-loading-prompt.md` |
 
 Follow-ups mentioned for the self-paced track (access-revocation
 notices, a jobs/career surface, global search) have since shipped —
 `modules/access/components/RevokedCourseNotice.tsx`, `modules/jobs/`,
 `modules/search/` + `components/layout/search-trigger.tsx` — as part of
 the same pass that produced plan 017. None of them got their own plan
-file; **next available plan number is 019.**
+file; **next available plan number is 020.**
 
 | ADRs taken | Decision |
 |---|---|
@@ -275,3 +276,5 @@ checkout.
 | Plan 017 — dialog spacing audit, react-hook-form + zod everywhere, refresh controls + coordinated loading on data pages | ✅ Done and live-verified — see `plans/017-forms-dialogs-data-pages-prompts.md`, `plans/017-validation-audit.md` |
 | Plan 018 — Select trigger label resolution + popup positioning | ✅ Done and live-verified (cycled every option on the Courses filters against real data, confirmed correct label + correct filtering each time) — see `plans/018-select-value-label-fix-prompt.md`. Two extra bugs found during this verification and fixed directly: `CohortDetailPageContent`'s 6-tab bar broke onto an ugly full-width row on narrow viewports instead of scrolling (now matches the `overflow-x-auto` pattern already used on Courses/self-paced tabs), and the roster/assignments tabs showed "1 Submissions"/"1 Pending Grade" instead of correct singular grammar. Commit `9cd9b51`. |
 | Profile birthday editing | ⬜ Known gap, flagged not fixed — legacy LMS exposes birthday editing and the backend accepts `birthDay`/`birthMonth`, but the current profile screen has no field for it (see `plans/017-validation-audit.md`) |
+| Auth screens — disable every input during submit | ✅ Done — the 5 auth screens (Login/ForgotPassword/ResetPassword/AcceptInvitation/ChangePassword) previously only disabled the submit button via `mutation.isPending`, not the fields themselves, contradicting plan 017's own rule. Fixed and live-verified (commit `a429da0`). |
+| Plan 019 — data-fetching/caching tiering, invalidation gaps, coordinated loading, refresh coverage, debounce | ⬜ Handoff prompt written, not yet actioned — see `plans/019-data-fetching-caching-loading-prompt.md` |
