@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, Wallet } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { formatPrice } from "@/lib/utils";
 import { useMyInstructorRevenueBreakdown } from "../api/instructor-earnings.queries";
 
@@ -17,27 +19,47 @@ export function CohortEarningsDetailContent({
 }: {
   scheduleId: string;
 }) {
-  const { data, isLoading, error } = useMyInstructorRevenueBreakdown();
+  const { data, isLoading, isFetching, error, refetch } = useMyInstructorRevenueBreakdown();
   const cohort = (data ?? []).find((c) => c.scheduleId === scheduleId);
+
+  const dateline = cohort
+    ? `${formatPrice(cohort.totalRevenueNaira)} Total Collected`
+    : undefined;
 
   return (
     <div className="space-y-6">
       <Link
         href="/billing"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to earnings
       </Link>
 
+      <PageHeader
+        variant="editorial"
+        eyebrow="Teaching · Earnings"
+        title={cohort?.course ?? "Cohort Earnings"}
+        dateline={dateline}
+        divider
+        description={
+          cohort
+            ? cohort.isFlat
+              ? `Your share is ${cohort.effectiveSharePct}% of what this cohort collects.`
+              : "Your pay on this cohort is a base fee plus a share above a threshold."
+            : "Review collection details and student revenue breakdown for this cohort."
+        }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
+      />
+
       {isLoading ? (
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : error ? (
-        <Card className="p-6 text-center text-sm text-destructive">
+        <Card className="p-6 text-center text-sm text-destructive rounded-2xl border-destructive/20 bg-destructive/5">
           Couldn&apos;t load this cohort&apos;s breakdown. Please refresh.
         </Card>
       ) : !cohort ? (
-        <Card className="p-10 text-center">
+        <Card className="p-10 text-center rounded-2xl">
           <Wallet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">Nothing to show</p>
           <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
@@ -47,17 +69,6 @@ export function CohortEarningsDetailContent({
         </Card>
       ) : (
         <>
-          <header className="space-y-1">
-            <h1 className="text-xl font-semibold tracking-tight">
-              {cohort.course}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {cohort.isFlat
-                ? `Your share is ${cohort.effectiveSharePct}% of what this cohort collects.`
-                : "Your pay on this cohort is a base fee plus a share above a threshold — see your total below."}
-            </p>
-          </header>
-
           <div className="grid gap-3 sm:grid-cols-3">
             <Tile label="Collected" amount={cohort.totalRevenueNaira} />
             <Tile label="Your earnings" amount={cohort.yourEntitlementNaira} />
@@ -150,11 +161,11 @@ function Tile({
   suffix?: string;
 }) {
   return (
-    <div className="rounded-lg border p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-sans">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">
+      <p className="mt-2 text-2xl font-bold font-display tabular-nums text-foreground">
         {suffix ? `${amount}${suffix}` : formatPrice(amount)}
       </p>
     </div>

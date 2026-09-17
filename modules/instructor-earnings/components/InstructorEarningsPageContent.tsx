@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { useBankingDetails } from "@/modules/referrals/queries/use-my-referrals";
@@ -64,7 +65,7 @@ function PayoutStatusBadge({ status }: { status: string }) {
  * payout history.
  */
 export function InstructorEarningsPageContent() {
-  const { data, isLoading, error } = useMyInstructorEarnings();
+  const { data, isLoading, isFetching, error, refetch } = useMyInstructorEarnings();
   const banking = useBankingDetails();
   const router = useRouter();
 
@@ -95,6 +96,10 @@ export function InstructorEarningsPageContent() {
   const cohorts = data?.cohorts ?? [];
   const payouts = data?.payouts ?? [];
 
+  const dateline = data
+    ? `Accrued ${formatPrice(totals.pendingNaira + totals.processingNaira + totals.paidNaira)} Total`
+    : undefined;
+
   const nothingYet =
     totals.pendingNaira === 0 &&
     totals.processingNaira === 0 &&
@@ -109,9 +114,12 @@ export function InstructorEarningsPageContent() {
           variant="editorial"
           eyebrow="Teaching"
           title="Earnings"
+          dateline={dateline}
+          divider
           description="Your accrued earnings and payouts across the cohorts you teach."
+          actions={<RefreshButton loading={isFetching} onClick={refetch} />}
         />
-        <Card className="p-6 text-center space-y-2 border-destructive/20 bg-destructive/5">
+        <Card className="p-6 text-center space-y-2 border-destructive/20 bg-destructive/5 rounded-2xl">
           <p className="font-semibold">We couldn&apos;t load your earnings</p>
           <p className="text-sm text-muted-foreground">
             Please refresh the page. If this keeps happening, contact admin.
@@ -127,7 +135,10 @@ export function InstructorEarningsPageContent() {
         variant="editorial"
         eyebrow="Teaching"
         title="Earnings"
+        dateline={dateline}
+        divider
         description="Your accrued earnings and payouts across the cohorts you teach."
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {/* Bank-details nudge — payouts land in the account on file, so
@@ -321,14 +332,14 @@ function MiniStat({
   hint: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-sans">
         {label}
       </p>
-      <p className="mt-1 text-xl font-bold tabular-nums text-foreground">
+      <p className="mt-2 text-xl font-bold font-display tabular-nums text-foreground">
         {formatPrice(amount)}
       </p>
-      <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
         {hint}
       </p>
     </div>
@@ -346,15 +357,15 @@ function Tile({
 }) {
   const palette: Record<typeof tone, string> = {
     warning: "bg-warning/10 border-warning/30 text-warning",
-    neutral: "bg-muted border-border text-foreground",
+    neutral: "bg-muted/40 border-border text-foreground",
     success: "bg-success/10 border-success/30 text-success",
   };
   return (
-    <div className={"rounded-lg border p-4 " + palette[tone]}>
-      <p className="text-xs font-medium uppercase tracking-wide opacity-80">
+    <div className={"rounded-2xl border p-5 shadow-xs " + palette[tone]}>
+      <p className="text-xs font-semibold uppercase tracking-wider opacity-80 font-sans">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">
+      <p className="mt-2 text-2xl font-bold font-display tabular-nums">
         {formatPrice(amount)}
       </p>
     </div>
