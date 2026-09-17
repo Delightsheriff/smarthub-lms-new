@@ -159,6 +159,16 @@ export function CourseModulePageContent({
 
   return (
     <div className="space-y-6">
+      {/* Top back navigation */}
+      <div>
+        <Link
+          href={`/courses/${slug}`}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to {course.name}
+        </Link>
+      </div>
+
       {/* Hero */}
       <Card className="p-6 md:p-8 rounded-2xl border border-border bg-card shadow-sm">
         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -227,17 +237,19 @@ export function CourseModulePageContent({
           </p>
         </Card>
       ) : (
-        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-          <TabsList className="overflow-x-auto justify-start max-w-full">
-            {visibleTabs.map((key) => (
-              <TabsTrigger key={key} value={key}>
-                {labels[key]}
-                <span className="ml-1.5 text-[10px] text-muted-foreground tabular-nums">
-                  {counts[key]}
-                </span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-4">
+          <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
+            <TabsList className="w-max">
+              {visibleTabs.map((key) => (
+                <TabsTrigger key={key} value={key}>
+                  {labels[key]}
+                  <span className="ml-1.5 text-[10px] text-muted-foreground tabular-nums">
+                    {counts[key]}
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {visibleTabs.includes("recordings") && (
             <TabsContent value="recordings">

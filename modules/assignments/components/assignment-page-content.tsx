@@ -175,9 +175,9 @@ export function AssignmentPageContent({
       )}
 
       {/* Two-column layout for details & submission status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left column: Instructions & Resources */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="xl:col-span-2 space-y-6">
           <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
             <h2 className="font-display text-lg font-semibold flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" /> Instructions & Brief
