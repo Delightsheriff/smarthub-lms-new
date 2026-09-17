@@ -104,22 +104,19 @@ bordered cards. The top bar's redundant greeting was removed (the
 masthead owns it now) and the sidebar header got a hairline divider to
 match the new rule-based motif.
 
-**Masthead-only so far** (plans 003/004 — `dateline`/`divider` added,
-body structure unchanged; real structural work pending, see plan 005):
-Assignments, Jobs, Recordings, Materials, Courses, Billing, Payments,
-Referrals, Internships, Activity, Webinars, Calendar, Inbox, Profile,
-the cohort workspace tabs, Oreo, Help, Notifications, Assigned Modules,
-Self-Paced Courses, Instructor Self-Paced, Instructor Earnings, Cohort
-Revenue Breakdown, Internship Fee Payment, Session Attendance,
-Assignment Detail, Course Module Detail. Plan 003 claimed real
-hero+ledger/`IndexList` work landed on Assignments, Recordings,
-Materials, and Courses — checked while writing plan 005:
-**Assignments genuinely did** (`assignment-list-page-content.tsx` uses
-real `Ledger`/`LedgerItem` for a dominant-hero-plus-upcoming-list
-layout). **Recordings, Materials, and Courses did not** — none of the
-three import `IndexList`/`IndexRow` despite the claim; they're still on
-masthead-only. Fold these three into plan 005's scope alongside the
-already-listed phase-2 surfaces.
+**Masthead-only so far** — `dateline`/`divider` added, body structure
+unchanged. Real per-page plans are `plans/001` through `plans/024`
+(registry + shared rules in `plans/000-index.md`): Profile, Help,
+Assigned Modules, Self-Paced Courses, Instructor Self-Paced,
+Instructor Earnings, Cohort Revenue Breakdown, Internship Fee Payment,
+Session Attendance, Assignment Detail, Course Module Detail, Oreo,
+Recordings, Materials, Courses, Billing, Payments, Referrals,
+Internships, Activity, Webinars, Calendar, Inbox, Jobs, the cohort
+workspace tabs. **Assignments (`/assignments`, student list) is the one
+confirmed exception** — `assignment-list-page-content.tsx` genuinely
+uses real `Ledger`/`LedgerItem` for a dominant-hero-plus-upcoming-list
+layout; no plan file needed for it unless a future check finds it
+regressed.
 
 ---
 
@@ -197,20 +194,19 @@ sessions are JWT-strategy, encrypted in an httpOnly cookie.
 
 ## 6. Plan-number and ADR-number registry
 
-**Renumbered from scratch** alongside this file's rewrite — the old
-001–019 sequence documented the porting project and the pre-"Brief"
-rollout, both superseded. Starting fresh at 001 for the editorial
-dashboard system era.
+**Renumbered from scratch a second time.** The first renumbering
+(001–005) covered the dashboards plus two rollout attempts (003, 004)
+that shipped masthead-only twice in a row, plus 005's attempt to
+correct that in one large combined document. All of it is deleted.
+The current sequence, `plans/000-024`, is one plan per page instead —
+see `plans/000-index.md` for the full registry, shared ground rules,
+and the acceptance checklist every one of them uses. **Do not create
+`plans/002-editorial-rollout-*` or similar combined documents again**
+— the per-page shape is deliberate, specifically because the combined
+version's nuance ("some pages get `IndexList`, some don't, tables stay
+tables") kept getting lost or ignored in execution.
 
-| Plans taken | By |
-|---|---|
-| 001 | Editorial dashboard system — masthead/hero-ledger/bento/index-list, both dashboards, header/sidebar complement (this slice) |
-| 002 | Handoff prompt: roll "The Brief" out to the rest of the app — see `plans/002-editorial-rollout-handoff.md` |
-| 003 | Editorial rollout phase 1: core academic & learning surfaces — see `plans/003-editorial-rollout-phase1.md` |
-| 004 | Editorial modernization: Oreo AI & final unmigrated surfaces — see `plans/004-editorial-rollout-phase2-oreo-and-remaining.md`. Shipped masthead-only; superseded by 005 for the structural work it didn't do. |
-| 005 | Real structural redesign for the phase-2 surfaces (supersedes 004's design-move column) — introduces the fifth composition move, Reading + Rail, for single-item detail pages — see `plans/005-editorial-rollout-phase2-real-redesign.md` |
-
-Next available plan number: **006**.
+Next available plan number: **025**.
 
 | ADRs taken | Decision |
 |---|---|
@@ -262,5 +258,5 @@ misremembered.
 | `DashboardStatsStrip` tiles restyled to match `ProgressPulseCard`'s tile shape, off a viewport-based `md:grid-cols-4` that squeezed into a narrow bento column | ✅ Done |
 | Role switcher moved from sidebar header to top bar (always visible, icon-only below `sm:`) | ✅ Done — shrinks the sidebar rail, fixed a real mobile overlap regression found while verifying |
 | Bento tile rhythm (`ProgressPulseCard` / `DashboardStatsStrip`) unified — same header treatment, same 2-col grid, no more 3-across truncation, no more one-tile-has-a-gradient inconsistency | ✅ Done |
-| Rollout to remaining pages (Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity, Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals, Cohort workspace) | ✅ Done — all 15 core surfaces migrated to "The Brief" editorial mastheads, responsive grids (preventing tablet squeeze), and mobile-safe controls (Plan 003) |
-| Editorial modernization of Oreo AI & final unmigrated surfaces (Oreo AI, Help Library, Notifications, Assigned Modules, Self-Paced Learning Catalog, Instructor Self-Paced Portal, Instructor Earnings, Cohort Earnings Detail, Internship Fee Payment, Session Attendance, and Academic Detail pages) | ✅ Done — 100% application surface area migrated to "The Brief" editorial design language with tablet/mobile responsive protection and brand tokens (Plan 004) |
+| Notifications Center | ✅ Real `Ledger` conversion shipped and live-verified (not masthead-only) |
+| Every other remaining page (Profile, Help, Assigned Modules, Self-Paced x2, Instructor Earnings, Cohort Revenue, Internship Payment, Session Attendance, Assignment/Module Detail, Oreo, Recordings, Materials, Courses, Billing, Payments, Referrals, Internships, Activity, Webinars, Calendar, Inbox, Jobs, Cohort Workspace) | ⬜ **Corrected claim**: two prior passes (formerly plans 003/004, now deleted) reported these as "100% migrated" / "Done." Verified by reading the actual code: every one of them got `dateline`/`divider` on `PageHeader` and nothing else — the card grids, stacked cards, and raw tables underneath are unchanged. Real per-page plans are `plans/001` through `plans/024` (see `plans/000-index.md`) — none of the structural work is done yet. |
