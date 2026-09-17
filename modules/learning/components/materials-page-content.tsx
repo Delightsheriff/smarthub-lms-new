@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
+import { IndexList } from "@/components/ui/index-list";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
 import { useMyMaterials, useTrackMaterialDownload } from "../api/content.queries";
 import { downloadFile } from "@/lib/cloudinary-download";
@@ -147,10 +148,12 @@ export function MaterialsPageContent() {
         />
       )}
 
+      {/* Course-grouped IndexList rows */}
       {!isLoading &&
         groups.map((g) => (
-          <section key={g.course.id} className="space-y-2">
-            <div className="flex items-baseline justify-between border-b border-border pb-2.5 pt-3">
+          <section key={g.course.id} className="space-y-1">
+            {/* Course heading */}
+            <div className="flex items-baseline justify-between pb-2 pt-3">
               <div className="flex items-center gap-2.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm"
@@ -158,7 +161,7 @@ export function MaterialsPageContent() {
                 />
                 <Link
                   href={`/courses/${g.course.slug}`}
-                  className="font-display text-lg font-semibold text-foreground hover:text-accent transition-colors"
+                  className="font-display text-base font-semibold text-foreground hover:text-accent transition-colors"
                 >
                   {g.course.name}
                 </Link>
@@ -168,8 +171,9 @@ export function MaterialsPageContent() {
               </span>
             </div>
 
-            <ul className="divide-y divide-border border-b border-border">
-              {g.items.map((row) => {
+            {/* IndexList — numbered hairline rows within this course */}
+            <IndexList>
+              {g.items.map((row, idx) => {
                 const m = row.material;
                 const Icon = MATERIAL_ICON[m.type];
                 const hasFile = !!m.fileUrl;
@@ -177,8 +181,8 @@ export function MaterialsPageContent() {
                 const instructionsOnly = !hasFile && hasBody;
                 const expanded = expandedId === m.id;
                 return (
-                  <li key={m.id} className="transition-colors hover:bg-muted/30">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 py-3.5">
+                  <div key={m.id} className="border-b border-border transition-colors hover:bg-muted/30">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5">
                       <div
                         className="flex flex-1 items-start sm:items-center gap-3 min-w-0 cursor-pointer"
                         onClick={() => {
@@ -189,6 +193,11 @@ export function MaterialsPageContent() {
                           }
                         }}
                       >
+                        {/* Number */}
+                        <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0">
+                          {String(idx + 1).padStart(2, "0")}
+                        </span>
+
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                           <Icon className="h-4 w-4" />
                         </span>
@@ -210,7 +219,7 @@ export function MaterialsPageContent() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pl-12 sm:pl-0">
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pl-9 sm:pl-0">
                         {hasFile ? (
                           <div className="flex items-center gap-1.5">
                             <Button
@@ -260,10 +269,10 @@ export function MaterialsPageContent() {
                         />
                       </div>
                     )}
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </IndexList>
           </section>
         ))}
 

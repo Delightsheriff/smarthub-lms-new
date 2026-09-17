@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
+import { IndexList } from "@/components/ui/index-list";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { useMyRecordings } from "../api/content.queries";
 import { cn, formatDate } from "@/lib/utils";
@@ -169,10 +170,12 @@ export function RecordingsPageContent() {
         />
       )}
 
+      {/* Course-grouped IndexList rows */}
       {!isLoading &&
         groups.map((g) => (
-          <section key={g.course.id} className="space-y-2">
-            <div className="flex items-baseline justify-between border-b border-border pb-2.5 pt-3">
+          <section key={g.course.id} className="space-y-1">
+            {/* Course heading */}
+            <div className="flex items-baseline justify-between pb-2 pt-3">
               <div className="flex items-center gap-2.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm"
@@ -180,7 +183,7 @@ export function RecordingsPageContent() {
                 />
                 <Link
                   href={`/courses/${g.course.slug}`}
-                  className="font-display text-lg font-semibold text-foreground hover:text-accent transition-colors"
+                  className="font-display text-base font-semibold text-foreground hover:text-accent transition-colors"
                 >
                   {g.course.name}
                 </Link>
@@ -190,93 +193,100 @@ export function RecordingsPageContent() {
               </span>
             </div>
 
-            <ul className="divide-y divide-border border-b border-border">
-              {g.items.map((row) => {
+            {/* IndexList — numbered hairline rows within this course */}
+            <IndexList>
+              {g.items.map((row, idx) => {
                 const r = row.recording;
                 const locked = r.isLocked;
                 const open = () => {
                   if (!locked) setActiveId(r.id);
                 };
                 return (
-                  <li
+                  <div
                     key={r.id}
                     className={cn(
-                      "flex items-start justify-between gap-3 px-2 py-3.5 transition-colors hover:bg-muted/30",
+                      "flex items-start justify-between gap-3 border-b border-border px-0 py-3.5 transition-colors hover:bg-muted/30",
                       locked && "opacity-60",
                     )}
                   >
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                    {/* Number */}
+                    <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0 mt-0.5">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+
+                    {/* Play or locked chip */}
+                    {locked ? (
+                      <span
+                        className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
+                        aria-hidden
+                      >
+                        <Lock className="h-4 w-4" />
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={open}
+                        aria-label={`Play ${r.title}`}
+                        className="mt-0.5 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary/20"
+                      >
+                        {r.watched ? (
+                          <CheckCircle2 className="h-4 w-4 text-success" />
+                        ) : (
+                          <PlayCircle className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
+                        {row.module.order != null
+                          ? `Module ${row.module.order
+                              .toString()
+                              .padStart(2, "0")} · `
+                          : ""}
+                        {row.module.title}
+                      </p>
                       {locked ? (
-                        <span
-                          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
-                          aria-hidden
-                        >
-                          <Lock className="h-4 w-4" />
-                        </span>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={open}
-                          aria-label={`Play ${r.title}`}
-                          className="mt-0.5 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary/20"
-                        >
-                          {r.watched ? (
-                            <CheckCircle2 className="h-4 w-4 text-success" />
-                          ) : (
-                            <PlayCircle className="h-4 w-4" />
-                          )}
-                        </Button>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
-                          {row.module.order != null
-                            ? `Module ${row.module.order
-                                .toString()
-                                .padStart(2, "0")} · `
-                            : ""}
-                          {row.module.title}
+                        <p className="text-sm font-medium leading-snug text-muted-foreground">
+                          {r.title}
                         </p>
-                        {locked ? (
-                          <p className="text-sm font-medium leading-snug text-muted-foreground">
-                            {r.title}
-                          </p>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={open}
-                            className="text-left text-sm font-medium leading-snug text-foreground hover:text-accent transition-colors"
-                          >
-                            {r.title}
-                          </button>
-                        )}
-                        {locked ? (
-                          <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
-                            <Lock className="h-3 w-3" />
-                            Not available to you
-                          </p>
-                        ) : (
-                          <p className="font-mono text-xs text-muted-foreground mt-0.5">
-                            {r.durationLabel}
-                            {r.durationLabel && r.publishedAt ? " · " : ""}
-                            {r.publishedAt
-                              ? `published ${formatDate(r.publishedAt)}`
-                              : ""}
-                            {r.watched && (
-                              <span className="ml-2 text-success font-sans">· Completed</span>
-                            )}
-                          </p>
-                        )}
-                        {!locked && r.description && (
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            <CollapsibleRichText
-                              html={r.description}
-                              maxHeight={72}
-                            />
-                          </div>
-                        )}
-                      </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={open}
+                          className="text-left text-sm font-medium leading-snug text-foreground hover:text-accent transition-colors"
+                        >
+                          {r.title}
+                        </button>
+                      )}
+                      {locked ? (
+                        <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
+                          <Lock className="h-3 w-3" />
+                          Not available to you
+                        </p>
+                      ) : (
+                        <p className="font-mono text-xs text-muted-foreground mt-0.5">
+                          {r.durationLabel}
+                          {r.durationLabel && r.publishedAt ? " · " : ""}
+                          {r.publishedAt
+                            ? `published ${formatDate(r.publishedAt)}`
+                            : ""}
+                          {r.watched && (
+                            <span className="ml-2 text-success font-sans">· Completed</span>
+                          )}
+                        </p>
+                      )}
+                      {!locked && r.description && (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          <CollapsibleRichText
+                            html={r.description}
+                            maxHeight={72}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <Link
@@ -286,10 +296,10 @@ export function RecordingsPageContent() {
                     >
                       <ArrowRight className="h-4 w-4" />
                     </Link>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </IndexList>
           </section>
         ))}
 
