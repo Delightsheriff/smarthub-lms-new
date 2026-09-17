@@ -63,7 +63,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="hidden sm:block text-right">
                       <span className="font-semibold text-foreground block">
-                        {row.submissionCount} Submissions
+                        {row.submissionCount} {row.submissionCount === 1 ? "Submission" : "Submissions"}
                       </span>
                       <span className="text-[10px]">
                         Last: {row.lastSubmittedAt ? formatDate(row.lastSubmittedAt) : "Never"}

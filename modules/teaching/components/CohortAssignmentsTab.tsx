@@ -53,8 +53,8 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
 
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>Due: {asgn.dueDate ? formatDate(asgn.dueDate) : "No due date"}</span>
-                    <span>· {asgn.submissionCount} Submissions</span>
-                    <span>· {asgn.pendingCount} Pending Grade</span>
+                    <span>· {asgn.submissionCount} {asgn.submissionCount === 1 ? "Submission" : "Submissions"}</span>
+                    <span>· {asgn.pendingCount} Pending {asgn.pendingCount === 1 ? "Grade" : "Grades"}</span>
                   </div>
                 </div>
 

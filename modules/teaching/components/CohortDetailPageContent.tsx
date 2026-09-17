@@ -80,7 +80,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
 
           {/* 6 Tabs Workspace Shell */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="rounded-xl bg-muted/60 p-1 flex-wrap">
+            <TabsList className="rounded-xl bg-muted/60 p-1 w-full justify-start overflow-x-auto flex-nowrap">
               <TabsTrigger value="overview" className="rounded-lg text-xs">
                 Overview
               </TabsTrigger>
