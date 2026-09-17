@@ -11,6 +11,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { publicSiteOrigin } from "@/lib/public-origin";
+import { pluralize } from "@/lib/utils";
 import { useSelfPacedCourses } from "../api/self-paced.queries";
 import { SELF_PACED_ROUTES } from "../config/endpoints";
 import type { SelfPacedCourseSummary } from "../types";
@@ -40,7 +41,7 @@ export function SelfPacedCoursesPageContent() {
   const empty = !isLoading && !isError && courses.length === 0;
 
   const count = courses.length;
-  const dateline = data ? `${count} Course${count === 1 ? "" : "s"} Enrolled` : undefined;
+  const dateline = data ? `${pluralize(count, "Course")} Enrolled` : undefined;
 
   const activeCandidates = pickActive(courses);
   const heroCourse = activeCandidates[0];

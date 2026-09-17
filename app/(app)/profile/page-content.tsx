@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, getInitial } from "@/lib/utils";
 
 type SectionId =
   | "overview"
@@ -116,7 +116,7 @@ export default function ProfilePageContent() {
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     user?.email ||
     "";
-  const initial = (fullName || "?").slice(0, 1).toUpperCase();
+  const initial = getInitial(fullName);
 
   const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,9 +95,7 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
                       {sub.assignment.title}
                     </Badge>
                     {sub.isLate && (
-                      <Badge variant="destructive" className="text-[10px]">
-                        Late
-                      </Badge>
+                      <StatusBadge status="late" className="text-[10px]" />
                     )}
                   </div>
                 }

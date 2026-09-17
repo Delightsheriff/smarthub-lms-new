@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
+import { pluralize } from "@/lib/utils";
 import { actionTypeStyle } from "../lib/action-type";
 import { useMyActivity } from "../api/activity.queries";
 import type { ActivityEvent } from "../types";
@@ -52,7 +53,7 @@ export function MyActivityPageContent() {
           meta ? (
             <>
               Security and audit timeline recording{" "}
-              <strong className="text-foreground">{meta.total}</strong> account action{meta.total === 1 ? "" : "s"}.
+              <strong className="text-foreground">{meta.total}</strong> {pluralize(meta.total, "account action", undefined, false)}.
             </>
           ) : (
             "A security and audit timeline of your recent account actions, submissions, and payments."

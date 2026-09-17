@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
+import { pluralize } from "@/lib/utils";
 import { useWebinars } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
 import type { WebinarSummary } from "../types";
@@ -84,7 +85,7 @@ export function WebinarsPageContent() {
           upcomingList.length > 0 ? (
             <>
               Join live industry sessions, masterclasses, and workshops.{" "}
-              <strong className="text-foreground">{upcomingList.length}</strong> upcoming session{upcomingList.length === 1 ? "" : "s"}.
+              <strong className="text-foreground">{upcomingList.length}</strong> {pluralize(upcomingList.length, "upcoming session", undefined, false)}.
             </>
           ) : (
             "Join live industry sessions, masterclasses, and rewatch past recorded workshops."

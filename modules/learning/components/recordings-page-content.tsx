@@ -12,7 +12,7 @@ import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { IndexList } from "@/components/ui/index-list";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { useMyRecordings } from "../api/content.queries";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, pluralize } from "@/lib/utils";
 import type { RecordingWithContext } from "../types";
 
 type Filter = "all" | "unwatched" | "watched";
@@ -74,7 +74,7 @@ export function RecordingsPageContent() {
               "Class recordings will appear here as your tutors publish live session replays."
             ) : (
               <>
-                <strong className="text-foreground">{rows.length}</strong> {rows.length === 1 ? "recording" : "recordings"} available
+                <strong className="text-foreground">{rows.length}</strong> {pluralize(rows.length, "recording", undefined, false)} available
                 {unwatched.length > 0 ? (
                   <>
                     {" "}
@@ -189,7 +189,7 @@ export function RecordingsPageContent() {
                 </Link>
               </div>
               <span className="font-mono text-xs text-muted-foreground">
-                {g.items.length} {g.items.length === 1 ? "recording" : "recordings"}
+                {pluralize(g.items.length, "recording")}
               </span>
             </div>
 

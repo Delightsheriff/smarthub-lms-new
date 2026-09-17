@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Clock } from "lucide-react";
-import { cn, formatDateTime } from "@/lib/utils";
+import { cn, formatDateTime, pluralize } from "@/lib/utils";
 import {
   isSameDay,
   formatHourLabel,
@@ -70,7 +70,7 @@ export function DayView({
           })}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {dayEvents.length} scheduled event{dayEvents.length === 1 ? "" : "s"}
+          {pluralize(dayEvents.length, "scheduled event")}
         </p>
       </div>
 

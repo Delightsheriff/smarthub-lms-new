@@ -14,7 +14,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, pluralize } from "@/lib/utils";
 import { useStudentCalendar } from "../api/calendar.queries";
 import { MonthGrid } from "./MonthGrid";
 import { WeekGrid } from "./WeekGrid";
@@ -157,7 +157,7 @@ export function CalendarPageContent() {
           events && events.length > 0 ? (
             <>
               Live sessions, assignment deadlines, and milestones.{" "}
-              <strong className="text-foreground">{events.length}</strong> event{events.length === 1 ? "" : "s"} scheduled for this period.
+              <strong className="text-foreground">{events.length}</strong> {pluralize(events.length, "event", undefined, false)} scheduled for this period.
             </>
           ) : (
             "Class sessions, assignment deadlines, office hours, and academic events."

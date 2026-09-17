@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClipboardList, HelpCircle, LogOut, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getInitial } from "@/lib/utils";
 import { useAuthStore } from "@/store/slices/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export function UserMenu() {
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     user?.email ||
     "";
-  const initial = (fullName || "?").slice(0, 1).toUpperCase();
+  const initial = getInitial(fullName);
 
   const handleLogout = () => {
     logout();
