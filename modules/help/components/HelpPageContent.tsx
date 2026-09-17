@@ -48,17 +48,31 @@ export function HelpPageContent() {
   }
 
   const groups = groupByCategory(data ?? []);
+  const totalGuides = (data ?? []).length;
+
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Support"
-        title="Help"
+        divider
+        dateline={`${dateline} · Knowledge Base & Support`}
+        title="Help & Guides"
         description={
-          groups.length > 0
-            ? "Short guides for the things you do most."
-            : undefined
+          totalGuides > 0 ? (
+            <>
+              Short walkthroughs and documentation for the things you do most.{" "}
+              <strong className="text-foreground">{totalGuides}</strong> guide{totalGuides === 1 ? "" : "s"} across{" "}
+              <strong className="text-foreground">{groups.length}</strong> {groups.length === 1 ? "category" : "categories"}.
+            </>
+          ) : (
+            "Short guides and walkthroughs for the things you do most."
+          )
         }
       />
 
