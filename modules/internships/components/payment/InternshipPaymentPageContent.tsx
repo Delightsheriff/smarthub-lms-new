@@ -8,13 +8,14 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
+  Copy,
   Landmark,
   Loader2,
   ReceiptText,
   UploadCloud,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,18 +25,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatPrice } from "@/lib/utils";
 import {
   useInternshipPayment,
   useSubmitInternshipPaymentProof,
 } from "../../api/internships.queries";
-import type { ApiInternshipPayment } from "../../types/api.types";
 
 /** `/internships/me/payment` — the internship fee surface. Self-gating
  *  like the dashboard tiles: no applicable payment renders an empty
@@ -95,109 +95,206 @@ export function InternshipPaymentPageContent() {
       />
 
       {settled ? (
-        <ConfirmedReceipt payment={data} />
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 rounded-2xl border border-success/30 bg-success/5 p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
+              <CheckCircle2 className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-display text-base font-semibold text-foreground">
+                Payment settled in full
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Your placement credentials and workspace access are active.
+              </p>
+            </div>
+          </div>
+
+          <Ledger title="Submission history" count={1}>
+            <LedgerItem
+              icon={CheckCircle2}
+              iconClassName="bg-success/10 text-success"
+              title={`${formatPrice(data.fee)} · Internship placement fee`}
+              meta={
+                <>
+                  Reference: <span className="font-mono">{data.paymentReference || "—"}</span>
+                  {data.paymentConfirmedAt && ` · Confirmed ${formatDate(data.paymentConfirmedAt)}`}
+                </>
+              }
+              when="Paid"
+            />
+          </Ledger>
+        </div>
       ) : data.paymentProofUrl ? (
-        <AwaitingConfirmation payment={data} />
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 rounded-2xl border border-warning/30 bg-warning/5 p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
+              <Clock3 className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-display text-base font-semibold text-foreground">
+                Proof submitted — awaiting confirmation
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Finance reviews submissions daily. Your placement updates automatically once confirmed.
+              </p>
+            </div>
+          </div>
+
+          <Ledger title="Your submissions" count={1}>
+            <LedgerItem
+              tone="due"
+              icon={Clock3}
+              iconClassName="bg-warning/10 text-warning"
+              title={`${formatPrice(data.fee - data.paidAmount)} · Internship placement fee`}
+              meta={
+                <>
+                  Reference: <span className="font-mono">{data.paymentReference || "—"}</span>
+                  {data.paymentProofSubmittedAt && ` · Submitted ${formatDate(data.paymentProofSubmittedAt)}`}
+                </>
+              }
+              when="In review"
+            />
+          </Ledger>
+
+          <BankDetailsCard
+            bank={data.bank}
+            fee={data.fee}
+            outstanding={data.fee - data.paidAmount}
+          />
+        </div>
       ) : (
-        <PendingPayment payment={data} />
+        <div className="space-y-6">
+          <BankDetailsCard
+            bank={data.bank}
+            fee={data.fee}
+            outstanding={data.fee - data.paidAmount}
+          />
+
+          <PendingPaymentAction
+            fee={data.fee}
+            outstanding={data.fee - data.paidAmount}
+          />
+        </div>
       )}
     </div>
   );
 }
 
-function ConfirmedReceipt({ payment }: { payment: ApiInternshipPayment }) {
+function BankDetailsCard({
+  bank,
+  fee,
+  outstanding,
+}: {
+  bank?: {
+    bankName?: string;
+    accountName?: string;
+    accountNumber?: string;
+    paymentInstructions?: string;
+  };
+  fee: number;
+  outstanding: number;
+}) {
+  if (!bank || !bank.bankName) return null;
+
+  const copy = (v?: string) => {
+    if (v) {
+      void navigator.clipboard?.writeText(v);
+      toast.success("Copied to clipboard");
+    }
+  };
+
   return (
-    <Card className="p-6 rounded-2xl border border-success/30 bg-success/5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
-          <CheckCircle2 className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-lg font-semibold text-foreground">
-            {formatPrice(payment.fee)} — paid in full
+    <div className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6 shadow-sm">
+      <div className="flex flex-col justify-between gap-3 border-b border-border pb-3 sm:flex-row sm:items-center">
+        <div>
+          <p className="font-display text-base font-semibold text-foreground">
+            Bank transfer details
           </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Reference:{" "}
-            <span className="font-mono text-xs">
-              {payment.paymentReference || "—"}
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Pay to our official account, then upload your receipt below
+          </p>
+        </div>
+        <div className="flex items-center gap-2 self-start rounded-xl border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary sm:self-auto">
+          <Landmark className="h-3.5 w-3.5" />
+          <span>{bank.bankName}</span>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div>
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+            Account name
+          </p>
+          <p className="mt-0.5 text-sm font-semibold text-foreground">
+            {bank.accountName}
+          </p>
+        </div>
+        <div>
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+            Account number
+          </p>
+          <div className="mt-0.5 flex items-center gap-2">
+            <span className="font-mono text-base font-bold tracking-wider text-foreground">
+              {bank.accountNumber}
             </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Copy account number"
+              className="rounded-lg hover:bg-muted"
+              onClick={() => copy(bank.accountNumber)}
+            >
+              <Copy className="h-4 w-4 text-primary" />
+            </Button>
+          </div>
+        </div>
+        <div>
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+            {outstanding < fee ? "Remaining balance" : "Internship fee"}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Confirmed {payment.paymentConfirmedAt ? formatDate(payment.paymentConfirmedAt) : ""}
+          <p className="mt-0.5 font-display text-base font-bold text-foreground">
+            {formatPrice(outstanding)}
           </p>
         </div>
       </div>
-    </Card>
+
+      {bank.paymentInstructions && (
+        <p className="rounded-xl border border-border/50 bg-muted/20 p-3 text-xs leading-relaxed text-muted-foreground">
+          {bank.paymentInstructions}
+        </p>
+      )}
+    </div>
   );
 }
 
-function AwaitingConfirmation({ payment }: { payment: ApiInternshipPayment }) {
-  return (
-    <Card className="p-6 rounded-2xl border border-info/30 bg-info/5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-info/10 text-info">
-          <Clock3 className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-lg font-semibold text-foreground">Proof submitted — awaiting confirmation</p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Your receipt is in for{" "}
-            {formatPrice(payment.fee - payment.paidAmount)}, submitted{" "}
-            {payment.paymentProofSubmittedAt
-              ? formatDate(payment.paymentProofSubmittedAt)
-              : ""}
-            .
-          </p>
-          {payment.paymentReference && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              Reference:{" "}
-              <span className="font-mono text-xs">{payment.paymentReference}</span>
-            </p>
-          )}
-          <p className="mt-2 text-xs text-muted-foreground">
-            Finance confirms each receipt — usually within a day. This page
-            updates automatically once they do.
-          </p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
+function PendingPaymentAction({
+  fee: _fee,
+  outstanding: _outstanding,
+}: {
+  fee: number;
+  outstanding: number;
+}) {
   const [open, setOpen] = useState(false);
   const mutation = useSubmitInternshipPaymentProof();
 
   return (
-    <div className="space-y-4">
-      <Card className="p-5 md:p-6 rounded-2xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-            <Landmark className="h-4 w-4 text-primary" />
-            {payment.bank?.bankName}
-          </div>
-          <span className="text-sm font-semibold text-destructive">
-            {formatPrice(payment.fee - payment.paidAmount)} outstanding
-          </span>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Account name" value={payment.bank?.accountName} mono />
-          <Field label="Account number" value={payment.bank?.accountNumber} mono />
-          <Field label="Fee" value={formatPrice(payment.fee)} />
-        </div>
-        {payment.bank?.paymentInstructions && (
-          <p className="mt-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-xs text-muted-foreground">
-            {payment.bank.paymentInstructions}
+    <>
+      <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm sm:flex-row sm:items-center md:p-6">
+        <div>
+          <p className="font-display text-base font-semibold text-foreground">
+            Ready to confirm your payment?
           </p>
-        )}
-        <div className="mt-5 flex justify-end">
-          <Button onClick={() => setOpen(true)} className="rounded-xl">
-            <UploadCloud className="h-4 w-4 mr-1.5" />
-            Upload payment proof
-          </Button>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Upload your bank transfer receipt (screenshot or PDF) to activate your placement.
+          </p>
         </div>
-      </Card>
+        <Button onClick={() => setOpen(true)} className="shrink-0 rounded-xl">
+          <UploadCloud className="mr-1.5 h-4 w-4" />
+          Upload payment proof
+        </Button>
+      </div>
 
       <UploadProofDialog
         open={open}
@@ -208,28 +305,7 @@ function PendingPayment({ payment }: { payment: ApiInternshipPayment }) {
           setOpen(false);
         }}
       />
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value?: string;
-  mono?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className={"mt-0.5 text-sm font-semibold" + (mono ? " font-mono" : "")}>
-        {value || "—"}
-      </p>
-    </div>
+    </>
   );
 }
 

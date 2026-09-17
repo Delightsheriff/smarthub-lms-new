@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { CheckCircle2, Copy, Loader2, UploadCloud } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Copy, Loader2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Select,
@@ -29,12 +30,6 @@ const paymentProofSchema = z.object({
   amount: z.string().trim().refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, "Enter an amount greater than zero"),
   reference: z.string().max(500, "Reference must be 500 characters or fewer"),
 });
-
-const statusTone: Record<string, string> = {
-  pending: "bg-warning/10 text-warning border-warning/20",
-  confirmed: "bg-success/10 text-success border-success/20",
-  rejected: "bg-destructive/10 text-destructive border-destructive/20",
-};
 
 export function PaymentsPageContent() {
   const {
@@ -323,44 +318,54 @@ export function PaymentsPageContent() {
       </form></Form>
 
       {surface && surface.proofs.length > 0 ? (
-        <div className="space-y-3">
-          <p className="font-display text-base font-semibold text-foreground">Your submissions</p>
-          <ul className="space-y-2.5">
-            {surface.proofs.map((p: MyPaymentProofUi) => (
-              <li
+        <Ledger title="Your submissions" count={surface.proofs.length}>
+          {surface.proofs.map((p: MyPaymentProofUi) => {
+            const confirmed = p.status === "confirmed";
+            const rejected = p.status === "rejected";
+            const amount = confirmed
+              ? p.confirmedAmount ?? p.amountClaimed
+              : p.amountClaimed;
+
+            return (
+              <LedgerItem
                 key={p._id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm shadow-xs"
-              >
-                <div>
-                  <p className="font-medium text-foreground">
-                    {`₦${(
-                      p.status === "confirmed"
-                        ? p.confirmedAmount ?? p.amountClaimed
-                        : p.amountClaimed
-                    ).toLocaleString("en-NG")}`}
+                icon={confirmed ? CheckCircle2 : rejected ? AlertCircle : Clock}
+                iconClassName={
+                  confirmed
+                    ? "bg-success/10 text-success"
+                    : rejected
+                      ? "bg-destructive/10 text-destructive"
+                      : "bg-warning/10 text-warning"
+                }
+                title={
+                  <>
+                    {`₦${amount.toLocaleString("en-NG")}`}
                     {p.courseName ? (
-                      <span className="text-muted-foreground font-normal">
-                        {" "}
-                        · {p.courseName}
+                      <span className="font-normal text-muted-foreground">
+                        {" · "}
+                        {p.courseName}
                       </span>
                     ) : null}
-                  </p>
-                  {p.status === "rejected" && p.reviewNotes && (
-                    <p className="text-xs text-destructive mt-0.5">{p.reviewNotes}</p>
-                  )}
-                </div>
-                <span
-                  className={`rounded-full border px-2.5 py-0.5 text-xs capitalize ${
-                    statusTone[p.status] ??
-                    "bg-muted text-muted-foreground border-border"
-                  }`}
-                >
-                  {p.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  </>
+                }
+                meta={
+                  rejected && p.reviewNotes
+                    ? p.reviewNotes
+                    : p.reference
+                      ? `Reference: ${p.reference}`
+                      : undefined
+                }
+                when={
+                  p.status === "confirmed"
+                    ? "Confirmed"
+                    : p.status === "rejected"
+                      ? "Declined"
+                      : "Pending"
+                }
+              />
+            );
+          })}
+        </Ledger>
       ) : null}
     </div>
   );
