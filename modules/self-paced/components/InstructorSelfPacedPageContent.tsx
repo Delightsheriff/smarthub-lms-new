@@ -27,7 +27,9 @@ export function InstructorSelfPacedPageContent() {
         variant="editorial"
         eyebrow="Teaching"
         title="Self-paced Courses"
-        description="Share your referral links, see what they've sold, and track your share of every sale."
+        dateline="Instructor Revenue & Attribution"
+        divider
+        description="Share your personal course links, monitor attributed sales, and track your revenue shares."
       />
 
       {!teaches ? (
@@ -37,12 +39,14 @@ export function InstructorSelfPacedPageContent() {
           description="Referral links and self-paced sales are available to accounts that teach on SmartHub."
         />
       ) : (
-        <Tabs defaultValue="links">
-          <TabsList className="w-full justify-start overflow-x-auto">
-            <TabsTrigger value="links">My referral links</TabsTrigger>
-            <TabsTrigger value="sales">Sales</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="links" className="space-y-4">
+          <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
+            <TabsList className="w-max">
+              <TabsTrigger value="links">My referral links</TabsTrigger>
+              <TabsTrigger value="sales">Sales</TabsTrigger>
+              <TabsTrigger value="earnings">Earnings</TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="links" className="mt-4">
             <InstructorReferralLinks />
           </TabsContent>
