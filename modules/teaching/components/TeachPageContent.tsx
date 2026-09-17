@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -32,6 +34,18 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 export function TeachPageContent() {
   const user = useAuthStore((s) => s.user);
   const { data: cohorts, isLoading, isFetching, error, refetch } = useTeachingCohorts();
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.allSettled([
+      refetch(),
+      queryClient.invalidateQueries({ queryKey: ["teaching"] }),
+      queryClient.invalidateQueries({ queryKey: ["webinars"] }),
+    ]);
+    setIsRefreshing(false);
+  };
 
   const greetingName = user?.firstName?.trim() || "there";
   const cohortCount = cohorts?.length ?? 0;
@@ -50,7 +64,12 @@ export function TeachPageContent() {
               : `Teaching ${cohortCount} ${cohortCount === 1 ? "cohort" : "cohorts"}.`
             : undefined
         }
-        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
+        actions={
+          <RefreshButton
+            loading={isFetching || isRefreshing}
+            onClick={handleRefresh}
+          />
+        }
       />
 
       <div className="grid gap-4 lg:grid-cols-3">

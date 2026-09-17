@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { useWebinars } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
@@ -74,16 +75,22 @@ export function WebinarsPageContent() {
         title="Webinars & Workshops"
         description="Join live industry sessions, masterclasses, and rewatch past recorded workshops."
         actions={
-          <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as Tab)}>
-            <TabsList className="rounded-xl bg-muted/60 p-1">
-              <TabsTrigger value="upcoming" className="rounded-lg text-xs">
-                Upcoming ({upcomingList.length})
-              </TabsTrigger>
-              <TabsTrigger value="past" className="rounded-lg text-xs">
-                Past Recordings
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-2">
+            <RefreshButton
+              loading={upcomingQuery.isFetching || pastQuery.isFetching}
+              onClick={() => Promise.allSettled([upcomingQuery.refetch(), pastQuery.refetch()])}
+            />
+            <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as Tab)}>
+              <TabsList className="rounded-xl bg-muted/60 p-1">
+                <TabsTrigger value="upcoming" className="rounded-lg text-xs">
+                  Upcoming ({upcomingList.length})
+                </TabsTrigger>
+                <TabsTrigger value="past" className="rounded-lg text-xs">
+                  Past Recordings
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         }
       />
 

@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +91,8 @@ export function CalendarPageContent() {
   const {
     data: events,
     isLoading,
+    isFetching,
+    refetch,
     error,
   } = useStudentCalendar({ from: from.toISOString(), to: to.toISOString() });
 
@@ -147,14 +150,17 @@ export function CalendarPageContent() {
         title="Academic Calendar"
         description="Class sessions, assignment deadlines, office hours, and academic events."
         actions={
-          <Tabs value={viewMode} onValueChange={(v) => handleViewChange(v as ViewMode)}>
-            <TabsList className="rounded-xl bg-muted/60 p-1">
-              <TabsTrigger value="month" className="rounded-lg text-xs">Month</TabsTrigger>
-              <TabsTrigger value="week" className="rounded-lg text-xs">Week</TabsTrigger>
-              <TabsTrigger value="day" className="rounded-lg text-xs">Day</TabsTrigger>
-              <TabsTrigger value="agenda" className="rounded-lg text-xs">Agenda</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-2">
+            <RefreshButton loading={isFetching} onClick={() => refetch()} />
+            <Tabs value={viewMode} onValueChange={(v) => handleViewChange(v as ViewMode)}>
+              <TabsList className="rounded-xl bg-muted/60 p-1">
+                <TabsTrigger value="month" className="rounded-lg text-xs">Month</TabsTrigger>
+                <TabsTrigger value="week" className="rounded-lg text-xs">Week</TabsTrigger>
+                <TabsTrigger value="day" className="rounded-lg text-xs">Day</TabsTrigger>
+                <TabsTrigger value="agenda" className="rounded-lg text-xs">Agenda</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         }
       />
 

@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { formatDate } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTeachingCohortDetail } from "../api/teaching.queries";
 import { CohortOverviewTab } from "./CohortOverviewTab";
 import { CohortModulesTab } from "./CohortModulesTab";
@@ -26,6 +27,18 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
   const [activeTab, setActiveTab] = useState("overview");
 
   const { data: cohort, isLoading, isFetching, error, refetch } = useTeachingCohortDetail(scheduleId);
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.allSettled([
+      refetch(),
+      queryClient.invalidateQueries({ queryKey: ["teaching", "cohort", scheduleId] }),
+      queryClient.invalidateQueries({ queryKey: ["calendar"] }),
+    ]);
+    setIsRefreshing(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -74,7 +87,10 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
                   <span>· {cohort.studentCount} Students Enrolled</span>
                 </p>
               </div>
-              <RefreshButton loading={isFetching} onClick={refetch} />
+              <RefreshButton
+                loading={isFetching || isRefreshing}
+                onClick={handleRefresh}
+              />
             </div>
           </Card>
 

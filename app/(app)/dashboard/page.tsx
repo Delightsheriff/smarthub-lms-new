@@ -1,6 +1,8 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   BookOpen,
@@ -11,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { TeachPageContent } from "@/modules/teaching/components/TeachPageContent";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useAuthStore } from "@/store/slices/authStore";
@@ -62,7 +65,33 @@ export default function DashboardPage() {
 
 function StudentDashboardBody() {
   const user = useAuthStore((s) => s.user);
-  const { data: courses, isLoading } = useCourses();
+  const {
+    data: courses,
+    isLoading,
+    isFetching: isCoursesFetching,
+    refetch: refetchCourses,
+  } = useCourses();
+  const qc = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.allSettled([
+      refetchCourses(),
+      qc.invalidateQueries({ queryKey: ["courses"] }),
+      qc.invalidateQueries({ queryKey: ["billing"] }),
+      qc.invalidateQueries({ queryKey: ["calendar"] }),
+      qc.invalidateQueries({ queryKey: ["progress"] }),
+      qc.invalidateQueries({ queryKey: ["internships"] }),
+      qc.invalidateQueries({ queryKey: ["webinars"] }),
+      qc.invalidateQueries({ queryKey: ["assigned-modules"] }),
+      qc.invalidateQueries({ queryKey: ["acceptance-letters"] }),
+      qc.invalidateQueries({ queryKey: ["referrals"] }),
+      qc.invalidateQueries({ queryKey: ["scholarship"] }),
+      qc.invalidateQueries({ queryKey: ["access"] }),
+    ]);
+    setIsRefreshing(false);
+  };
 
   const firstName =
     user?.firstName || user?.email?.split("@")[0] || "there";
@@ -87,6 +116,12 @@ function StudentDashboardBody() {
                     enrolledCount === 1 ? "course" : "courses"
                   } enrolled · pick up where you left off.`
             : undefined
+        }
+        actions={
+          <RefreshButton
+            loading={isCoursesFetching || isRefreshing}
+            onClick={handleRefresh}
+          />
         }
       />
 

@@ -43,6 +43,7 @@ import {
   ProgressTrack,
 } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/utils";
 import {
@@ -107,7 +108,7 @@ const checkInSchema = z.object({
 });
 
 export function InternshipWorkspacePageContent() {
-  const { data, isLoading, isError } = useInternshipWorkspace();
+  const { data, isLoading, isFetching, isError, refetch } = useInternshipWorkspace();
 
   if (isLoading) {
     return (
@@ -145,6 +146,7 @@ export function InternshipWorkspacePageContent() {
         eyebrow="Internship"
         title="Internship workspace"
         description={`${internship.product.name} · started ${formatDate(internship.startDate)}`}
+        actions={<RefreshButton loading={isFetching} onClick={() => refetch()} />}
       />
 
       <Card className="p-5">
