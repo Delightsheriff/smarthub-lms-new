@@ -126,7 +126,9 @@ export function JobsPageContent() {
 
           <Select value={company} onValueChange={(v) => changeCompany(v ?? "__all__")}>
             <SelectTrigger className="w-40 shrink-0">
-              <SelectValue placeholder="All companies" />
+              <SelectValue placeholder="All companies">
+                {(v: string) => (v === "__all__" || !v ? "All companies" : v)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">All companies</SelectItem>

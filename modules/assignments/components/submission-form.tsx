@@ -48,6 +48,12 @@ const submissionSchema = z.object({
   notes: z.string().max(2000, "Notes must be 2,000 characters or fewer"),
 });
 
+const SUBMISSION_FORMAT_OPTIONS = [
+  { value: "file", label: "File Attachment (PDF, Zip, Doc)", icon: Upload },
+  { value: "url", label: "External URL (GitHub, Figma, Notion)", icon: LinkIcon },
+  { value: "text", label: "Inline Text Submission", icon: FileText },
+] as const;
+
 export function SubmissionForm({
   assignment,
   existingSubmission,
@@ -177,27 +183,32 @@ export function SubmissionForm({
                  onValueChange={(v) => field.onChange(v)}
                  disabled={form.formState.isSubmitting}
                >
-                 <FormControl><SelectTrigger id="submissionType" className="rounded-xl">
-                   <SelectValue placeholder="Select submission type" />
-                 </SelectTrigger></FormControl>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="file">
-                    <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4" /> File Attachment (PDF, Zip, Doc)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="url">
-                    <div className="flex items-center gap-2">
-                      <LinkIcon className="h-4 w-4" /> External URL (GitHub, Figma, Notion)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="text">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" /> Inline Text Submission
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-               </Select><FormMessage />
+                  <FormControl><SelectTrigger id="submissionType" className="rounded-xl">
+                    <SelectValue placeholder="Select submission type">
+                      {(v: string) => {
+                        const opt = SUBMISSION_FORMAT_OPTIONS.find((o) => o.value === v);
+                        if (!opt) return "Select submission type";
+                        const Icon = opt.icon;
+                        return (
+                          <span className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" />
+                            <span>{opt.label}</span>
+                          </span>
+                        );
+                      }}
+                    </SelectValue>
+                  </SelectTrigger></FormControl>
+                 <SelectContent className="rounded-xl">
+                   {SUBMISSION_FORMAT_OPTIONS.map(({ value, label, icon: Icon }) => (
+                     <SelectItem key={value} value={value}>
+                       <div className="flex items-center gap-2">
+                         <Icon className="h-4 w-4" />
+                         <span>{label}</span>
+                       </div>
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
+                </Select><FormMessage />
              </FormItem>} />
 
             {/* File Upload Input */}

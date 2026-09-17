@@ -17,6 +17,13 @@ interface ClassSessionAttendancePageProps {
   sessionId: string;
 }
 
+const ATTENDANCE_STATUS_OPTIONS: { value: AttendanceStatus; label: string }[] = [
+  { value: "present", label: "Present" },
+  { value: "late", label: "Late" },
+  { value: "absent", label: "Absent" },
+  { value: "excused", label: "Excused" },
+];
+
 export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendancePageProps) {
   const { data: sessionData, isLoading, error } = useSessionAttendance(sessionId);
   const markMutation = useMarkSessionAttendance(sessionId);
@@ -152,13 +159,16 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
                         onValueChange={(v) => handleStatusChange(row.studentId, v as AttendanceStatus)}
                       >
                         <SelectTrigger className="w-32 rounded-xl text-xs bg-background">
-                          <SelectValue />
+                          <SelectValue>
+                            {(v: string) => ATTENDANCE_STATUS_OPTIONS.find((s) => s.value === v)?.label ?? v}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="present">Present</SelectItem>
-                          <SelectItem value="late">Late</SelectItem>
-                          <SelectItem value="absent">Absent</SelectItem>
-                          <SelectItem value="excused">Excused</SelectItem>
+                          {ATTENDANCE_STATUS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
 

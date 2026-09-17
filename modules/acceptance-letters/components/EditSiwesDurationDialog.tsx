@@ -117,7 +117,13 @@ function DurationPicker({
             className="w-full"
             disabled={disabled}
           >
-            <SelectValue placeholder="Select duration" />
+            <SelectValue placeholder="Select duration">
+              {(v: string) => {
+                if (!v) return "Select duration";
+                const m = Number(v);
+                return `${m} ${m === 1 ? "month" : "months"}`;
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {MONTH_OPTIONS.map((m) => (

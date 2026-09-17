@@ -93,7 +93,9 @@ export function FilterDropdown({
               className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
             />
           )}
-          <SelectValue />
+          <SelectValue>
+            {(v: string) => options.find((o) => o.value === v)?.label ?? v}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

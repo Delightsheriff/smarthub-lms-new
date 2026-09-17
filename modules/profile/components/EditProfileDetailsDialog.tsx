@@ -33,6 +33,11 @@ const profileDetailsSchema = z.object({
   phone: z.string().trim().refine((value) => value.length === 0 || (value.length >= 7 && value.length <= 20), "Phone must be 7–20 characters"),
 });
 
+const GENDER_OPTIONS = [
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+] as const;
+
 interface EditProfileDetailsProps {
   current: {
     firstName?: string;
@@ -129,7 +134,30 @@ function ProfileDetailsForm({
         )} />
       ))}
       <FormField control={form.control} name="gender" render={({ field }) => (
-        <FormItem><FormLabel>Gender</FormLabel><Select value={field.value || undefined} onValueChange={(value) => field.onChange(value ?? "")} disabled={form.formState.isSubmitting}><FormControl><SelectTrigger className="w-full"><SelectValue placeholder="Select gender" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+        <FormItem>
+          <FormLabel>Gender</FormLabel>
+          <Select
+            value={field.value || undefined}
+            onValueChange={(value) => field.onChange(value ?? "")}
+            disabled={form.formState.isSubmitting}
+          >
+            <FormControl>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select gender">
+                  {(v: string | null) => GENDER_OPTIONS.find((g) => g.value === v)?.label ?? (v || "Select gender")}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {GENDER_OPTIONS.map((g) => (
+                <SelectItem key={g.value} value={g.value}>
+                  {g.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
       )} />
       <div className="grid gap-1.5">
         <div className="flex items-center justify-between">

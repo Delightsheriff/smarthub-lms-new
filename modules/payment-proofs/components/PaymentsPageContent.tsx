@@ -185,7 +185,14 @@ export function PaymentsPageContent() {
              <Label>What is this payment for?</Label>
              <Select value={registration} onValueChange={(v) => setRegistration(v ?? GENERAL)} disabled={form.formState.isSubmitting}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="General / other" />
+                <SelectValue placeholder="General / other">
+                  {(v: string) => {
+                    if (!v || v === GENERAL) return "General / other";
+                    const reg = surface?.registrations.find((r) => r._id === v);
+                    if (!reg) return v;
+                    return `${reg.courseName}${reg.remainingAmount > 0 ? ` — ₦${reg.remainingAmount.toLocaleString("en-NG")} outstanding` : ""}`;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={GENERAL}>General / other</SelectItem>
