@@ -201,8 +201,11 @@ actual `plans/`/`docs/adr/` directories, before picking a number.**
 | 018 | Handoff prompt: fix Select trigger label resolution app-wide (Base UI `Select.Value` doesn't auto-resolve labels) — see `plans/018-select-value-label-fix-prompt.md` |
 
 Follow-ups mentioned for the self-paced track (access-revocation
-notices, a jobs/career surface, global search) are **not yet files** —
-whoever builds them starts at **019**.
+notices, a jobs/career surface, global search) have since shipped —
+`modules/access/components/RevokedCourseNotice.tsx`, `modules/jobs/`,
+`modules/search/` + `components/layout/search-trigger.tsx` — as part of
+the same pass that produced plan 017. None of them got their own plan
+file; **next available plan number is 019.**
 
 | ADRs taken | Decision |
 |---|---|
@@ -269,3 +272,6 @@ checkout.
 | Tech Scholarship | ✅ Already consistent — dashboard-only widget (`TechScholarshipCard`), no standalone page exists |
 | Per-page segmented header tabs (the CRM inspiration's "Companies · Active" pattern) | ⬜ Deliberately deferred — a per-page decision, not a chrome concern |
 | Full profile "entity drawer" (CRM-style avatar/stat-grid/list panel) | ⬜ Superseded — the left-rail + header-card shape shipped instead; revisit only if a future page specifically needs the CRM stat-grid layout |
+| Plan 017 — dialog spacing audit, react-hook-form + zod everywhere, refresh controls + coordinated loading on data pages | ✅ Done and live-verified — see `plans/017-forms-dialogs-data-pages-prompts.md`, `plans/017-validation-audit.md` |
+| Plan 018 — Select trigger label resolution + popup positioning | ✅ Done and live-verified (cycled every option on the Courses filters against real data, confirmed correct label + correct filtering each time) — see `plans/018-select-value-label-fix-prompt.md`. Two extra bugs found during this verification and fixed directly: `CohortDetailPageContent`'s 6-tab bar broke onto an ugly full-width row on narrow viewports instead of scrolling (now matches the `overflow-x-auto` pattern already used on Courses/self-paced tabs), and the roster/assignments tabs showed "1 Submissions"/"1 Pending Grade" instead of correct singular grammar. Commit `9cd9b51`. |
+| Profile birthday editing | ⬜ Known gap, flagged not fixed — legacy LMS exposes birthday editing and the backend accepts `birthDay`/`birthMonth`, but the current profile screen has no field for it (see `plans/017-validation-audit.md`) |
