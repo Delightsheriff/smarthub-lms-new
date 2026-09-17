@@ -36,16 +36,32 @@ export function MyActivityPageContent() {
     groupedMap.set(dayStr, existing);
   }
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   const groupedEntries = Array.from(groupedMap.entries());
 
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Activity"
+        divider
+        dateline={`${dateline} · Security & Audit`}
         title="Activity Log"
-         description="A security and audit timeline of your recent account actions, submissions, and payments."
-         actions={<RefreshButton loading={isFetching} onClick={refetch} />}
+        description={
+          meta ? (
+            <>
+              Security and audit timeline recording{" "}
+              <strong className="text-foreground">{meta.total}</strong> account action{meta.total === 1 ? "" : "s"}.
+            </>
+          ) : (
+            "A security and audit timeline of your recent account actions, submissions, and payments."
+          )
+        }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {isLoading && (
