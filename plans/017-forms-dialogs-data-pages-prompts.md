@@ -1,6 +1,11 @@
 # PLAN 017 — Handoff Prompts: Dialog Spacing, Form Standardization, Data-Page Refresh
 
-**Status:** Ready to hand off
+**Status:** Done — both slices shipped and verified (commits `07e968e`,
+`10e35e3`). One extra bug found and fixed during verification: the
+attendance roster endpoint (`ATTENDANCE_SESSION`) had the same
+wrong-path bug as the two endpoints Slice B's grading/attendance fix
+already caught, but was itself missed — see `plans/017-validation-audit.md`
+and the `07e968e` commit message for detail.
 **Owner:** SmartHub design-system modernization (same track as Plans 014–016)
 **Depends on:** Nothing structurally, but read `plans/DESIGN-SYSTEM.md` §4
 (non-negotiables) and `plans/016-editorial-rollout-prompts.md` §1–2
