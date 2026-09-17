@@ -43,6 +43,7 @@ export function TeachPageContent() {
       refetch(),
       queryClient.invalidateQueries({ queryKey: ["teaching"] }),
       queryClient.invalidateQueries({ queryKey: ["webinars"] }),
+      queryClient.invalidateQueries({ queryKey: ["calendar"] }),
     ]);
     setIsRefreshing(false);
   };
