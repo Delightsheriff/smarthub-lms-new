@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Activity as ActivityIcon, ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Activity as ActivityIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
-import { Stagger, StaggerItem } from "@/components/animation/stagger";
-import { formatDateTime } from "@/lib/utils";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { actionTypeStyle } from "../lib/action-type";
 import { useMyActivity } from "../api/activity.queries";
 import type { ActivityEvent } from "../types";
@@ -85,57 +82,40 @@ export function MyActivityPageContent() {
           {groupedEntries.length > 0 ? (
             <div className="space-y-6">
               {groupedEntries.map(([dayStr, dayEvents]) => (
-                <div key={dayStr} className="space-y-3">
-                  <h2 className="font-display text-sm font-semibold text-foreground tracking-wide">
-                    {dayStr}
-                  </h2>
+                <Ledger key={dayStr} title={dayStr} count={dayEvents.length}>
+                  {dayEvents.map((event) => {
+                    const style = actionTypeStyle(event.action);
+                    const Icon = style.icon;
+                    const timeStr = new Date(event.createdAt).toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
 
-                  <Stagger className="space-y-2">
-                    {dayEvents.map((event) => {
-                      const style = actionTypeStyle(event.action);
-                      const Icon = style.icon;
-
-                      return (
-                        <StaggerItem key={event.id}>
-                          <Card className="rounded-2xl border border-border bg-card hover:border-primary/40 transition-colors shadow-xs">
-                            <CardContent className="p-4 flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div
-                                  className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${style.className}`}
-                                >
-                                  <Icon className="h-5 w-5" />
-                                </div>
-
-                                <div className="space-y-0.5 min-w-0">
-                                  <div className="font-display font-semibold text-sm text-foreground truncate">
-                                    {style.label}
-                                  </div>
-                                  {event.resource?.label && (
-                                    <div className="text-xs text-muted-foreground truncate">
-                                      Target: <span className="font-medium text-foreground">{event.resource.label}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
-                                <div className="flex items-center gap-1 font-mono">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  <span>{formatDateTime(event.createdAt)}</span>
-                                </div>
-                                {event.ip && (
-                                  <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-mono">
-                                    {event.ip}
-                                  </Badge>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </StaggerItem>
-                      );
-                    })}
-                  </Stagger>
-                </div>
+                    return (
+                      <LedgerItem
+                        key={event.id}
+                        icon={Icon}
+                        iconClassName={style.className}
+                        title={style.label}
+                        meta={
+                          <div className="flex flex-wrap items-center gap-2">
+                            {event.resource?.label && (
+                              <span>
+                                Target: <strong className="font-medium text-foreground">{event.resource.label}</strong>
+                              </span>
+                            )}
+                            {event.ip && (
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                · {event.ip}
+                              </span>
+                            )}
+                          </div>
+                        }
+                        when={timeStr}
+                      />
+                    );
+                  })}
+                </Ledger>
               ))}
 
               {meta && meta.totalPages > 1 && (
