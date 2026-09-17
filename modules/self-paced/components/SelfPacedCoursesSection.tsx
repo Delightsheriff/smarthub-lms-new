@@ -49,7 +49,7 @@ export function SelfPacedCoursesSection({
           )}
         </header>
       )}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {data.map((c) => (
           <SelfPacedCourseCard key={c.id} course={c} />
         ))}
