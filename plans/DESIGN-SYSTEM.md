@@ -195,8 +195,9 @@ dashboard system era.
 |---|---|
 | 001 | Editorial dashboard system — masthead/hero-ledger/bento/index-list, both dashboards, header/sidebar complement (this slice) |
 | 002 | Handoff prompt: roll "The Brief" out to the rest of the app — see `plans/002-editorial-rollout-handoff.md` |
+| 003 | Editorial rollout phase 1: core academic & learning surfaces — see `plans/003-editorial-rollout-phase1.md` |
 
-Next available plan number: **003**.
+Next available plan number: **004**.
 
 | ADRs taken | Decision |
 |---|---|
