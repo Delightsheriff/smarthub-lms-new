@@ -76,6 +76,7 @@ export function LoginPageContent() {
                     type="email"
                     placeholder="name@example.com"
                     className="rounded-xl text-xs"
+                    disabled={loginMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -104,6 +105,7 @@ export function LoginPageContent() {
                   <PasswordInput
                     placeholder="••••••••"
                     className="rounded-xl text-xs"
+                    disabled={loginMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -122,6 +124,7 @@ export function LoginPageContent() {
                     id="rememberMe"
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={loginMutation.isPending}
                   />
                 </FormControl>
                 <FormLabel htmlFor="rememberMe" className="text-xs text-muted-foreground cursor-pointer font-normal">

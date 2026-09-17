@@ -76,7 +76,7 @@ export function ChangePasswordForm() {
                 <FormItem>
                   <FormLabel>Current password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" {...field} />
+                    <PasswordInput placeholder="••••••••" disabled={changeMutation.isPending} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,7 +90,7 @@ export function ChangePasswordForm() {
                 <FormItem>
                   <FormLabel>New password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" {...field} />
+                    <PasswordInput placeholder="••••••••" disabled={changeMutation.isPending} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,7 +104,7 @@ export function ChangePasswordForm() {
                 <FormItem>
                   <FormLabel>Confirm new password</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="••••••••" {...field} />
+                    <PasswordInput placeholder="••••••••" disabled={changeMutation.isPending} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

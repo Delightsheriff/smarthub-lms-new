@@ -84,6 +84,7 @@ export function ForgotPasswordForm() {
                       type="email"
                       placeholder="name@example.com"
                       className="rounded-xl text-xs"
+                      disabled={forgotMutation.isPending}
                       {...field}
                     />
                   </FormControl>

@@ -97,7 +97,12 @@ export function AcceptInvitationPageContent() {
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-foreground">First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ade" className="rounded-xl text-xs" {...field} />
+                        <Input
+                          placeholder="Ade"
+                          className="rounded-xl text-xs"
+                          disabled={acceptMutation.isPending}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -111,7 +116,12 @@ export function AcceptInvitationPageContent() {
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-foreground">Last Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Balogun" className="rounded-xl text-xs" {...field} />
+                        <Input
+                          placeholder="Balogun"
+                          className="rounded-xl text-xs"
+                          disabled={acceptMutation.isPending}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -128,7 +138,12 @@ export function AcceptInvitationPageContent() {
                       <Lock className="h-3.5 w-3.5 text-primary" /> Create Password
                     </FormLabel>
                     <FormControl>
-                      <PasswordInput placeholder="••••••••" className="rounded-xl text-xs" {...field} />
+                      <PasswordInput
+                        placeholder="••••••••"
+                        className="rounded-xl text-xs"
+                        disabled={acceptMutation.isPending}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

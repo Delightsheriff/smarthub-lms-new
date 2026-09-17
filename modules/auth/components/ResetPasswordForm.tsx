@@ -80,6 +80,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   <PasswordInput
                     placeholder="••••••••"
                     className="rounded-xl text-xs"
+                    disabled={resetMutation.isPending}
                     {...field}
                   />
                 </FormControl>
@@ -100,6 +101,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   <PasswordInput
                     placeholder="••••••••"
                     className="rounded-xl text-xs"
+                    disabled={resetMutation.isPending}
                     {...field}
                   />
                 </FormControl>
