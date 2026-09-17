@@ -27,32 +27,27 @@ export function ProgressPulseCard() {
   const recent = (achievements || []).filter((a) => a.earned).slice(0, 3);
 
   return (
-    <Card className="p-5 bg-gradient-to-br from-primary/[0.04] via-card to-accent/[0.03] border-primary/15 rounded-2xl shadow-sm space-y-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="font-display font-semibold text-base flex items-center gap-2 text-foreground">
-            <Target className="h-4 w-4 text-primary" />
-            Your Learning Pulse
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Personal progress highlights and milestones.
-          </p>
-        </div>
+    <Card className="p-5 rounded-2xl border-border bg-card shadow-sm">
+      <header className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="font-display font-semibold text-base flex items-center gap-2 text-foreground">
+          <Target className="h-4 w-4 text-primary" />
+          Your Learning Pulse
+        </h2>
         <Link
           href="/profile?tab=achievements"
-          className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
+          className="shrink-0 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
         >
           Trophy case <ArrowRight className="h-3 w-3" />
         </Link>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3">
         <Tile
           icon={<Flame className="h-4 w-4" />}
           tone="accent"
-          label="On-time streak"
+          label="Streak"
           value={pulse?.earnedCount ?? 0}
-          caption="Submissions on time"
+          caption="On-time submissions"
         />
         <Tile
           icon={<CheckCircle2 className="h-4 w-4" />}
@@ -61,19 +56,19 @@ export function ProgressPulseCard() {
           value={
             typeof pulse?.earnedCount === "number" ? `${pulse.earnedCount}` : "—"
           }
-          caption={`Out of ${pulse?.totalCount ?? 0} total tasks`}
+          caption={`Of ${pulse?.totalCount ?? 0} tasks`}
         />
         <Tile
           icon={<Trophy className="h-4 w-4" />}
           tone="primary"
-          label="Next Milestone"
-          value={pulse?.nextMilestone || "Keep Learning"}
+          label="Next milestone"
+          value={pulse?.nextMilestone || "Keep learning"}
           caption="Keep going to unlock"
         />
       </div>
 
       {recent.length > 0 && (
-        <div className="pt-3 flex flex-wrap items-center gap-2 border-t border-border">
+        <div className="mt-4 pt-3 flex flex-wrap items-center gap-2 border-t border-border">
           <span className="text-xs text-muted-foreground font-medium">Recent badges:</span>
           {recent.map((a) => (
             <span
@@ -120,12 +115,12 @@ function Tile({
         >
           {icon}
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
       </div>
-      <p className="font-display text-xl font-bold leading-tight text-foreground truncate">{value}</p>
-      <p className="text-xs text-muted-foreground">{caption}</p>
+      <p className="font-display text-xl font-bold leading-tight text-foreground line-clamp-1">{value}</p>
+      <p className="truncate text-xs text-muted-foreground">{caption}</p>
     </div>
   );
 }

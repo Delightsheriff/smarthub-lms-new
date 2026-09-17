@@ -27,7 +27,6 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Logo } from "@/components/layout/logo";
-import { RoleSwitcher } from "@/components/layout/role-switcher";
 import { UserMenu } from "@/components/layout/user-menu";
 
 /**
@@ -44,7 +43,7 @@ import { UserMenu } from "@/components/layout/user-menu";
 export function AppSidebar() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
-  const { mode, canSwitch } = useEffectiveMode();
+  const { mode } = useEffectiveMode();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const learner = useLearnerShape();
@@ -68,15 +67,12 @@ export function AppSidebar() {
     // per-item, without risking accidental activation on the first hover.
     <TooltipProvider delay={500}>
       <Sidebar collapsible="icon" side="left">
-        <SidebarHeader className="gap-2 border-b border-sidebar-border/60 p-2 pb-3">
+        <SidebarHeader className="border-b border-sidebar-border/60 p-2 pb-3">
           <div className="flex justify-center">
             <Link href="/dashboard" aria-label="SmartHub" className="block">
               <Logo size="sm" />
             </Link>
           </div>
-          {canSwitch && (
-            <RoleSwitcher variant={collapsed ? "collapsed" : "expanded"} />
-          )}
         </SidebarHeader>
 
         <SidebarContent>

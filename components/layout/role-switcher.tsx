@@ -128,7 +128,7 @@ function SlidingSwitch({
               />
             )}
             <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
-            <span className="truncate">{it.label}</span>
+            <span className="hidden truncate sm:inline">{it.label}</span>
           </button>
         );
       })}

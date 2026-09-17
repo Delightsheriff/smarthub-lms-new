@@ -35,21 +35,30 @@ export function TopBar() {
         <div className="flex min-w-0 items-center gap-3">
           <SidebarTrigger className="-ml-1" />
 
-          {/* Logo only on mobile — the side rail owns the brand mark. */}
-          <Link
-            href="/dashboard"
-            className="flex shrink-0 items-center md:hidden"
-            aria-label="SmartHub"
-          >
-            <Logo size="sm" />
-          </Link>
+          {/* Logo only on mobile — the side rail owns the brand mark.
+              Dropped entirely once a dual-role switcher is also
+              competing for this row's space: sidebar-trigger + the
+              switcher's own icons already say "this is the app," and
+              opening the rail shows the full lockup anyway. */}
+          {!canSwitch && (
+            <Link
+              href="/dashboard"
+              className="flex shrink-0 items-center md:hidden"
+              aria-label="SmartHub"
+            >
+              <Logo size="sm" />
+            </Link>
+          )}
 
           <SearchTrigger />
         </div>
 
-        {/* Mobile-only role switcher — the rail's is desktop-only. */}
+        {/* Lives in the header, not the sidebar — a dual-role user
+            switches often enough that it belongs beside search, and
+            keeping it out of the rail keeps the rail from growing a
+            second header row above the nav. */}
         {canSwitch && (
-          <div className="max-w-50 flex-1 md:hidden">
+          <div className="w-20 shrink-0 sm:w-44">
             <RoleSwitcher variant="expanded" />
           </div>
         )}

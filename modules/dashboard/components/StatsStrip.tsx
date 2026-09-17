@@ -67,14 +67,14 @@ export function DashboardStatsStrip() {
       href: "/assignments?filter=open",
     },
     {
-      label: "Awaiting marking",
+      label: "Marking",
       value: awaitingRemark,
       icon: Hourglass,
       tone: "warning",
       href: "/assignments?filter=submitted",
     },
     {
-      label: "Reviewed",
+      label: "Graded",
       value: reviewed,
       icon: CheckCircle2,
       tone: "success",
