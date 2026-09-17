@@ -118,17 +118,33 @@ export default function ProfilePageContent() {
     "";
   const initial = (fullName || "?").slice(0, 1).toUpperCase();
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Account"
+        divider
+        dateline={`${dateline} · Account Settings`}
         title="Profile & Settings"
-        description="Your details, security and preferences."
+        description={
+          user?.createdAt ? (
+            <>
+              Manage your personal details, credentials, and security. Member since{" "}
+              <strong className="text-foreground">{formatDate(user.createdAt)}</strong>.
+            </>
+          ) : (
+            "Your details, credentials, security, and notification preferences."
+          )
+        }
         actions={
           tab === "overview" && (
             <Button size="sm" variant="outline" onClick={() => setEditOpen(true)} className="rounded-xl">
-              <Pencil className="h-3.5 w-3.5" />
+              <Pencil className="h-3.5 w-3.5 mr-1" />
               Edit details
             </Button>
           )
