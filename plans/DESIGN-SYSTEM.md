@@ -89,6 +89,9 @@ Motion tokens live in `app/globals.css`'s `:root` block:
 | `IndexList` / `IndexRow` | `components/ui/index-list.tsx` | A magazine-index browse list (courses, cohorts) — numbered rows, hairline dividers, progress rule + status that hide below 720px via Tailwind's own `sm:` utilities (not hand-written media queries — see the cascade-order note in §4). |
 | `StatTile` | `components/ui/stat-tile.tsx` | The shared bento-tile shape — rounded card with icon circle, uppercase micro-label, big tabular display number, and optional caption/hint. Used across Dashboards and Instructor Earnings / Self-Paced. |
 | `EmptyState` | `components/ui/empty-state.tsx` | The "nothing here" block. Unchanged. |
+| `StatusBadge` | `components/ui/status-badge.tsx` | A status string ("graded", "late", "active"...) resolved to a `Badge` variant + label via `STATUS_REGISTRY` in `lib/utils/status.ts`, instead of each call site picking a variant and writing its own label. Not for icon-chip tints (`LedgerItem`/`NagItem`'s `iconClassName`) — that's a separate, already-correct pattern. |
+| `SegmentedControl` | `components/ui/segmented-control.tsx` | The mono-uppercase, pill-bordered, ink-solid-pressed toggle from the "Brief" mockup's meta-bar. Generic (not role-switcher-specific); `RoleSwitcher`'s `SlidingSwitch` is its first consumer. `hideLabelsBelowSm` for icon-only-on-mobile spots. |
+| `lib/utils/` | `lib/utils/{cn,format-date,format-text,html,status}.ts` | Split from one flat `lib/utils.ts`, barrelled through `index.ts` (same `@/lib/utils` import path everywhere). Includes `pluralize()`, `getInitial()`, `daysUntil()` — reach for these before writing a local `n === 1 ? "x" : "xs"` ternary or `name.slice(0,1)`. |
 | `FilterDropdown` / `FilterBar` | `components/ui/filter-dropdown.tsx` | Any page-local filter dropdown (built on `Select`, not `DropdownMenu`). Unchanged. |
 | `AuthCard` / `AuthCardBody` / `AuthColumn` | `modules/auth/components/AuthCard.tsx` | Auth screen shell. Unchanged. |
 | `groupNavItems` | `lib/nav-grouping.ts` | Sidebar section grouping. Unchanged. |
@@ -105,19 +108,12 @@ bordered cards. The top bar's redundant greeting was removed (the
 masthead owns it now) and the sidebar header got a hairline divider to
 match the new rule-based motif.
 
-**Masthead-only so far** — `dateline`/`divider` added, body structure
-unchanged. Real per-page plans are `plans/001` through `plans/024`
-(registry + shared rules in `plans/000-index.md`): Profile, Help,
-Assigned Modules, Self-Paced Courses, Instructor Self-Paced,
-Instructor Earnings, Cohort Revenue Breakdown, Internship Fee Payment,
-Session Attendance, Assignment Detail, Course Module Detail, Oreo,
-Recordings, Materials, Courses, Billing, Payments, Referrals,
-Internships, Activity, Webinars, Calendar, Inbox, Jobs, the cohort
-workspace tabs. **Assignments (`/assignments`, student list) is the one
-confirmed exception** — `assignment-list-page-content.tsx` genuinely
-uses real `Ledger`/`LedgerItem` for a dominant-hero-plus-upcoming-list
-layout; no plan file needed for it unless a future check finds it
-regressed.
+**Plans 001–024 are done** (see §8 for the verification pass and the
+bugs it found) — every page listed in `plans/000-index.md` got the
+real structural conversion its plan named, not just `PageHeader`
+props. **Plan 025** (shared primitives — `pluralize`/`StatusBadge`
+rollout) is the current open one; see that file for exactly what's
+converted vs. still pending.
 
 ---
 
@@ -205,9 +201,12 @@ and the acceptance checklist every one of them uses. **Do not create
 `plans/002-editorial-rollout-*` or similar combined documents again**
 — the per-page shape is deliberate, specifically because the combined
 version's nuance ("some pages get `IndexList`, some don't, tables stay
-tables") kept getting lost or ignored in execution.
+tables") kept getting lost or ignored in execution. `plans/025` breaks
+the "one plan per page" shape deliberately — it's a cross-cutting
+rollout (shared utils/components), not a page redesign, so it doesn't
+have a route to be a page-plan about.
 
-Next available plan number: **025**.
+Next available plan number: **026**.
 
 | ADRs taken | Decision |
 |---|---|
