@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
 import { useInternshipWorkspace } from "../api/internships.queries";
 
 /**
- * Dashboard tile into the internship workspace. Self-gating: hidden
- * when the student has no placement (grads / non-interns never see it).
+ * Internship-progress row in the dashboard's "Needs a look" ledger.
+ * Self-gating: hidden when the student has no placement (grads /
+ * non-interns never see it). Keeps its own progress rule (unlike the
+ * plain one-line nags) since "how far along" is the actual content
+ * here, not a secondary detail.
  */
 export function InternshipDashboardCard() {
   const { data, isLoading } = useInternshipWorkspace();
@@ -17,38 +16,33 @@ export function InternshipDashboardCard() {
   if (!data) return null;
 
   return (
-    <Card className="rounded-2xl border-border bg-card p-4 md:p-5 shadow-sm hover:border-primary/40 transition-all">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <BriefcaseBusiness className="h-4 w-4" />
+    <Link
+      href="/internships"
+      className="-mx-1 flex flex-col gap-2 rounded-lg border-t border-border px-1 py-[11px] first:border-t-0 hover:bg-muted/50"
+    >
+      <div className="flex items-center gap-3">
+        <span className="h-8 w-[3px] shrink-0 self-stretch rounded-full bg-primary" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[13px] font-medium text-foreground">
+            {data.internship.product.name}
           </div>
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
-              Internship
-            </p>
-            <p className="text-base font-semibold truncate">
-              {data.internship.product.name}
-            </p>
-            <p className="text-xs text-muted-foreground tabular-nums">
-              {data.progressPercent}% complete
-            </p>
-          </div>
+          <div className="truncate text-[11.5px] text-muted-foreground">Internship</div>
         </div>
-        <Button
-          render={<Link href="/internships" />}
-          size="sm"
-          variant="outline"
-          className="shrink-0"
-        >
-          Workspace <ArrowRight className="h-3.5 w-3.5" />
-        </Button>
+        <span className="shrink-0 font-mono text-[11px] font-medium text-primary">
+          Workspace →
+        </span>
       </div>
-      <Progress value={data.progressPercent} className="mt-4 gap-3">
-        <ProgressTrack>
-          <ProgressIndicator />
-        </ProgressTrack>
-      </Progress>
-    </Card>
+      <div className="flex items-center gap-2 pl-[15px]">
+        <div className="relative h-0.5 flex-1 rounded-full bg-border">
+          <span
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+            style={{ width: `${Math.min(100, Math.max(0, data.progressPercent))}%` }}
+          />
+        </div>
+        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          {data.progressPercent}%
+        </span>
+      </div>
+    </Link>
   );
 }

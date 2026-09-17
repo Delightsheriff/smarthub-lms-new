@@ -3,22 +3,17 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  BookOpen,
-  Calendar,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import { BookOpen } from "lucide-react";
 import { RefreshButton } from "@/components/ui/refresh-button";
+import { Ledger, LedgerItem } from "@/components/ui/ledger";
+import { IndexList, IndexRow } from "@/components/ui/index-list";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TeachPageContent } from "@/modules/teaching/components/TeachPageContent";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useCourses } from "@/modules/courses/api/courses.queries";
-import { CourseCard } from "@/modules/courses/components/CourseCard";
+import { useUpcomingDeadlines } from "@/modules/assignments/api/assignments.queries";
+import { getDeadlineStatus } from "@/modules/assignments/components/countdown-to-deadline";
 import { AcceptanceLetterCard } from "@/modules/acceptance-letters/components/AcceptanceLetterCard";
 import { DashboardBillingWidget } from "@/modules/billing/components/DashboardBillingWidget";
 import { DashboardReferralsWidget } from "@/modules/referrals/components/DashboardReferralsWidget";
@@ -29,36 +24,20 @@ import { DashboardWebinarsWidget } from "@/modules/webinars/components/Dashboard
 import { DashboardAssignedModulesWidget } from "@/modules/assigned-modules/components/DashboardAssignedModulesWidget";
 import { ProgressPulseCard } from "@/modules/progress/components/ProgressPulseCard";
 import { DashboardCalendarCard } from "@/modules/calendar/components/DashboardCalendarCard";
-import { UpcomingDeadlinesPanel } from "@/modules/calendar/components/UpcomingDeadlinesPanel";
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
-import { CourseProgressList } from "@/modules/dashboard/components/CourseProgressList";
 import { PageHeader } from "@/components/layout/page-header";
 import { RevokedCourseNotice } from "@/modules/access/components/RevokedCourseNotice";
 import { formatDate, htmlToPlainText } from "@/lib/utils";
 
 /**
- * LMS dashboard. Ordering follows a "what does the student need right
- * now?" pyramid — most action-oriented surfaces at the top, browse
- * surfaces at the bottom:
- *
- *   1. Greeting (single line — no separate card)
- *   2. Status nags — billing, referrals (auto-fit grid). Each self-
- *      gates; the slot collapses when nothing's outstanding.
- *   3. Stats strip — workload at a glance (to-do / awaiting / reviewed
- *      / overdue).
- *   4. Progress pulse — personal stats + cohort + recent badges.
- *   5. Upcoming webinars — self-gating preview.
- *   6. Assigned to you — extra standalone modules.
- *   7. Continue learning — primary re-entry CTA.
- *   8. Upcoming deadlines — action-focused "what to submit next".
- *   9. Progress by course — completion breakdown per enrolment.
- *  10. Your courses — browse-all surface.
+ * LMS home — "The Brief." A masthead greeting, an asymmetric hero
+ * (continue learning) + ledger (upcoming deadlines) row, a bento row
+ * of secondary widgets, then a magazine-index course list. Replaces
+ * the earlier ten-stacked-cards layout; see plans/020-editorial-
+ * dashboard-system.md for the direction and rationale.
  */
 export default function DashboardPage() {
   const { mode } = useEffectiveMode();
-  // Instructor mode reuses the teaching dashboard (greeting + needs-
-  // grading inbox + cohort grid). Same nav slot, different content —
-  // "Home shows what's mine to do today" in either role.
   if (mode === "instructor") return <TeachPageContent />;
   return <StudentDashboardBody />;
 }
@@ -71,6 +50,7 @@ function StudentDashboardBody() {
     isFetching: isCoursesFetching,
     refetch: refetchCourses,
   } = useCourses();
+  const { data: deadlines } = useUpcomingDeadlines(4);
   const qc = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -93,29 +73,44 @@ function StudentDashboardBody() {
     setIsRefreshing(false);
   };
 
-  const firstName =
-    user?.firstName || user?.email?.split("@")[0] || "there";
+  const firstName = user?.firstName || user?.email?.split("@")[0] || "there";
   const continueLearning = courses?.[0];
   const enrolledCount = courses?.length || 0;
+  const nextDeadline = deadlines?.[0];
+
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Dashboard"
-        title={`Hi, ${firstName}`}
+        divider
+        dateline={dateline}
+        title={`Good ${timeOfDay()}, ${firstName}.`}
         description={
-          !isLoading
-            ? enrolledCount === 0
-              ? "You're not enrolled in any courses yet."
-              : continueLearning
-                ? `${enrolledCount} ${
-                    enrolledCount === 1 ? "course" : "courses"
-                  } enrolled · pick up where you left off in ${continueLearning.name}.`
-                : `${enrolledCount} ${
-                    enrolledCount === 1 ? "course" : "courses"
-                  } enrolled · pick up where you left off.`
-            : undefined
+          !isLoading ? (
+            enrolledCount === 0 ? (
+              "You're not enrolled in any courses yet."
+            ) : (
+              <>
+                <strong className="text-foreground">{enrolledCount}</strong>{" "}
+                {enrolledCount === 1 ? "course" : "courses"} in progress
+                {nextDeadline && (
+                  <>
+                    {" "}
+                    · next deadline in{" "}
+                    <strong className="text-foreground">
+                      {getDeadlineStatus(nextDeadline.assignment.dueAt).label.replace(/^Due in |^Past due by /, "")}
+                    </strong>
+                  </>
+                )}
+              </>
+            )
+          ) : undefined
         }
         actions={
           <RefreshButton
@@ -125,145 +120,154 @@ function StudentDashboardBody() {
         }
       />
 
-      {/* Status nags — each self-gates; the row collapses when nothing's
-          outstanding. */}
-      <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
-        <DashboardBillingWidget />
-        <AcceptanceLetterCard />
-        <DashboardReferralsWidget />
-        <InternshipPaymentBannerCard />
-        <InternshipDashboardCard />
-        <TechScholarshipCard />
-      </div>
-
-      {/* Revoked-enrolment notice — self-gates when none are revoked. */}
       <RevokedCourseNotice />
 
-      <DashboardStatsStrip />
-
-      <ProgressPulseCard />
-
-      <DashboardWebinarsWidget />
-
-      <DashboardAssignedModulesWidget />
-
-      {continueLearning && (
-        <section>
-          <header className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-lg font-semibold text-foreground">
-              Continue learning
-            </h2>
-            <Sparkles className="h-4 w-4 text-primary" />
-          </header>
-          <Card className="p-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all duration-300">
-            <div className="md:grid md:grid-cols-[220px_1fr]">
-              <div className="relative h-36 md:h-full w-full bg-muted">
-                {continueLearning.imageUrl ? (
-                  <Image
-                    src={continueLearning.imageUrl}
-                    alt={continueLearning.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 220px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <BookOpen className="h-8 w-8 text-primary/30" />
-                  </div>
-                )}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent md:hidden"
-                  aria-hidden
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2fr_1fr] lg:items-stretch">
+        {continueLearning ? (
+          <div className="flex min-h-[300px] flex-col overflow-hidden rounded-[20px] border border-border bg-card">
+            <div className="relative h-[190px] shrink-0 bg-gradient-to-br from-foreground/90 to-accent/60 dark:from-background dark:to-accent/30">
+              {continueLearning.imageUrl && (
+                <Image
+                  src={continueLearning.imageUrl}
+                  alt={continueLearning.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 66vw"
+                  className="object-cover"
                 />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" aria-hidden />
+              <span className="absolute left-4 top-4 rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-white">
+                Continue learning
+              </span>
+            </div>
+            <div className="flex flex-1 flex-col gap-3.5 p-5 md:p-6">
+              <div>
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
+                  {[continueLearning.mode, formatDate(continueLearning.startDate)]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+                <h2 className="mt-1 font-display text-2xl font-semibold leading-[1.15] text-foreground">
+                  {continueLearning.name}
+                </h2>
               </div>
-              <div className="p-5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <Badge variant="default" className="text-[10px]">
-                      Pick up
-                    </Badge>
-                    <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                      <Calendar className="h-3.5 w-3.5 text-primary" />
-                      Started {formatDate(continueLearning.startDate)}
-                    </span>
-                  </div>
-                  <h3 className="font-display text-lg font-semibold leading-snug mb-1 text-foreground">
-                    {continueLearning.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                    {htmlToPlainText(continueLearning.description)}
-                  </p>
+              <p className="text-[13.5px] leading-relaxed text-muted-foreground line-clamp-2">
+                {htmlToPlainText(continueLearning.description)}
+              </p>
+              <div className="mt-auto flex items-center gap-3">
+                <div className="relative h-0.5 flex-1 rounded-full bg-border">
+                  <span
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                    style={{ width: `${continueLearning.progress}%` }}
+                  />
                 </div>
-                <div className="pt-4 mt-2 border-t border-border flex items-center justify-end">
-                  <Button
-                    render={<Link href={`/courses/${continueLearning.slug}`} />}
-                    size="sm"
-                    className="w-full sm:w-auto"
-                  >
-                    Resume
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <span className="shrink-0 font-mono text-xs tabular-nums text-foreground">
+                  {continueLearning.progress}%
+                </span>
+              </div>
+              <div className="flex justify-end">
+                <Link
+                  href={`/courses/${continueLearning.slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+                >
+                  Resume →
+                </Link>
               </div>
             </div>
-          </Card>
-        </section>
-      )}
+          </div>
+        ) : (
+          <EmptyState
+            icon={BookOpen}
+            title="You're not enrolled yet"
+            description="Browse the catalog to find your first programme."
+            className="lg:min-h-[300px] lg:justify-center"
+          />
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <DashboardCalendarCard />
-        </div>
-        <div>
-          <UpcomingDeadlinesPanel />
+        <Ledger title="Today & upcoming" count={deadlines?.length || undefined}>
+          {(deadlines || []).map(({ assignment, course }) => {
+            const status = getDeadlineStatus(assignment.dueAt);
+            return (
+              <LedgerItem
+                key={assignment.id}
+                tone={status.isOverdue || status.isUrgent ? "due" : "info"}
+                title={assignment.title}
+                meta={course?.name || "Course"}
+                when={status.label.replace(/^Due in |^Past due by /, "")}
+                href="/assignments"
+              />
+            );
+          })}
+        </Ledger>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-[1.1fr_0.9fr_1.2fr]">
+        <ProgressPulseCard />
+        <DashboardStatsStrip />
+        <Ledger title="Needs a look" empty="Nothing outstanding — you're all caught up.">
+          <DashboardBillingWidget />
+          <InternshipPaymentBannerCard />
+          <AcceptanceLetterCard />
+          <InternshipDashboardCard />
+          <DashboardReferralsWidget />
+          <TechScholarshipCard />
+        </Ledger>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr]">
+        <DashboardCalendarCard />
+        <div className="flex flex-col gap-5">
+          <DashboardWebinarsWidget />
+          <DashboardAssignedModulesWidget />
         </div>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Progress by course
-        </h2>
-        <CourseProgressList />
-      </section>
-
       <section>
-        <header className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-lg font-semibold text-foreground">
-            Your courses
-          </h2>
-          <Link
-            href="/courses"
-            className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
-          >
-            See all <ArrowRight className="h-3 w-3" />
+        <div className="mb-1 flex items-baseline justify-between">
+          <h2 className="font-display text-xl font-semibold text-foreground">Your courses</h2>
+          <Link href="/courses" className="font-mono text-[11px] text-muted-foreground hover:text-foreground">
+            See all →
           </Link>
-        </header>
+        </div>
 
         {isLoading && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Skeleton className="h-40 w-full rounded-2xl" />
-            <Skeleton className="h-40 w-full rounded-2xl" />
+          <div className="space-y-3 pt-3">
+            <div className="h-16 animate-pulse rounded-xl bg-muted" />
+            <div className="h-16 animate-pulse rounded-xl bg-muted" />
           </div>
         )}
 
         {!isLoading && (!courses || courses.length === 0) && (
-          <Card className="p-8 text-center rounded-2xl border-border bg-card shadow-sm">
-            <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-            <p className="font-display text-base font-semibold">You&apos;re not enrolled yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Browse the catalog to find your first programme.
-            </p>
-          </Card>
+          <EmptyState
+            icon={BookOpen}
+            title="You're not enrolled yet"
+            description="Browse the catalog to find your first programme."
+          />
         )}
 
         {!isLoading && courses && courses.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {courses.slice(0, 2).map((c) => (
-              <CourseCard key={c.id} course={c} />
+          <IndexList>
+            {courses.map((c, i) => (
+              <IndexRow
+                key={c.id}
+                index={i + 1}
+                title={c.name}
+                subtitle={[c.mode, c.durationLabel].filter(Boolean).join(" · ")}
+                progress={c.progress}
+                status={c.status === "in-progress" ? "Active" : c.status === "completed" ? "Ended" : "Not started"}
+                href={`/courses/${c.slug}`}
+              />
             ))}
-          </div>
+          </IndexList>
         )}
       </section>
     </div>
   );
+}
+
+function timeOfDay(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
 }

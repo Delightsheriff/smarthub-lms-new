@@ -6,7 +6,6 @@ import {
   ClipboardList,
   Hourglass,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyAssignments } from "@/modules/assignments/api/assignments.queries";
 import { cn } from "@/lib/utils";
@@ -40,10 +39,13 @@ export function DashboardStatsStrip() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-20 rounded-2xl" />
-        ))}
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <Skeleton className="mb-4 h-4 w-28" />
+        <div className="grid grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[70px] rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -88,33 +90,37 @@ export function DashboardStatsStrip() {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <h2 className="mb-4 font-display font-semibold text-base text-foreground">
+        Your workload
+      </h2>
+      <div className="grid grid-cols-2 gap-3">
       {tiles.map((t) => {
         const Icon = t.icon;
         const inner = (
-          <Card
+          <div
             className={cn(
-              "rounded-2xl border-border bg-card p-3 md:p-4 flex items-center gap-3 transition-all duration-200 shadow-sm",
-              t.href && "hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md",
+              "space-y-1 rounded-xl border border-border/80 bg-background/50 p-3.5 transition-colors",
+              t.href && "hover:border-primary/40",
             )}
           >
-            <span
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                TONE_BG[t.tone],
-              )}
-            >
-              <Icon className="h-4 w-4" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+                  TONE_BG[t.tone],
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+              <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t.label}
-              </p>
-              <p className="text-lg md:text-xl font-semibold tabular-nums leading-tight">
-                {t.value}
-              </p>
+              </span>
             </div>
-          </Card>
+            <p className="font-display text-xl font-bold leading-tight tabular-nums text-foreground">
+              {t.value}
+            </p>
+          </div>
         );
         return t.href ? (
           <Link key={t.label} href={t.href} className="block">
@@ -124,6 +130,7 @@ export function DashboardStatsStrip() {
           <div key={t.label}>{inner}</div>
         );
       })}
+      </div>
     </div>
   );
 }
