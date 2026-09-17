@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
+import { htmlToPlainText } from "@/lib/utils";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useMyAssignments } from "../api/assignments.queries";
 import { AssignmentListCard } from "./assignment-list-card";
@@ -165,7 +166,7 @@ function StudentAssignmentsBody() {
 
               {urgentAssignment.assignment.instructions && (
                 <p className="mt-2 text-xs md:text-sm leading-relaxed text-muted-foreground line-clamp-2 md:line-clamp-3">
-                  {urgentAssignment.assignment.instructions}
+                  {htmlToPlainText(urgentAssignment.assignment.instructions)}
                 </p>
               )}
             </div>
@@ -213,40 +214,42 @@ function StudentAssignmentsBody() {
       )}
 
       {/* Filter and search bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-xs xl:max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search assignments by title or course..."
+            placeholder="Search assignments..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 rounded-xl"
           />
         </div>
 
-        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)}>
-          <TabsList className="rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="all" className="rounded-lg text-xs">
-              All ({assignments?.length || 0})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="rounded-lg text-xs">
-              Pending ({pendingAssignments.length})
-            </TabsTrigger>
-            <TabsTrigger value="submitted" className="rounded-lg text-xs">
-              Submitted ({submittedCount})
-            </TabsTrigger>
-            <TabsTrigger value="graded" className="rounded-lg text-xs">
-              Reviewed ({reviewedCount})
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="rounded-lg text-xs">
-              Overdue
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)} className="w-full">
+            <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
+              <TabsTrigger value="all" className="rounded-lg text-xs">
+                All ({assignments?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="rounded-lg text-xs">
+                Pending ({pendingAssignments.length})
+              </TabsTrigger>
+              <TabsTrigger value="submitted" className="rounded-lg text-xs">
+                Submitted ({submittedCount})
+              </TabsTrigger>
+              <TabsTrigger value="graded" className="rounded-lg text-xs">
+                Reviewed ({reviewedCount})
+              </TabsTrigger>
+              <TabsTrigger value="overdue" className="rounded-lg text-xs">
+                Overdue
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-56 w-full rounded-2xl" />
           ))}
@@ -264,7 +267,7 @@ function StudentAssignmentsBody() {
       {!isLoading && !error && (
         <>
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
               {filtered.map(({ assignment, course, module }) => (
                 <AssignmentListCard
                   key={assignment.id}

@@ -6,6 +6,7 @@ import { ArrowRight, BookOpen, CheckCircle2, Clock, AlertTriangle, FileText } fr
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { htmlToPlainText } from "@/lib/utils";
 import { CountdownToDeadline } from "./countdown-to-deadline";
 import type { Assignment } from "../types";
 import type { Course } from "@/modules/courses/types";
@@ -29,26 +30,26 @@ export function AssignmentListCard({
         // students (see grade-card.tsx), so the language shouldn't
         // imply a number is waiting to be seen.
         return (
-          <Badge variant="success">
+          <Badge variant="success" className="text-[11px] font-medium shrink-0">
             <CheckCircle2 className="mr-1 h-3 w-3" /> Reviewed
           </Badge>
         );
       case "submitted":
         return (
-          <Badge variant="outline" className="border-primary/40 text-primary">
+          <Badge variant="outline" className="border-primary/40 text-primary text-[11px] font-medium shrink-0">
             <Clock className="mr-1 h-3 w-3" /> Submitted
           </Badge>
         );
       case "overdue":
         return (
-          <Badge variant="destructive">
+          <Badge variant="destructive" className="text-[11px] font-medium shrink-0">
             <AlertTriangle className="mr-1 h-3 w-3" /> Overdue
           </Badge>
         );
       case "draft":
       default:
         return (
-          <Badge variant="outline" className="text-muted-foreground">
+          <Badge variant="outline" className="text-muted-foreground text-[11px] font-medium shrink-0">
             <FileText className="mr-1 h-3 w-3" /> Pending
           </Badge>
         );
@@ -58,7 +59,7 @@ export function AssignmentListCard({
   const getPriorityBadge = () => {
     if (assignment.priority === "high") {
       return (
-        <Badge variant="destructive" className="text-[10px]">
+        <Badge variant="destructive" className="text-[10px] shrink-0">
           High Priority
         </Badge>
       );
@@ -66,50 +67,52 @@ export function AssignmentListCard({
     return null;
   };
 
+  const plainInstructions = htmlToPlainText(assignment.instructions);
+
   return (
-    <Card className="rounded-2xl border border-border bg-card hover:-translate-y-1 hover:border-primary/40 transition-all duration-300 shadow-sm overflow-hidden group">
-      <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
-        <div className="space-y-2.5">
+    <Card className="rounded-2xl border border-border bg-card hover:border-primary/40 transition-all duration-200 shadow-sm overflow-hidden group flex flex-col justify-between">
+      <CardContent className="p-4 sm:p-5 flex flex-col justify-between flex-1 gap-3.5">
+        <div className="space-y-2.5 min-w-0">
           {/* Context header: Course & Module */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5 truncate max-w-[70%]">
+          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <BookOpen className="h-3.5 w-3.5 shrink-0 text-primary" />
-              <span className="font-medium truncate">
+              <span className="font-medium truncate text-foreground/80">
                 {course?.name || "Course"}
               </span>
-              <span>·</span>
-              <span className="truncate">{module?.title || "Module"}</span>
+              <span className="text-muted-foreground/40 shrink-0">·</span>
+              <span className="truncate text-muted-foreground">
+                {module?.title || "Module"}
+              </span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               {getPriorityBadge()}
               {getStatusBadge()}
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="font-display text-base font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
+          <h3 className="font-display text-base font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2 leading-snug">
             {assignment.title}
           </h3>
 
-          {/* Instructions snippet */}
-          {assignment.instructions && (
+          {/* Instructions snippet (HTML-stripped) */}
+          {plainInstructions && (
             <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-              {assignment.instructions}
+              {plainInstructions}
             </p>
           )}
         </div>
 
         {/* Card footer details */}
-        <div className="pt-3 border-t border-border flex items-center justify-between gap-2 mt-auto">
-          {/* Points aren't surfaced to students (see grade-card.tsx) —
-              a written remark, not a number, is what they see. */}
-          <CountdownToDeadline dueAt={assignment.dueAt} />
+        <div className="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-2 mt-auto">
+          <CountdownToDeadline dueAt={assignment.dueAt} className="text-[11px]" />
 
           <Button
             render={<Link href={`/assignments/${assignment.id}`} />}
             size="sm"
             variant="ghost"
-            className="rounded-xl group-hover:translate-x-0.5 transition-transform"
+            className="h-8 rounded-xl px-2.5 text-xs group-hover:translate-x-0.5 transition-transform text-foreground/80 hover:text-foreground shrink-0 ml-auto sm:ml-0"
           >
             View Detail <ArrowRight className="ml-1 h-3.5 w-3.5" />
           </Button>
