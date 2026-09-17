@@ -12,7 +12,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +25,7 @@ import {
   MaterialsSection,
   RecordingsSection,
 } from "@/modules/learning/components/module-section";
+import { PageHeader } from "@/components/layout/page-header";
 import { useCourseModule } from "../api/courses.queries";
 import { RichText } from "@/components/ui/rich-text";
 import type { ModuleCohortStatus } from "@/modules/learning/types";
@@ -157,9 +157,12 @@ export function CourseModulePageContent({
     assignments: mod.assignments.length,
   };
 
+  const hasRail =
+    mod.summary || (mod.learningObjectives && mod.learningObjectives.length > 0);
+
   return (
     <div className="space-y-6">
-      {/* Top back navigation */}
+      {/* Back navigation */}
       <div>
         <Link
           href={`/courses/${slug}`}
@@ -169,148 +172,147 @@ export function CourseModulePageContent({
         </Link>
       </div>
 
-      {/* Hero */}
-      <Card className="p-6 md:p-8 rounded-2xl border border-border bg-card shadow-sm">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge variant="outline">
-            Module {mod.order.toString().padStart(2, "0")} · {course.name}
-          </Badge>
-          <ModuleStatusBadge status={mod.cohortStatus} />
-        </div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight leading-tight text-foreground">
-          {mod.title}
-        </h1>
-      </Card>
+      {/* Masthead */}
+      <PageHeader
+        variant="editorial"
+        divider
+        dateline={`Module ${mod.order.toString().padStart(2, "0")} · ${course.name}`}
+        title={mod.title}
+        description={<ModuleStatusBadge status={mod.cohortStatus} />}
+      />
 
-      {(mod.summary ||
-        (mod.learningObjectives && mod.learningObjectives.length > 0)) && (
-        <Card className="px-5 md:px-6 rounded-2xl border border-border bg-card shadow-sm">
-          <Accordion defaultValue={["overview", "objectives"]}>
-            {mod.summary && (
-              <AccordionItem value="overview">
-                <AccordionTrigger className="font-display text-base font-semibold">
-                  Overview
-                </AccordionTrigger>
-                <AccordionContent>
-                  <RichText
-                    html={mod.summary}
-                    className="text-muted-foreground pb-1"
+      {/* Reading + Rail */}
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_300px]">
+        {/* Reading column — lesson content tabs */}
+        <div className="min-w-0">
+          {visibleTabs.length === 0 ? (
+            <div className="rounded-[20px] border border-border bg-card p-8 text-center">
+              <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+              <p className="font-display text-base font-semibold">Content on the way</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Recordings, materials, and assignments for this module will
+                appear here once they&apos;re published.
+              </p>
+            </div>
+          ) : (
+            <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-4">
+              <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
+                <TabsList className="w-max">
+                  {visibleTabs.map((key) => (
+                    <TabsTrigger key={key} value={key}>
+                      {labels[key]}
+                      <span className="ml-1.5 text-[10px] text-muted-foreground tabular-nums">
+                        {counts[key]}
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+
+              {visibleTabs.includes("recordings") && (
+                <TabsContent value="recordings">
+                  <RecordingsSection items={mod.recordings} />
+                </TabsContent>
+              )}
+              {visibleTabs.includes("materials") && (
+                <TabsContent value="materials">
+                  <MaterialsSection items={mod.materials} />
+                </TabsContent>
+              )}
+              {visibleTabs.includes("assignments") && (
+                <TabsContent value="assignments">
+                  <AssignmentsSection
+                    items={mod.assignments}
+                    courseSlug={slug}
+                    moduleSlug={mod.slug}
                   />
-                </AccordionContent>
-              </AccordionItem>
-            )}
-
-            {mod.learningObjectives && mod.learningObjectives.length > 0 && (
-              <AccordionItem value="objectives" className="border-b-0">
-                <AccordionTrigger className="font-display text-base font-semibold">
-                  What you&apos;ll learn
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-2 pb-1">
-                    {mod.learningObjectives.map((objective, i) => (
-                      <li
-                        key={i}
-                        className="flex gap-2 text-sm text-muted-foreground"
-                      >
-                        <Check
-                          className="h-4 w-4 mt-0.5 shrink-0 text-accent"
-                        />
-                        <span>{objective}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            )}
-          </Accordion>
-        </Card>
-      )}
-
-      {/* Lanes — tabs when there's content, friendly empty state otherwise */}
-      {visibleTabs.length === 0 ? (
-        <Card className="p-8 text-center rounded-2xl border border-border bg-card shadow-sm">
-          <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-          <p className="font-display text-base font-semibold">Content on the way</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Recordings, materials, and assignments for this module will
-            appear here once they&apos;re published.
-          </p>
-        </Card>
-      ) : (
-        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="space-y-4">
-          <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
-            <TabsList className="w-max">
-              {visibleTabs.map((key) => (
-                <TabsTrigger key={key} value={key}>
-                  {labels[key]}
-                  <span className="ml-1.5 text-[10px] text-muted-foreground tabular-nums">
-                    {counts[key]}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-
-          {visibleTabs.includes("recordings") && (
-            <TabsContent value="recordings">
-              <RecordingsSection items={mod.recordings} />
-            </TabsContent>
+                </TabsContent>
+              )}
+            </Tabs>
           )}
-          {visibleTabs.includes("materials") && (
-            <TabsContent value="materials">
-              <MaterialsSection items={mod.materials} />
-            </TabsContent>
-          )}
-          {visibleTabs.includes("assignments") && (
-            <TabsContent value="assignments">
-              <AssignmentsSection
-                items={mod.assignments}
-                courseSlug={slug}
-                moduleSlug={mod.slug}
-              />
-            </TabsContent>
-          )}
-        </Tabs>
-      )}
+        </div>
 
-      {/* Prev / Next */}
-      <nav
-        aria-label="Module navigation"
-        className="flex items-center justify-between gap-3 pt-2"
-      >
-        {prev ? (
-          <Link
-            href={`/courses/${slug}/modules/${prev.slug}`}
-            className="group flex flex-col gap-0.5 text-sm rounded-2xl border border-border bg-card p-4 max-w-[48%] hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm"
+        {/* Sticky rail — overview, objectives, prev/next nav */}
+        <aside className="space-y-4 lg:sticky lg:top-6">
+          {hasRail && (
+            <div className="rounded-[20px] border border-border bg-card px-5 pb-2 pt-4">
+              <Accordion defaultValue={["overview", "objectives"]}>
+                {mod.summary && (
+                  <AccordionItem value="overview">
+                    <AccordionTrigger className="font-display text-sm font-semibold">
+                      Overview
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <RichText
+                        html={mod.summary}
+                        className="text-muted-foreground pb-1 text-xs"
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {mod.learningObjectives && mod.learningObjectives.length > 0 && (
+                  <AccordionItem value="objectives" className="border-b-0">
+                    <AccordionTrigger className="font-display text-sm font-semibold">
+                      What you&apos;ll learn
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2 pb-1">
+                        {mod.learningObjectives.map((objective, i) => (
+                          <li
+                            key={i}
+                            className="flex gap-2 text-xs text-muted-foreground"
+                          >
+                            <Check
+                              className="h-3.5 w-3.5 mt-0.5 shrink-0 text-accent"
+                            />
+                            <span>{objective}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+              </Accordion>
+            </div>
+          )}
+
+          {/* Prev / Next */}
+          <nav
+            aria-label="Module navigation"
+            className="flex flex-col gap-2"
           >
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" />
-              Previous
-            </span>
-            <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
-              {prev.title}
-            </span>
-          </Link>
-        ) : (
-          <span aria-hidden />
-        )}
-        {next ? (
-          <Link
-            href={`/courses/${slug}/modules/${next.slug}`}
-            className="group flex flex-col items-end gap-0.5 text-sm rounded-2xl border border-border bg-card p-4 max-w-[48%] hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm text-right"
-          >
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
-              Next
-              <ArrowRight className="h-3 w-3" />
-            </span>
-            <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
-              {next.title}
-            </span>
-          </Link>
-        ) : (
-          <span aria-hidden />
-        )}
-      </nav>
+            {prev && (
+              <Link
+                href={`/courses/${slug}/modules/${prev.slug}`}
+                className="group flex flex-col gap-0.5 text-sm rounded-[20px] border border-border bg-card p-4 hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm"
+              >
+                <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
+                  <ArrowLeft className="h-3 w-3" />
+                  Previous
+                </span>
+                <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
+                  {prev.title}
+                </span>
+              </Link>
+            )}
+            {next && (
+              <Link
+                href={`/courses/${slug}/modules/${next.slug}`}
+                className="group flex flex-col items-end gap-0.5 text-sm rounded-[20px] border border-border bg-card p-4 hover:border-primary/40 hover:-translate-y-0.5 transition-all shadow-sm text-right"
+              >
+                <span className="text-[11px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
+                  Next
+                  <ArrowRight className="h-3 w-3" />
+                </span>
+                <span className="font-display font-medium truncate group-hover:text-accent transition-colors">
+                  {next.title}
+                </span>
+              </Link>
+            )}
+          </nav>
+        </aside>
+      </div>
     </div>
   );
 }

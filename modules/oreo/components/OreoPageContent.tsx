@@ -3,12 +3,10 @@ import { useState } from "react";
 import {
   Bot,
   ChevronDown,
-  CircleHelp,
   Loader2,
   MessageSquarePlus,
   Send,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
@@ -88,6 +86,8 @@ export function OreoPageContent() {
 
   return (
     <div className="flex h-[calc(100dvh-8.5rem)] flex-col space-y-4">
+      {/* Single source of quota truth — in the masthead description.
+          The separate muted strip that echoed this was removed (plan 011). */}
       <PageHeader
         variant="editorial"
         divider
@@ -97,11 +97,22 @@ export function OreoPageContent() {
           usage.data ? (
             usage.data.unlimited ? (
               <>
-                Your personal LMS guide. <strong className="text-foreground">Unlimited</strong> queries enabled.
+                Your personal LMS guide.{" "}
+                <strong className="text-foreground">Unlimited</strong> queries enabled.{" "}
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80">
+                  LMS Grounded
+                </span>
               </>
             ) : (
               <>
-                Your personal LMS guide. <strong className="text-foreground">{usage.data.tokensLeft.toLocaleString()}</strong> tokens available this cycle.
+                Your personal LMS guide.{" "}
+                <strong className="text-foreground">
+                  {usage.data.tokensLeft.toLocaleString()}
+                </strong>{" "}
+                tokens available this cycle.{" "}
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80">
+                  LMS Grounded
+                </span>
               </>
             )
           ) : (
@@ -122,29 +133,6 @@ export function OreoPageContent() {
         }
       />
 
-      <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-3.5 py-2 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-3.5 w-3.5 text-accent shrink-0" />
-          <span>
-            {usage.data ? (
-              usage.data.unlimited ? (
-                "Unlimited AI usage tier active"
-              ) : (
-                <>
-                  <strong className="text-foreground font-mono">{usage.data.tokensUsed.toLocaleString()}</strong> tokens used ·{" "}
-                  <strong className="text-foreground font-mono">{usage.data.tokensLeft.toLocaleString()}</strong> tokens remaining
-                </>
-              )
-            ) : (
-              "Checking usage quota…"
-            )}
-          </span>
-        </div>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80 hidden sm:inline">
-          LMS Grounded
-        </span>
-      </div>
-
       <MessageScrollerProvider autoScroll defaultScrollPosition="end">
         <MessageScroller className="min-h-0 flex-1 rounded-2xl border border-border bg-card shadow-sm">
           <MessageScrollerViewport>
@@ -160,19 +148,25 @@ export function OreoPageContent() {
                       Ask about your upcoming deadlines, grades, timetable, or pick a prompt below.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2.5 max-w-2xl mx-auto">
-                    {suggestions.map((s) => (
-                      <Button
+
+                  {/* Suggestions as a numbered, hairline-divided list */}
+                  <div className="mx-auto max-w-xl border-t border-border">
+                    {suggestions.map((s, i) => (
+                      <button
                         key={s.prompt}
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl border-border bg-background hover:border-primary/50 hover:bg-muted/40 transition-all text-xs"
+                        type="button"
                         onClick={() => void submit(s.prompt)}
                         disabled={ask.isPending}
+                        className="flex w-full items-center gap-3 border-b border-border py-3 text-left hover:bg-muted/30 transition-colors disabled:opacity-50"
                       >
-                        <CircleHelp className="h-3.5 w-3.5 mr-1.5 text-accent" />
-                        {s.prompt}
-                      </Button>
+                        <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="flex-1 text-sm font-medium text-foreground leading-snug">
+                          {s.prompt}
+                        </span>
+                        <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -276,6 +270,7 @@ function AssistantBubble({
   );
 }
 
+/** Hairline ledger-style tool-step rows — one row per step, mono labels. */
 function HowIGotThis({
   steps,
   tools,
@@ -286,44 +281,47 @@ function HowIGotThis({
   return (
     <Collapsible>
       <CollapsibleTrigger className="mt-1.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-        <UserRound className="h-3 w-3" />
-        How I got this
         <ChevronDown className="h-3 w-3 transition-transform data-panel-open:rotate-180" />
+        How I got this
       </CollapsibleTrigger>
-      <CollapsibleContent className="mt-1 text-xs">
-        <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
+      <CollapsibleContent className="mt-1.5 text-xs">
+        <div className="border-t border-border">
           {steps.map((step, i) => (
-            <div key={i} className="space-y-0.5">
-              <p className="font-mono text-[11px] font-medium">
-                <span className="text-primary">{step.tool}</span>
-                {step.args ? (
-                  <span className="text-muted-foreground">
-                    {" "}
-                    {JSON.stringify(step.args)}
-                  </span>
-                ) : null}
-              </p>
-              {step.result && (
-                <p
-                  className={
-                    "text-[11px] " +
-                    (step.result.ok === false
-                      ? "text-destructive"
-                      : "text-muted-foreground")
-                  }
-                >
-                  {step.result.ok === false && step.result.error
-                    ? step.result.error
-                    : step.result.data
-                      ? JSON.stringify(step.result.data)
-                      : "ok"}
+            <div key={i} className="flex items-start gap-3 border-b border-border py-2">
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground shrink-0 w-4">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-[11px] font-medium text-primary truncate">
+                  {step.tool}
+                  {step.args && (
+                    <span className="text-muted-foreground ml-1">
+                      {JSON.stringify(step.args)}
+                    </span>
+                  )}
                 </p>
-              )}
+                {step.result && (
+                  <p
+                    className={
+                      "text-[11px] truncate " +
+                      (step.result.ok === false
+                        ? "text-destructive"
+                        : "text-muted-foreground")
+                    }
+                  >
+                    {step.result.ok === false && step.result.error
+                      ? step.result.error
+                      : step.result.data
+                        ? JSON.stringify(step.result.data)
+                        : "ok"}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
           {tools.length > 0 && (
-            <p className="pt-1 text-[11px] text-muted-foreground">
-              Tools used: {tools.join(", ")}
+            <p className="pt-2 text-[11px] text-muted-foreground font-mono">
+              Tools: {tools.join(", ")}
             </p>
           )}
         </div>
