@@ -3,14 +3,22 @@ import { Receipt } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatPrice } from "@/lib/utils";
 import { useBillingBreakdown } from "../api/billing.queries";
 import { BillingSummaryCard } from "./BillingSummaryCard";
 import { RegistrationBillingCard } from "./RegistrationBillingCard";
 import { RefreshButton } from "@/components/ui/refresh-button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function BillingPageContent() {
   const { data, isLoading, isFetching, error, refetch } = useBillingBreakdown();
+
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const fullyPaid = data && data.overall.totalDue <= 0 && data.overall.totalAmount > 0;
 
   if (isLoading) {
     return (
@@ -26,10 +34,28 @@ export function BillingPageContent() {
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Money"
-        title="Billing"
-         description="Track your payments, instalments, and outstanding balance."
-         actions={<RefreshButton loading={isFetching} onClick={refetch} />}
+        divider
+        dateline={`${dateline} · Student Accounts`}
+        title="Tuition & Billing"
+        description={
+          !isLoading && data && data.registrations.length > 0 ? (
+            fullyPaid ? (
+              <>
+                All course enrolments are <strong className="text-foreground">paid in full</strong>. No outstanding balance.
+              </>
+            ) : (
+              <>
+                <strong className="text-foreground">{formatPrice(data.overall.totalDue)}</strong> outstanding across{" "}
+                <strong className="text-foreground">{data.registrations.length}</strong> {data.registrations.length === 1 ? "course" : "courses"}
+                {" · "}
+                <strong className="text-foreground">{formatPrice(data.overall.totalPaid)}</strong> paid to date.
+              </>
+            )
+          ) : (
+            "Track your tuition payments, instalments, and account balances."
+          )
+        }
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {error ? (
