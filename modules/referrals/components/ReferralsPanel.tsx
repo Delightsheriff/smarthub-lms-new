@@ -125,6 +125,12 @@ export function ReferralsPanel() {
     );
   }
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   const totals = data?.totals ?? {
     pendingNaira: 0,
     earnedNaira: 0,
@@ -136,26 +142,44 @@ export function ReferralsPanel() {
     <div className="space-y-6 font-sans">
       <PageHeader
         variant="editorial"
-        eyebrow="Refer & Earn"
-        title="Refer & earn"
-        description="Share your link, track sign-ups, and withdraw what you earn."
-         actions={
-           <>
-           <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-            <TabsList className="rounded-xl bg-muted/60 p-1">
-              {TABS.map((t) => (
-                <TabsTrigger key={t.key} value={t.key} className="rounded-lg text-xs">
-                  {t.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-           </Tabs>
-           <RefreshButton
-             loading={isFetching || banking.isFetching || payouts.isFetching}
-             onClick={() => Promise.allSettled([refetch(), banking.refetch(), payouts.refetch()])}
-           />
-           </>
-         }
+        divider
+        dateline={`${dateline} · Affiliate Programme`}
+        title="Refer & Earn"
+        description={
+          totals.earnedNaira > 0 ? (
+            <>
+              Share your link, track sign-ups, and withdraw what you earn. Total earned:{" "}
+              <strong className="text-foreground">{`₦${totals.earnedNaira.toLocaleString("en-NG")}`}</strong>
+              {totals.pendingNaira > 0 && (
+                <>
+                  {" · "}
+                  <strong className="text-foreground">{`₦${totals.pendingNaira.toLocaleString("en-NG")}`}</strong> pending
+                </>
+              )}
+            </>
+          ) : (
+            "Share your link, track sign-ups, and withdraw what you earn."
+          )
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="overflow-x-auto pb-0.5 max-w-full">
+              <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+                <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
+                  {TABS.map((t) => (
+                    <TabsTrigger key={t.key} value={t.key} className="rounded-lg text-xs">
+                      {t.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+            <RefreshButton
+              loading={isFetching || banking.isFetching || payouts.isFetching}
+              onClick={() => Promise.allSettled([refetch(), banking.refetch(), payouts.refetch()])}
+            />
+          </div>
+        }
       />
 
       {/* Code-pill card — persistent across tabs so the user's
