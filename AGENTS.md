@@ -6,43 +6,48 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # SmartHub Core LMS
 
-Two initiatives have run in this repo. Read the one that matches your task
-**first** — each is its own master context:
+The original 28-module port plus Self-Paced Learning is done and fully
+shipped — the codebase itself, not a plan doc, is the record of it now.
+`plans/ARCHITECTURE.md` still carries the timeless module/seam vocabulary
+and principles from that era (module-per-domain, interface/depth, when a
+seam earns its keep) — read it for the "how do we keep this testable and
+AI-navigable" rules, which don't change with the UI.
 
-- **The porting project is done** (Plans 001–013 — the original 28-module
-  port plus Self-Paced Learning). `plans/PORTING.md` is its master context;
-  read it if you're touching a still-open porting detail or need the
-  original module-shape rationale.
-- **Design-system modernization & auth is the active track.**
-  **Read `plans/DESIGN-SYSTEM.md` first** for anything involving nav/chrome,
-  page restyling, shared UI primitives, colors, motion, or auth. It covers
-  the design skills in use, the shared-primitive registry, non-negotiables,
-  the NextAuth architecture, and — important if more than one agent session
-  may be working this repo at once — a real, previously-hit git-collision
-  hazard and how to avoid it.
+**Design-system modernization is the active track. Read
+`plans/DESIGN-SYSTEM.md` first** for anything involving nav/chrome, page
+layout, shared UI primitives, colors, motion, or auth. As of the editorial
+dashboard redesign, that file documents the *current* design language —
+masthead-style headers, hero+ledger asymmetric layouts, bento tiles sized
+by importance, magazine-index lists — not the earlier "restyle every
+page's cards" rollout, which it superseded. It covers the shared-primitive
+registry, non-negotiables, the NextAuth architecture, and — important if
+more than one agent session may be working this repo at once — a real,
+previously-hit git-collision hazard and how to avoid it.
 
-## Working rules (both tracks)
+## Working rules
 
 - **Work incrementally.** A cross-cutting slice (new nav chrome, an auth
-  swap) gets its own `plans/0NN-*.md`, confirmed by the user before code. A
-  small single-page pass doesn't need one — check `plans/DESIGN-SYSTEM.md`
-  §6 for the next free plan number before creating a file.
+  swap, a new page-layout direction) gets its own `plans/0NN-*.md`,
+  confirmed by the user before code. A small single-page pass doesn't need
+  one — check `plans/DESIGN-SYSTEM.md`'s plan registry for the next free
+  number before creating a file.
 - **Never assume; confirm scope.** Ask before starting a slice with real
   blast radius, and flag ambiguities.
 - **Use shadcn components throughout.** Rebuild every UI primitive/screen
   from the `base-vega` preset (Base UI primitives — `render` prop, not
   `asChild`). Do NOT hand-roll a primitive shadcn already provides, and
-  check `plans/DESIGN-SYSTEM.md` §3 for a shared primitive before adding a
-  new page-local one.
+  check `plans/DESIGN-SYSTEM.md`'s shared-primitive registry before adding
+  a new page-local one.
 - **The brand colors are SmartHub's own** — maroon `#430330` (primary),
   orange `#F29913` (accent), restored by ADR 0015 in both light and dark.
   This *reverses* an earlier decision (ADR 0005) that kept the shadcn
   preset's stock colors instead — if you find guidance elsewhere in this
   repo implying the old maroon/orange should be avoided, it's stale;
-  ADR 0015 and `plans/DESIGN-SYSTEM.md` are the current word. What's still
-  fair game to modernize is everything *around* the colors: radius,
-  elevation, motion, layout, shared components — see `plans/DESIGN-SYSTEM.md`
-  §4 for the specific rules (no raw Tailwind colors, solid active-states,
+  ADR 0015 and `plans/DESIGN-SYSTEM.md` are the current word. These are
+  the one thing the editorial redesign did NOT change — what moved is
+  layout and composition (masthead/ledger/bento/index-list over stacked
+  cards), not the palette. See `plans/DESIGN-SYSTEM.md`'s non-negotiables
+  for the specific rules (no raw Tailwind colors, solid active-states,
   `Select` for filters, one background per page, motion needs a reason).
 
 ## Source of truth for behavior/contracts
@@ -61,7 +66,7 @@ missing required params) were found this way, not by guessing.
 
 Each domain module owns its `api/` (service + queries + normalise),
 `components/`, `config/endpoints.ts`, and `types/` (api.types + index). See
-`plans/PORTING.md` §4.
+`docs/adr/0003-module-per-domain-structure.md` for the rationale.
 
 ## Checks before claiming done
 

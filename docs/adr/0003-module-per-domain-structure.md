@@ -16,7 +16,7 @@ folders.
 Each domain module owns its `api/` (service + queries + normalise),
 `components/`, `config/endpoints.ts`, and `types/` (`api.types` +
 `index`). Shared infrastructure that doesn't belong to a domain stays in
-`lib/`. See `plans/PORTING.md` §4 for the canonical pattern.
+`lib/`.
 
 ## Consequences
 

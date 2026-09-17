@@ -1,45 +1,56 @@
-# SmartHub LMS — Design System Modernization & Auth (Master Context)
+# SmartHub LMS — Design System (Master Context)
 
-This is the **master context** for the second initiative in this repo,
-running after (and in parallel with) the original porting project.
-Read this first if you're picking up nav/chrome/auth/page-redesign work;
-read **`plans/PORTING.md`** if you're picking up a still-open porting
-slice. The two tracks share one codebase, one ADR sequence, and one
-plan-number sequence — see §6 before creating a new plan file.
+This is the **master context** for the design system. Read this first
+for anything involving nav/chrome, page layout, shared UI primitives,
+colors, motion, or auth.
 
-> **Status of the other track:** Plans 001–012 (the original 28-module
-> port) are done — see `docs/PROGRESS.md`. Plan 013 (Self-Paced
-> Learning) landed after that, built by a separate concurrent session —
-> see `docs/adr/0017-*.md`. Neither is this track's concern except
-> where explicitly noted (e.g. §7).
+**This file was rewritten from scratch** when the dashboard was
+redesigned into "The Brief" — a masthead/hero-ledger/bento/magazine-
+index layout language, replacing the earlier approach of restyling
+every page as a stack of equal-weight bordered cards. Everything
+`plans/0NN-*.md` documented about that earlier rollout (select fixes,
+form standardization, data-fetching audits) is still true of the code
+it touched and isn't being redone — only the page-layout language
+changed. If you find a stale reference to an old plan number anywhere
+in this repo, this file and the actual code are the current word, not
+the old doc.
+
+The original 28-module port (and Self-Paced Learning) is done and
+fully shipped — `plans/ARCHITECTURE.md` still carries its timeless
+module/seam vocabulary, which doesn't change with the UI.
 
 ---
 
 ## 1. The goal
 
-Two things, done together, not sequentially:
+**A distinctive editorial layout language, not a generic dashboard
+template.** The brand colors were never the problem — maroon `#430330`
+(primary) / orange `#F29913` (accent), restored by ADR 0015, are not
+up for renegotiation. What was wrong was composition: every page was a
+vertical stack of `<h2> + card-grid>` sections, each card sharing the
+same radius/border/shadow regardless of what it held — a dashboard
+that read as a list, not a considered piece of UI.
 
-1. **Restyle the app into a bold, modern, professional product** —
-   grouped navigation, solid brand-color active states, real motion,
-   consistent shared primitives — instead of the generic shadcn-default
-   look the port shipped with. Page by page, starting from the
-   smallest surfaces outward (nav chrome first, then Help/Activity/
-   Webinars/Notifications/Courses, then the bigger ones: Profile/
-   Settings, Referrals, Billing).
-2. **Port the client auth system onto NextAuth v5** (Credentials
-   provider against the real `smarthub-api`), which turned out to be
-   the actual fix for a real, reported bug ("logs out on every
-   implementation") — see §5.
+**"The Brief"** is the fix: a real visual hierarchy built from four
+moves, applied consistently but never mechanically —
 
-**The brand colors are not up for negotiation — the execution around
-them is.** ADR 0005 (original port) treated the shadcn `base-vega`
-preset's stock magenta as the design language and explicitly refused
-the old maroon/orange. ADR 0015 reverses that: the real SmartHub
-values — maroon `#430330` (primary), orange `#F29913` (accent) — are
-restored, converted precisely to OKLCH, in both themes. Every
-modernization in this file happens *with* those colors, doing real
-visual work (solid fills, not tints; a real independent accent), not
-instead of them.
+1. **Masthead, not a header bar.** A dateline (mono, small caps) above
+   a real serif headline at real scale (`clamp(30px, 4.4vw, 48px)`
+   territory) — see `PageHeader`'s `dateline`/`divider` props (§3).
+2. **Asymmetric hero + ledger**, not equal-weight cards. The single
+   most important thing on the page (continue learning; needs grading)
+   takes a dominant ~2/3 slot; a compact, hairline-divided ledger of
+   dated/typed entries takes the rest — see `Ledger`/`LedgerItem` (§3).
+3. **Bento tiles sized by actual importance**, not a uniform grid —
+   Tailwind grid-cols/spans that vary per tile, never `md:grid-cols-4`
+   forcing four tiles into whatever space happens to be left.
+4. **Magazine-index lists** for "browse everything" surfaces (courses,
+   cohorts) — numbered rows separated by hairlines, not a grid of
+   boxed cards competing for the same visual weight as real content —
+   see `IndexList`/`IndexRow` (§3).
+
+Auth is on NextAuth v5 (Credentials provider against the real
+`smarthub-api`) — see §5. Unrelated to the layout work, still current.
 
 ---
 
@@ -57,16 +68,11 @@ namechecked:
   framework*: should this even animate (frequency-based — never animate
   keyboard-initiated or 100+/day actions), what easing (ease-out for
   entering, never ease-in), what duration (<300ms for UI), springs for
-  interruptible/gestural motion. The rest of `emilkowalski/skills`
-  (`animate`, `apple-design`, `ask-sonner`, etc.) is also installed —
-  consult it before hand-rolling any animation.
+  interruptible/gestural motion.
 
-Also installed: **`better-colors`** (same family as `better-ui`) — for
-any future palette/contrast work; **`@shadcn/lint`** — registered in
+Also installed: **`better-colors`**; **`@shadcn/lint`** — registered in
 `eslint.config.mjs` with **zero rules enabled on purpose** (see its own
-`SETUP.md`). Turning on `no-raw-colors`/`no-restyle`/`no-arbitrary-values`
-once each component's contract is settled is a real, cheap way to make
-§4's conventions machine-enforced instead of just written down here.
+`SETUP.md`).
 
 Motion tokens live in `app/globals.css`'s `:root` block:
 `--ease-out-strong`, `--ease-in-out-strong`, `--ease-drawer`,
@@ -76,69 +82,73 @@ Motion tokens live in `app/globals.css`'s `:root` block:
 
 ## 3. Shared primitives — use these, don't reinvent them
 
-Every one of these was extracted because the same pattern had already
-drifted into 2–4 near-identical copies across pages. Before building a
-new page surface, check this list first.
-
-| Primitive | Path | Replaces |
+| Primitive | Path | For |
 |---|---|---|
-| `PageHeader` | `components/layout/page-header.tsx` | Every page's own hand-rolled `<h1 className="text-2xl font-semibold...">` + description paragraph |
-| `EmptyState` | `components/ui/empty-state.tsx` | The copy-pasted `rounded-2xl border bg-card p-12 text-center` "nothing here" block |
-| `FilterDropdown` / `FilterBar` | `components/ui/filter-dropdown.tsx` | Any page-local filter dropdown (built on shadcn `Select`, not `DropdownMenu` — a filter *picks a value*, it isn't a menu of actions). Bold active-state (tinted border/bg/dot) built in. Has a `loading` prop for query-backed options. |
-| `AuthCard` / `AuthCardBody` / `AuthColumn` | `modules/auth/components/AuthCard.tsx` | Every auth screen's own `min-h-screen` + logo + Card boilerplate |
-| `Stagger` / `StaggerItem` | `components/animation/stagger.tsx` (pre-existing, now actually used) | Flat, un-animated list/grid pop-in |
-| `groupNavItems` | `lib/nav-grouping.ts` | Ad hoc sidebar section grouping (unit-tested — see `tests/nav/grouping.test.ts`) |
-| Per-domain type→icon→color maps | `modules/notifications/lib/notification-type.ts`, `modules/activity/lib/action-type.ts` | Duplicated `getIcon()`/`getActionInfo()` switches with raw Tailwind colors. **Pattern, not a single shared file** — two different domains (notification types vs. activity actions) get two small modules, not one forced abstraction. Do the same for a third domain rather than overloading one of these. |
-| Chat primitives: `MessageScroller`/`Message`/`Bubble`/`Marker`/`Attachment` | `components/ui/message-scroller.tsx`, `message.tsx`, `bubble.tsx`, `marker.tsx`, `attachment.tsx` | shadcn's official chat components (added 2026-06, see `ui.shadcn.com/docs/changelog/2026-06-chat-components`). Used by Ask Oreo (`modules/oreo/components/OreoPageContent.tsx`). **Gotcha:** `npx shadcn add` generates these importing `cn` from the standalone `cn` npm package, not this repo's `@/lib/utils` — fix that import on every file the CLI touches, and don't let the `cn` package linger as a second, redundant class-merge utility. `@shadcn/react` (the headless scroll/anchoring logic behind `MessageScroller`) is a real, needed dependency — keep it. |
+| `PageHeader` (editorial variant) | `components/layout/page-header.tsx` | The masthead. New `dateline` prop (mono uppercase line above the title, e.g. "Tuesday, Sep 17 · Data Science Cohort") and `divider` prop (hairline rule under the whole block) are additive — every other editorial-variant page that doesn't pass them renders exactly as before. `description` now takes `ReactNode`, not just `string`, so a page can bold a number inline (`<strong>{n}</strong> courses...`). |
+| `Ledger` / `LedgerItem` / `NagItem` | `components/ui/ledger.tsx` | A hairline-divided list of dated/typed entries ("Today & upcoming", "Needs grading") or self-gating status/opportunity rows ("Needs a look" — billing, referrals, etc.). `LedgerItem` takes `href` (link) or `onClick` (e.g. opening a dialog); `NagItem` has a colored left rule for urgency instead of a dot, plus an `actions` escape hatch for a row needing more than one action. |
+| `IndexList` / `IndexRow` | `components/ui/index-list.tsx` | A magazine-index browse list (courses, cohorts) — numbered rows, hairline dividers, progress rule + status that hide below 720px via Tailwind's own `sm:` utilities (not hand-written media queries — see the cascade-order note in §4). |
+| `EmptyState` | `components/ui/empty-state.tsx` | The "nothing here" block. Unchanged. |
+| `FilterDropdown` / `FilterBar` | `components/ui/filter-dropdown.tsx` | Any page-local filter dropdown (built on `Select`, not `DropdownMenu`). Unchanged. |
+| `AuthCard` / `AuthCardBody` / `AuthColumn` | `modules/auth/components/AuthCard.tsx` | Auth screen shell. Unchanged. |
+| `groupNavItems` | `lib/nav-grouping.ts` | Sidebar section grouping. Unchanged. |
 
-Pages already migrated to this set: Courses, Help, Notifications
-(+ `NotificationBell`), Activity, Webinars, both self-paced page-level
-surfaces, Profile/Settings, Referrals, Billing, Internships, Oreo,
-Assigned-modules, and all four auth screens. Not yet migrated:
-Tech Scholarship (no standalone page — dashboard widget only, already
-consistent).
+**Shipped on this language so far:** the student dashboard
+(`app/(app)/dashboard/page.tsx`) and the instructor dashboard
+(`modules/teaching/components/TeachPageContent.tsx`), both roles fully
+rebuilt — masthead, hero+ledger, bento row, magazine-index list. The
+six student dashboard "nag" widgets (billing, internship fee/workspace,
+acceptance letters, referrals, tech scholarship) were rewritten to
+render as `NagItem` rows inside one ledger instead of six separate
+bordered cards. The top bar's redundant greeting was removed (the
+masthead owns it now) and the sidebar header got a hairline divider to
+match the new rule-based motif.
+
+**Not yet migrated** (candidates for the next slice — see §6):
+Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity,
+Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals,
+the cohort workspace tabs. These still use the pre-"Brief" `PageHeader`
+(no dateline/divider) + card-grid pattern, which is not *wrong*, just
+not yet carrying the new language.
 
 ---
 
 ## 4. Non-negotiables
 
-- **No raw Tailwind palette colors** (`text-emerald-600`,
-  `bg-amber-50 dark:bg-amber-950/30`, etc.) for anything semantic.
-  Route through theme tokens: `success`, `warning`, `destructive`,
-  `primary`, `accent`, `muted`. If a genuinely new semantic category
-  doesn't fit an existing token, that's a `better-colors` conversation,
-  not a reach for a raw Tailwind shade.
-- **Active/selected state is a solid fill**, not a `/10`–`/15` opacity
-  tint. This is the single highest-leverage visual change made this
-  track (`sidebarMenuButtonVariants` in `components/ui/sidebar.tsx`,
-  `BottomNav`, notification badges). A tinted state reads as "maybe
-  active"; a solid one doesn't.
-- **A filter/value-picker is a `Select`, not a `DropdownMenu`.** The
-  latter is for actions, not for choosing one value from a list —
-  matters for both correctness (listbox ARIA semantics, arrow-key nav)
-  and for keeping `FilterDropdown` as the one implementation.
-  Look-alike Radio-group-in-a-DropdownMenu patterns elsewhere in the
-  app pre-date this rule; migrate them opportunistically, don't leave
-  new ones.
+- **No raw Tailwind palette colors** for anything semantic. Route
+  through theme tokens: `success`, `warning`, `destructive`, `primary`,
+  `accent`, `muted`.
+- **Active/selected state is a solid fill**, not a tint (`sidebarMenuButtonVariants`,
+  `BottomNav`, notification badges). Unchanged, still correct — the
+  editorial redesign did not touch this.
+- **A filter/value-picker is a `Select`, not a `DropdownMenu`.**
 - **One page, one background.** A page component never declares its
-  own `min-h-screen`/full-viewport background wrapper if it renders
-  inside a layout that already owns one — that exact bug (a second
-  nested full-height box, confined to the layout's width, painting a
-  visibly different background than the rest of the page) took out
-  all four auth screens at once. If a page looks like it has a
-  two-tone background, this is almost certainly why.
-- **Motion needs a reason** (emil-design-eng §"Animation Decision
-  Framework"). Don't add a transition because it's easy to add one;
-  answer "should this even animate" first, especially for anything
-  triggered often (nav, keyboard shortcuts).
-- **Confirm scope before a big slice, same as the porting track.** The
-  small per-page passes (Help, Activity, etc.) don't need a `plans/
-  0NN-*.md` of their own — they're small enough for a single
-  confirm-and-build turn. A cross-cutting slice (nav chrome, auth) does.
+  own `min-h-screen` wrapper if it renders inside a layout that
+  already owns one.
+- **Not everything is a card.** A hairline (`border-t border-border`)
+  is enough separation for a row in a list; reach for a full bordered
+  `Card` only for something that's genuinely a distinct object (the
+  hero, a bento tile) — stamping the same radius/border/shadow on
+  every block is exactly the flattened-hierarchy bug this redesign
+  fixed. Before adding a new boxed card to a page, ask whether it's
+  actually a list row wearing a card as a costume.
+- **A responsive override lives after the rule it overrides**, or use
+  Tailwind's own `sm:`/`md:` utilities instead of hand-written media
+  queries. A real bug this session: a `@media (max-width: 720px)` block
+  placed *before* the base `display: flex` rule it meant to override
+  lost silently at every width, because equal-specificity same-media
+  CSS resolves by source order, not by which one "sounds newer."
+  `IndexRow` avoids this entirely by using `hidden sm:flex` etc.
+- **Motion needs a reason.**
+- **Confirm scope before a big slice.** A cross-cutting layout change
+  (a new page-layout direction, nav chrome, auth) gets its own
+  `plans/0NN-*.md`, confirmed by the user before code. A small
+  single-page pass doesn't need one.
 
 ---
 
 ## 5. Auth architecture (NextAuth v5 / Auth.js)
+
+Unrelated to the layout work — still current as originally written.
 
 `next-auth@beta` (5.0.0-beta.x — the App-Router-native version;
 `next-auth@latest` resolves to the old v4 API and is the wrong choice
@@ -158,101 +168,69 @@ sessions are JWT-strategy, encrypted in an httpOnly cookie.
 - **No token-refresh logic** — smarthub-api's `generateAccessToken`
   signs with no `expiresIn`, so tokens carry no `exp` claim and never
   expire. A 401 from the API is therefore always a genuinely invalid
-  session (suspended, revoked, secret rotated), never "needs a routine
-  refresh" — `lib/api/client.ts`'s response interceptor just signs out
-  for real (`next-auth/react`'s `signOut`) rather than attempting a
-  refresh dance.
-- **`AuthSessionBridge`** (`components/providers/auth-session-bridge.tsx`)
-  mirrors the NextAuth session into the existing Zustand `authStore` on
-  every session change, so the store's ~20 existing consumers (sidebar,
-  socket provider, the axios interceptor's `getState()` call outside
-  React, etc.) needed zero changes. `authStore` no longer has its own
-  `persist` middleware — that would be a second, independent
-  persistence layer racing the real session on every load.
+  session, never "needs a routine refresh" — `lib/api/client.ts`'s
+  response interceptor just signs out for real rather than attempting
+  a refresh dance.
+- **`AuthSessionBridge`** mirrors the NextAuth session into the
+  existing Zustand `authStore` on every session change, so the store's
+  ~20 existing consumers needed zero changes. `authStore` no longer has
+  its own `persist` middleware.
 - **The root layout (`app/layout.tsx`) is `async` and calls `auth()`
-  server-side**, passing the result into `SessionProvider`. This is
-  what actually fixes "logs out on every implementation": without a
-  server-fetched initial session, `useSession()` starts in a `"loading"`
-  state on first client render, and any gate that doesn't explicitly
-  wait for `status` (rather than a derived flag that updates a tick
-  later) will flash an already-authenticated user to `/login`. See
-  `AppShell`'s comment for the exact mechanism.
-- Dev-only env (`.env.local`, gitignored): `AUTH_SECRET`, `AUTH_API_URL`
-  (the direct backend URL for server-side `auth.ts` — deliberately
-  *not* the `/api-proxy` rewrite `NEXT_PUBLIC_API_URL` uses, which
-  exists only so the *browser* preview sandbox can reach a second port;
-  server-side code has no such restriction), `AUTH_TRUST_HOST`.
+  server-side**, passing the result into `SessionProvider` — this is
+  what fixes "logs out on every reload." See `AppShell`'s comment for
+  the exact mechanism.
+- Dev-only env (`.env.local`, gitignored): `AUTH_SECRET`, `AUTH_API_URL`,
+  `AUTH_TRUST_HOST`.
 
 ---
 
 ## 6. Plan-number and ADR-number registry
 
-One shared sequence across both tracks — **check this table, and the
-actual `plans/`/`docs/adr/` directories, before picking a number.**
+**Renumbered from scratch** alongside this file's rewrite — the old
+001–019 sequence documented the porting project and the pre-"Brief"
+rollout, both superseded. Starting fresh at 001 for the editorial
+dashboard system era.
 
 | Plans taken | By |
 |---|---|
-| 001–012 | Original porting plans |
-| 013 | Self-Paced Learning |
-| 014 | Navigation chrome redesign (this track) |
-| 015 | Editorial design sync from `smarthub-core-client` (this track) — slice 1 (Courses) shipped, see `plans/015-editorial-design-sync.md` |
-| 016 | Editorial rollout handoff prompts — per-page prompts for slices 2+, see `plans/016-editorial-rollout-prompts.md` |
-| 017 | Handoff prompts: dialog spacing, form standardization (react-hook-form + zod everywhere, backend/legacy validation audit), data-page refresh + coordinated loading — see `plans/017-forms-dialogs-data-pages-prompts.md` |
-| 018 | Handoff prompt: fix Select trigger label resolution app-wide (Base UI `Select.Value` doesn't auto-resolve labels) — see `plans/018-select-value-label-fix-prompt.md` |
-| 019 | Handoff prompt: data-fetching/caching tiering, cache-invalidation gaps, coordinated vs. staggered loading, refresh-button coverage, shared debounce hook — see `plans/019-data-fetching-caching-loading-prompt.md` |
+| 001 | Editorial dashboard system — masthead/hero-ledger/bento/index-list, both dashboards, header/sidebar complement (this slice) |
 
-Follow-ups mentioned for the self-paced track (access-revocation
-notices, a jobs/career surface, global search) have since shipped —
-`modules/access/components/RevokedCourseNotice.tsx`, `modules/jobs/`,
-`modules/search/` + `components/layout/search-trigger.tsx` — as part of
-the same pass that produced plan 017. None of them got their own plan
-file; **next available plan number is 020.**
+Next available plan number: **002**.
 
 | ADRs taken | Decision |
 |---|---|
-| 0001–0014 | Original porting decisions |
-| 0015 | Restore SmartHub brand colors (supersedes 0005) |
-| 0016 | Grouped nav + solid active-state fill (extends 0007) |
+| 0001–0014 | Original porting decisions (module seams, state split, routing, auth flows — all still accurate, unrelated to visual design) |
+| 0015 | Restore SmartHub brand colors (supersedes 0005) — still accurate, unchanged by this redesign |
+| 0016 | Grouped nav + solid active-state fill (extends 0007) — still accurate, unchanged by this redesign |
 | 0017 | Self-paced watermarked streaming/entitlement seam |
+| 0018 | Editorial dashboard composition — masthead/hero-ledger/bento/magazine-index over uniform card stacks |
 
-Next available: ADR **0018**.
+Next available ADR: **0019**.
 
 ---
 
 ## 7. Working alongside a concurrent agent session
 
-This codebase has, more than once in this track's history, had a
-**second Claude session working on the self-paced port at the same
-time**, in the same git working tree. Two real failure modes happened,
-not hypothetically:
+This codebase has, more than once, had a **second Claude session
+working on it at the same time**, in the same git working tree. Two
+real failure modes happened, not hypothetically:
 
 1. **Git-index race on commit.** `git add <mine>; git commit` picked up
    files the *other* session had staged moments earlier, silently
    bundling their in-progress work into a commit attributed to this
-   one. Fix in place: every commit in this track uses
-   `git commit -m "..." -- <exact paths>`, never a bare `git commit` and
-   never `git add -A`. This limits a commit to exactly the paths named,
-   regardless of what else is sitting in the shared index.
+   one. Fix in place: every commit uses `git commit -m "..." -- <exact
+   paths>`, never a bare `git commit` and never `git add -A`.
 2. **Full working-tree wipe.** Once, every uncommitted change across
-   *eight tracked files plus four new untracked files* vanished at once
+   eight tracked files plus four new untracked files vanished at once
    — almost certainly the other session running `git clean -fd` /
-   `checkout .` as part of its own workflow, with no way to know this
-   session had uncommitted work sitting in the same tree.
-   `git reflog` confirmed no *committed* work was lost, only whatever
-   hadn't been committed yet.
+   `checkout .`. `git reflog` confirmed no *committed* work was lost.
 
 **If you're an agent reading this while another session might be
 active on the same checkout:** commit early and often, in small
-verified units, immediately after each one — don't batch multiple
-logical changes into one uncommitted working session. Re-run
-`git status`/`git diff --stat` right before every commit, not just
-after, since staged content can change between the two. If a file you
-just edited reads back with your edit missing, don't assume you
-misremembered — check `git reflog` and redo the work; it's very
-possibly this exact class of collision, not an error on your part. The
-real, durable fix — recommended, not yet actioned — is running
-concurrent sessions in separate `git worktree`s instead of one shared
-checkout.
+verified units. Re-run `git status`/`git diff --stat` right before
+every commit, not just after. If a file you just edited reads back
+with your edit missing, check `git reflog` before assuming you
+misremembered.
 
 ---
 
@@ -260,21 +238,11 @@ checkout.
 
 | Slice | Status |
 |---|---|
-| Brand colors restored (ADR 0015) | ✅ Done |
-| `@shadcn/lint` registered | ✅ Done (no rules on yet) |
-| Plan 014 — nav chrome redesign (grouping, solid active state, collapsible sections, sliding role switcher, header polish) | ✅ Done — see `plans/014-navigation-chrome-redesign.md` |
-| NextAuth v5 port | ✅ Done |
-| Auth pages full-page-background fix + `AuthCard` extraction | ✅ Done |
-| Shared primitives: `PageHeader`, `EmptyState`, `FilterDropdown`/`FilterBar` | ✅ Done |
-| Courses, Help, Notifications, Activity, Webinars migrated to shared primitives | ✅ Done |
-| Self-paced module: raw-color cleanup + `PageHeader`/`EmptyState` adoption | ✅ Done |
-| Profile/Settings redesign | ✅ Done — left settings rail (solid active-state, replaces the wrapping `TabsList`), every section wrapped in a matching `Card` header, dead "Notifications" row removed from Overview, `notification-prefs` endpoint path fixed, `Switch` dark-mode contrast fixed |
-| Referrals, Billing, Internships, Oreo, Assigned-modules | ✅ Done — PageHeader/EmptyState adoption throughout; Referrals also moved onto the segmented-header-tabs pattern; Oreo rebuilt on shadcn's new chat primitives (`message-scroller`/`message`/`bubble`) |
-| Tech Scholarship | ✅ Already consistent — dashboard-only widget (`TechScholarshipCard`), no standalone page exists |
-| Per-page segmented header tabs (the CRM inspiration's "Companies · Active" pattern) | ⬜ Deliberately deferred — a per-page decision, not a chrome concern |
-| Full profile "entity drawer" (CRM-style avatar/stat-grid/list panel) | ⬜ Superseded — the left-rail + header-card shape shipped instead; revisit only if a future page specifically needs the CRM stat-grid layout |
-| Plan 017 — dialog spacing audit, react-hook-form + zod everywhere, refresh controls + coordinated loading on data pages | ✅ Done and live-verified — see `plans/017-forms-dialogs-data-pages-prompts.md`, `plans/017-validation-audit.md` |
-| Plan 018 — Select trigger label resolution + popup positioning | ✅ Done and live-verified (cycled every option on the Courses filters against real data, confirmed correct label + correct filtering each time) — see `plans/018-select-value-label-fix-prompt.md`. Two extra bugs found during this verification and fixed directly: `CohortDetailPageContent`'s 6-tab bar broke onto an ugly full-width row on narrow viewports instead of scrolling (now matches the `overflow-x-auto` pattern already used on Courses/self-paced tabs), and the roster/assignments tabs showed "1 Submissions"/"1 Pending Grade" instead of correct singular grammar. Commit `9cd9b51`. |
-| Profile birthday editing | ⬜ Known gap, flagged not fixed — legacy LMS exposes birthday editing and the backend accepts `birthDay`/`birthMonth`, but the current profile screen has no field for it (see `plans/017-validation-audit.md`) |
-| Auth screens — disable every input during submit | ✅ Done — the 5 auth screens (Login/ForgotPassword/ResetPassword/AcceptInvitation/ChangePassword) previously only disabled the submit button via `mutation.isPending`, not the fields themselves, contradicting plan 017's own rule. Fixed and live-verified (commit `a429da0`). |
-| Plan 019 — data-fetching/caching tiering, invalidation gaps, coordinated loading, refresh coverage, debounce | ⬜ Handoff prompt written, not yet actioned — see `plans/019-data-fetching-caching-loading-prompt.md` |
+| Student dashboard rebuilt on "The Brief" (masthead, hero+ledger, bento, magazine index-list) | ✅ Done, live-verified against real data, desktop/tablet/mobile |
+| Instructor dashboard (`TeachPageContent`) rebuilt on the same language | ✅ Done, live-verified — grading dialog interaction re-tested and confirmed working through the new `LedgerItem onClick` |
+| Six dashboard nag widgets → `NagItem` rows in one ledger | ✅ Done |
+| `PageHeader` `dateline`/`divider` props, `Ledger`/`LedgerItem`/`NagItem`, `IndexList`/`IndexRow` | ✅ Done — new primitives, additive to `PageHeader` |
+| Top bar redundant greeting removed; sidebar header divider added | ✅ Done |
+| App-wide mobile bug: `<main>` had no bottom padding for the `fixed` `BottomNav`, covering the last bit of every page's content on mobile | ✅ Fixed (found while verifying the dashboard redesign) |
+| `DashboardStatsStrip` tiles restyled to match `ProgressPulseCard`'s tile shape, off a viewport-based `md:grid-cols-4` that squeezed into a narrow bento column | ✅ Done |
+| Rollout to remaining pages (Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity, Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals, cohort workspace) | ⬜ Not started — see plan 002 handoff prompt |
