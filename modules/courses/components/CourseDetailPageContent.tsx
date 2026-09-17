@@ -140,8 +140,8 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
         </div>
       </div>
 
-      {/* Stats — hairline-divided strip instead of four boxed cards. */}
-      <div className="grid grid-cols-2 divide-x divide-y divide-border rounded-2xl border border-border bg-card shadow-sm sm:grid-cols-5 sm:divide-y-0 overflow-hidden">
+      {/* Stats — hairline-divided strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 divide-y sm:divide-y-0 divide-border rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <Stat label="Progress" value={`${course.progress}%`} />
         <Stat label="Modules" value={modules.length} />
         <Stat label="Recordings" value={totalRecordings} />
@@ -262,11 +262,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="p-4">
-      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="p-3.5 sm:p-4">
+      <p className="text-[11px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 font-display text-2xl tabular-nums leading-tight md:text-3xl">
+      <p className="mt-1 font-display text-2xl font-bold tabular-nums leading-tight text-foreground md:text-3xl">
         {value}
       </p>
     </div>
