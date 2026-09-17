@@ -1,8 +1,8 @@
 "use client";
 import { BookOpen, GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { cn } from "@/lib/utils";
 
@@ -76,11 +76,10 @@ export function RoleSwitcher({ variant = "expanded", className }: Props) {
   return <SlidingSwitch mode={mode} onSwitch={switchTo} className={className} />;
 }
 
-/** A sliding solid-fill segmented control, not a dropdown — the switch
- *  is binary and used constantly, so it should read (and animate) as
- *  one continuous state change rather than a menu to open. The pill
- *  uses `layoutId` for a shared-element slide (Motion's FLIP-style
- *  animation) instead of hand-computed transform math. */
+/** The mono/pill "seg" toggle (see SegmentedControl) instead of a
+ *  dropdown — the switch is binary and used constantly, so it should
+ *  read (and animate) as one continuous state change rather than a
+ *  menu to open. */
 function SlidingSwitch({
   mode,
   onSwitch,
@@ -90,48 +89,15 @@ function SlidingSwitch({
   onSwitch: (value: "student" | "instructor") => void;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-
   return (
-    <div
-      role="tablist"
-      aria-label="Switch workspace"
-      className={cn(
-        "relative flex w-full items-center gap-0.5 rounded-lg bg-muted p-0.5",
-        className
-      )}
-    >
-      {ITEMS.map((it) => {
-        const Icon = it.icon;
-        const active = mode === it.value;
-        return (
-          <button
-            key={it.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onSwitch(it.value)}
-            className={cn(
-              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors active:scale-[0.97]",
-              active ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {active && (
-              <motion.span
-                layoutId="role-switch-pill"
-                className="absolute inset-0 -z-10 rounded-md bg-primary shadow-xs"
-                transition={
-                  reduce
-                    ? { duration: 0 }
-                    : { type: "spring", duration: 0.25, bounce: 0 }
-                }
-              />
-            )}
-            <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
-            <span className="hidden truncate sm:inline">{it.label}</span>
-          </button>
-        );
-      })}
-    </div>
+    <SegmentedControl
+      items={ITEMS}
+      value={mode}
+      onChange={onSwitch}
+      layoutId="role-switch-pill"
+      ariaLabel="Switch workspace"
+      className={cn("w-full justify-center", className)}
+      hideLabelsBelowSm
+    />
   );
 }
