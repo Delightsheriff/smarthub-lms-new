@@ -194,8 +194,9 @@ dashboard system era.
 | Plans taken | By |
 |---|---|
 | 001 | Editorial dashboard system — masthead/hero-ledger/bento/index-list, both dashboards, header/sidebar complement (this slice) |
+| 002 | Handoff prompt: roll "The Brief" out to the rest of the app — see `plans/002-editorial-rollout-handoff.md` |
 
-Next available plan number: **002**.
+Next available plan number: **003**.
 
 | ADRs taken | Decision |
 |---|---|
@@ -245,4 +246,6 @@ misremembered.
 | Top bar redundant greeting removed; sidebar header divider added | ✅ Done |
 | App-wide mobile bug: `<main>` had no bottom padding for the `fixed` `BottomNav`, covering the last bit of every page's content on mobile | ✅ Fixed (found while verifying the dashboard redesign) |
 | `DashboardStatsStrip` tiles restyled to match `ProgressPulseCard`'s tile shape, off a viewport-based `md:grid-cols-4` that squeezed into a narrow bento column | ✅ Done |
-| Rollout to remaining pages (Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity, Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals, cohort workspace) | ⬜ Not started — see plan 002 handoff prompt |
+| Role switcher moved from sidebar header to top bar (always visible, icon-only below `sm:`) | ✅ Done — shrinks the sidebar rail, fixed a real mobile overlap regression found while verifying |
+| Bento tile rhythm (`ProgressPulseCard` / `DashboardStatsStrip`) unified — same header treatment, same 2-col grid, no more 3-across truncation, no more one-tile-has-a-gradient inconsistency | ✅ Done |
+| Rollout to remaining pages (Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity, Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals, cohort workspace) | ⬜ Not started — see `plans/002-editorial-rollout-handoff.md` |
