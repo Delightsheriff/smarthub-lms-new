@@ -4,8 +4,6 @@ import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  BookOpen,
-  Calendar,
   ExternalLink,
   FileText,
   AlertTriangle,
@@ -16,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { RichText } from "@/components/ui/rich-text";
@@ -83,101 +82,76 @@ export function AssignmentPageContent({
 
   return (
     <div className="space-y-6">
-      {/* Top Breadcrumb & Navigation */}
-      <div className="flex items-center justify-between">
-        <Button
-          render={<Link href="/assignments" />}
-          variant="ghost"
-          size="sm"
-          className="rounded-xl text-muted-foreground hover:text-foreground"
+      {/* Top Navigation */}
+      <div>
+        <Link
+          href="/assignments"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> All Assignments
-        </Button>
-        {course && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <BookOpen className="h-3.5 w-3.5 text-primary" />
-            <span>{course.name}</span>
-            {module && <span>/ {module.title}</span>}
-          </div>
-        )}
+          <ArrowLeft className="h-4 w-4" /> All assignments
+        </Link>
       </div>
 
-      {/* Main Header Banner */}
-      <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              {assignment.type && (
-                <Badge variant="outline" className="capitalize text-xs">
-                  {assignment.type.replace("-", " ")}
-                </Badge>
-              )}
-              {assignment.priority && (
-                <Badge variant="destructive" className="text-xs">
-                  {assignment.priority} priority
-                </Badge>
-              )}
-            </div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-              {assignment.title}
-            </h1>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <CountdownToDeadline dueAt={assignment.dueAt} className="text-sm px-3 py-1.5" />
-            {!submissionWindowClosed && (
-              <SubmissionForm
-                assignment={assignment}
-                existingSubmission={submission}
-              />
+      {/* Masthead */}
+      <PageHeader
+        variant="editorial"
+        eyebrow={course ? `${course.name}${module ? ` · ${module.title}` : ""}` : "Assignments"}
+        title={assignment.title}
+        dateline={`Due ${formatDateTime(assignment.dueAt)}${assignment.allowLateSubmission ? " · Late submissions allowed" : ""}`}
+        divider
+        description={
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {assignment.type && (
+              <Badge variant="outline" className="capitalize text-xs font-mono">
+                {assignment.type.replace("-", " ")}
+              </Badge>
             )}
+            {assignment.priority && (
+              <Badge variant="destructive" className="text-xs font-mono">
+                {assignment.priority} priority
+              </Badge>
+            )}
+            <CountdownToDeadline dueAt={assignment.dueAt} className="text-xs" />
           </div>
-        </div>
+        }
+        actions={
+          !submissionWindowClosed ? (
+            <SubmissionForm
+              assignment={assignment}
+              existingSubmission={submission}
+            />
+          ) : undefined
+        }
+      />
 
-        {/* Due date info strip */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border-border">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-primary" />
-            <span>Due: {formatDateTime(assignment.dueAt)}</span>
-          </div>
-          {assignment.allowLateSubmission && (
-            <span className="text-success font-medium">
-              Late submissions allowed
-            </span>
+      {/* Reading + Rail Layout */}
+      <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[1fr_340px]">
+        {/* Left Reading Column: Instructions, Brief & Grade Feedback */}
+        <div className="space-y-6 min-w-0">
+          {/* Overdue Warning Alert */}
+          {isOverdue && !submission && !submissionWindowClosed && (
+            <Alert variant="destructive" className="rounded-2xl">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertTitle>Past Deadline</AlertTitle>
+              <AlertDescription>
+                This assignment is past its due date. Submit your work as soon as possible.
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
-      </Card>
 
-      {/* Overdue Warning Alert */}
-      {isOverdue && !submission && !submissionWindowClosed && (
-        <Alert variant="destructive" className="rounded-2xl">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Past Deadline</AlertTitle>
-          <AlertDescription>
-            This assignment is past its due date. Submit your work as soon as possible.
-          </AlertDescription>
-        </Alert>
-      )}
+          {/* Submission window closed alert */}
+          {submissionWindowClosed && (
+            <Alert variant="destructive" className="rounded-2xl">
+              <Lock className="h-5 w-5" />
+              <AlertTitle>Submissions closed</AlertTitle>
+              <AlertDescription>
+                This assignment&apos;s deadline has passed and late submissions
+                aren&apos;t allowed. Contact your instructor if you need an
+                exception.
+              </AlertDescription>
+            </Alert>
+          )}
 
-      {/* Submission window closed — the form is suppressed entirely
-          rather than shown and left to fail against the backend's own
-          allowLateSubmission check. */}
-      {submissionWindowClosed && (
-        <Alert variant="destructive" className="rounded-2xl">
-          <Lock className="h-5 w-5" />
-          <AlertTitle>Submissions closed</AlertTitle>
-          <AlertDescription>
-            This assignment&apos;s deadline has passed and late submissions
-            aren&apos;t allowed. Contact your instructor if you need an
-            exception.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Two-column layout for details & submission status */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left column: Instructions & Resources */}
-        <div className="xl:col-span-2 space-y-6">
           <Card className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-4">
             <h2 className="font-display text-lg font-semibold flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" /> Instructions & Brief
@@ -228,8 +202,8 @@ export function AssignmentPageContent({
           {submission && <GradeCard submission={submission} />}
         </div>
 
-        {/* Right column: Current Submission & History */}
-        <div className="space-y-6">
+        {/* Right Sticky Rail: Current Submission Status & History */}
+        <aside className="space-y-6 xl:sticky xl:top-6">
           {submission ? (
             <>
               <SubmissionStatusCard submission={submission} />
@@ -270,7 +244,7 @@ export function AssignmentPageContent({
               />
             </Card>
           )}
-        </div>
+        </aside>
       </div>
     </div>
   );

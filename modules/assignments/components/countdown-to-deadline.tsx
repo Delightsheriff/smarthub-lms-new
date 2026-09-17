@@ -82,7 +82,7 @@ export function CountdownToDeadline({
             : "outline"
       }
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap shrink-0",
         className,
       )}
     >
