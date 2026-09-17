@@ -68,7 +68,7 @@ export function AppSidebar() {
     // per-item, without risking accidental activation on the first hover.
     <TooltipProvider delay={500}>
       <Sidebar collapsible="icon" side="left">
-        <SidebarHeader className="gap-2 p-2">
+        <SidebarHeader className="gap-2 border-b border-sidebar-border/60 p-2 pb-3">
           <div className="flex justify-center">
             <Link href="/dashboard" aria-label="SmartHub" className="block">
               <Logo size="sm" />

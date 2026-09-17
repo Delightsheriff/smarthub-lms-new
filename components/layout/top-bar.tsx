@@ -7,7 +7,6 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { SearchTrigger } from "@/components/layout/search-trigger";
 import { NotificationBell } from "@/modules/notifications/components/NotificationBell";
-import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { CONTENT_MAX_WIDTH } from "@/configs/brand";
 import { cn } from "@/lib/utils";
@@ -23,11 +22,7 @@ import { cn } from "@/lib/utils";
  * the notifications plan.
  */
 export function TopBar() {
-  const user = useAuthStore((s) => s.user);
   const { canSwitch } = useEffectiveMode();
-
-  const firstName =
-    user?.firstName || user?.email?.split("@")[0] || "there";
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -48,10 +43,6 @@ export function TopBar() {
           >
             <Logo size="sm" />
           </Link>
-
-          <p className="hidden truncate text-sm text-muted-foreground lg:block">
-            Hey {firstName} 👋
-          </p>
 
           <SearchTrigger />
         </div>
