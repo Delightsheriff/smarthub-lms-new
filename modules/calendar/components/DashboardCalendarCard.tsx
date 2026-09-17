@@ -6,6 +6,7 @@ import { Calendar as CalendarIcon, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils";
 import { useStudentCalendar } from "../api/calendar.queries";
 import { MonthGrid } from "./MonthGrid";
@@ -18,7 +19,20 @@ export function DashboardCalendarCard() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: events } = useStudentCalendar();
+  const { data: events, isLoading } = useStudentCalendar();
+
+  if (isLoading) {
+    return (
+      <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm h-full flex flex-col justify-between space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-44" />
+          <Skeleton className="h-7 w-20 rounded-xl" />
+        </div>
+        <Skeleton className="h-44 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-xl" />
+      </Card>
+    );
+  }
 
   const dayEvents = (events || []).filter((e) => isSameDay(e.start, selectedDate));
 

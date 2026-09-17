@@ -87,7 +87,9 @@ export function ReferralsPanel() {
   const requestPayout = useRequestPayout();
   const cancelPayout = useCancelPayout();
 
-  if (isLoading) {
+  const isPageLoading = isLoading || banking.isLoading || payouts.isLoading;
+
+  if (isPageLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-9 w-48" />

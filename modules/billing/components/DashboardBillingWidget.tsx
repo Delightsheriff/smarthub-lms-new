@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/utils";
 import { useBillingBreakdown } from "../api/billing.queries";
 
@@ -16,7 +17,11 @@ import { useBillingBreakdown } from "../api/billing.queries";
  * source of truth.
  */
 export function DashboardBillingWidget() {
-  const { data } = useBillingBreakdown();
+  const { data, isLoading } = useBillingBreakdown();
+
+  if (isLoading) {
+    return <Skeleton className="h-[76px] w-full rounded-2xl" />;
+  }
 
   if (!data) return null;
   const totalDue = data.overall.totalDue;

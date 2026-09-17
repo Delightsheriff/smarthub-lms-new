@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { useMyInstallmentPlans, useMyPaymentSurface, useSubmitPaymentProof } from "../api/payment-proofs.queries";
 import type { MyInstallmentPlanUi, MyPaymentProofUi, PlanTrancheUi } from "../types";
 import { InstallmentScheduleCard } from "./InstallmentScheduleCard";
@@ -35,9 +37,22 @@ const statusTone: Record<string, string> = {
 };
 
 export function PaymentsPageContent() {
-  const { data: surface, isLoading } = useMyPaymentSurface();
-  const { data: plans } = useMyInstallmentPlans();
+  const {
+    data: surface,
+    isLoading: surfaceLoading,
+    isFetching: surfaceFetching,
+    refetch: refetchSurface,
+  } = useMyPaymentSurface();
+  const {
+    data: plans,
+    isLoading: plansLoading,
+    isFetching: plansFetching,
+    refetch: refetchPlans,
+  } = useMyInstallmentPlans();
   const submit = useSubmitPaymentProof();
+
+  const isPageLoading = surfaceLoading || plansLoading;
+  const isFetching = surfaceFetching || plansFetching;
 
   const [registration, setRegistration] = useState("general");
   const [file, setFile] = useState<File | null>(null);
@@ -94,6 +109,30 @@ export function PaymentsPageContent() {
     }
   };
 
+  if (isPageLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          variant="editorial"
+          eyebrow="Money"
+          title="Payments"
+          description="Paid by bank transfer? Upload your receipt and we'll confirm it."
+          actions={
+            <RefreshButton
+              loading={isFetching}
+              onClick={() => Promise.allSettled([refetchSurface(), refetchPlans()])}
+            />
+          }
+        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+        </div>
+        <Skeleton className="h-72 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -101,6 +140,12 @@ export function PaymentsPageContent() {
         eyebrow="Money"
         title="Payments"
         description="Paid by bank transfer? Upload your receipt and we'll confirm it."
+        actions={
+          <RefreshButton
+            loading={isFetching}
+            onClick={() => Promise.allSettled([refetchSurface(), refetchPlans()])}
+          />
+        }
       />
 
       {bank && (bank.accountNumber || bank.bankName) && (
@@ -247,11 +292,7 @@ export function PaymentsPageContent() {
         </Button>
       </form></Form>
 
-      {isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-        </div>
-      ) : surface && surface.proofs.length > 0 ? (
+      {surface && surface.proofs.length > 0 ? (
         <div className="space-y-3">
           <p className="font-display text-base font-semibold text-foreground">Your submissions</p>
           <ul className="space-y-2.5">
