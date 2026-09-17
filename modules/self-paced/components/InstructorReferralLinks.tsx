@@ -10,6 +10,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
@@ -21,6 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { IndexList } from "@/components/ui/index-list";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api";
@@ -133,35 +140,41 @@ export function InstructorReferralLinks() {
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Share a course&apos;s link anywhere. Anyone who buys through it is
         attributed to you, and your revenue share on that sale is paid at
         the referral rate.
       </p>
 
-      {ordered.map((link) => (
-        <LinkCard
-          key={link._id}
-          link={link}
-          onRevoke={() => setRevoking(link)}
-          onReactivate={() =>
-            link.course?._id && void issueFor(link.course._id, true)
-          }
-          reactivating={issuingFor === link.course?._id}
-          busy={issue.isPending}
-        />
-      ))}
+      <IndexList>
+        <Accordion>
+          {ordered.map((link, i) => (
+            <LinkIndexItem
+              key={link._id}
+              link={link}
+              index={i + 1}
+              onRevoke={() => setRevoking(link)}
+              onReactivate={() =>
+                link.course?._id && void issueFor(link.course._id, true)
+              }
+              reactivating={issuingFor === link.course?._id}
+              busy={issue.isPending}
+            />
+          ))}
+        </Accordion>
 
-      {without.map((course) => (
-        <CourseWithoutLinkCard
-          key={course._id}
-          course={course}
-          onIssue={() => void issueFor(course._id, false)}
-          issuing={issuingFor === course._id}
-          busy={issue.isPending}
-        />
-      ))}
+        {without.map((course, i) => (
+          <CourseWithoutLinkRow
+            key={course._id}
+            course={course}
+            index={ordered.length + i + 1}
+            onIssue={() => void issueFor(course._id, false)}
+            issuing={issuingFor === course._id}
+            busy={issue.isPending}
+          />
+        ))}
+      </IndexList>
 
       <AlertDialog
         open={!!revoking}
@@ -210,14 +223,16 @@ export function InstructorReferralLinks() {
   );
 }
 
-function LinkCard({
+function LinkIndexItem({
   link,
+  index,
   onRevoke,
   onReactivate,
   reactivating,
   busy,
 }: {
   link: InstructorLink;
+  index: number;
   onRevoke: () => void;
   onReactivate: () => void;
   reactivating: boolean;
@@ -255,159 +270,191 @@ function LinkCard({
   };
 
   return (
-    <Card
-      className={
-        "p-4 sm:p-5 space-y-3 " + (link.isActive ? "" : "bg-muted/30")
-      }
+    <AccordionItem
+      value={link._id}
+      className="border-b border-border transition-colors group"
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-semibold leading-tight">{courseName}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Code{" "}
-            <button
-              type="button"
-              onClick={() => void copy(link.code, "Code")}
-              className="font-mono font-medium text-foreground hover:underline"
-              title="Copy code"
-            >
-              {link.code}
-            </button>
-            {link.createdAt ? ` · issued ${formatDate(link.createdAt)}` : ""}
-          </p>
-        </div>
-        {link.isActive ? (
-          <Badge
-            variant="outline"
-            className="border-success/30 text-success bg-success/10"
-          >
-            Active
-          </Badge>
-        ) : (
-          <Badge variant="secondary">
-            Revoked{link.revokedAt ? ` ${formatDate(link.revokedAt)}` : ""}
-          </Badge>
-        )}
-      </div>
+      <AccordionTrigger className="grid grid-cols-[28px_minmax(0,1fr)_auto] sm:grid-cols-[34px_minmax(0,1fr)_100px_auto] items-center gap-4 py-4 px-2 hover:no-underline hover:bg-muted/40 transition-colors text-left rounded-xl">
+        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+          {String(index).padStart(2, "0")}
+        </span>
 
-      {link.isActive ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-          <Input
-            readOnly
-            value={shareUrl}
-            onClick={(e) => (e.target as HTMLInputElement).select()}
-            className="flex-1"
-            aria-label={`Referral link for ${courseName}`}
-          />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              size="sm"
-              className="h-11 px-3"
-              onClick={() => void copy(shareUrl, "Link")}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="truncate font-display text-base font-semibold leading-snug text-foreground group-hover:text-primary transition-colors">
+              {courseName}
+            </span>
+            <span className="sm:hidden">
+              {link.isActive ? (
+                <Badge
+                  variant="outline"
+                  className="border-success/30 text-success bg-success/10 font-mono text-[9px] uppercase tracking-[0.05em]"
+                >
+                  Active
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="font-mono text-[9px] uppercase tracking-[0.05em]">
+                  Revoked
+                </Badge>
+              )}
+            </span>
+          </div>
+          <div className="mt-0.5 truncate text-xs text-muted-foreground">
+            Code{" "}
+            <span className="font-mono font-medium text-foreground">
+              {link.code}
+            </span>
+            {" · "}
+            <strong className="tabular-nums text-foreground">
+              {link.stats?.paidOrders ?? 0}
+            </strong>{" "}
+            paid {link.stats?.paidOrders === 1 ? "sale" : "sales"}
+            {gross.length > 0 && (
+              <>
+                {" · "}
+                {gross
+                  .map(([currency, minor]) => formatMinor(minor, currency))
+                  .join(" + ")}{" "}
+                gross
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="hidden sm:flex justify-end">
+          {link.isActive ? (
+            <Badge
+              variant="outline"
+              className="border-success/30 text-success bg-success/10 font-mono text-[10px] uppercase tracking-[0.05em]"
             >
-              <Copy className="h-3.5 w-3.5" />
-              Copy
-            </Button>
-            {canNativeShare ? (
+              Active
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="font-mono text-[10px] uppercase tracking-[0.05em]">
+              Revoked
+            </Badge>
+          )}
+        </div>
+      </AccordionTrigger>
+
+      <AccordionContent className="px-2 pt-1 pb-4">
+        <div className="rounded-xl border border-border/80 bg-background/50 p-4 space-y-3">
+          {link.isActive ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+              <Input
+                readOnly
+                value={shareUrl}
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+                className="flex-1 font-mono text-xs"
+                aria-label={`Referral link for ${courseName}`}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-11 px-3"
+                  onClick={() => void copy(shareUrl, "Link")}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy
+                </Button>
+                {canNativeShare ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-11 px-3"
+                    onClick={() => void nativeShare()}
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    Share
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-11 px-3"
+                  render={
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      WhatsApp
+                    </a>
+                  }
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              This link no longer attributes sales. Reactivate it to bring the
+              same link and code back.
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="text-xs text-muted-foreground">
+              {(link.stats?.refundedOrders ?? 0) > 0 &&
+                `${link.stats.refundedOrders} refunded · `}
+              {link.createdAt ? `Issued ${formatDate(link.createdAt)}` : ""}
+              {link.revokedAt ? ` · Revoked ${formatDate(link.revokedAt)}` : ""}
+            </p>
+            {link.isActive ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={onRevoke}
+              >
+                <ShieldOff className="h-3.5 w-3.5" />
+                Revoke link
+              </Button>
+            ) : (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-11 px-3"
-                onClick={() => void nativeShare()}
+                disabled={busy || !link.course?._id}
+                onClick={onReactivate}
               >
-                <Share2 className="h-3.5 w-3.5" />
-                Share
+                <RotateCcw className="h-3.5 w-3.5" />
+                {reactivating ? "Reactivating…" : "Reactivate link"}
               </Button>
-            ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-11 px-3"
-              render={
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  WhatsApp
-                </a>
-              }
-            />
+            )}
           </div>
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          This link no longer attributes sales. Reactivate it to bring the
-          same link and code back.
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-        <p className="text-xs text-muted-foreground">
-          <strong className="text-foreground tabular-nums">
-            {link.stats?.paidOrders ?? 0}
-          </strong>{" "}
-          paid {link.stats?.paidOrders === 1 ? "sale" : "sales"}
-          {gross.length > 0 && (
-            <>
-              {" · "}
-              {gross
-                .map(([currency, minor]) => formatMinor(minor, currency))
-                .join(" + ")}{" "}
-              gross
-            </>
-          )}
-          {(link.stats?.refundedOrders ?? 0) > 0 &&
-            ` · ${link.stats.refundedOrders} refunded`}
-        </p>
-        {link.isActive ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-            onClick={onRevoke}
-          >
-            <ShieldOff className="h-3.5 w-3.5" />
-            Revoke
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={busy || !link.course?._id}
-            onClick={onReactivate}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            {reactivating ? "Reactivating…" : "Reactivate"}
-          </Button>
-        )}
-      </div>
-    </Card>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
 
-function CourseWithoutLinkCard({
+function CourseWithoutLinkRow({
   course,
+  index,
   onIssue,
   issuing,
   busy,
 }: {
   course: CourseWithoutLink;
+  index: number;
   onIssue: () => void;
   issuing: boolean;
   busy: boolean;
 }) {
   return (
-    <Card className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="grid grid-cols-[28px_minmax(0,1fr)_auto] sm:grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-4 py-4 px-2 border-b border-border text-left">
+      <span className="font-mono text-xs tabular-nums text-muted-foreground">
+        {String(index).padStart(2, "0")}
+      </span>
       <div className="min-w-0">
-        <p className="font-semibold leading-tight">{course.name}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="font-display text-base font-semibold leading-snug text-foreground">
+          {course.name}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
           {course.isPublished
             ? "No referral link yet."
             : "Not published yet — you can get the link now; it works once the course is live."}
@@ -417,6 +464,7 @@ function CourseWithoutLinkCard({
         <Link2 className="h-3.5 w-3.5" />
         {issuing ? "Getting link…" : "Get my link"}
       </Button>
-    </Card>
+    </div>
   );
 }
+

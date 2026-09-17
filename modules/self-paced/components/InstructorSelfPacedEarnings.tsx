@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
-import { Wallet } from "lucide-react";
+import { CheckCircle2, Clock, Hourglass, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatTile } from "@/components/ui/stat-tile";
 import { formatDate } from "@/lib/utils";
 import {
   SHARES_PAGE_SIZE,
@@ -202,9 +203,27 @@ export function InstructorSelfPacedEarnings() {
               </h2>
             )}
             <div className="grid gap-3 sm:grid-cols-3">
-              <Tile label="Pending" tone="warning" value={formatMinor(b.pending, t.currency)} />
-              <Tile label="Processing" tone="primary" value={formatMinor(b.processing, t.currency)} />
-              <Tile label="Paid" tone="success" value={formatMinor(b.paid, t.currency)} />
+              <StatTile
+                label="Pending"
+                tone="warning"
+                value={formatMinor(b.pending, t.currency)}
+                icon={<Clock className="h-3.5 w-3.5" />}
+                caption="Awaiting next payout"
+              />
+              <StatTile
+                label="Processing"
+                tone="primary"
+                value={formatMinor(b.processing, t.currency)}
+                icon={<Hourglass className="h-3.5 w-3.5" />}
+                caption="Bundled into payout"
+              />
+              <StatTile
+                label="Paid"
+                tone="success"
+                value={formatMinor(b.paid, t.currency)}
+                icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+                caption="Settled to your bank"
+              />
             </div>
             {(b.clawedBack > 0 || b.review > 0 || t.notEligibleCount > 0) && (
               <p className="text-xs text-muted-foreground">
@@ -368,33 +387,6 @@ export function InstructorSelfPacedEarnings() {
           label={`${total} ${total === 1 ? "sale" : "sales"}`}
         />
       </section>
-    </div>
-  );
-}
-
-function Tile({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "warning" | "primary" | "success";
-}) {
-  // Same three states AccruedStatus's badges use, same colors: Paid is
-  // success everywhere in this file now, not primary in one place and
-  // emerald in another.
-  const palette: Record<typeof tone, string> = {
-    warning: "bg-warning/10 border-warning/30 text-warning",
-    primary: "bg-primary/10 border-primary/30 text-primary",
-    success: "bg-success/10 border-success/30 text-success",
-  };
-  return (
-    <div className={"rounded-lg border p-4 " + palette[tone]}>
-      <p className="text-xs font-medium uppercase tracking-wide opacity-80">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
     </div>
   );
 }
