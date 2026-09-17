@@ -139,17 +139,32 @@ export function InternshipWorkspacePageContent() {
 
   const { internship, tasks, checkIns, progressPercent } = data;
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Internship"
-        title="Internship workspace"
-        description={`${internship.product.name} · started ${formatDate(internship.startDate)}`}
+        divider
+        dateline={`${dateline} · Placement Workspace`}
+        title="Internship Workspace"
+        description={
+          <>
+            <strong className="text-foreground">{internship.product.name}</strong>
+            {" · "}
+            Started {formatDate(internship.startDate)}
+            {" · "}
+            <strong className="text-foreground">{progressPercent}%</strong> completed
+          </>
+        }
         actions={<RefreshButton loading={isFetching} onClick={() => refetch()} />}
       />
 
-      <Card className="p-5">
+      <Card className="p-5 rounded-2xl border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -170,11 +185,10 @@ export function InternshipWorkspacePageContent() {
         </Progress>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <PlacementSummaryCard
           title="Mentor"
           detail={internship.mentor.name}
-          sub={internship.mentor.title}
           icon={<UserRound className="h-4 w-4" />}
         />
         <PlacementSummaryCard
@@ -185,6 +199,7 @@ export function InternshipWorkspacePageContent() {
         <PlacementSummaryCard
           title="Placement window"
           detail={`${formatDate(internship.startDate)} – ${formatDate(internship.endDate)}`}
+          sub={`${tasks.filter((t) => t.status === "done").length} of ${tasks.length} tasks done`}
           icon={<CalendarDays className="h-4 w-4" />}
         />
       </div>
@@ -225,8 +240,8 @@ function TaskListSection({ tasks }: { tasks: ApiInternshipTask[] }) {
   if (tasks.length === 0) return null;
   return (
     <section className="space-y-3">
-      <h2 className="font-semibold">Tasks</h2>
-      <Card className="p-0 divide-y">
+      <h2 className="font-semibold text-foreground">Tasks</h2>
+      <Card className="p-0 divide-y divide-border rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {tasks.map((task) => (
           <TaskRow key={task._id} task={task} />
         ))}
@@ -244,73 +259,80 @@ function TaskRow({ task }: { task: ApiInternshipTask }) {
   };
 
   return (
-    <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-      <span
-        className={
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg " +
-          (task.status === "done"
-            ? "bg-success/10 text-success"
-            : task.status === "submitted"
-              ? "bg-info/10 text-info"
-              : "bg-primary/10 text-primary")
-        }
-      >
-        {task.status === "done" ? (
-          <FileCheck2 className="h-4 w-4" />
-        ) : (
-          <FlaskConical className="h-4 w-4" />
+    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+        <span
+          className={
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl " +
+            (task.status === "done"
+              ? "bg-success/10 text-success"
+              : task.status === "submitted"
+                ? "bg-info/10 text-info"
+                : "bg-primary/10 text-primary")
+          }
+        >
+          {task.status === "done" ? (
+            <FileCheck2 className="h-4 w-4" />
+          ) : (
+            <FlaskConical className="h-4 w-4" />
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-tight text-foreground truncate">{task.title}</p>
+          {task.description && (
+            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+              {task.description}
+            </p>
+          )}
+          {task.dueDate && (
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Due {formatDate(task.dueDate)}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-center">
+        <Badge variant="outline" className={"normal-case text-xs " + TASK_STATUS_STYLES[task.status]}>
+          {task.status.replace("_", " ")}
+        </Badge>
+        {task.status === "todo" && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl"
+            disabled={mutation.isPending}
+            onClick={() => progress({ status: "in_progress" })}
+          >
+            Start
+          </Button>
         )}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold leading-tight">{task.title}</p>
-        {task.description && (
-          <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-            {task.description}
-          </p>
+        {task.status === "in_progress" && (
+          <Button
+            size="sm"
+            className="rounded-xl bg-primary text-primary-foreground font-semibold"
+            disabled={mutation.isPending}
+            onClick={() => setSubmitOpen(true)}
+          >
+            Submit
+          </Button>
         )}
-        {task.dueDate && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Due {formatDate(task.dueDate)}
+        {task.status === "submitted" && task.submissionUrl && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl"
+            render={<a href={task.submissionUrl} target="_blank" rel="noreferrer" />}
+          >
+            <ArrowUpRight className="h-3.5 w-3.5 mr-1" />
+            View
+          </Button>
+        )}
+        {task.status === "done" && task.reviewNotes && (
+          <p className="text-xs text-muted-foreground max-w-xs truncate">
+            {task.reviewNotes}
           </p>
         )}
       </div>
-      <Badge variant="outline" className={"normal-case " + TASK_STATUS_STYLES[task.status]}>
-        {task.status.replace("_", " ")}
-      </Badge>
-      {task.status === "todo" && (
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={mutation.isPending}
-          onClick={() => progress({ status: "in_progress" })}
-        >
-          Start
-        </Button>
-      )}
-      {task.status === "in_progress" && (
-        <Button
-          size="sm"
-          disabled={mutation.isPending}
-          onClick={() => setSubmitOpen(true)}
-        >
-          Submit
-        </Button>
-      )}
-      {task.status === "submitted" && task.submissionUrl && (
-        <Button
-          size="sm"
-          variant="outline"
-          render={<a href={task.submissionUrl} target="_blank" rel="noreferrer" />}
-        >
-          <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" />
-          View
-        </Button>
-      )}
-      {task.status === "done" && task.reviewNotes && (
-        <p className="text-xs text-muted-foreground max-w-xs truncate">
-          {task.reviewNotes}
-        </p>
-      )}
 
       {task.status === "in_progress" && (
         <SubmitTaskDialog
