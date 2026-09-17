@@ -109,13 +109,20 @@ export function PaymentsPageContent() {
     }
   };
 
+  const dateline = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   if (isPageLoading) {
     return (
       <div className="space-y-6">
         <PageHeader
           variant="editorial"
-          eyebrow="Money"
-          title="Payments"
+          divider
+          dateline={`${dateline} · Student Accounts`}
+          title="Manual Payments & Proofs"
           description="Paid by bank transfer? Upload your receipt and we'll confirm it."
           actions={
             <RefreshButton
@@ -137,9 +144,19 @@ export function PaymentsPageContent() {
     <div className="space-y-6">
       <PageHeader
         variant="editorial"
-        eyebrow="Money"
-        title="Payments"
-        description="Paid by bank transfer? Upload your receipt and we'll confirm it."
+        divider
+        dateline={`${dateline} · Student Accounts`}
+        title="Manual Payments & Proofs"
+        description={
+          surface && surface.proofs.length > 0 ? (
+            <>
+              Upload bank transfer receipts for verification. You have{" "}
+              <strong className="text-foreground">{surface.proofs.length}</strong> recorded submission{surface.proofs.length === 1 ? "" : "s"}.
+            </>
+          ) : (
+            "Paid via bank transfer? Upload your payment receipt and our finance team will verify it."
+          )
+        }
         actions={
           <RefreshButton
             loading={isFetching}
@@ -149,43 +166,49 @@ export function PaymentsPageContent() {
       />
 
       {bank && (bank.accountNumber || bank.bankName) && (
-        <div className="rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Transfer to
-          </p>
-          <div className="space-y-1.5 text-sm">
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono text-[11px] uppercase tracking-wider font-semibold text-primary">
+              Official Bank Transfer Account
+            </span>
+            <span className="text-[11px] text-muted-foreground font-mono">Manual Verification</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             {bank.bankName && (
-              <p>
-                <span className="text-muted-foreground">Bank:</span>{" "}
-                <span className="font-medium text-foreground">{bank.bankName}</span>
-              </p>
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[11px] text-muted-foreground uppercase font-mono">Bank Name</p>
+                <p className="font-semibold text-foreground mt-0.5 text-sm">{bank.bankName}</p>
+              </div>
             )}
             {bank.accountName && (
-              <p>
-                <span className="text-muted-foreground">Name:</span>{" "}
-                <span className="font-medium text-foreground">{bank.accountName}</span>
-              </p>
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[11px] text-muted-foreground uppercase font-mono">Account Name</p>
+                <p className="font-semibold text-foreground mt-0.5 text-sm truncate">{bank.accountName}</p>
+              </div>
             )}
             {bank.accountNumber && (
-              <p className="flex items-center gap-2">
-                <span className="text-muted-foreground">Account:</span>{" "}
-                <span className="font-mono font-semibold text-foreground">
-                  {bank.accountNumber}
-                </span>
+              <div className="rounded-xl bg-muted/40 p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] text-muted-foreground uppercase font-mono">Account Number</p>
+                  <p className="font-mono font-bold text-foreground mt-0.5 text-sm sm:text-base tracking-wider">
+                    {bank.accountNumber}
+                  </p>
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Copy account number"
+                  className="rounded-lg hover:bg-muted"
                   onClick={() => copy(bank.accountNumber)}
                 >
-                  <Copy className="h-3.5 w-3.5" />
+                  <Copy className="h-4 w-4 text-primary" />
                 </Button>
-              </p>
+              </div>
             )}
           </div>
           {bank.paymentInstructions && (
-            <p className="mt-3 text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-xl">
+            <p className="text-xs text-muted-foreground bg-muted/20 border border-border/50 p-3 rounded-xl leading-relaxed">
               {bank.paymentInstructions}
             </p>
           )}
@@ -255,19 +278,22 @@ export function PaymentsPageContent() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
-           <FormField control={form.control} name="amount" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Amount paid (₦)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={1} placeholder="e.g. 50000" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
-           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input type="text" placeholder="From your bank app" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+           <FormField control={form.control} name="amount" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Amount paid (₦)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={1} placeholder="e.g. 50000" className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input type="text" placeholder="From your bank app" className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
         </div>
 
         <Label
           htmlFor="proof-file"
-          className="block cursor-pointer rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground hover:border-primary/40"
+          className="block cursor-pointer rounded-2xl border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-all"
         >
-          <UploadCloud className="mx-auto mb-1 h-5 w-5" />
+          <UploadCloud className="mx-auto mb-2 h-6 w-6 text-primary" />
           {file ? (
-            <span className="font-medium text-foreground">{file.name}</span>
+            <span className="font-semibold text-foreground">{file.name}</span>
           ) : (
-            <span>Tap to attach your receipt (image or PDF)</span>
+            <div>
+              <p className="font-medium text-foreground">Tap to attach your receipt</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Supports PNG, JPG, PDF up to 10MB</p>
+            </div>
           )}
           <Input
             id="proof-file"
@@ -275,19 +301,23 @@ export function PaymentsPageContent() {
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-               disabled={form.formState.isSubmitting}
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            disabled={form.formState.isSubmitting}
           />
         </Label>
 
         {done && (
-          <p className="flex items-center gap-1.5 text-sm text-success">
+          <p className="flex items-center gap-1.5 text-sm text-success font-medium">
             <CheckCircle2 className="h-4 w-4" /> Submitted — awaiting confirmation.
           </p>
         )}
 
-        <Button type="submit" disabled={submit.isPending || form.formState.isSubmitting}>
-          {submit.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+        <Button
+          type="submit"
+          className="rounded-xl bg-primary text-primary-foreground font-semibold px-5"
+          disabled={submit.isPending || form.formState.isSubmitting}
+        >
+          {submit.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
           {submit.isPending ? "Submitting…" : "Submit payment proof"}
         </Button>
       </form></Form>
