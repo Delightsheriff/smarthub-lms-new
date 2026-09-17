@@ -91,6 +91,7 @@ Motion tokens live in `app/globals.css`'s `:root` block:
 | `FilterDropdown` / `FilterBar` | `components/ui/filter-dropdown.tsx` | Any page-local filter dropdown (built on `Select`, not `DropdownMenu`). Unchanged. |
 | `AuthCard` / `AuthCardBody` / `AuthColumn` | `modules/auth/components/AuthCard.tsx` | Auth screen shell. Unchanged. |
 | `groupNavItems` | `lib/nav-grouping.ts` | Sidebar section grouping. Unchanged. |
+| **Reading + Rail** (fifth move, not yet a shared component — a layout pattern) | See `plans/005-editorial-rollout-phase2-real-redesign.md` §1 | Single-item detail pages (an assignment, a lesson, a cohort's revenue breakdown) that don't fit hero+ledger: a wide reading column (~2/3, real prose typography) + a slim sticky rail (~1/3 — status, countdown, the primary action) that moves below the reading column on mobile. |
 
 **Shipped on this language so far:** the student dashboard
 (`app/(app)/dashboard/page.tsx`) and the instructor dashboard
@@ -103,12 +104,22 @@ bordered cards. The top bar's redundant greeting was removed (the
 masthead owns it now) and the sidebar header got a hairline divider to
 match the new rule-based motif.
 
-**Not yet migrated** (candidates for the next slice — see §6):
-Courses, Assignments, Jobs, Recordings, Materials, Billing, Activity,
-Inbox, Calendar, Webinars, Internships, Payments, Profile, Referrals,
-the cohort workspace tabs. These still use the pre-"Brief" `PageHeader`
-(no dateline/divider) + card-grid pattern, which is not *wrong*, just
-not yet carrying the new language.
+**Masthead-only so far** (plans 003/004 — `dateline`/`divider` added,
+body structure unchanged; real structural work pending, see plan 005):
+Assignments, Jobs, Recordings, Materials, Courses, Billing, Payments,
+Referrals, Internships, Activity, Webinars, Calendar, Inbox, Profile,
+the cohort workspace tabs, Oreo, Help, Notifications, Assigned Modules,
+Self-Paced Courses, Instructor Self-Paced, Instructor Earnings, Cohort
+Revenue Breakdown, Internship Fee Payment, Session Attendance,
+Assignment Detail, Course Module Detail. Plan 003 claimed real
+hero+ledger/`IndexList` work landed on Assignments, Recordings,
+Materials, and Courses — checked while writing plan 005:
+**Assignments genuinely did** (`assignment-list-page-content.tsx` uses
+real `Ledger`/`LedgerItem` for a dominant-hero-plus-upcoming-list
+layout). **Recordings, Materials, and Courses did not** — none of the
+three import `IndexList`/`IndexRow` despite the claim; they're still on
+masthead-only. Fold these three into plan 005's scope alongside the
+already-listed phase-2 surfaces.
 
 ---
 
@@ -196,9 +207,10 @@ dashboard system era.
 | 001 | Editorial dashboard system — masthead/hero-ledger/bento/index-list, both dashboards, header/sidebar complement (this slice) |
 | 002 | Handoff prompt: roll "The Brief" out to the rest of the app — see `plans/002-editorial-rollout-handoff.md` |
 | 003 | Editorial rollout phase 1: core academic & learning surfaces — see `plans/003-editorial-rollout-phase1.md` |
-| 004 | Editorial modernization: Oreo AI & final unmigrated surfaces — see `plans/004-editorial-rollout-phase2-oreo-and-remaining.md` |
+| 004 | Editorial modernization: Oreo AI & final unmigrated surfaces — see `plans/004-editorial-rollout-phase2-oreo-and-remaining.md`. Shipped masthead-only; superseded by 005 for the structural work it didn't do. |
+| 005 | Real structural redesign for the phase-2 surfaces (supersedes 004's design-move column) — introduces the fifth composition move, Reading + Rail, for single-item detail pages — see `plans/005-editorial-rollout-phase2-real-redesign.md` |
 
-Next available plan number: **005**.
+Next available plan number: **006**.
 
 | ADRs taken | Decision |
 |---|---|
