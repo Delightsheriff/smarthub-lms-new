@@ -68,9 +68,9 @@ export function AssignedModulesPageContent() {
       )}
 
       {!isLoading && !error && (data?.length ?? 0) > 0 && (
-        <Accordion className="space-y-3">
-          {data!.map((mod) => (
-            <AssignedModuleCard key={mod.id} module={mod} />
+        <Accordion className="border-t border-border">
+          {data!.map((mod, i) => (
+            <AssignedModuleCard key={mod.id} module={mod} index={i + 1} />
           ))}
         </Accordion>
       )}
@@ -78,7 +78,13 @@ export function AssignedModulesPageContent() {
   );
 }
 
-function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
+function AssignedModuleCard({
+  module: mod,
+  index,
+}: {
+  module: AssignedModule;
+  index: number;
+}) {
   const counts = [
     mod.recordings.length &&
       `${mod.recordings.length} recording${mod.recordings.length > 1 ? "s" : ""}`,
@@ -88,19 +94,25 @@ function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
       `${mod.assignments.length} task${mod.assignments.length > 1 ? "s" : ""}`,
   ].filter(Boolean) as string[];
 
+  const taskCount = mod.assignments.length;
+
   return (
     <AccordionItem
       value={mod.id}
-      className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm"
+      className="border-b border-border transition-colors group"
     >
-      <AccordionTrigger className="px-5 py-4 hover:no-underline">
-        <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">
-          <span className="font-display text-lg font-semibold leading-tight text-foreground">
+      <AccordionTrigger className="grid grid-cols-[28px_minmax(0,1fr)_auto] sm:grid-cols-[34px_minmax(0,1fr)_120px_auto] items-center gap-4 py-4 px-2 hover:no-underline hover:bg-muted/40 transition-colors text-left rounded-xl">
+        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+          {String(index).padStart(2, "0")}
+        </span>
+
+        <div className="min-w-0">
+          <span className="block font-display text-base font-semibold leading-snug text-foreground group-hover:text-primary transition-colors">
             {mod.title}
           </span>
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-sans">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
             {mod.estimatedDuration && (
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 font-sans">
                 <Clock className="h-3.5 w-3.5" />
                 {mod.estimatedDuration}
               </span>
@@ -108,19 +120,23 @@ function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
             {counts.length > 0 && <span>{counts.join(" · ")}</span>}
           </span>
         </div>
+
+        <span className="hidden font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-muted-foreground sm:block text-right">
+          {taskCount > 0 ? `${taskCount} task${taskCount === 1 ? "" : "s"}` : "Study only"}
+        </span>
       </AccordionTrigger>
 
-      <AccordionContent className="px-5 pb-5 pt-0">
-        <div className="space-y-5">
+      <AccordionContent className="pt-2 pb-6 px-2">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-6">
           {mod.description && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground leading-relaxed">
               <CollapsibleRichText html={mod.description} maxHeight={96} />
             </div>
           )}
 
           {mod.note && (
             <div className="rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-accent">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-accent font-mono">
                 Note from your instructor
               </p>
               <p className="mt-1 text-sm text-foreground">{mod.note}</p>
@@ -129,10 +145,10 @@ function AssignedModuleCard({ module: mod }: { module: AssignedModule }) {
 
           {mod.learningObjectives.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 What you&apos;ll learn
               </h3>
-              <ul className="mt-2 space-y-1.5">
+              <ul className="mt-2.5 space-y-2">
                 {mod.learningObjectives.map((obj, i) => (
                   <li
                     key={i}
