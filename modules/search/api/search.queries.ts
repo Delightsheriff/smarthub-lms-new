@@ -1,6 +1,7 @@
 "use client";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { searchService } from "./search.service";
+import { STALE_TIME } from "@/lib/query-config";
 
 export const SEARCH_QUERY_KEYS = {
   query: (q: string) => ["search", q] as const,
@@ -20,6 +21,6 @@ export function useSearch(q: string) {
     queryFn: ({ signal }) => searchService.query(trimmed, signal),
     enabled: trimmed.length >= 2,
     placeholderData: keepPreviousData,
-    staleTime: 30 * 1000,
+    staleTime: STALE_TIME.REALTIME,
   });
 }

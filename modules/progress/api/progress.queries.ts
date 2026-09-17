@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { progressService } from "./progress.service";
+import { STALE_TIME } from "@/lib/query-config";
 
 export const PROGRESS_QUERY_KEYS = {
   achievements: ["progress", "achievements"] as const,
@@ -12,7 +13,7 @@ export function useAchievements() {
   return useQuery({
     queryKey: PROGRESS_QUERY_KEYS.achievements,
     queryFn: () => progressService.getAchievements(),
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.EXTENDED,
   });
 }
 
@@ -20,6 +21,6 @@ export function useProgressPulse() {
   return useQuery({
     queryKey: PROGRESS_QUERY_KEYS.pulse,
     queryFn: () => progressService.getPulse(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.SLOW,
   });
 }

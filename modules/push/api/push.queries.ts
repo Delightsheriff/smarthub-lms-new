@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pushService } from "./push.service";
+import { STALE_TIME } from "@/lib/query-config";
 import type { NotificationPrefs } from "../types";
 
 export const PUSH_QUERY_KEYS = {
@@ -13,7 +14,7 @@ export function useNotificationPrefs() {
   return useQuery({
     queryKey: PUSH_QUERY_KEYS.prefs,
     queryFn: () => pushService.getPrefs(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.SLOW,
   });
 }
 

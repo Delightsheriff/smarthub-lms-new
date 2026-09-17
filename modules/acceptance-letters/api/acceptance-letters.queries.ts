@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptanceLettersService } from "./acceptance-letters.service";
 import { dedupeAcceptanceLetters, normaliseAcceptanceLetter } from "./normalise";
+import { STALE_TIME } from "@/lib/query-config";
 
 export const ACCEPTANCE_LETTERS_QUERY_KEYS = {
   list: ["acceptance-letters", "list"] as const,
@@ -18,7 +19,7 @@ export function useAcceptanceLetters() {
     // Letters are issued at most once per applicant; a 60s stale
     // window is plenty to absorb the post-payment auto-issue race
     // without hammering the API.
-    staleTime: 60 * 1000,
+    staleTime: STALE_TIME.DEFAULT,
   });
 }
 

@@ -13,6 +13,7 @@ import {
   normaliseUpgradeCredits,
 } from "./normalise";
 import { shouldRetry } from "../lib/access-denial";
+import { STALE_TIME } from "@/lib/query-config";
 import type {
   LessonCompletionResult,
   LessonPlayback,
@@ -40,7 +41,7 @@ export function useUpgradeCredits({ enabled = true }: { enabled?: boolean } = {}
     enabled,
     queryFn: async () =>
       normaliseUpgradeCredits(await selfPacedService.getUpgradeCredits()),
-    staleTime: 5 * 60_000,
+    staleTime: STALE_TIME.SLOW,
     retry: shouldRetry,
   });
 }
@@ -49,7 +50,7 @@ export function useMyPass() {
   return useQuery<PassState>({
     queryKey: SELF_PACED_QUERY_KEYS.pass,
     queryFn: async () => normalisePass(await selfPacedService.getPass()),
-    staleTime: 5 * 60_000,
+    staleTime: STALE_TIME.SLOW,
     retry: shouldRetry,
   });
 }
@@ -62,7 +63,7 @@ export function useSelfPacedNudges({ enabled = true }: { enabled?: boolean } = {
     enabled,
     queryFn: async () =>
       (await selfPacedService.listNudges()).map(normaliseNudge),
-    staleTime: 60_000,
+    staleTime: STALE_TIME.DEFAULT,
     retry: shouldRetry,
   });
 }
@@ -91,7 +92,7 @@ export function useSelfPacedCourses() {
     queryKey: SELF_PACED_QUERY_KEYS.list,
     queryFn: async () =>
       (await selfPacedService.listCourses()).map(normaliseCourseSummary),
-    staleTime: 60_000,
+    staleTime: STALE_TIME.DEFAULT,
     retry: shouldRetry,
   });
 }

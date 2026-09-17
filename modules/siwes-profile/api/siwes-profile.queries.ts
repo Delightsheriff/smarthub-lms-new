@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { siwesProfileService } from "./siwes-profile.service";
+import { STALE_TIME } from "@/lib/query-config";
 
 export const SIWES_PROFILE_QUERY_KEYS = {
   myRegistrations: ["siwes-profile", "my-registrations"] as const,
@@ -16,6 +17,6 @@ export function useMySiwesRegistrations() {
   return useQuery({
     queryKey: SIWES_PROFILE_QUERY_KEYS.myRegistrations,
     queryFn: () => siwesProfileService.listMySiwesRegistrations(),
-    staleTime: 60 * 1000,
+    staleTime: STALE_TIME.DEFAULT,
   });
 }

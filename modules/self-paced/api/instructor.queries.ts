@@ -8,6 +8,7 @@ import {
 import { useAuthStore } from "@/store/slices/authStore";
 import { selfPacedInstructorService } from "./instructor.service";
 import { shouldRetry } from "../lib/access-denial";
+import { STALE_TIME } from "@/lib/query-config";
 
 export const SELF_PACED_INSTRUCTOR_KEYS = {
   all: ["self-paced", "instructor"] as const,
@@ -34,7 +35,7 @@ export function useMyInstructorLinks(options?: { enabled?: boolean }) {
     queryKey: SELF_PACED_INSTRUCTOR_KEYS.links,
     queryFn: () => selfPacedInstructorService.getLinks(),
     enabled: teaches && (options?.enabled ?? true),
-    staleTime: 5 * 60_000,
+    staleTime: STALE_TIME.SLOW,
     retry: shouldRetry,
   });
 }
