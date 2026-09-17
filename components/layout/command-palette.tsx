@@ -14,6 +14,7 @@ import {
 import { getNavItemsForMode, type NavItem } from "@/configs/nav";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearch } from "@/modules/search/api/search.queries";
 import { iconForHint } from "@/modules/search/api/normalise";
 import type { SearchResult } from "@/modules/search/types";
@@ -40,14 +41,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const user = useAuthStore((s) => s.user);
   const { mode } = useEffectiveMode();
   const [input, setInput] = React.useState("");
-  const [query, setQuery] = React.useState("");
-
-  // Debounce the input into the fetched query so rapid typing issues
-  // one settled request rather than one per keystroke.
-  React.useEffect(() => {
-    const t = setTimeout(() => setQuery(input), 200);
-    return () => clearTimeout(t);
-  }, [input]);
+  const query = useDebouncedValue(input, 200);
 
   // Wrap onOpenChange so closing also clears the local text — no effect
   // needed, the callback fires synchronously before React re-renders.
@@ -55,7 +49,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     (next: boolean) => {
       if (!next) {
         setInput("");
-        setQuery("");
       }
       onOpenChange(next);
     },

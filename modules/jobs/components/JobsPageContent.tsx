@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Briefcase,
   Building2,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { RefreshButton } from "@/components/ui/refresh-button";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useJobCompanies, useJobs } from "../api/jobs.queries";
 import type { Job } from "../types";
 
@@ -49,7 +50,7 @@ const REMOTE_FILTERS: { value: RemoteFilter; label: string }[] = [
  */
 export function JobsPageContent() {
   const [rawQuery, setRawQuery] = useState("");
-  const [keyword, setKeyword] = useState("");
+  const keyword = useDebouncedValue(rawQuery.trim(), 300);
   const [company, setCompany] = useState("__all__");
   const [remote, setRemote] = useState<RemoteFilter>("all");
   // Defaults to the student's own courses. A board of every opening is
@@ -57,17 +58,8 @@ export function JobsPageContent() {
   const [scope, setScope] = useState<Scope>("mine");
   const [page, setPage] = useState(1);
 
-  // Debounced: the list refetches, so a request per keystroke would
-  // both hammer the API and make the results flicker behind typing.
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setKeyword(rawQuery.trim());
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(t);
-  }, [rawQuery]);
-
   // Wrapper setters reset to page 1 inline so no effect is needed.
+  const handleQueryChange = (v: string) => { setRawQuery(v); setPage(1); };
   const changeCompany = (v: string) => { setCompany(v); setPage(1); };
   const changeRemote = (v: RemoteFilter) => { setRemote(v); setPage(1); };
   const changeScope = (v: Scope) => { setScope(v); setPage(1); };
@@ -80,7 +72,12 @@ export function JobsPageContent() {
     remote: remote === "all" ? undefined : remote === "remote",
     scope,
   });
-  const { data: companies, isFetching: companiesFetching, refetch: refetchCompanies } = useJobCompanies();
+  const {
+    data: companies,
+    isLoading: companiesLoading,
+    isFetching: companiesFetching,
+    refetch: refetchCompanies,
+  } = useJobCompanies();
 
   const jobs = useMemo(() => data?.jobs ?? [], [data]);
   const meta = data?.meta;
@@ -118,7 +115,7 @@ export function JobsPageContent() {
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={rawQuery}
-              onChange={(e) => setRawQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="Search role, company or location…"
               className="pl-8"
             />
@@ -132,11 +129,17 @@ export function JobsPageContent() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">All companies</SelectItem>
-              {(companies ?? []).map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
+              {companiesLoading ? (
+                <SelectItem value="__loading__" disabled>
+                  Loading companies…
                 </SelectItem>
-              ))}
+              ) : (
+                (companies ?? []).map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
 
