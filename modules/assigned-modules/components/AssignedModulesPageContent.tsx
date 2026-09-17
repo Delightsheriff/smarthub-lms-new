@@ -9,6 +9,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import {
@@ -25,7 +26,10 @@ import type { AssignedAssignment, AssignedModule } from "../types";
  * these modules carry no course slug (so no submission route exists).
  */
 export function AssignedModulesPageContent() {
-  const { data, isLoading, error } = useAssignedModules();
+  const { data, isLoading, isFetching, error, refetch } = useAssignedModules();
+
+  const count = data?.length ?? 0;
+  const dateline = data ? `${count} Module${count === 1 ? "" : "s"} Assigned` : undefined;
 
   return (
     <div className="space-y-6">
@@ -33,7 +37,10 @@ export function AssignedModulesPageContent() {
         variant="editorial"
         eyebrow="Learning"
         title="Assigned to you"
-        description="Extra modules your instructors have shared with you."
+        dateline={dateline}
+        divider
+        description="Supplemental modules, recordings, and tasks your instructors have assigned directly to you."
+        actions={<RefreshButton loading={isFetching} onClick={refetch} />}
       />
 
       {isLoading && (
