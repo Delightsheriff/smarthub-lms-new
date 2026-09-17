@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -11,12 +12,16 @@ import { cn } from "@/lib/utils";
 export function Ledger({
   title,
   count,
+  actions,
   children,
   className,
   empty,
 }: {
   title: string;
   count?: number;
+  /** Trailing header content beyond the count — filter tabs, a "mark
+   *  all read" button. Renders after the count when both are given. */
+  actions?: ReactNode;
   children?: ReactNode;
   className?: string;
   /** Shown instead of `children` when there's nothing to list. */
@@ -30,12 +35,15 @@ export function Ledger({
         className,
       )}
     >
-      <h3 className="mb-3 flex items-center justify-between font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-        {title}
-        {typeof count === "number" && (
-          <span className="text-accent">{count}</span>
-        )}
-      </h3>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          {title}
+          {typeof count === "number" && (
+            <span className="text-accent">{count}</span>
+          )}
+        </h3>
+        {actions}
+      </div>
       {hasItems ? (
         children
       ) : (
@@ -55,6 +63,8 @@ const DOT_TONE = {
 
 export function LedgerItem({
   tone = "info",
+  icon: Icon,
+  iconClassName,
   title,
   meta,
   when,
@@ -62,6 +72,12 @@ export function LedgerItem({
   onClick,
 }: {
   tone?: keyof typeof DOT_TONE;
+  /** A type icon (in a small tinted chip) instead of the plain dot —
+   *  for lists where the entry's *type* is the primary signal (a
+   *  notification's grade/material/announcement icon), not urgency. */
+  icon?: LucideIcon;
+  /** Tint classes for the icon chip, e.g. "text-success bg-success/10". */
+  iconClassName?: string;
   title: ReactNode;
   meta?: ReactNode;
   when?: ReactNode;
@@ -76,14 +92,26 @@ export function LedgerItem({
       onClick={onClick}
       type={onClick && !href ? "button" : undefined}
       className={cn(
-        "flex w-full items-baseline gap-2.5 border-t border-border py-[11px] text-left first:border-t-0",
+        "flex w-full items-center gap-2.5 border-t border-border py-[11px] text-left first:border-t-0",
+        Icon && "items-start",
         interactive && "-mx-1 rounded-lg px-1 transition-colors hover:bg-muted/50",
       )}
     >
-      <span
-        className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", DOT_TONE[tone])}
-        aria-hidden
-      />
+      {Icon ? (
+        <span
+          className={cn(
+            "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+            iconClassName ?? "bg-muted text-muted-foreground",
+          )}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+      ) : (
+        <span
+          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", DOT_TONE[tone])}
+          aria-hidden
+        />
+      )}
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13px] font-medium leading-snug text-foreground">
           {title}
@@ -95,7 +123,7 @@ export function LedgerItem({
         )}
       </div>
       {when && (
-        <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+        <span className="shrink-0 self-start font-mono text-[11px] tabular-nums text-muted-foreground">
           {when}
         </span>
       )}
