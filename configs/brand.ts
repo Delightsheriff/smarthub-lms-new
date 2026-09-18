@@ -17,8 +17,8 @@ export const BRAND = {
 } as const;
 
 /**
- * Shared content-column width (Tailwind class). The top bar and the
- * `(app)` main column both center on this so chrome actions and page
- * content sit on the same vertical edges. Change it in ONE place.
+ * Shared content-column width (Tailwind class). Full width across
+ * all viewports so the content sits close to the sidebar on large displays
+ * (e.g. 16" screens) without dead margin space.
  */
-export const CONTENT_MAX_WIDTH = "max-w-6xl" as const;
+export const CONTENT_MAX_WIDTH = "w-full max-w-full" as const;

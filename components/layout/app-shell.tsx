@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             // it doesn't push content up the way static chrome would —
             // without this, a page's last bit of content renders right
             // under the nav bar instead of above it.
-            "mx-auto w-full flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 md:pb-6",
+            "w-full flex-1 px-4 sm:px-6 lg:px-8 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 md:pb-6",
             CONTENT_MAX_WIDTH
           )}
         >

@@ -32,7 +32,7 @@ export function PaymentStatusBanner() {
 
   return (
     <div className="border-b border-warning/20 bg-warning/10">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 text-sm">
+      <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 px-4 sm:px-6 lg:px-8 py-2.5 text-sm">
         <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
         <p className="min-w-0 flex-1 text-foreground">
           <span className="font-medium">
