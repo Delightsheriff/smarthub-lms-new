@@ -127,7 +127,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
 
       {/* Integrated Progress & Pick Up Action Banner */}
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2 min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
@@ -158,7 +158,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
             <div className="shrink-0">
               <Button
                 size="default"
-                className="w-full sm:w-auto justify-center rounded-xl bg-primary text-primary-foreground font-semibold shadow-xs gap-2 active:scale-[0.97] transition-[transform,background-color]"
+                className="w-full md:w-auto justify-center rounded-xl bg-primary text-primary-foreground font-semibold shadow-xs gap-2 active:scale-[0.97] transition-[transform,background-color]"
                 render={
                   <Link href={`/courses/${course.slug}/modules/${pickUp.slug}`} />
                 }
@@ -172,7 +172,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
       </div>
 
       {/* Metrics Bento Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] font-medium">Modules</span>

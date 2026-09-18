@@ -138,7 +138,7 @@ export function CourseOutline({
               value={mod.slug}
               className="border-0 bg-transparent"
             >
-              <div className="flex items-stretch">
+              <div className="flex items-center gap-1 min-w-0">
                 <Link
                   href={moduleHref}
                   onClick={onItemClick}
@@ -163,11 +163,11 @@ export function CourseOutline({
                   >
                     {mod.order.toString().padStart(2, "0")}
                   </span>
-                  <span className="line-clamp-2 leading-snug text-left">
+                  <span className="truncate leading-snug text-left flex-1 min-w-0">
                     {mod.title}
                   </span>
                 </Link>
-                <AccordionTrigger className="px-2 hover:bg-muted rounded-lg" />
+                <AccordionTrigger className="shrink-0 w-8 h-8 p-0 flex items-center justify-center hover:bg-muted rounded-lg border-0 py-0" />
               </div>
 
               <AccordionContent className="pl-9 pr-2 pb-1 pt-1">

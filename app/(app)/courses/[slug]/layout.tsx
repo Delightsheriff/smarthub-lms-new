@@ -50,14 +50,14 @@ export default function CourseLayout({
           All courses
         </Link>
 
-        {/* Mobile-only outline trigger */}
+        {/* Mobile & tablet outline trigger */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetTrigger
             render={
               <Button
                 variant="outline"
                 size="sm"
-                className="lg:hidden gap-2 text-xs active:scale-[0.97] transition-transform"
+                className="xl:hidden gap-2 text-xs active:scale-[0.97] transition-transform"
               >
                 <ListTree className="h-3.5 w-3.5" />
                 Course outline
@@ -86,10 +86,11 @@ export default function CourseLayout({
         </Sheet>
       </div>
 
-      {/* Two-pane split. Side rail visible at lg+ only because the
-          main app shell already eats up 72px on md for its side rail. */}
-      <div className="lg:grid lg:grid-cols-[300px_1fr] lg:gap-6 w-full min-w-0">
-        <aside className="hidden lg:block sticky top-20 h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border bg-card">
+      {/* Two-pane split. Side rail visible at xl+ only so screens below xl
+          (including laptops with the 256px app sidebar open) retain a generous,
+          readable content column instead of cramping. */}
+      <div className="xl:grid xl:grid-cols-[280px_1fr] xl:gap-6 w-full min-w-0">
+        <aside className="hidden xl:block sticky top-20 h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border bg-card">
           {isLoading ? (
             <OutlineSkeleton />
           ) : data ? (
