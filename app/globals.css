@@ -159,8 +159,8 @@
     /* Warm dark sidebar */
     --sidebar: oklch(0.175 0.006 60);
     --sidebar-foreground: oklch(0.965 0.007 78.29);
-    --sidebar-primary: oklch(0.754 0.162 67.889);
-    --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
+    --sidebar-primary: oklch(0.32 0.095 342.162);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(1 0 0 / 7%);
     --sidebar-accent-foreground: oklch(0.965 0.007 78.29);
     --sidebar-border: oklch(1 0 0 / 10%);

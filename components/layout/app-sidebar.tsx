@@ -67,15 +67,13 @@ export function AppSidebar() {
     // per-item, without risking accidental activation on the first hover.
     <TooltipProvider delay={500}>
       <Sidebar collapsible="icon" side="left">
-        <SidebarHeader className="border-b border-sidebar-border/60 p-2 pb-3">
-          <div className="flex justify-center">
-            <Link href="/dashboard" aria-label="SmartHub" className="block">
-              <Logo size="sm" />
-            </Link>
-          </div>
+        <SidebarHeader className="h-14 border-b border-sidebar-border/60 px-4 flex items-center justify-center group-data-[collapsible=icon]:px-1">
+          <Link href="/dashboard" aria-label="SmartHub" className="flex items-center">
+            <Logo size="sm" />
+          </Link>
         </SidebarHeader>
 
-        <SidebarContent>
+        <SidebarContent className="px-1.5 py-2 space-y-1">
           {sections.map((section, i) => (
             <NavSectionGroup
               key={section.group ?? `ungrouped-${i}`}
@@ -90,14 +88,14 @@ export function AppSidebar() {
         {/* Identity card — the avatar opens the existing quick-action
             menu (UserMenu). A dedicated profile drawer replaces this
             once the Settings/Profile slice builds it end-to-end. */}
-        <SidebarFooter className="border-t border-sidebar-border/80 p-2 group-data-[collapsible=icon]:items-center">
-          <div className="flex items-center gap-2.5 rounded-xl p-1.5 transition-colors hover:bg-sidebar-accent/50 group-data-[collapsible=icon]:justify-center">
+        <SidebarFooter className="border-t border-sidebar-border/60 p-2 group-data-[collapsible=icon]:items-center">
+          <div className="flex items-center gap-2.5 rounded-xl p-1.5 transition-colors hover:bg-sidebar-accent/60 group-data-[collapsible=icon]:justify-center">
             <UserMenu />
             <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-semibold text-sidebar-foreground">
+              <p className="truncate text-[13px] font-semibold text-sidebar-foreground tracking-tight">
                 {fullName || "—"}
               </p>
-              <p className="truncate text-xs text-sidebar-foreground/60">
+              <p className="truncate text-[11px] font-medium text-sidebar-foreground/60">
                 {mode === "instructor" ? "Instructor" : "Student"}
               </p>
             </div>
@@ -164,10 +162,10 @@ function NavSectionGroup({
       <SidebarGroup>
         <SidebarGroupLabel
           render={<CollapsibleTrigger />}
-          className="cursor-pointer uppercase tracking-wider text-[11px] font-semibold text-sidebar-foreground/60 hover:text-sidebar-foreground/90 transition-colors select-none py-1.5"
+          className="cursor-pointer font-mono uppercase tracking-[0.14em] text-[10px] font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/90 transition-colors select-none py-1 px-2.5 h-7 flex items-center justify-between rounded-lg hover:bg-sidebar-accent/30"
         >
-          {section.group}
-          <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 transition-transform duration-150 ease-out group-data-open/collapsible:rotate-180" />
+          <span>{section.group}</span>
+          <ChevronDown className="ml-auto h-3 w-3 shrink-0 text-sidebar-foreground/40 transition-transform duration-150 ease-out group-data-open/collapsible:rotate-180" />
         </SidebarGroupLabel>
         <CollapsibleContent>
           <SidebarGroupContent>{menu}</SidebarGroupContent>
