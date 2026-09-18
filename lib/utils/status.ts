@@ -32,6 +32,7 @@ export const STATUS_REGISTRY: Record<string, { label: string; tone: StatusTone }
   rejected: { label: "Rejected", tone: "destructive" },
   overdue: { label: "Overdue", tone: "destructive" },
   defaulted: { label: "Defaulted", tone: "destructive" },
+  terminated: { label: "Terminated", tone: "destructive" },
 
   draft: { label: "Draft", tone: "neutral" },
   ended: { label: "Ended", tone: "neutral" },
