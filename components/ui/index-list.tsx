@@ -93,7 +93,7 @@ export function IndexRow({
   );
 
   const className =
-    "grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
+    "group/index-row grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-4 text-left transition-[background-color,transform] duration-150 ease-[var(--ease-out-strong)] hover:bg-muted/40 active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
 
   if (href) {
     return (

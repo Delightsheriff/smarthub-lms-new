@@ -94,7 +94,7 @@ export function LedgerItem({
       className={cn(
         "flex w-full items-center gap-2.5 border-t border-border py-[11px] text-left first:border-t-0",
         Icon && "items-start",
-        interactive && "-mx-1 rounded-lg px-1 transition-colors hover:bg-muted/50",
+        interactive && "-mx-1.5 rounded-xl px-1.5 transition-[background-color,transform] duration-150 ease-[var(--ease-out-strong)] hover:bg-muted/60 active:scale-[0.99] cursor-pointer",
       )}
     >
       {Icon ? (

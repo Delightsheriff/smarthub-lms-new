@@ -43,8 +43,8 @@ export function StatTile({
   const content = (
     <div
       className={cn(
-        "flex flex-col justify-between rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs transition-colors",
-        isInteractive && "hover:border-primary/40 cursor-pointer",
+        "flex flex-col justify-between rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)]",
+        isInteractive && "hover:border-primary/40 active:scale-[0.98] cursor-pointer",
         className,
       )}
     >

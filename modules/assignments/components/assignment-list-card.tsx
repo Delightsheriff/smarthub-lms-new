@@ -70,7 +70,7 @@ export function AssignmentListCard({
   const plainInstructions = htmlToPlainText(assignment.instructions);
 
   return (
-    <Card className="rounded-2xl border border-border bg-card hover:border-primary/40 transition-all duration-200 shadow-sm overflow-hidden group flex flex-col justify-between">
+    <Card className="rounded-2xl border border-border bg-card hover:border-primary/40 active:scale-[0.99] transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] shadow-xs overflow-hidden group flex flex-col justify-between">
       <CardContent className="p-4 sm:p-5 flex flex-col justify-between flex-1 gap-3.5">
         <div className="space-y-2.5 min-w-0">
           {/* Context header: Course & Module */}
