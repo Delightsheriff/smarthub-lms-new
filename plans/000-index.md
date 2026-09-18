@@ -87,6 +87,8 @@ inference.
 | 023 | Jobs | `/jobs` |
 | 024 | Cohort Workspace (6 tabs) | `/teach/cohorts/[scheduleId]` |
 | 025 | Shared primitives rollout (pluralize/StatusBadge) | cross-cutting, no single route |
+| 026 | Component test infra (StatusBadge/SegmentedControl) | cross-cutting, no single route |
+| 027 | Accessibility audit (Ledger/IndexList/StatusBadge/SegmentedControl) | cross-cutting, no single route |
 
 **Already done, not in this list:** the student and instructor
 dashboards (plan 001 of the prior sequence — see `plans/DESIGN-SYSTEM.md`

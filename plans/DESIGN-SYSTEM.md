@@ -201,12 +201,13 @@ and the acceptance checklist every one of them uses. **Do not create
 `plans/002-editorial-rollout-*` or similar combined documents again**
 — the per-page shape is deliberate, specifically because the combined
 version's nuance ("some pages get `IndexList`, some don't, tables stay
-tables") kept getting lost or ignored in execution. `plans/025` breaks
-the "one plan per page" shape deliberately — it's a cross-cutting
-rollout (shared utils/components), not a page redesign, so it doesn't
-have a route to be a page-plan about.
+tables") kept getting lost or ignored in execution. `plans/025`–`027`
+break the "one plan per page" shape deliberately — they're cross-
+cutting (shared utils/components rollout, test infra, accessibility),
+not page redesigns, so none of them have a route to be a page-plan
+about.
 
-Next available plan number: **026**.
+Next available plan number: **028**.
 
 | ADRs taken | Decision |
 |---|---|
