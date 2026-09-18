@@ -38,7 +38,7 @@ export default function CourseLayout({
   const modulesForOutline = data?.modules ?? [];
 
   return (
-    <div className="space-y-4 -mt-2">
+    <div className="space-y-4 -mt-2 w-full min-w-0">
       {/* Back link + mobile drawer trigger.
           Sits inside the existing app `<main>` container. */}
       <div className="flex items-center justify-between gap-3">
@@ -57,16 +57,18 @@ export default function CourseLayout({
               <Button
                 variant="outline"
                 size="sm"
-                className="lg:hidden gap-2 text-xs"
+                className="lg:hidden gap-2 text-xs active:scale-[0.97] transition-transform"
               >
                 <ListTree className="h-3.5 w-3.5" />
                 Course outline
               </Button>
             }
           />
-          <SheetContent side="left" className="p-0">
-            <SheetHeader>
-              <SheetTitle>{data?.course.name || "Course outline"}</SheetTitle>
+          <SheetContent side="left" className="p-0 w-[85vw] max-w-sm">
+            <SheetHeader className="px-4 py-3 border-b border-border">
+              <SheetTitle className="text-base font-display font-semibold truncate pr-6">
+                {data?.course.name || "Course outline"}
+              </SheetTitle>
             </SheetHeader>
             <div className="overflow-y-auto h-[calc(100dvh-65px)]">
               {isLoading ? (
@@ -86,7 +88,7 @@ export default function CourseLayout({
 
       {/* Two-pane split. Side rail visible at lg+ only because the
           main app shell already eats up 72px on md for its side rail. */}
-      <div className="lg:grid lg:grid-cols-[300px_1fr] lg:gap-6">
+      <div className="lg:grid lg:grid-cols-[300px_1fr] lg:gap-6 w-full min-w-0">
         <aside className="hidden lg:block sticky top-20 h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border bg-card">
           {isLoading ? (
             <OutlineSkeleton />
@@ -98,7 +100,7 @@ export default function CourseLayout({
             />
           ) : null}
         </aside>
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 w-full">{children}</div>
       </div>
     </div>
   );

@@ -70,13 +70,13 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
       value={m.id}
       className="border-b border-border last:border-b-0"
     >
-      <AccordionTrigger className="px-5 py-3.5 hover:no-underline">
-        <span className="flex items-center gap-4 min-w-0 flex-1 text-left">
-          <span className="shrink-0 font-display text-xl tabular-nums text-muted-foreground">
+      <AccordionTrigger className="px-4 py-3.5 sm:px-5 hover:no-underline">
+        <span className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 text-left">
+          <span className="shrink-0 font-display text-lg sm:text-xl tabular-nums text-muted-foreground">
             {m.order.toString().padStart(2, "0")}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-display text-base leading-tight truncate">
+            <span className="block font-display text-sm sm:text-base font-semibold leading-snug text-foreground break-words">
               {m.title}
             </span>
             <span className="block text-xs text-muted-foreground mt-0.5">
@@ -89,8 +89,8 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
         </span>
       </AccordionTrigger>
 
-      <AccordionContent className="px-5 pb-4 pt-0">
-        <div className="space-y-4 pl-0 sm:pl-12">
+      <AccordionContent className="px-4 pb-4 pt-0 sm:px-5">
+        <div className="space-y-4 pl-0 sm:pl-10 min-w-0">
           {/* Description */}
           {m.summary && (
             <RichText
@@ -158,6 +158,7 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
             <Button
               size="sm"
               variant="outline"
+              className="rounded-xl active:scale-[0.97] transition-transform"
               render={
                 <Link href={`/courses/${courseSlug}/modules/${m.slug}`} />
               }

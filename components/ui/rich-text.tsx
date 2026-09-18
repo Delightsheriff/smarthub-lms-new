@@ -63,14 +63,15 @@ export function RichText({ html, className }: RichTextProps) {
       // copy, not like an HTML test page. Tight at the edges so
       // it slots into existing card layouts.
       className={cn(
-        "text-sm leading-relaxed text-foreground/90",
+        "text-sm leading-relaxed text-foreground/90 break-words [overflow-wrap:anywhere]",
         "[&_p]:mb-2 [&_p:last-child]:mb-0",
         "[&_strong]:font-semibold [&_b]:font-semibold",
-        "[&_a]:text-primary [&_a]:underline-offset-2 [&_a:hover]:underline",
+        "[&_a]:text-primary [&_a]:underline-offset-2 [&_a:hover]:underline [&_a]:break-all",
         "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
         "[&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:font-semibold",
         "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
-        "[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs",
+        "[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_code]:break-all",
+        "[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_img]:max-w-full [&_img]:h-auto [&_table]:overflow-x-auto [&_table]:block",
         className,
       )}
       dangerouslySetInnerHTML={{ __html: clean }}
