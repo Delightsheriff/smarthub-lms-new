@@ -8,10 +8,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 The original 28-module port plus Self-Paced Learning is done and fully
 shipped — the codebase itself, not a plan doc, is the record of it now.
-`plans/ARCHITECTURE.md` still carries the timeless module/seam vocabulary
-and principles from that era (module-per-domain, interface/depth, when a
-seam earns its keep) — read it for the "how do we keep this testable and
-AI-navigable" rules, which don't change with the UI.
 
 **Design-system modernization is the active track. Read
 `plans/DESIGN-SYSTEM.md` first** for anything involving nav/chrome, page
@@ -26,11 +22,10 @@ previously-hit git-collision hazard and how to avoid it.
 
 ## Working rules
 
-- **Work incrementally.** A cross-cutting slice (new nav chrome, an auth
-  swap, a new page-layout direction) gets its own `plans/0NN-*.md`,
-  confirmed by the user before code. A small single-page pass doesn't need
-  one — check `plans/DESIGN-SYSTEM.md`'s plan registry for the next free
-  number before creating a file.
+- **Work incrementally.** The per-page-plan workflow (`plans/0NN-*.md`)
+  that carried the editorial redesign is retired — `plans/DESIGN-SYSTEM.md`
+  is now the only file in `plans/`. Don't recreate that workflow for a new
+  slice of work unless it's explicitly asked for again.
 - **Never assume; confirm scope.** Ask before starting a slice with real
   blast radius, and flag ambiguities.
 - **Use shadcn components throughout.** Rebuild every UI primitive/screen

@@ -16,8 +16,12 @@ in this repo, this file and the actual code are the current word, not
 the old doc.
 
 The original 28-module port (and Self-Paced Learning) is done and
-fully shipped — `plans/ARCHITECTURE.md` still carries its timeless
-module/seam vocabulary, which doesn't change with the UI.
+fully shipped — the codebase itself is the record of it now.
+
+## Related codebases
+
+- **Website** — `~/Documents/smarthub-projects/smarthub/smarthub-client`
+- **API** — `~/Documents/smarthub-projects/smarthub/smarthub-api`
 
 ---
 
@@ -145,9 +149,9 @@ converted vs. still pending.
   `IndexRow` avoids this entirely by using `hidden sm:flex` etc.
 - **Motion needs a reason.**
 - **Confirm scope before a big slice.** A cross-cutting layout change
-  (a new page-layout direction, nav chrome, auth) gets its own
-  `plans/0NN-*.md`, confirmed by the user before code. A small
-  single-page pass doesn't need one.
+  (a new page-layout direction, nav chrome, auth) gets confirmed by the
+  user before code, plan doc or not — the per-page-plan workflow itself
+  is retired (see §6).
 
 ---
 
@@ -189,25 +193,15 @@ sessions are JWT-strategy, encrypted in an httpOnly cookie.
 
 ---
 
-## 6. Plan-number and ADR-number registry
+## 6. ADR-number registry
 
-**Renumbered from scratch a second time.** The first renumbering
-(001–005) covered the dashboards plus two rollout attempts (003, 004)
-that shipped masthead-only twice in a row, plus 005's attempt to
-correct that in one large combined document. All of it is deleted.
-The current sequence, `plans/000-024`, is one plan per page instead —
-see `plans/000-index.md` for the full registry, shared ground rules,
-and the acceptance checklist every one of them uses. **Do not create
-`plans/002-editorial-rollout-*` or similar combined documents again**
-— the per-page shape is deliberate, specifically because the combined
-version's nuance ("some pages get `IndexList`, some don't, tables stay
-tables") kept getting lost or ignored in execution. `plans/025`–`027`
-break the "one plan per page" shape deliberately — they're cross-
-cutting (shared utils/components rollout, test infra, accessibility),
-not page redesigns, so none of them have a route to be a page-plan
-about.
-
-Next available plan number: **028**.
+The per-page plan files (`plans/000` through `plans/027` — the
+editorial redesign, the shared-primitives rollout, test infra, the
+accessibility audit) are done and deleted; this file and the actual
+code are the durable record of what they did (§8 has the status
+ledger). The plans folder now holds only this file — don't recreate
+the `plans/0NN-*.md` workflow for a new slice of work unless it's
+explicitly asked for again; note it here in §8 instead.
 
 | ADRs taken | Decision |
 |---|---|
