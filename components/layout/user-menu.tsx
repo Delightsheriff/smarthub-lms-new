@@ -57,13 +57,13 @@ export function UserMenu() {
               type="button"
               variant="ghost"
               aria-label="Account menu"
-              className="ml-1.5 h-auto p-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-transparent"
+              className="p-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-transparent active:scale-[0.96] transition-transform"
             >
-              <Avatar className="h-9 w-9 ring-2 ring-background transition-shadow hover:ring-primary/30">
+              <Avatar className="h-8.5 w-8.5 ring-2 ring-border/80 transition-all hover:ring-primary/50 shadow-2xs">
                 {user?.imageUrl && (
                   <AvatarImage src={user.imageUrl} alt="Profile photo" />
                 )}
-                <AvatarFallback>{initial}</AvatarFallback>
+                <AvatarFallback className="text-xs font-semibold">{initial}</AvatarFallback>
               </Avatar>
             </Button>
           }

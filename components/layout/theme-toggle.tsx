@@ -43,24 +43,24 @@ export function ThemeToggle() {
     <Button
       type="button"
       variant="ghost"
-      size="icon"
+      size="icon-sm"
       onClick={toggleTheme}
       aria-label={!mounted ? "Toggle theme" : isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="rounded-full relative"
+      className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/70 active:scale-[0.96] transition-[transform,background-color] relative"
     >
       {!mounted ? (
-        <span className="h-[18px] w-[18px]" aria-hidden />
+        <span className="h-4 w-4" aria-hidden />
       ) : (
-        <div className="relative h-[18px] w-[18px]">
+        <div className="relative h-4 w-4">
           <Sun
             className={cn(
-              "absolute inset-0 h-[18px] w-[18px] transition-[transform,opacity] duration-200 ease-out",
+              "absolute inset-0 h-4 w-4 transition-[transform,opacity] duration-200 ease-out",
               isDark ? "scale-100 opacity-100 rotate-0" : "scale-50 opacity-0 rotate-90 pointer-events-none"
             )}
           />
           <Moon
             className={cn(
-              "absolute inset-0 h-[18px] w-[18px] transition-[transform,opacity] duration-200 ease-out",
+              "absolute inset-0 h-4 w-4 transition-[transform,opacity] duration-200 ease-out",
               isDark ? "scale-50 opacity-0 -rotate-90 pointer-events-none" : "scale-100 opacity-100 rotate-0"
             )}
           />

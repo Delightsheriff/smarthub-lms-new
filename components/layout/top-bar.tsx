@@ -28,18 +28,15 @@ export function TopBar() {
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div
         className={cn(
-          "flex h-14 w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8",
+          "flex h-14 w-full items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-8",
           CONTENT_MAX_WIDTH
         )}
       >
-        <div className="flex min-w-0 items-center gap-3">
-          <SidebarTrigger className="-ml-1" />
+        {/* Left: Sidebar trigger, mobile logo, search */}
+        <div className="flex flex-1 items-center gap-2 sm:gap-3 min-w-0">
+          <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors" />
 
-          {/* Logo only on mobile — the side rail owns the brand mark.
-              Dropped entirely once a dual-role switcher is also
-              competing for this row's space: sidebar-trigger + the
-              switcher's own icons already say "this is the app," and
-              opening the rail shows the full lockup anyway. */}
+          {/* Logo only on mobile — the side rail owns the brand mark. */}
           {!canSwitch && (
             <Link
               href="/dashboard"
@@ -50,25 +47,31 @@ export function TopBar() {
             </Link>
           )}
 
+          <div className="hidden sm:block h-4 w-px bg-border/60 shrink-0" aria-hidden />
+
           <SearchTrigger />
         </div>
 
-        {/* Lives in the header, not the sidebar — a dual-role user
-            switches often enough that it belongs beside search, and
-            keeping it out of the rail keeps the rail from growing a
-            second header row above the nav. */}
+        {/* Center: Workspace Role Switcher (Anchored in the exact horizontal center via balanced flex-1 sides) */}
         {canSwitch && (
-          <div className="w-20 shrink-0 sm:w-44">
+          <div className="flex shrink-0 items-center justify-center px-1 sm:px-2">
             <RoleSwitcher variant="expanded" />
           </div>
         )}
 
-        <div className="flex items-center gap-1.5">
-          <ThemeToggle />
-          <NotificationBell />
+        {/* Right: Actions Cluster (Theme, Notifications, Profile) */}
+        <div className="flex flex-1 items-center justify-end gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-border/60 bg-muted/25 p-0.5">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
+
+          <div className="h-4 w-px bg-border/60 mx-0.5 sm:mx-1 shrink-0" aria-hidden />
+
           <UserMenu />
         </div>
       </div>
     </header>
   );
 }
+

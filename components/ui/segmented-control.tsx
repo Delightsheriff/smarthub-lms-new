@@ -68,7 +68,7 @@ export function SegmentedControl<T extends string>({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full border border-border p-0.5",
+        "inline-flex items-center gap-0.5 rounded-full border border-border/70 bg-muted/25 p-1 shadow-2xs backdrop-blur-xs",
         className,
       )}
     >
@@ -88,14 +88,14 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(item.value)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
             className={cn(
-              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.04em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1 sm:px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.05em] transition-[color,transform] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               active ? "text-background" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {active && (
               <motion.span
                 layoutId={layoutId}
-                className="absolute inset-0 -z-10 rounded-full bg-foreground"
+                className="absolute inset-0 -z-10 rounded-full bg-foreground shadow-xs"
                 transition={reduce ? { duration: 0 } : { type: "spring", duration: 0.25, bounce: 0 }}
               />
             )}

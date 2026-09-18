@@ -44,12 +44,12 @@ export function NotificationBell() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="relative rounded-xl text-muted-foreground hover:text-foreground"
+            className="relative h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/70 active:scale-[0.96] transition-[transform,background-color]"
             aria-label="Notifications"
           />
         }
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-4 w-4 stroke-[1.8]" />
         <AnimatePresence>
           {unreadCount > 0 && (
             // Contextual icon animation (better-ui): opacity + scale +
@@ -61,7 +61,7 @@ export function NotificationBell() {
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={reduce ? undefined : { opacity: 0, scale: 0.25, filter: "blur(4px)" }}
               transition={{ type: "spring", duration: 0.3, bounce: 0 }}
-              className="absolute -top-1 -right-1"
+              className="absolute -top-0.5 -right-0.5"
             >
               <Badge className="bg-accent text-white font-bold text-[10px] h-4 min-w-4 px-1 rounded-full flex items-center justify-center p-0 border-2 border-background">
                 {unreadCount > 9 ? "9+" : unreadCount}
