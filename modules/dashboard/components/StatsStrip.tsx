@@ -100,8 +100,8 @@ export function DashboardStatsStrip() {
         const inner = (
           <div
             className={cn(
-              "space-y-1 rounded-xl border border-border/80 bg-background/50 p-3.5 transition-colors",
-              t.href && "hover:border-primary/40",
+              "space-y-1 rounded-xl border border-border/80 bg-background/50 p-3.5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)] shadow-xs",
+              t.href && "hover:border-primary/40 active:scale-[0.98]",
             )}
           >
             <div className="flex items-center gap-2">

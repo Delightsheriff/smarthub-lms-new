@@ -46,16 +46,21 @@ export function ConversationListItemRow({
     <div
       onClick={onSelect}
       className={cn(
-        "p-3.5 transition-colors cursor-pointer space-y-2 select-none",
+        "p-3.5 transition-[background-color,border-color,transform] duration-150 ease-[var(--ease-out-strong)] cursor-pointer space-y-2 select-none active:scale-[0.99]",
         isActive
-          ? "bg-primary/10 border-l-2 border-l-primary"
+          ? "bg-muted/70 border-l-[3px] border-l-primary shadow-xs"
           : "hover:bg-muted/40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <Avatar className="h-9 w-9 shrink-0">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+            <AvatarFallback
+              className={cn(
+                "font-semibold text-xs transition-colors",
+                isActive ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+              )}
+            >
               {initials || "C"}
             </AvatarFallback>
           </Avatar>
