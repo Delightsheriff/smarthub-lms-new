@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/stat-tile";
-import { formatDate } from "@/lib/utils";
+import { formatDate, pluralize } from "@/lib/utils";
 import {
   SHARES_PAGE_SIZE,
   useMySelfPacedEarnings,
@@ -232,7 +232,7 @@ export function InstructorSelfPacedEarnings() {
                 {b.review > 0 &&
                   `${formatMinor(b.review, t.currency)} refunded after payout — an admin will settle it with you. `}
                 {t.notEligibleCount > 0 &&
-                  `${t.notEligibleCount} ${t.notEligibleCount === 1 ? "sale" : "sales"} earned no share (see reasons below).`}
+                  `${pluralize(t.notEligibleCount, "sale")} earned no share (see reasons below).`}
               </p>
             )}
           </section>
@@ -384,7 +384,7 @@ export function InstructorSelfPacedEarnings() {
           page={page}
           totalPages={totalPages}
           onPage={setPage}
-          label={`${total} ${total === 1 ? "sale" : "sales"}`}
+          label={pluralize(total, "sale")}
         />
       </section>
     </div>

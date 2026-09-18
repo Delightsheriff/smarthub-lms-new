@@ -16,6 +16,7 @@ import {
   MaterialsSection,
   RecordingsSection,
 } from "@/modules/learning/components/module-section";
+import { pluralize } from "@/lib/utils";
 import { useAssignedModules } from "../api/assigned-modules.queries";
 import type { AssignedAssignment, AssignedModule } from "../types";
 
@@ -29,7 +30,7 @@ export function AssignedModulesPageContent() {
   const { data, isLoading, isFetching, error, refetch } = useAssignedModules();
 
   const count = data?.length ?? 0;
-  const dateline = data ? `${count} Module${count === 1 ? "" : "s"} Assigned` : undefined;
+  const dateline = data ? `${pluralize(count, "Module")} Assigned` : undefined;
 
   return (
     <div className="space-y-6">
@@ -122,7 +123,7 @@ function AssignedModuleCard({
         </div>
 
         <span className="hidden font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-muted-foreground sm:block text-right">
-          {taskCount > 0 ? `${taskCount} task${taskCount === 1 ? "" : "s"}` : "Study only"}
+          {taskCount > 0 ? pluralize(taskCount, "task") : "Study only"}
         </span>
       </AccordionTrigger>
 

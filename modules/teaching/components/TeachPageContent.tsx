@@ -11,7 +11,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { useAuthStore } from "@/store/slices/authStore";
 import { DashboardWebinarsWidget } from "@/modules/webinars/components/DashboardWebinarsWidget";
 import { useUpcomingEvents } from "@/modules/calendar/api/calendar.queries";
-import { formatDateTimeFriendly } from "@/lib/utils";
+import { formatDateTimeFriendly, pluralize } from "@/lib/utils";
 import {
   useGradeSubmissionFromInbox,
   useInstructorInbox,
@@ -99,11 +99,11 @@ export function TeachPageContent() {
                 {needsGradingRows.length > 0 && (
                   <>
                     <strong className="text-foreground">{needsGradingRows.length}</strong>{" "}
-                    {needsGradingRows.length === 1 ? "submission" : "submissions"} waiting on your review ·{" "}
+                    {pluralize(needsGradingRows.length, "submission", undefined, false)} waiting on your review ·{" "}
                   </>
                 )}
                 <strong className="text-foreground">{activeCount}</strong>{" "}
-                {activeCount === 1 ? "cohort" : "cohorts"} active
+                {pluralize(activeCount, "cohort", undefined, false)} active
               </>
             )
           ) : undefined
@@ -195,7 +195,7 @@ export function TeachPageContent() {
                   key={c.id}
                   index={i + 1}
                   title={c.course.name}
-                  subtitle={`${c.studentCount} ${c.studentCount === 1 ? "student" : "students"} · started ${new Date(c.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
+                  subtitle={`${pluralize(c.studentCount, "student")} · started ${new Date(c.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                   progress={c.progress}
                   status={isCohortEnded(c.endDate) ? "Ended" : "Active"}
                   href={`/teach/cohorts/${c.id}`}

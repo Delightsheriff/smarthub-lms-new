@@ -15,7 +15,7 @@ import {
   Send,
   UserRound,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
@@ -60,13 +60,6 @@ import type {
   InternshipCheckInInput,
   InternshipTaskUpdateInput,
 } from "../types";
-
-const TASK_STATUS_STYLES: Record<ApiInternshipTask["status"], string> = {
-  todo: "bg-muted text-muted-foreground",
-  in_progress: "bg-warning/10 text-warning",
-  submitted: "bg-info/10 text-info",
-  done: "bg-success/10 text-success",
-};
 
 const submitTaskSchema = z.object({
   submissionUrl: z
@@ -176,9 +169,7 @@ export function InternshipWorkspacePageContent() {
               {progressPercent}% of the program completed
             </p>
           </div>
-          <Badge variant="outline" className="normal-case">
-            {internship.status}
-          </Badge>
+          <StatusBadge status={internship.status} />
         </div>
         <Progress value={progressPercent} className="mt-4 gap-3">
           <ProgressTrack>
@@ -271,9 +262,7 @@ function TaskRow({ task }: { task: ApiInternshipTask }) {
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className={"normal-case text-xs " + TASK_STATUS_STYLES[task.status]}>
-              {task.status.replace("_", " ")}
-            </Badge>
+            <StatusBadge status={task.status} className="text-xs" />
             {task.status === "todo" && (
               <Button
                 size="sm"

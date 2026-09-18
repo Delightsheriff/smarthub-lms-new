@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, pluralize } from "@/lib/utils";
 import { useSessionAttendance, useMarkSessionAttendance } from "../api/attendance.queries";
 import type { AttendanceStatus } from "../types/attendance";
 
@@ -100,8 +100,8 @@ export function ClassSessionAttendancePage({ sessionId }: ClassSessionAttendance
             divider
             description={
               session.location
-                ? `Location: ${session.location} · ${rows.length} enrolled student${rows.length === 1 ? "" : "s"}`
-                : `Mark attendance and add notes for ${rows.length} enrolled student${rows.length === 1 ? "" : "s"}.`
+                ? `Location: ${session.location} · ${pluralize(rows.length, "enrolled student")}`
+                : `Mark attendance and add notes for ${pluralize(rows.length, "enrolled student")}.`
             }
             actions={
               <Button

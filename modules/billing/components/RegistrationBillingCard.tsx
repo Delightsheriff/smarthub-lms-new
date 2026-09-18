@@ -2,13 +2,13 @@
 import { useState } from "react";
 import {
   Calendar,
-  CheckCircle2,
   ChevronDown,
   Clock,
   GraduationCap,
   Tag,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Progress } from "@/components/ui/progress";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
@@ -44,17 +44,6 @@ interface Props {
   registration: BillingRegistrationCard;
 }
 
-/** Tone classes layered over an `outline` badge. The allowed badge
- *  variants only cover default/secondary/destructive/outline/ghost/link,
- *  so status colour is expressed via explicit utility classes. */
-const STATUS_TONE: Record<PaymentStatus, string> = {
-  pending: "border-warning/40 text-warning",
-  completed: "border-success/40 bg-success/10 text-success",
-  cancelled: "border-destructive/30 bg-destructive/10 text-destructive",
-  refunded: "border-border text-muted-foreground",
-  waived: "border-success/40 bg-success/10 text-success",
-};
-
 const STATUS_LABEL: Record<PaymentStatus, string> = {
   pending: "In progress",
   completed: "Paid in full",
@@ -70,7 +59,6 @@ const STATUS_LABEL: Record<PaymentStatus, string> = {
  */
 export function RegistrationBillingCard({ registration: r }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const statusTone = STATUS_TONE[r.paymentStatus] || "border-border text-muted-foreground";
   const statusLabel = STATUS_LABEL[r.paymentStatus] || r.paymentStatus;
   const isWaived = r.paymentStatus === "waived";
   const fullyPaid =
@@ -102,10 +90,11 @@ export function RegistrationBillingCard({ registration: r }: Props) {
             <span className="font-display font-semibold text-sm text-foreground truncate">
               {r.courseName}
             </span>
-            <Badge variant="outline" className={cn("text-[10px]", statusTone)}>
-              {fullyPaid && <CheckCircle2 className="mr-1 h-3 w-3" />}
-              {statusLabel}
-            </Badge>
+            <StatusBadge
+              status={r.paymentStatus}
+              label={statusLabel}
+              className="text-[10px]"
+            />
             {hasDiscount && (
               <Badge variant="default" className="border-accent/30 bg-accent/15 text-accent text-[10px]">
                 <Tag className="mr-1 h-3 w-3" />

@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { StatTile } from "@/components/ui/stat-tile";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn, formatPrice } from "@/lib/utils";
+import { formatPrice, pluralize } from "@/lib/utils";
 import {
   useBankingDetails,
   useCancelPayout,
@@ -38,33 +39,6 @@ const formatRelative = (iso?: string): string => {
   if (day < 30) return `${day}d ago`;
   return d.toLocaleDateString();
 };
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-warning/10 text-warning",
-  processing: "bg-muted text-muted-foreground",
-  qualified: "bg-primary/10 text-primary",
-  earned: "bg-success/10 text-success",
-  paid: "bg-success/10 text-success",
-  rejected: "bg-destructive/10 text-destructive",
-  failed: "bg-destructive/10 text-destructive",
-  cancelled: "bg-muted text-muted-foreground",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const cls =
-    STATUS_STYLES[status?.toLowerCase()] || "bg-muted text-muted-foreground";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-        cls,
-      )}
-    >
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
-      {status || "unknown"}
-    </span>
-  );
-}
 
 type TabKey = "share" | "earnings" | "ledger" | "payouts";
 
@@ -209,7 +183,7 @@ export function ReferralsPanel() {
             {typeof data?.uses === "number" && (
               <span className="font-medium text-foreground">
                 <span className="font-display text-base font-bold tabular-nums text-primary">{data.uses}</span>{" "}
-                sign-up{data.uses === 1 ? "" : "s"}
+                {pluralize(data.uses, "sign-up", undefined, false)}
               </span>
             )}
             {typeof data?.qualifiedCount === "number" && (

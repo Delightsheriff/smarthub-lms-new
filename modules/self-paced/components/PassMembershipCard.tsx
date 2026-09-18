@@ -2,8 +2,9 @@
 import { useSyncExternalStore } from "react";
 import { Ticket } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Card } from "@/components/ui/card";
-import { formatDate } from "@/lib/utils";
+import { formatDate, pluralize } from "@/lib/utils";
 import { useMyPass } from "../api/self-paced.queries";
 
 const EXCLUDED_COPY: Record<string, string> = {
@@ -49,10 +50,10 @@ export function PassMembershipCard({ compact = false }: { compact?: boolean }) {
             <p className="font-semibold leading-tight">All-access pass</p>
             {endingSoon ? (
               <Badge variant="warning">
-                Ends in {daysLeft} {daysLeft === 1 ? "day" : "days"}
+                Ends in {pluralize(daysLeft, "day")}
               </Badge>
             ) : (
-              <Badge variant="success">Active</Badge>
+              <StatusBadge status="active" />
             )}
           </div>
           <p className="text-sm text-muted-foreground">

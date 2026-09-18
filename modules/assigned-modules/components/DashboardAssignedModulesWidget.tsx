@@ -8,6 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pluralize } from "@/lib/utils";
 import { useAssignedModules } from "../api/assigned-modules.queries";
 
 /**
@@ -50,25 +51,13 @@ export function DashboardAssignedModulesWidget() {
         {preview.map((m) => {
           const bits: string[] = [];
           if (m.recordings.length > 0) {
-            bits.push(
-              `${m.recordings.length} recording${
-                m.recordings.length === 1 ? "" : "s"
-              }`,
-            );
+            bits.push(pluralize(m.recordings.length, "recording"));
           }
           if (m.materials.length > 0) {
-            bits.push(
-              `${m.materials.length} material${
-                m.materials.length === 1 ? "" : "s"
-              }`,
-            );
+            bits.push(pluralize(m.materials.length, "material"));
           }
           if (m.assignments.length > 0) {
-            bits.push(
-              `${m.assignments.length} assignment${
-                m.assignments.length === 1 ? "" : "s"
-              }`,
-            );
+            bits.push(pluralize(m.assignments.length, "assignment"));
           }
 
           return (

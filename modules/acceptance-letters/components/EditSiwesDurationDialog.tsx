@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { pluralize } from "@/lib/utils";
 import { useUpdateSiwesDuration } from "../api/acceptance-letters.queries";
 
 const durationSchema = z.object({
@@ -121,14 +122,14 @@ function DurationPicker({
               {(v: string) => {
                 if (!v) return "Select duration";
                 const m = Number(v);
-                return `${m} ${m === 1 ? "month" : "months"}`;
+                return pluralize(m, "month");
               }}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {MONTH_OPTIONS.map((m) => (
               <SelectItem key={m} value={String(m)}>
-                {m} {m === 1 ? "month" : "months"}
+                {pluralize(m, "month")}
               </SelectItem>
             ))}
           </SelectContent>

@@ -14,6 +14,7 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/ui/rich-text";
+import { pluralize } from "@/lib/utils";
 import type { Module, ModuleCohortStatus } from "@/modules/learning/types";
 
 interface Props {
@@ -81,7 +82,7 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
             <span className="block text-xs text-muted-foreground mt-0.5">
               {itemCount === 0
                 ? "Content on the way"
-                : `${itemCount} item${itemCount === 1 ? "" : "s"}`}
+                : pluralize(itemCount, "item")}
             </span>
           </span>
           <span className="hidden sm:inline-flex shrink-0">{statusBadge}</span>
@@ -128,19 +129,19 @@ export function CourseModuleRow({ courseSlug, module: m }: Props) {
               {recordings > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <PlayCircle className="h-3.5 w-3.5" />
-                  {recordings} recording{recordings === 1 ? "" : "s"}
+                  {pluralize(recordings, "recording")}
                 </span>
               )}
               {materials > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <FileText className="h-3.5 w-3.5" />
-                  {materials} material{materials === 1 ? "" : "s"}
+                  {pluralize(materials, "material")}
                 </span>
               )}
               {assignments > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <ClipboardList className="h-3.5 w-3.5" />
-                  {assignments} assignment{assignments === 1 ? "" : "s"}
+                  {pluralize(assignments, "assignment")}
                 </span>
               )}
             </div>

@@ -21,6 +21,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
+import { pluralize } from "@/lib/utils";
 import { useMyInstallmentPlans, useMyPaymentSurface, useSubmitPaymentProof } from "../api/payment-proofs.queries";
 import type { MyInstallmentPlanUi, MyPaymentProofUi, PlanTrancheUi } from "../types";
 import { InstallmentScheduleCard } from "./InstallmentScheduleCard";
@@ -146,7 +147,7 @@ export function PaymentsPageContent() {
           surface && surface.proofs.length > 0 ? (
             <>
               Upload bank transfer receipts for verification. You have{" "}
-              <strong className="text-foreground">{surface.proofs.length}</strong> recorded submission{surface.proofs.length === 1 ? "" : "s"}.
+              <strong className="text-foreground">{surface.proofs.length}</strong> recorded {pluralize(surface.proofs.length, "submission", undefined, false)}.
             </>
           ) : (
             "Paid via bank transfer? Upload your payment receipt and our finance team will verify it."

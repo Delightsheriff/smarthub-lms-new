@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, pluralize } from "@/lib/utils";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -140,7 +140,7 @@ export function JobsPageContent() {
         {meta && (
           <span className="text-xs text-muted-foreground">
             Showing <strong className="text-foreground">{jobs.length}</strong> of{" "}
-            <strong className="text-foreground">{meta.totalItems}</strong> opening{meta.totalItems === 1 ? "" : "s"}
+            <strong className="text-foreground">{meta.totalItems}</strong> {pluralize(meta.totalItems, "opening", undefined, false)}
           </span>
         )}
       </div>
@@ -260,7 +260,7 @@ export function JobsPageContent() {
           page={meta.currentPage}
           totalPages={meta.totalPages}
           onPage={setPage}
-          label={`${meta.totalItems} opening${meta.totalItems === 1 ? "" : "s"}`}
+          label={pluralize(meta.totalItems, "opening")}
         />
       )}
     </div>

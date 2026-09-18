@@ -27,7 +27,7 @@ import { DashboardCalendarCard } from "@/modules/calendar/components/DashboardCa
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
 import { PageHeader } from "@/components/layout/page-header";
 import { RevokedCourseNotice } from "@/modules/access/components/RevokedCourseNotice";
-import { formatDate, htmlToPlainText } from "@/lib/utils";
+import { formatDate, htmlToPlainText, pluralize } from "@/lib/utils";
 
 /**
  * LMS home — "The Brief." A masthead greeting, an asymmetric hero
@@ -98,7 +98,7 @@ function StudentDashboardBody() {
             ) : (
               <>
                 <strong className="text-foreground">{enrolledCount}</strong>{" "}
-                {enrolledCount === 1 ? "course" : "courses"} in progress
+                {pluralize(enrolledCount, "course", undefined, false)} in progress
                 {nextDeadline && (
                   <>
                     {" "}

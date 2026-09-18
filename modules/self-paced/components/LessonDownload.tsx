@@ -2,6 +2,7 @@
 import { AlertCircle, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { pluralize } from "@/lib/utils";
 import {
   startDownload,
   useLessonDownload,
@@ -75,7 +76,7 @@ function StatusLine({
           Your download has started.{" "}
           {status.remainingToday === 0
             ? "That was your last download for today."
-            : `${status.remainingToday} ${status.remainingToday === 1 ? "download" : "downloads"} left today.`}
+            : `${pluralize(status.remainingToday, "download")} left today.`}
         </>
       );
     case "failed":

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
-import { formatDate } from "@/lib/utils";
+import { formatDate, pluralize } from "@/lib/utils";
 import { useCohortAssignments, useUpdateAssignmentSchedule } from "../api/teaching.queries";
 
 interface CohortAssignmentsTabProps {
@@ -54,10 +54,10 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span>Due: {asgn.dueDate ? formatDate(asgn.dueDate) : "No due date"}</span>
                   <span>·</span>
-                  <span>{asgn.submissionCount} {asgn.submissionCount === 1 ? "Submission" : "Submissions"}</span>
+                  <span>{pluralize(asgn.submissionCount, "Submission")}</span>
                   <span>·</span>
                   <span className={asgn.pendingCount > 0 ? "text-warning font-medium" : ""}>
-                    {asgn.pendingCount} Pending {asgn.pendingCount === 1 ? "Grade" : "Grades"}
+                    {asgn.pendingCount} Pending {pluralize(asgn.pendingCount, "Grade", undefined, false)}
                   </span>
                 </div>
               }

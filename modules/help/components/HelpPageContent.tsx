@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
+import { pluralize } from "@/lib/utils";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { groupByCategory, useHelpLibrary } from "../api/help.queries";
 import type { ApiHelpResource } from "../types/api.types";
@@ -47,8 +48,8 @@ export function HelpPageContent() {
           totalGuides > 0 ? (
             <>
               Short walkthroughs and documentation for the things you do most.{" "}
-              <strong className="text-foreground">{totalGuides}</strong> guide{totalGuides === 1 ? "" : "s"} across{" "}
-              <strong className="text-foreground">{groups.length}</strong> {groups.length === 1 ? "category" : "categories"}.
+              <strong className="text-foreground">{totalGuides}</strong> {pluralize(totalGuides, "guide", undefined, false)} across{" "}
+              <strong className="text-foreground">{groups.length}</strong> {pluralize(groups.length, "category", "categories", false)}.
             </>
           ) : (
             "Short guides and walkthroughs for the things you do most."

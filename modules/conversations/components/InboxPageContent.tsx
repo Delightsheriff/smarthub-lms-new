@@ -10,6 +10,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { useConversations, useMarkConversationRead } from "../api/conversations.queries";
 import { ConversationListItemRow } from "./ConversationListItemRow";
 import { AssignmentThread } from "@/modules/messaging/components/AssignmentThread";
+import { pluralize } from "@/lib/utils";
 
 export function InboxPageContent() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -50,7 +51,7 @@ export function InboxPageContent() {
           conversations && conversations.length > 0 ? (
             <>
               Direct messages, cohort announcements, and instructor support.{" "}
-              <strong className="text-foreground">{conversations.length}</strong> active thread{conversations.length === 1 ? "" : "s"}.
+              <strong className="text-foreground">{conversations.length}</strong> active {pluralize(conversations.length, "thread", undefined, false)}.
             </>
           ) : (
             "Direct messages, cohort announcements, course discussions, and instructor support."

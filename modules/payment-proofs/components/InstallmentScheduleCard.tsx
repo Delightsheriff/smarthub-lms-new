@@ -2,6 +2,7 @@
 
 import { CalendarClock, CheckCircle2, CircleDot, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPrice } from "@/lib/utils";
 import type {
   MyInstallmentPlanUi,
@@ -71,9 +72,7 @@ export function InstallmentScheduleCard({
           </p>
         </div>
         {plan.status === "defaulted" ? (
-          <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2.5 py-1 text-[11px] font-medium text-destructive">
-            Needs review
-          </span>
+          <StatusBadge status="defaulted" label="Needs review" />
         ) : null}
       </div>
 

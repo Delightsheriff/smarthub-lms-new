@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/utils";
 import { useStudentAttendanceHistory } from "../api/attendance.queries";
@@ -29,21 +30,6 @@ export function StudentAttendanceSheet({
   onOpenChange,
 }: StudentAttendanceSheetProps) {
   const { data, isLoading } = useStudentAttendanceHistory(open ? scheduleId : null, open ? studentId : null);
-
-  const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case "present":
-        return <Badge variant="success">Present</Badge>;
-      case "late":
-        return <Badge variant="warning">Late</Badge>;
-      case "absent":
-        return <Badge variant="destructive">Absent</Badge>;
-      case "excused":
-        return <Badge variant="outline">Excused</Badge>;
-      default:
-        return <Badge variant="outline" className="text-muted-foreground">Unmarked</Badge>;
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -86,7 +72,7 @@ export function StudentAttendanceSheet({
                           {formatDateTime(session.startsAt)}
                         </span>
                       </div>
-                      {getStatusBadge(session.status)}
+                      <StatusBadge status={session.status ?? "unmarked"} />
                     </div>
                   ))}
                 </div>

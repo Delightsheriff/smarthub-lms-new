@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
-import { htmlToPlainText } from "@/lib/utils";
+import { htmlToPlainText, pluralize } from "@/lib/utils";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
 import { useMyAssignments } from "../api/assignments.queries";
 import { AssignmentListCard } from "./assignment-list-card";
@@ -122,7 +122,7 @@ function StudentAssignmentsBody() {
             ) : (
               <>
                 <strong className="text-foreground">{pendingAssignments.length}</strong>{" "}
-                {pendingAssignments.length === 1 ? "assignment" : "assignments"} pending
+                {pluralize(pendingAssignments.length, "assignment", undefined, false)} pending
                 {urgentAssignment?.assignment.dueAt && (
                   <>
                     {" "}

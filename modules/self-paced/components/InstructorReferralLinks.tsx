@@ -31,7 +31,7 @@ import { IndexList } from "@/components/ui/index-list";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api";
-import { formatDate } from "@/lib/utils";
+import { formatDate, pluralize } from "@/lib/utils";
 import {
   useIssueInstructorLink,
   useMyInstructorLinks,
@@ -308,7 +308,7 @@ function LinkIndexItem({
             <strong className="tabular-nums text-foreground">
               {link.stats?.paidOrders ?? 0}
             </strong>{" "}
-            paid {link.stats?.paidOrders === 1 ? "sale" : "sales"}
+            paid {pluralize(link.stats?.paidOrders ?? 0, "sale", undefined, false)}
             {gross.length > 0 && (
               <>
                 {" · "}

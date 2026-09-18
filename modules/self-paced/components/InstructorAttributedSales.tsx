@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/utils";
+import { formatDate, pluralize } from "@/lib/utils";
 import {
   ORDERS_PAGE_SIZE,
   useMyAttributedOrders,
@@ -126,7 +126,7 @@ export function InstructorAttributedSales() {
         page={page}
         totalPages={totalPages}
         onPage={setPage}
-        label={`${total} ${total === 1 ? "sale" : "sales"}`}
+        label={pluralize(total, "sale")}
       />
     </div>
   );

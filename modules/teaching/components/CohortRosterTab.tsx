@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
+import { pluralize } from "@/lib/utils";
 import { useCohortRoster } from "../api/teaching.queries";
 import { StudentAttendanceSheet } from "./StudentAttendanceSheet";
 import type { CohortRosterRow } from "../types";
@@ -42,7 +43,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
               subtitle={row.email}
               status={
                 <span className="text-[10px] font-mono">
-                  {row.submissionCount} {row.submissionCount === 1 ? "sub" : "subs"}
+                  {pluralize(row.submissionCount, "sub")}
                 </span>
               }
               actions={

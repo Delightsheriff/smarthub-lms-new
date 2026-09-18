@@ -3,7 +3,7 @@ import { Receipt } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, pluralize } from "@/lib/utils";
 import { useBillingBreakdown } from "../api/billing.queries";
 import { BillingSummaryCard } from "./BillingSummaryCard";
 import { RegistrationBillingCard } from "./RegistrationBillingCard";
@@ -46,7 +46,7 @@ export function BillingPageContent() {
             ) : (
               <>
                 <strong className="text-foreground">{formatPrice(data.overall.totalDue)}</strong> outstanding across{" "}
-                <strong className="text-foreground">{data.registrations.length}</strong> {data.registrations.length === 1 ? "course" : "courses"}
+                <strong className="text-foreground">{data.registrations.length}</strong> {pluralize(data.registrations.length, "course", undefined, false)}
                 {" · "}
                 <strong className="text-foreground">{formatPrice(data.overall.totalPaid)}</strong> paid to date.
               </>

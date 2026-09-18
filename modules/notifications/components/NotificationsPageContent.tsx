@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, pluralize } from "@/lib/utils";
 import { notificationTypeStyle } from "../lib/notification-type";
 import {
   useNotifications,
@@ -43,7 +43,7 @@ export function NotificationsPageContent() {
         divider
         description={
           unreadCount > 0
-            ? `You have ${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}. Stay updated on grades, materials, and cohort activity.`
+            ? `You have ${pluralize(unreadCount, "unread notification")}. Stay updated on grades, materials, and cohort activity.`
             : "All caught up! Grade alerts, material announcements, and cohort updates appear here."
         }
         actions={<RefreshButton loading={isFetching} onClick={refetch} />}

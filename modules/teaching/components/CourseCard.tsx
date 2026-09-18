@@ -4,6 +4,7 @@ import React from "react";
 import { BookOpen } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { pluralize } from "@/lib/utils";
 import { CohortCard } from "./CohortCard";
 import type { CourseGroup } from "../lib/group-cohorts";
 
@@ -24,7 +25,7 @@ export function CourseCard({ group }: CourseCardProps) {
           </CardTitle>
         </div>
         <Badge variant="outline" className="text-xs">
-          {group.cohorts.length} {group.cohorts.length === 1 ? "Cohort" : "Cohorts"}
+          {pluralize(group.cohorts.length, "Cohort")}
         </Badge>
       </CardHeader>
 

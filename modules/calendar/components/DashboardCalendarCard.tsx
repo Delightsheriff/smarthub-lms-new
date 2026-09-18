@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, pluralize } from "@/lib/utils";
 import { useStudentCalendar } from "../api/calendar.queries";
 import { MonthGrid } from "./MonthGrid";
 import { isSameDay } from "./grid-utils";
@@ -79,7 +79,7 @@ export function DashboardCalendarCard() {
                 day: "numeric",
               })}
             </span>
-            <span>{dayEvents.length} Event{dayEvents.length === 1 ? "" : "s"}</span>
+            <span>{pluralize(dayEvents.length, "Event")}</span>
           </div>
 
           <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-none">

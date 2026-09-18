@@ -20,6 +20,7 @@ import { IndexList } from "@/components/ui/index-list";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
 import { useMyMaterials, useTrackMaterialDownload } from "../api/content.queries";
 import { downloadFile } from "@/lib/cloudinary-download";
+import { pluralize } from "@/lib/utils";
 import type { Material, MaterialWithContext } from "../types";
 
 const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
@@ -96,17 +97,17 @@ export function MaterialsPageContent() {
             ) : (
               <>
                 <strong className="text-foreground">{rows.length}</strong> resources across{" "}
-                <strong className="text-foreground">{courseCount}</strong> {courseCount === 1 ? "course" : "courses"}
+                <strong className="text-foreground">{courseCount}</strong> {pluralize(courseCount, "course", undefined, false)}
                 {totalFiles > 0 && (
                   <>
                     {" "}
-                    · <strong className="text-foreground">{totalFiles}</strong> {totalFiles === 1 ? "file" : "files"}
+                    · <strong className="text-foreground">{totalFiles}</strong> {pluralize(totalFiles, "file", undefined, false)}
                   </>
                 )}
                 {totalGuides > 0 && (
                   <>
                     {" "}
-                    · <strong className="text-foreground">{totalGuides}</strong> {totalGuides === 1 ? "guide" : "guides"}
+                    · <strong className="text-foreground">{totalGuides}</strong> {pluralize(totalGuides, "guide", undefined, false)}
                   </>
                 )}
               </>
@@ -167,7 +168,7 @@ export function MaterialsPageContent() {
                 </Link>
               </div>
               <span className="font-mono text-xs text-muted-foreground">
-                {g.items.length} {g.items.length === 1 ? "resource" : "resources"}
+                {pluralize(g.items.length, "resource")}
               </span>
             </div>
 

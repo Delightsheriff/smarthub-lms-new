@@ -14,6 +14,7 @@ import { useCourses } from "../api/courses.queries";
 import { useTeachingCohorts } from "@/modules/teaching/api/teaching.queries";
 import { CourseCard as TeachingCourseCard } from "@/modules/teaching/components/CourseCard";
 import { groupCohortsByCourse, isCohortEnded } from "@/modules/teaching/lib/group-cohorts";
+import { pluralize } from "@/lib/utils";
 import type { Course } from "../types";
 
 const TEACH_MODE_FILTERS = [
@@ -83,9 +84,9 @@ function InstructorCoursesBody() {
             ) : (
               <>
                 <strong className="text-foreground">{activeCohorts}</strong> active{" "}
-                {activeCohorts === 1 ? "cohort" : "cohorts"} across{" "}
+                {pluralize(activeCohorts, "cohort", undefined, false)} across{" "}
                 <strong className="text-foreground">{grouped.active.length}</strong>{" "}
-                {grouped.active.length === 1 ? "course" : "courses"}.
+                {pluralize(grouped.active.length, "course", undefined, false)}.
               </>
             )
           ) : undefined
@@ -231,7 +232,7 @@ function StudentCoursesBody() {
               "You're not enrolled in any courses yet. Check back once your enrollment is confirmed."
             ) : (
               <>
-                <strong className="text-foreground">{activeCount}</strong> active {activeCount === 1 ? "course" : "courses"} in progress
+                <strong className="text-foreground">{activeCount}</strong> active {pluralize(activeCount, "course", undefined, false)} in progress
                 {completedCount > 0 && (
                   <>
                     {" "}
