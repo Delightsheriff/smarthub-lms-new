@@ -72,12 +72,10 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Hero — editorial treatment (plans/015-editorial-design-sync.md):
-          eyebrow + serif display title in place of the old boxed
-          gradient card + font-semibold heading. */}
+      {/* Hero Header */}
       <div className="canvas-warm overflow-hidden rounded-2xl border border-border">
         {course.imageUrl && (
-          <div className="relative aspect-[3/1] w-full bg-muted">
+          <div className="relative aspect-[3/1] w-full bg-muted border-b border-border/60">
             <Image
               src={course.imageUrl}
               alt={course.name}
@@ -87,7 +85,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
               priority
             />
             <div
-              className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent"
+              className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent"
               aria-hidden
             />
           </div>
@@ -97,178 +95,218 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
             <span className="h-px w-8 bg-accent" aria-hidden />
             {course.category}
           </p>
-          <h1 className="mt-3 font-display text-3xl leading-[1.05] text-balance md:text-4xl">
+          <h1 className="mt-3 font-display text-3xl leading-[1.05] text-balance md:text-4xl text-foreground">
             {course.name}
           </h1>
           <CollapsibleRichText
             html={course.description}
-            className="mt-3 max-w-2xl text-muted-foreground"
+            className="mt-3 max-w-3xl text-muted-foreground"
           />
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground mt-5">
-            <span className="inline-flex items-center gap-1.5">
-              <GraduationCap className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <GraduationCap className="h-3.5 w-3.5 text-primary" />
               {course.instructor.name}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <Clock className="h-3.5 w-3.5 text-accent" />
               {course.durationLabel}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
               {new Date(course.startDate) <= new Date() ? "Started" : "Starts"}{" "}
               {formatDate(course.startDate)}
             </span>
           </div>
+        </div>
+      </div>
 
-          {pickUp && (
-            <div className="mt-6">
+      {/* Reading + Rail Layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] items-start">
+        {/* Left Column (~2/3): Syllabus, Modules, and About narrative */}
+        <div className="space-y-6 min-w-0">
+          {/* Modules Accordion */}
+          <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-xs">
+            <div className="px-5 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-xl font-semibold text-foreground">Curriculum & Modules</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {modules.length} modules · {totalRecordings} lessons · {totalAssignments} assignments
+                </p>
+              </div>
               <Button
-                size="lg"
-                className="w-full sm:w-auto"
-                render={
-                  <Link
-                    href={`/courses/${course.slug}/modules/${pickUp.slug}`}
-                  />
-                }
+                variant="outline"
+                size="sm"
+                className="gap-1.5 rounded-xl"
+                disabled={downloadCurriculum.isPending}
+                onClick={() => downloadCurriculum.mutate(slug)}
               >
-                Pick up where you left off
-                <ArrowRight className="h-4 w-4" />
+                {downloadCurriculum.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+                {downloadCurriculum.isPending
+                  ? "Preparing…"
+                  : "Curriculum PDF"}
               </Button>
             </div>
-          )}
+            <Accordion>
+              {modules.map((m) => (
+                <CourseModuleRow key={m.id} courseSlug={course.slug} module={m} />
+              ))}
+            </Accordion>
+          </Card>
+
+          {/* About Section */}
+          <Card className="p-5 md:p-6 space-y-3 rounded-2xl border-border bg-card shadow-xs">
+            <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+              <span className="h-px w-6 bg-accent" aria-hidden />
+              Overview
+            </p>
+            <h2 className="font-display text-xl font-semibold text-foreground">About this programme</h2>
+            <CollapsibleRichText
+              html={course.description}
+              className="text-muted-foreground leading-relaxed text-sm"
+            />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              You&apos;ll work through {modules.length} modules, with live sessions, recordings,
+              supplementary materials, and graded assignments. Your progress is saved automatically
+              across modules and devices.
+            </p>
+          </Card>
         </div>
-      </div>
 
-      {/* Stats — hairline-divided strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 divide-y sm:divide-y-0 divide-border rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        <Stat label="Progress" value={`${course.progress}%`} />
-        <Stat label="Modules" value={modules.length} />
-        <Stat label="Recordings" value={totalRecordings} />
-        <Stat label="Materials" value={totalMaterials} />
-        <Stat label="Assignments" value={totalAssignments} />
-      </div>
+        {/* Right Column (~340px): Sticky Operational Rail */}
+        <aside className="space-y-5 lg:sticky lg:top-20">
+          {/* Primary Action Card: Pick up / Resume */}
+          <div className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-xs">
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
+              Your Course Progress
+            </span>
+            <div className="mt-2 flex items-baseline justify-between">
+              <span className="font-display text-3xl font-bold tabular-nums text-foreground">
+                {course.progress}%
+              </span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {course.progress === 100 ? "Completed" : "In Progress"}
+              </span>
+            </div>
+            <div className="mt-2 relative h-1.5 w-full overflow-hidden rounded-full bg-border">
+              <span
+                className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-300"
+                style={{ width: `${course.progress}%` }}
+              />
+            </div>
 
-      {/* About */}
-      <Card className="p-5 md:p-6 space-y-3 rounded-2xl border-border bg-card shadow-sm">
-        <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-          <span className="h-px w-6 bg-accent" aria-hidden />
-          About
-        </p>
-        <h2 className="font-display text-xl font-semibold">About this programme</h2>
-        <CollapsibleRichText
-          html={course.description}
-          className="text-muted-foreground"
-        />
-        <p className="text-sm text-muted-foreground">
-          You&apos;ll work through {modules.length} modules, with live
-          sessions, recordings, supplementary materials, and graded
-          assignments. Use the outline on the left to jump between any
-          module or item — your progress is saved automatically.
-        </p>
-      </Card>
-
-      {/* Instructors */}
-      {course.instructors && course.instructors.length > 0 && (
-        <Card className="p-5 md:p-6 space-y-4 rounded-2xl border-border bg-card shadow-sm">
-          <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-            <span className="h-px w-6 bg-accent" aria-hidden />
-            Meet the team
-          </p>
-          <h2 className="font-display text-xl font-semibold">
-            Your {course.instructors.length > 1 ? "instructors" : "instructor"}
-          </h2>
-          <ul className="space-y-4">
-            {course.instructors.map((ins) => (
-              <li key={ins.id} className="flex gap-3">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
-                  {ins.imageUrl ? (
-                    <Image
-                      src={ins.imageUrl}
-                      alt={ins.name}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                      {ins.name
-                        .split(" ")
-                        .map((p) => p[0])
-                        .slice(0, 2)
-                        .join("")
-                        .toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">{ins.name}</p>
-                  <p className="text-xs text-muted-foreground">{ins.title}</p>
-                  {ins.bio && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {ins.bio}
-                    </p>
-                  )}
-                  {ins.whatsapp && (
-                    <a
-                      href={`https://wa.me/${ins.whatsapp
-                        .replace(/\D/g, "")
-                        .replace(/^0/, "234")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/15"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      Message on WhatsApp
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {/* Modules at a glance */}
-      <Card className="p-0 overflow-hidden rounded-2xl border-border bg-card shadow-sm">
-        <div className="px-5 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl font-semibold">Course modules</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            disabled={downloadCurriculum.isPending}
-            onClick={() => downloadCurriculum.mutate(slug)}
-          >
-            {downloadCurriculum.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Download className="h-3.5 w-3.5" />
+            {pickUp && (
+              <div className="mt-5 space-y-2 pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground truncate">
+                  Next up: <span className="font-medium text-foreground">{pickUp.title}</span>
+                </p>
+                <Button
+                  size="default"
+                  className="w-full justify-center rounded-xl bg-primary text-primary-foreground font-semibold shadow-xs"
+                  render={
+                    <Link href={`/courses/${course.slug}/modules/${pickUp.slug}`} />
+                  }
+                >
+                  Pick up where you left off
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             )}
-            {downloadCurriculum.isPending
-              ? "Preparing…"
-              : "Download curriculum"}
-          </Button>
-        </div>
-        <Accordion>
-          {modules.map((m) => (
-            <CourseModuleRow key={m.id} courseSlug={course.slug} module={m} />
-          ))}
-        </Accordion>
-      </Card>
-    </div>
-  );
-}
+          </div>
 
-function Stat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="p-3.5 sm:p-4">
-      <p className="text-[11px] font-mono uppercase tracking-[0.1em] text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1 font-display text-2xl font-bold tabular-nums leading-tight text-foreground md:text-3xl">
-        {value}
-      </p>
+          {/* Metrics Bento Grid */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="rounded-xl border border-border bg-card p-3.5 shadow-xs">
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Modules
+              </p>
+              <p className="mt-1 font-display text-xl font-bold tabular-nums text-foreground">
+                {modules.length}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-3.5 shadow-xs">
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Lessons
+              </p>
+              <p className="mt-1 font-display text-xl font-bold tabular-nums text-foreground">
+                {totalRecordings}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-3.5 shadow-xs">
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Readings
+              </p>
+              <p className="mt-1 font-display text-xl font-bold tabular-nums text-foreground">
+                {totalMaterials}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-3.5 shadow-xs">
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Tasks
+              </p>
+              <p className="mt-1 font-display text-xl font-bold tabular-nums text-foreground">
+                {totalAssignments}
+              </p>
+            </div>
+          </div>
+
+          {/* Instructors Panel */}
+          {course.instructors && course.instructors.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3.5">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
+                {course.instructors.length > 1 ? "Instructors" : "Lead Instructor"}
+              </span>
+              <div className="space-y-3">
+                {course.instructors.map((ins) => (
+                  <div key={ins.id} className="flex items-start gap-3">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted border border-border/80">
+                      {ins.imageUrl ? (
+                        <Image
+                          src={ins.imageUrl}
+                          alt={ins.name}
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted-foreground">
+                          {ins.name
+                            .split(" ")
+                            .map((p) => p[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground truncate">{ins.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{ins.title}</p>
+                      {ins.whatsapp && (
+                        <a
+                          href={`https://wa.me/${ins.whatsapp
+                            .replace(/\D/g, "")
+                            .replace(/^0/, "234")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/15 transition-colors"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Message
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
