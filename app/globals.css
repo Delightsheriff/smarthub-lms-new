@@ -92,9 +92,9 @@
     --accent-foreground: oklch(0.141 0.005 285.823);
 
     --destructive: oklch(0.577 0.245 27.325);
-    --warning: oklch(0.70 0.17 70.08);
+    --warning: oklch(0.53 0.17 70.08);
     --warning-foreground: oklch(0.98 0.016 73.684);
-    --success: oklch(0.696 0.17 162.48);
+    --success: oklch(0.50 0.17 162.48);
     --success-foreground: oklch(0.984 0.014 180.72);
 
     /* Warm hairline borders */
