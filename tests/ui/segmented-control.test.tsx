@@ -67,4 +67,47 @@ describe("SegmentedControl", () => {
     expect(labelSpan?.className).toContain("hidden sm:inline");
     expect(screen.getByRole("tab", { name: /student/i })).toBeDefined();
   });
+
+  it("supports roving tabindex (0 for active, -1 for inactive)", () => {
+    render(<ControlledSegmentedControl initial="student" />);
+    const studentTab = screen.getByRole("tab", { name: /student/i });
+    const instructorTab = screen.getByRole("tab", { name: /instructor/i });
+
+    expect(studentTab.getAttribute("tabindex")).toBe("0");
+    expect(instructorTab.getAttribute("tabindex")).toBe("-1");
+  });
+
+  it("supports ArrowRight/ArrowLeft keyboard navigation between tabs", () => {
+    const handleChange = vi.fn();
+    render(<ControlledSegmentedControl initial="student" onChange={handleChange} />);
+
+    const studentTab = screen.getByRole("tab", { name: /student/i });
+    studentTab.focus();
+
+    fireEvent.keyDown(studentTab, { key: "ArrowRight" });
+    expect(handleChange).toHaveBeenCalledWith("instructor");
+
+    const instructorTab = screen.getByRole("tab", { name: /instructor/i });
+    expect(instructorTab.getAttribute("aria-selected")).toBe("true");
+    expect(instructorTab.getAttribute("tabindex")).toBe("0");
+
+    fireEvent.keyDown(instructorTab, { key: "ArrowLeft" });
+    expect(handleChange).toHaveBeenCalledWith("student");
+    expect(studentTab.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("supports Home and End keys to jump to first and last tabs", () => {
+    const handleChange = vi.fn();
+    render(<ControlledSegmentedControl initial="student" onChange={handleChange} />);
+
+    const studentTab = screen.getByRole("tab", { name: /student/i });
+    studentTab.focus();
+
+    fireEvent.keyDown(studentTab, { key: "End" });
+    expect(handleChange).toHaveBeenCalledWith("instructor");
+
+    const instructorTab = screen.getByRole("tab", { name: /instructor/i });
+    fireEvent.keyDown(instructorTab, { key: "Home" });
+    expect(handleChange).toHaveBeenCalledWith("student");
+  });
 });

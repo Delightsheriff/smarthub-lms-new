@@ -47,9 +47,15 @@ export function IndexRow({
 }) {
   const content = (
     <>
-      <span className="font-mono text-xs tabular-nums text-muted-foreground">
+      {/* Visual editorial index (padded "01") is hidden from screen readers to prevent
+          awkward "zero one" announcements. A semantic sr-only label conveys the clean index number. */}
+      <span
+        aria-hidden="true"
+        className="font-mono text-xs tabular-nums text-muted-foreground select-none"
+      >
         {String(index).padStart(2, "0")}
       </span>
+      <span className="sr-only">{index}. </span>
 
       <div className="min-w-0">
         <div className="truncate font-display text-base font-semibold text-foreground">
@@ -87,7 +93,7 @@ export function IndexRow({
   );
 
   const className =
-    "grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
+    "grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-4 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:grid-cols-[34px_minmax(0,1fr)_140px_90px_auto]";
 
   if (href) {
     return (

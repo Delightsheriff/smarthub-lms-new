@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, type KeyboardEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,27 @@ export function SegmentedControl<T extends string>({
   hideLabelsBelowSm?: boolean;
 }) {
   const reduce = useReducedMotion();
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let targetIndex: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      targetIndex = (index + 1) % items.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      targetIndex = (index - 1 + items.length) % items.length;
+    } else if (e.key === "Home") {
+      targetIndex = 0;
+    } else if (e.key === "End") {
+      targetIndex = items.length - 1;
+    }
+
+    if (targetIndex !== null) {
+      e.preventDefault();
+      const targetItem = items[targetIndex];
+      buttonRefs.current[targetIndex]?.focus();
+      onChange(targetItem.value);
+    }
+  };
 
   return (
     <div
@@ -50,18 +72,23 @@ export function SegmentedControl<T extends string>({
         className,
       )}
     >
-      {items.map((item) => {
+      {items.map((item, idx) => {
         const Icon = item.icon;
         const active = value === item.value;
         return (
           <button
             key={item.value}
+            ref={(el) => {
+              buttonRefs.current[idx] = el;
+            }}
             type="button"
             role="tab"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(item.value)}
+            onKeyDown={(e) => handleKeyDown(e, idx)}
             className={cn(
-              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.04em] transition-colors",
+              "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.04em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               active ? "text-background" : "text-muted-foreground hover:text-foreground",
             )}
           >

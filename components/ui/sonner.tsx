@@ -43,11 +43,11 @@ export function Toaster({ ...props }: ToasterProps) {
           title: "text-sm font-medium",
           description: "text-xs text-muted-foreground mt-0.5",
           actionButton:
-            "!bg-primary !text-primary-foreground !rounded-lg !text-xs !font-medium",
+            "!bg-primary !text-primary-foreground !rounded-lg !text-xs !font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           cancelButton:
-            "!bg-muted !text-muted-foreground !rounded-lg !text-xs !font-medium",
+            "!bg-muted !text-muted-foreground !rounded-lg !text-xs !font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           closeButton:
-            "!bg-card !border-border !text-muted-foreground hover:!text-foreground",
+            "!bg-card !border-border !text-muted-foreground hover:!text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           icon:
             "group-data-[type=success]:text-success group-data-[type=error]:text-destructive " +
             "group-data-[type=warning]:text-warning group-data-[type=info]:text-accent",
