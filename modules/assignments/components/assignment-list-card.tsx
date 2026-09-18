@@ -109,7 +109,7 @@ export function AssignmentListCard({
           <CountdownToDeadline dueAt={assignment.dueAt} className="text-[11px]" />
 
           <Button
-            render={<Link href={`/assignments/${assignment.id}`} />}
+            nativeButton={false} render={<Link href={`/assignments/${assignment.id}`} />}
             size="sm"
             variant="ghost"
             className="h-8 rounded-xl px-2.5 text-xs group-hover:translate-x-0.5 transition-transform text-foreground/80 hover:text-foreground shrink-0 ml-auto sm:ml-0"

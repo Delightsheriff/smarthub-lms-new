@@ -59,7 +59,7 @@ export function ForgotPasswordForm() {
           </p>
           <div className="pt-2">
             <Button
-              render={<Link href="/login" />}
+              nativeButton={false} render={<Link href="/login" />}
               variant="outline"
               size="sm"
               className="rounded-xl text-xs"

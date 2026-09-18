@@ -57,7 +57,7 @@ export function CohortSessionsTab({ scheduleId }: CohortSessionsTabProps) {
               }
               actions={
                 <Button
-                  render={<Link href={`/teaching/sessions/${event.sourceId || "cs_1"}`} />}
+                  nativeButton={false} render={<Link href={`/teaching/sessions/${event.sourceId || "cs_1"}`} />}
                   size="sm"
                   className="rounded-xl text-xs h-7"
                 >

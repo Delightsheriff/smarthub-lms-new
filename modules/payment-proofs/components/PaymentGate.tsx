@@ -77,7 +77,7 @@ function PaywallScreen({ plan }: { plan: MyInstallmentPlanUi }) {
         <Button
           size="lg"
           className="mt-6 w-full"
-          render={<Link href="/payments" />}
+          nativeButton={false} render={<Link href="/payments" />}
         >
           Make a payment
         </Button>

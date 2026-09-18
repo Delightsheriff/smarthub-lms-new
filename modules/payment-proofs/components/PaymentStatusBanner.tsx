@@ -50,7 +50,7 @@ export function PaymentStatusBanner() {
         <Button
           size="sm"
           className="shrink-0"
-          render={<Link href="/payments" />}
+          nativeButton={false} render={<Link href="/payments" />}
         >
           Make a payment
         </Button>

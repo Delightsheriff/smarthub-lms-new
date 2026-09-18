@@ -129,7 +129,7 @@ export function InternshipWorkspacePageContent() {
         title="No internship placement yet"
         description="Once you're accepted into the internship program, your workspace shows up here with your tasks, milestones and mentor."
         action={
-          <Button render={<Link href="/dashboard" />}>
+          <Button nativeButton={false} render={<Link href="/dashboard" />}>
             Back to dashboard
           </Button>
         }

@@ -63,7 +63,7 @@ export function CohortCard({ cohort }: CohortCardProps) {
 
       <CardFooter className="px-5 pb-5 pt-0">
         <Button
-          render={<Link href={`/teach/cohorts/${cohort.id}`} />}
+          nativeButton={false} render={<Link href={`/teach/cohorts/${cohort.id}`} />}
           className="w-full rounded-xl"
         >
           Open Workspace <ArrowRight className="ml-2 h-4 w-4" />

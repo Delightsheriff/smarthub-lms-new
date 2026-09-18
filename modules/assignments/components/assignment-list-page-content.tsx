@@ -183,7 +183,7 @@ function StudentAssignmentsBody() {
                 </Badge>
               </div>
               <Button
-                render={<Link href={`/assignments/${urgentAssignment.assignment.id}`} />}
+                nativeButton={false} render={<Link href={`/assignments/${urgentAssignment.assignment.id}`} />}
                 className="rounded-xl bg-primary text-primary-foreground font-semibold"
               >
                 Submit coursework →

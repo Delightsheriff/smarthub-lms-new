@@ -59,7 +59,7 @@ export function AssignmentPageContent({
           </AlertDescription>
         </Alert>
         <Button
-          render={<Link href="/assignments" />}
+          nativeButton={false} render={<Link href="/assignments" />}
           variant="outline"
           className="rounded-xl"
         >

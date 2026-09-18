@@ -59,7 +59,7 @@ export function InternshipPaymentPageContent() {
         title="No internship payment"
         description="Your internship is fully covered or you have no active placement — there's nothing to pay for right now."
         action={
-          <Button variant="outline" render={<Link href="/internships" />}>
+          <Button variant="outline" nativeButton={false} render={<Link href="/internships" />}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             Back to internship
           </Button>
@@ -87,7 +87,7 @@ export function InternshipPaymentPageContent() {
             : "Complete your transfer and upload proof to keep your placement active."
         }
         actions={
-          <Button variant="outline" size="sm" render={<Link href="/internships" />} className="rounded-xl">
+          <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/internships" />} className="rounded-xl">
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             Back to internship
           </Button>

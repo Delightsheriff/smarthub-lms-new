@@ -49,7 +49,7 @@ export function DashboardCalendarCard() {
           <CardTitle className="font-display text-base font-semibold">Calendar & Schedule</CardTitle>
         </div>
         <Button
-          render={<Link href="/calendar" />}
+          nativeButton={false} render={<Link href="/calendar" />}
           size="sm"
           variant="ghost"
           className="rounded-xl text-xs"

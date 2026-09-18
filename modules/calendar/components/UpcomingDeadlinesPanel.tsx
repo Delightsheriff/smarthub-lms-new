@@ -25,7 +25,7 @@ export function UpcomingDeadlinesPanel({ limit = 3 }: UpcomingDeadlinesPanelProp
           <CardTitle className="font-display text-base font-semibold">Upcoming Deadlines</CardTitle>
         </div>
         <Button
-          render={<Link href="/assignments" />}
+          nativeButton={false} render={<Link href="/assignments" />}
           size="sm"
           variant="ghost"
           className="rounded-xl text-xs"

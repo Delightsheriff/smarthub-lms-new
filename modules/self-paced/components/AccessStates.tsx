@@ -72,7 +72,7 @@ export function SelfPacedErrorState({
           <>
             <Button
               size="sm"
-              render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
+              nativeButton={false} render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
             />
             {denial === "none" ? (
               <Button
@@ -88,7 +88,7 @@ export function SelfPacedErrorState({
             <Button
               size="sm"
               variant="outline"
-              render={<Link href="/inbox">Message us</Link>}
+              nativeButton={false} render={<Link href="/inbox">Message us</Link>}
             />
           </>
         }
@@ -105,7 +105,7 @@ export function SelfPacedErrorState({
         actions={
           <Button
             size="sm"
-            render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
+            nativeButton={false} render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
           />
         }
       />
@@ -125,7 +125,7 @@ export function SelfPacedErrorState({
         ) : (
           <Button
             size="sm"
-            render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
+            nativeButton={false} render={<Link href={SELF_PACED_ROUTES.LIST}>My self-paced courses</Link>}
           />
         )
       }

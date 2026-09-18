@@ -393,7 +393,7 @@ export function LessonPlayerPageContent({
           <DialogFooter>
             <Button
               variant="outline"
-              render={<Link href={courseHref}>Back to course</Link>}
+              nativeButton={false} render={<Link href={courseHref}>Back to course</Link>}
             />
           </DialogFooter>
         </DialogContent>

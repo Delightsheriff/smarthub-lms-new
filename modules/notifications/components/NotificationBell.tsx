@@ -145,7 +145,7 @@ export function NotificationBell() {
         {/* Footer */}
         <div className="p-2 border-t bg-muted/20 text-center">
           <Button
-            render={<Link href="/notifications" onClick={() => setOpen(false)} />}
+            nativeButton={false} render={<Link href="/notifications" onClick={() => setOpen(false)} />}
             variant="ghost"
             size="xs"
             className="w-full text-xs text-primary font-medium rounded-xl"

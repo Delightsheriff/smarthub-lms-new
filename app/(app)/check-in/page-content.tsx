@@ -205,7 +205,7 @@ function Result({
       </div>
       {showHomeCta && (
         <div className="pt-2">
-          <Button render={<Link href="/" />} className="rounded-xl">Go now</Button>
+          <Button nativeButton={false} render={<Link href="/" />} className="rounded-xl">Go now</Button>
           <p className="text-[11px] text-muted-foreground mt-2">
             We&apos;ll take you home automatically.
           </p>

@@ -351,7 +351,7 @@ function PayoutsTab({
             <Button
               variant="default"
               size="sm"
-              render={<Link href="/profile?tab=banking" />}
+              nativeButton={false} render={<Link href="/profile?tab=banking" />}
             >
               Add bank details
             </Button>

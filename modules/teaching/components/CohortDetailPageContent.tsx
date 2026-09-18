@@ -44,7 +44,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
       {/* Back Button */}
       <div>
         <Button
-          render={<Link href="/teach" />}
+          nativeButton={false} render={<Link href="/teach" />}
           variant="ghost"
           size="sm"
           className="rounded-xl text-muted-foreground hover:text-foreground"

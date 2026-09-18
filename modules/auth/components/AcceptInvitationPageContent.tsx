@@ -71,7 +71,7 @@ export function AcceptInvitationPageContent() {
             This invitation link is invalid or has expired. Please request a new invitation.
           </p>
           <div className="pt-2">
-            <Button render={<Link href="/login" />} variant="outline" size="sm" className="rounded-xl">
+            <Button nativeButton={false} render={<Link href="/login" />} variant="outline" size="sm" className="rounded-xl">
               Return to Sign In
             </Button>
           </div>

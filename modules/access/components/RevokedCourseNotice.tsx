@@ -93,7 +93,7 @@ export function RevokedCourseNotice() {
                   {owes && (
                     <Button
                       size="sm"
-                      render={<Link href="/billing" />}
+                      nativeButton={false} render={<Link href="/billing" />}
                     >
                       View billing
                     </Button>
@@ -101,7 +101,7 @@ export function RevokedCourseNotice() {
                   <Button
                     size="sm"
                     variant="outline"
-                    render={<Link href="/help" />}
+                    nativeButton={false} render={<Link href="/help" />}
                   >
                     Contact support
                   </Button>
