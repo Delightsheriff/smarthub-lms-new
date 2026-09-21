@@ -347,6 +347,17 @@
       radial-gradient(55% 35% at 92% 18%, oklch(0.754 0.162 67.889 / 0.035), transparent 75%);
   }
 
+  .glass-scroll-edge::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1.5rem;
+    height: 1.5rem;
+    pointer-events: none;
+    background: linear-gradient(to bottom, var(--glass-border), transparent);
+    opacity: 0.7;
+  }
+
   .dark .app-shell-backdrop {
     background-image:
       radial-gradient(70% 40% at 8% 0%, oklch(0.263 0.108 342.162 / 0.07), transparent 72%),

@@ -25,7 +25,7 @@ export function TopBar() {
   const { canSwitch } = useEffectiveMode();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header className="glass-scroll-edge glass-regular sticky top-0 z-30">
       <div
         className={cn(
           "flex h-14 w-full items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-8",
@@ -74,4 +74,3 @@ export function TopBar() {
     </header>
   );
 }
-
