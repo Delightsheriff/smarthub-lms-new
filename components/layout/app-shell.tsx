@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     >
       <ProfilePhotoGate />
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="app-shell-backdrop">
         <TopBar />
         {/* Late-payment nudge while access is still open. Silent
             otherwise, and replaced by the paywall once access is
