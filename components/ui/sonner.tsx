@@ -29,15 +29,15 @@ export function Toaster({ ...props }: ToasterProps) {
       closeButton
       style={
         {
-           "--normal-bg": "var(--glass-bg-regular)",
-           "--normal-text": "var(--foreground)",
-           "--normal-border": "var(--glass-border)",
+          "--normal-bg": "var(--card)",
+          "--normal-text": "var(--card-foreground)",
+          "--normal-border": "var(--border)",
         } as CSSProperties
       }
       toastOptions={{
         classNames: {
           toast:
-            "glass-regular group toast !rounded-2xl !border-l-[3px] !border-l-muted-foreground/40 !pl-4 " +
+            "group toast !rounded-2xl !border-l-[3px] !border-l-muted-foreground/40 !shadow-lg !pl-4 " +
             "data-[type=success]:!border-l-success data-[type=error]:!border-l-destructive " +
             "data-[type=warning]:!border-l-warning data-[type=info]:!border-l-accent",
           title: "text-sm font-medium",
