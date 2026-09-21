@@ -52,7 +52,7 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+        className="glass-regular fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Primary navigation"
       >
         <ul className="container flex items-stretch justify-around gap-1 py-1.5">
@@ -74,7 +74,7 @@ export function BottomNav() {
                   <span
                     className={cn(
                       "relative flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150",
-                      active && "bg-primary text-primary-foreground shadow-sm"
+                       active && "glass-active-pill bg-primary text-primary-foreground shadow-sm"
                     )}
                   >
                     <Icon className="h-4.5 w-4.5" />
