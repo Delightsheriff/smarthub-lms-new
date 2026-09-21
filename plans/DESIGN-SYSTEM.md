@@ -112,6 +112,23 @@ bordered cards. The top bar's redundant greeting was removed (the
 masthead owns it now) and the sidebar header got a hairline divider to
 match the new rule-based motif.
 
+### Glass / Apple material
+
+The product owner explicitly broadened glass beyond the original floating-only rule.
+Shared cards, buttons, inputs, textareas, ledgers, stat tiles, empty states, page backgrounds,
+links, navigation chrome, dialogs, sheets, anchored menus, toasts, segmented-control tracks,
+and media controls now use the themed material. Sidebar rail and menu links remain opaque by
+explicit exception.
+
+Final shipped tokens (defined in both `:root` and `.dark` in `app/globals.css`):
+
+- Light: thin `oklch(1 0 0 / 0.58)`, regular `oklch(1 0 0 / 0.70)`, thick `oklch(1 0 0 / 0.82)`, border `oklch(0.2 0.04 340 / 0.08)`, highlight `oklch(1 0 0 / 0.85)`, shadow `0 8px 30px oklch(0.2 0.04 340 / 0.10)`.
+- Dark: thin `oklch(0.25 0.006 60 / 0.52)`, regular `oklch(0.25 0.006 60 / 0.60)`, thick `oklch(0.25 0.006 60 / 0.78)`, border `oklch(1 0 0 / 0.10)`, highlight `oklch(1 0 0 / 0.09)`, shadow `0 8px 30px oklch(0 0 0 / 0.35)`.
+
+The glass utilities include blur/saturate, the bright top highlight, elevation, and solid
+fallbacks for unsupported backdrop filters, `prefers-reduced-transparency: reduce`, and
+`prefers-contrast: more`. The app shell uses static, theme-specific brand radial washes.
+
 **Plans 001–024 are done** (see §8 for the verification pass and the
 bugs it found) — every page listed in `plans/000-index.md` got the
 real structural conversion its plan named, not just `PageHeader`
@@ -259,3 +276,4 @@ misremembered.
 | Plan 026 (component test infra) | ✅ Done — `@testing-library/react` + `happy-dom` added, scoped per-file so the existing node-environment pure-logic suite is untouched; `StatusBadge` and `SegmentedControl` both have real, meaningful tests (not vacuous renders). |
 | Plan 027 (accessibility audit) | ✅ Done, with one correction. `SegmentedControl`'s roving-tabindex + arrow-key nav, `IndexRow`'s aria-hidden/sr-only index, and the toast focus-visible rings were all verified correct, including a live end-to-end keyboard test of the real `RoleSwitcher` (not just the unit test). **The color-contrast fix was wrong as originally shipped**: the report claimed light-mode `--warning` reached 5.45:1 against `--card`, but the actual committed value (`oklch(0.70 ...)`) measured 2.76:1 via real rendered pixels — still failing WCAG AA. Re-derived the correct value (`oklch(0.53 ...)` → 5.41:1) and, while re-checking, found light-mode `--success` had never been touched at all and independently failed (2.47:1) — fixed to `oklch(0.50 ...)` → 5.16:1. All 6 tone×theme combinations now verified via canvas-rendered pixels, not manual OKLCH math (which is exactly what produced the wrong number the first time). |
 | Verification pass on 001–024 found and fixed 4 real bugs the completion report missed | ✅ Fixed: (1) a systemic SSR/CSR hydration mismatch on every masthead dateline (`toLocaleDateString(undefined, ...)` resolved a different locale on the Node server vs the browser — hard-coded to `en-GB` across 21 files), (2) `IndexRow`'s mobile grid hard-coded its trailing column to 20px, overflowing the viewport whenever a row passed a real `actions` button (found on Cohort Roster's "Attendance Record"), (3) `CohortModulesTab` left `&nbsp;` and other entities un-decoded in its collapsed description preview, (4) one real `eslint` error (`courses/[slug]/layout.tsx`) contradicting the report's "0 errors" claim. |
+| Glass / Apple material | ✅ Foundation and broadened shared-surface migration shipped. Cards, buttons, form fields, ledgers, stat tiles, empty states, page atmosphere, floating primitives, toasts, tracks, and media controls use themed glass; sidebar rail and menu links remain opaque by explicit product direction. Gesture-driven sheet dismissal has a unit-tested threshold. |
