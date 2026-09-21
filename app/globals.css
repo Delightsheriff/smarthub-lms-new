@@ -362,23 +362,6 @@
     transition: transform var(--duration-fast) var(--ease-out-strong), opacity var(--duration-fast) ease-out;
   }
 
-  .glass-materialize {
-    transition:
-      scale var(--duration-modal) var(--ease-out-strong),
-      opacity var(--duration-modal) var(--ease-out-strong),
-      -webkit-backdrop-filter var(--duration-modal) var(--ease-out-strong),
-      backdrop-filter var(--duration-modal) var(--ease-out-strong);
-  }
-
-  .glass-materialize[data-starting-style],
-  .glass-materialize[data-ending-style],
-  .glass-materialize[data-closed] {
-    opacity: 0;
-    scale: 0.96;
-    -webkit-backdrop-filter: blur(0) saturate(100%);
-    backdrop-filter: blur(0) saturate(100%);
-  }
-
   @starting-style {
     .glass-active-pill {
       opacity: 0;
