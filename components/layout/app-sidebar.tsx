@@ -66,7 +66,7 @@ export function AppSidebar() {
     // instantly — the rail should feel expensive to use, not laggy
     // per-item, without risking accidental activation on the first hover.
     <TooltipProvider delay={500}>
-      <Sidebar collapsible="icon" side="left" className="glass-thick bg-transparent">
+      <Sidebar collapsible="icon" side="left">
         <SidebarHeader className="h-14 border-b border-sidebar-border/60 px-4 flex items-center justify-center group-data-[collapsible=icon]:px-1">
           <Link href="/dashboard" aria-label="SmartHub" className="flex items-center">
             <Logo size="sm" />
