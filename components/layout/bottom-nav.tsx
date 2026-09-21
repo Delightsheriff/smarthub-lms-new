@@ -124,6 +124,7 @@ export function BottomNav() {
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent
           side="bottom"
+          onDismiss={() => setMoreOpen(false)}
           showCloseButton={false}
           className="max-h-[78vh] justify-start rounded-t-2xl px-0 pb-[env(safe-area-inset-bottom)]"
         >
