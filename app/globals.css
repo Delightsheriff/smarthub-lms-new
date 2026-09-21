@@ -358,17 +358,6 @@
     opacity: 0.7;
   }
 
-  .glass-active-pill {
-    transition: transform var(--duration-fast) var(--ease-out-strong), opacity var(--duration-fast) ease-out;
-  }
-
-  @starting-style {
-    .glass-active-pill {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-  }
-
   .dark .app-shell-backdrop {
     background-image:
       radial-gradient(70% 40% at 8% 0%, oklch(0.263 0.108 342.162 / 0.07), transparent 72%),
