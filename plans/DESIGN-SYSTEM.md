@@ -114,11 +114,11 @@ match the new rule-based motif.
 
 ### Glass / Apple material
 
-The product owner explicitly broadened glass beyond the original floating-only rule.
-Shared cards, buttons, inputs, textareas, ledgers, stat tiles, empty states, page backgrounds,
-links, navigation chrome, dialogs, sheets, anchored menus, toasts, segmented-control tracks,
-and media controls now use the themed material. Sidebar rail and menu links remain opaque by
-explicit exception.
+Material is tiered rather than applied literally everywhere. Floating layers use translucent
+blurred glass. Shared cards, buttons, inputs, textareas, ledgers, stat tiles, and empty states
+use high-alpha `glass-content` with the same highlight, border, shadow, and theme behavior but
+no backdrop blur. Page backgrounds use static tonal washes. Sidebar rail/menu links and
+dropdown/select menus remain opaque because translucency made dense navigation muddy.
 
 Final shipped tokens (defined in both `:root` and `.dark` in `app/globals.css`):
 
@@ -276,4 +276,4 @@ misremembered.
 | Plan 026 (component test infra) | ✅ Done — `@testing-library/react` + `happy-dom` added, scoped per-file so the existing node-environment pure-logic suite is untouched; `StatusBadge` and `SegmentedControl` both have real, meaningful tests (not vacuous renders). |
 | Plan 027 (accessibility audit) | ✅ Done, with one correction. `SegmentedControl`'s roving-tabindex + arrow-key nav, `IndexRow`'s aria-hidden/sr-only index, and the toast focus-visible rings were all verified correct, including a live end-to-end keyboard test of the real `RoleSwitcher` (not just the unit test). **The color-contrast fix was wrong as originally shipped**: the report claimed light-mode `--warning` reached 5.45:1 against `--card`, but the actual committed value (`oklch(0.70 ...)`) measured 2.76:1 via real rendered pixels — still failing WCAG AA. Re-derived the correct value (`oklch(0.53 ...)` → 5.41:1) and, while re-checking, found light-mode `--success` had never been touched at all and independently failed (2.47:1) — fixed to `oklch(0.50 ...)` → 5.16:1. All 6 tone×theme combinations now verified via canvas-rendered pixels, not manual OKLCH math (which is exactly what produced the wrong number the first time). |
 | Verification pass on 001–024 found and fixed 4 real bugs the completion report missed | ✅ Fixed: (1) a systemic SSR/CSR hydration mismatch on every masthead dateline (`toLocaleDateString(undefined, ...)` resolved a different locale on the Node server vs the browser — hard-coded to `en-GB` across 21 files), (2) `IndexRow`'s mobile grid hard-coded its trailing column to 20px, overflowing the viewport whenever a row passed a real `actions` button (found on Cohort Roster's "Attendance Record"), (3) `CohortModulesTab` left `&nbsp;` and other entities un-decoded in its collapsed description preview, (4) one real `eslint` error (`courses/[slug]/layout.tsx`) contradicting the report's "0 errors" claim. |
-| Glass / Apple material | ✅ Foundation and broadened shared-surface migration shipped. Cards, buttons, form fields, ledgers, stat tiles, empty states, page atmosphere, floating primitives, toasts, tracks, and media controls use themed glass; sidebar rail and menu links remain opaque by explicit product direction. Gesture-driven sheet dismissal has a unit-tested threshold. |
+| Glass / Apple material | ✅ Tiered material system shipped. Floating primitives use translucent glass; shared content/control surfaces use high-alpha `glass-content`; page atmosphere is static and theme-specific; sidebar navigation and dropdown/select menus remain opaque for dense-content legibility. Gesture-driven sheet dismissal has a unit-tested threshold. |
