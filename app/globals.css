@@ -190,6 +190,25 @@
   }
 }
 
+/* Reduced motion (apple-design §14): drop movement, keep comprehension.
+   Animations collapse to their end state; transitions keep only
+   opacity/colour/shadow so state changes still read, without slides,
+   scales or springs. JS-driven motion is handled by <MotionConfig
+   reducedMotion="user"> in AppProviders. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    scroll-behavior: auto !important;
+    transition-property:
+      opacity, color, background-color, border-color, box-shadow, fill,
+      stroke !important;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;

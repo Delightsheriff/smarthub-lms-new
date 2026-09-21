@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import { MotionConfig } from "motion/react";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "./query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -23,7 +24,7 @@ export function AppProviders({
       <ThemeProvider>
         <QueryProvider>
           <SocketProvider>
-            {children}
+            <MotionConfig reducedMotion="user">{children}</MotionConfig>
             <Toaster />
           </SocketProvider>
         </QueryProvider>
