@@ -43,7 +43,7 @@ export function StatTile({
   const content = (
     <div
       className={cn(
-        "glass-regular flex flex-col justify-between rounded-2xl p-4 sm:p-5 transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)]",
+        "flex flex-col justify-between rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs transition-[border-color,box-shadow,transform] duration-150 ease-[var(--ease-out-strong)]",
         isInteractive && "hover:border-primary/40 active:scale-[0.98] cursor-pointer",
         className,
       )}
@@ -78,7 +78,7 @@ export function StatTile({
 
   if (href) {
     return (
-      <Link href={href} className="glass-link block group">
+      <Link href={href} className="block group">
         {content}
       </Link>
     );

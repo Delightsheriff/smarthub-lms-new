@@ -31,7 +31,7 @@ export function Ledger({
   return (
     <div
       className={cn(
-        "glass-regular flex flex-col rounded-[20px] px-5 pb-1 pt-[18px]",
+        "flex flex-col rounded-[20px] border border-border bg-card px-5 pb-1 pt-[18px]",
         className,
       )}
     >
