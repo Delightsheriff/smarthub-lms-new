@@ -13,15 +13,6 @@
     --duration-fast: 150ms;
     --duration-base: 200ms;
     --duration-modal: 300ms;
-
-    /* Floating Apple-style materials. Keep these paired with .dark below. */
-    --glass-bg-thin: oklch(1 0 0 / 0.58);
-    --glass-bg-regular: oklch(1 0 0 / 0.70);
-    --glass-bg-thick: oklch(1 0 0 / 0.82);
-    --glass-border: oklch(0.2 0.04 340 / 0.08);
-    --glass-highlight: oklch(1 0 0 / 0.85);
-    --glass-shadow: 0 8px 30px oklch(0.2 0.04 340 / 0.10);
-    --glass-solid: var(--card);
 }
 
 @theme inline {
@@ -174,14 +165,6 @@
     --sidebar-accent-foreground: oklch(0.965 0.007 78.29);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.754 0.162 67.889);
-
-    --glass-bg-thin: oklch(0.25 0.006 60 / 0.52);
-    --glass-bg-regular: oklch(0.25 0.006 60 / 0.60);
-    --glass-bg-thick: oklch(0.25 0.006 60 / 0.78);
-    --glass-border: oklch(1 0 0 / 0.10);
-    --glass-highlight: oklch(1 0 0 / 0.09);
-    --glass-shadow: 0 8px 30px oklch(0 0 0 / 0.35);
-    --glass-solid: var(--card);
 }
 
 @layer base {
@@ -311,71 +294,6 @@
 }
 
 @layer utilities {
-  /* Floating layers only. Content rows and cards remain opaque. */
-  .glass-thin,
-  .glass-regular,
-  .glass-thick {
-    border: 1px solid var(--glass-border);
-    background-color: var(--glass-bg-regular);
-    background-image: linear-gradient(to bottom, var(--glass-highlight), transparent 1px);
-    background-repeat: no-repeat;
-    box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-shadow);
-    color: var(--foreground);
-  }
-
-  .glass-thin {
-    background-color: var(--glass-bg-thin);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    backdrop-filter: blur(12px) saturate(160%);
-  }
-
-  .glass-regular {
-    -webkit-backdrop-filter: blur(20px) saturate(175%);
-    backdrop-filter: blur(20px) saturate(175%);
-  }
-
-  .glass-thick {
-    background-color: var(--glass-bg-thick);
-    -webkit-backdrop-filter: blur(32px) saturate(175%);
-    backdrop-filter: blur(32px) saturate(175%);
-  }
-
-  .app-shell-backdrop {
-    background-color: var(--background);
-    background-image:
-      radial-gradient(70% 40% at 8% 0%, oklch(0.263 0.108 342.162 / 0.045), transparent 72%),
-      radial-gradient(55% 35% at 92% 18%, oklch(0.754 0.162 67.889 / 0.035), transparent 75%);
-  }
-
-  .dark .app-shell-backdrop {
-    background-image:
-      radial-gradient(70% 40% at 8% 0%, oklch(0.263 0.108 342.162 / 0.07), transparent 72%),
-      radial-gradient(55% 35% at 92% 18%, oklch(0.754 0.162 67.889 / 0.055), transparent 75%);
-  }
-
-  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    .glass-thin,
-    .glass-regular,
-    .glass-thick {
-      background-color: var(--glass-solid);
-      background-image: none;
-      box-shadow: none;
-    }
-  }
-
-  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-    .glass-thin,
-    .glass-regular,
-    .glass-thick {
-      background-color: var(--glass-solid);
-      background-image: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      border-color: var(--foreground);
-      box-shadow: none;
-    }
-  }
-
   /*
    * Light sections had all the atmosphere stripped out — every gradient
    * and texture lived on the deep slabs. This is a very quiet warm wash
