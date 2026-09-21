@@ -2,6 +2,7 @@
 import { useState } from "react";
 import {
   Calendar,
+  CheckCircle2,
   ChevronDown,
   Clock,
   GraduationCap,
@@ -93,6 +94,7 @@ export function RegistrationBillingCard({ registration: r }: Props) {
             <StatusBadge
               status={r.paymentStatus}
               label={statusLabel}
+              icon={fullyPaid ? CheckCircle2 : undefined}
               className="text-[10px]"
             />
             {hasDiscount && (

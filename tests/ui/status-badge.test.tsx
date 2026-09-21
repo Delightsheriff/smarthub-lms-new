@@ -4,6 +4,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 
 afterEach(cleanup);
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Check } from "lucide-react";
 
 describe("StatusBadge", () => {
   it("renders a known status with registry label and tone variant class", () => {
@@ -28,5 +29,11 @@ describe("StatusBadge", () => {
     expect(badge).toBeDefined();
     // "defaulted" tone is destructive -> text-destructive
     expect(badge.className).toContain("text-destructive");
+  });
+
+  it("renders an optional leading icon", () => {
+    const { container } = render(<StatusBadge status="paid" icon={Check} />);
+    expect(container.querySelector("svg")).not.toBeNull();
+    expect(screen.getByText("Paid")).toBeDefined();
   });
 });

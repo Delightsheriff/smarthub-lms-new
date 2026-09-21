@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import { Badge } from "./badge";
 import { resolveStatus, type StatusTone } from "@/lib/utils";
 
@@ -19,17 +20,21 @@ const TONE_TO_VARIANT: Record<StatusTone, "success" | "warning" | "destructive" 
 export function StatusBadge({
   status,
   label,
+  icon: Icon,
   className,
 }: {
   /** Matched case-insensitively against `STATUS_REGISTRY`, e.g. "graded", "late", "active". */
   status: string;
   /** Override the registry's label without changing its color. */
   label?: string;
+  /** Optional leading icon, e.g. a check on "Paid in full". */
+  icon?: LucideIcon;
   className?: string;
 }) {
   const resolved = resolveStatus(status);
   return (
     <Badge variant={TONE_TO_VARIANT[resolved.tone]} className={className}>
+      {Icon && <Icon />}
       {label ?? resolved.label}
     </Badge>
   );

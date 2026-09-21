@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
-import { formatDateTime, pluralize } from "@/lib/utils";
+import { pluralize, timeAgo } from "@/lib/utils";
 import { notificationTypeStyle } from "../lib/notification-type";
 import {
   useNotifications,
@@ -126,7 +126,7 @@ export function NotificationsPageContent() {
                   </span>
                 }
                 meta={n.body}
-                when={formatDateTime(n.createdAt)}
+                when={timeAgo(n.createdAt)}
               />
             );
           })}
