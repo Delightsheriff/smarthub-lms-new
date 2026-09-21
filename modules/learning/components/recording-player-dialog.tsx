@@ -198,8 +198,9 @@ export function RecordingPlayerDialog({
               </div>
               <Button
                 size="default"
+                variant="glass"
                 onClick={trackOnce}
-                className="mt-1 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md gap-2 active:scale-[0.97] transition-transform"
+                className="mt-1 rounded-xl font-semibold gap-2 active:scale-[0.97] transition-transform"
                 render={
                   <a href={source.src} target="_blank" rel="noopener noreferrer" />
                 }
