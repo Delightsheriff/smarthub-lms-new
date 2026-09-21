@@ -42,7 +42,7 @@ export function CourseCard({ course }: { course: Course }) {
           aria-hidden
         />
 
-        <span className="glass-thin absolute bottom-3 left-4 flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground">
+        <span className="absolute bottom-3 left-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-background">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
           {course.category}
         </span>
@@ -51,8 +51,8 @@ export function CourseCard({ course }: { course: Course }) {
           <Badge
             variant={completed ? "success" : started ? undefined : "secondary"}
             className={cn(
-              "glass-thin text-[10px]",
-              started && !completed && "text-foreground",
+              "text-[10px] backdrop-blur",
+              started && !completed && "bg-background/90 text-foreground",
             )}
           >
             {completed
@@ -66,7 +66,7 @@ export function CourseCard({ course }: { course: Course }) {
         {/* Completion ring — the at-a-glance "how far in" signal,
             layered under the status badge rather than replacing it. */}
         {started && !completed && (
-          <div className="glass-thin absolute bottom-3 right-3 rounded-full p-1">
+          <div className="absolute bottom-3 right-3 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
             <CircularProgress value={progress} size={42} strokeWidth={3.5}>
               <span className="text-sm font-bold tabular-nums text-primary">
                 {progress}

@@ -38,7 +38,7 @@ export function SelfPacedCourseCard({
             aria-hidden
           />
 
-           <span className="glass-thin absolute bottom-3 left-4 flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground">
+          <span className="absolute bottom-3 left-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-background">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             Self-paced
           </span>
@@ -47,7 +47,7 @@ export function SelfPacedCourseCard({
             <div className="absolute right-3 top-3">
               <Badge
                 variant={completed ? "success" : "secondary"}
-                 className="glass-thin text-[10px]"
+                className="text-[10px] backdrop-blur"
               >
                 {completed ? "Completed" : "Not started"}
               </Badge>
@@ -58,7 +58,7 @@ export function SelfPacedCourseCard({
               course card, replacing a footer progress bar that competed
               with the title/description for attention. */}
           {started && !completed && (
-             <div className="glass-thin absolute bottom-3 right-3 rounded-full p-1">
+            <div className="absolute bottom-3 right-3 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur">
               <CircularProgress value={progress.percent} size={42} strokeWidth={3.5}>
                 <span className="text-sm font-bold tabular-nums text-primary">
                   {progress.percent}
