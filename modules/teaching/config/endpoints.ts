@@ -9,7 +9,8 @@ export const TEACHING_ENDPOINTS = {
   ASSIGNMENTS: (id: string) => `${LMS_PREFIX}/teaching/cohorts/${id}/assignments`,
   SUBMISSIONS: (id: string) => `${LMS_PREFIX}/teaching/cohorts/${id}/submissions`,
   GRADE_SUBMISSION: (id: string) => `${LMS_PREFIX}/teaching/submissions/${id}/grade`,
-  UPDATE_ASSIGNMENT: (attId: string) => `${LMS_PREFIX}/teaching/assignments/${attId}`,
+  ASSIGNMENT_SCHEDULE: (assignmentId: string, scheduleId: string) =>
+    `${LMS_PREFIX}/assignments/${assignmentId}/schedules/${scheduleId}`,
   ATTENDANCE_SESSION: (id: string) => `${LMS_PREFIX}/class-sessions/${id}/attendance`,
   MARK_ATTENDANCE: (id: string) => `${LMS_PREFIX}/class-sessions/${id}/attendance`,
   STUDENT_ATTENDANCE: (scheduleId: string, studentId: string) => `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/students/${studentId}/attendance`,

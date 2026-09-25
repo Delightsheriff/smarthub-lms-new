@@ -4,6 +4,7 @@ import { activityService } from "@/modules/activity/api/activity.service";
 import { oreoService } from "@/modules/oreo/api/oreo.service";
 import { pushService } from "@/modules/push/api/push.service";
 import { webinarsService } from "@/modules/webinars/api/webinars.service";
+import { teachingService } from "@/modules/teaching/api/teaching.service";
 
 vi.mock("@/lib/api", () => ({
   apiClient: {
@@ -135,4 +136,20 @@ describe("F4 Endpoint contract tests", () => {
       });
     });
   });
+
+  describe("Teaching service", () => {
+    it("calls PATCH /lms/assignments/:assignmentId/schedules/:scheduleId with patch body", async () => {
+      vi.mocked(apiClient.patch).mockResolvedValueOnce({ success: true });
+
+      await teachingService.updateAssignmentSchedule("asgn_123", "sched_456", {
+        isVisible: false,
+      });
+
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        "/lms/assignments/asgn_123/schedules/sched_456",
+        { isVisible: false },
+      );
+    });
+  });
 });
+

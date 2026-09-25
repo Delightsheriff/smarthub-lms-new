@@ -59,11 +59,12 @@ class TeachingService {
   }
 
   async updateAssignmentSchedule(
-    attachmentId: string,
+    assignmentId: string,
+    scheduleId: string,
     patch: { dueDate?: string; isVisible?: boolean },
   ): Promise<{ success: boolean }> {
-    return apiClient.put<{ success: boolean }>(
-      TEACHING_ENDPOINTS.UPDATE_ASSIGNMENT(attachmentId),
+    return apiClient.patch<{ success: boolean }>(
+      TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
       patch,
     );
   }

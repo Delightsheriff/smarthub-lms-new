@@ -17,10 +17,13 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
   const { data: assignments, isLoading } = useCohortAssignments(scheduleId);
   const updateScheduleMutation = useUpdateAssignmentSchedule(scheduleId);
 
-  const handleToggleVisibility = (attachmentId: string, current: boolean) => {
+  const handleToggleVisibility = (
+    assignmentId: string,
+    currentVisible: boolean,
+  ) => {
     updateScheduleMutation.mutate({
-      attachmentId,
-      patch: { isVisible: !current },
+      assignmentId,
+      patch: { isVisible: !currentVisible },
     });
   };
 
@@ -66,7 +69,13 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
                   <span className="text-[11px] text-muted-foreground">Visible to students</span>
                   <Switch
                     checked={asgn.isVisible ?? true}
-                    onCheckedChange={() => handleToggleVisibility(asgn.attachmentId, !!asgn.isVisible)}
+                    aria-label={`Visible to students for ${asgn.title}`}
+                    onCheckedChange={() =>
+                      handleToggleVisibility(
+                        asgn.assignmentId,
+                        asgn.isVisible ?? true,
+                      )
+                    }
                   />
                 </div>
               }

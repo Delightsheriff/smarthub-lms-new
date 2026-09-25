@@ -158,16 +158,25 @@ export function useUpdateAssignmentSchedule(scheduleId: string) {
 
   return useMutation({
     mutationFn: async ({
-      attachmentId,
+      assignmentId,
       patch,
     }: {
-      attachmentId: string;
+      assignmentId: string;
       patch: { dueDate?: string; isVisible?: boolean };
     }) => {
-      return teachingService.updateAssignmentSchedule(attachmentId, patch);
+      return teachingService.updateAssignmentSchedule(
+        assignmentId,
+        scheduleId,
+        patch,
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId) });
+      queryClient.invalidateQueries({
+        queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: TEACHING_QUERY_KEYS.myAssignments,
+      });
     },
   });
 }
