@@ -1,13 +1,23 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Receipt, Share2, Wallet } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Receipt, RotateCw, Share2, Wallet } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/layout/page-header";
+import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { StatTile } from "@/components/ui/stat-tile";
@@ -42,6 +52,8 @@ const formatRelative = (iso?: string): string => {
 
 type TabKey = "share" | "earnings" | "ledger" | "payouts";
 
+const PAYOUTS_PAGE_SIZE = 20;
+
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: "share", label: "Share" },
   { key: "earnings", label: "Earnings" },
@@ -58,7 +70,8 @@ export function ReferralsPanel() {
   const { data, isLoading, isFetching, error, refetch } = useMyReferrals();
   const [tab, setTab] = useState<TabKey>("share");
   const banking = useBankingDetails();
-  const payouts = useMyPayouts();
+  const [payoutsPage, setPayoutsPage] = useState(1);
+  const payouts = useMyPayouts(payoutsPage, PAYOUTS_PAGE_SIZE);
   const requestPayout = useRequestPayout();
   const cancelPayout = useCancelPayout();
 
@@ -124,11 +137,11 @@ export function ReferralsPanel() {
           totals.earnedNaira > 0 ? (
             <>
               Share your link, track sign-ups, and withdraw what you earn. Total earned:{" "}
-              <strong className="text-foreground">{`₦${totals.earnedNaira.toLocaleString("en-NG")}`}</strong>
+              <strong className="text-foreground">{formatPrice(totals.earnedNaira)}</strong>
               {totals.pendingNaira > 0 && (
                 <>
                   {" · "}
-                  <strong className="text-foreground">{`₦${totals.pendingNaira.toLocaleString("en-NG")}`}</strong> pending
+                  <strong className="text-foreground">{formatPrice(totals.pendingNaira)}</strong> pending
                 </>
               )}
             </>
@@ -162,7 +175,7 @@ export function ReferralsPanel() {
       <div className="canvas-warm rounded-2xl border border-border p-6 md:p-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+            <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
               <span className="h-px w-6 bg-accent" aria-hidden />
               Your unique link
             </p>
@@ -190,7 +203,7 @@ export function ReferralsPanel() {
               <span>
                 {" · "}
                 <span className="font-medium text-foreground">
-                  <span className="font-display text-base font-bold tabular-nums text-accent">{data.qualifiedCount}</span>{" "}
+                  <span className="font-display text-base font-bold tabular-nums text-primary">{data.qualifiedCount}</span>{" "}
                   qualified
                 </span>
               </span>
@@ -275,6 +288,7 @@ export function ReferralsPanel() {
           earnedNaira={totals.earnedNaira}
           banking={banking.data}
           payouts={payouts}
+          onPayoutsPage={setPayoutsPage}
           requestPayout={requestPayout}
           cancelPayout={cancelPayout}
         />
@@ -287,15 +301,19 @@ function PayoutsTab({
   earnedNaira,
   banking,
   payouts,
+  onPayoutsPage,
   requestPayout,
   cancelPayout,
 }: {
   earnedNaira: number;
   banking: BankingDetails | undefined;
   payouts: ReturnType<typeof useMyPayouts>;
+  onPayoutsPage: (page: number) => void;
   requestPayout: ReturnType<typeof useRequestPayout>;
   cancelPayout: ReturnType<typeof useCancelPayout>;
 }) {
+  const [confirmRequest, setConfirmRequest] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<Payout | null>(null);
   const hasBanking =
     !!banking?.bankName &&
     !!banking?.accountName &&
@@ -334,7 +352,7 @@ function PayoutsTab({
               variant="default"
               size="sm"
               disabled={!canRequest}
-              onClick={() => requestPayout.mutate()}
+              onClick={() => setConfirmRequest(true)}
             >
               {requestPayout.isPending ? "Requesting…" : "Request Payout"}
             </Button>
@@ -357,6 +375,22 @@ function PayoutsTab({
 
       {payouts.isLoading ? (
         <Skeleton className="h-32 w-full rounded-2xl" />
+      ) : payouts.isError && !payouts.data ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load your payout requests"
+          description="Check your connection and try again."
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void payouts.refetch()}
+              disabled={payouts.isFetching}
+            >
+              <RotateCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          }
+        />
       ) : !payouts.data?.items?.length ? (
         <EmptyState
           icon={Receipt}
@@ -364,12 +398,73 @@ function PayoutsTab({
           description="Requests you make will show up here."
         />
       ) : (
-        <PayoutsLedger
-          items={payouts.data.items}
-          onCancel={(id) => cancelPayout.mutate(id)}
-          isCancelling={cancelPayout.isPending}
-        />
+        <>
+          <PayoutsLedger
+            items={payouts.data.items}
+            onCancel={setCancelTarget}
+            cancellingId={cancelPayout.isPending ? cancelPayout.variables : undefined}
+          />
+          <Pager
+            page={payouts.data.meta?.currentPage ?? 1}
+            totalPages={payouts.data.meta?.totalPages ?? 1}
+            onPage={onPayoutsPage}
+            label={pluralize(payouts.data.meta?.totalItems ?? payouts.data.items.length, "request")}
+          />
+        </>
       )}
+
+      <AlertDialog open={confirmRequest} onOpenChange={setConfirmRequest}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Request a payout of {formatPrice(earnedNaira)}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`We'll send it to ${banking?.bankName ?? "your bank"}`}
+              {banking?.accountNumber ? ` (${banking.accountNumber})` : ""}. You can
+              cancel while the request is still pending.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={requestPayout.isPending}>Not now</AlertDialogCancel>
+            <Button
+              disabled={requestPayout.isPending}
+              onClick={() =>
+                requestPayout.mutate(undefined, {
+                  onSettled: () => setConfirmRequest(false),
+                })
+              }
+            >
+              {requestPayout.isPending ? "Requesting…" : "Request payout"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!cancelTarget}
+        onOpenChange={(open) => !open && setCancelTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this payout request?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {cancelTarget ? formatPrice(cancelTarget.totalAmount) : "The amount"} goes
+              back to your earned balance. You can request it again later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep request</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (cancelTarget) cancelPayout.mutate(cancelTarget._id);
+                setCancelTarget(null);
+              }}
+            >
+              Cancel request
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
@@ -377,11 +472,12 @@ function PayoutsTab({
 function PayoutsLedger({
   items,
   onCancel,
-  isCancelling,
+  cancellingId,
 }: {
   items: Payout[];
-  onCancel: (id: string) => void;
-  isCancelling: boolean;
+  onCancel: (item: Payout) => void;
+  /** The row whose cancel is in flight — only that row's button waits. */
+  cancellingId: string | undefined;
 }) {
   return (
     <Ledger title="Payout requests" count={items.length}>
@@ -409,10 +505,10 @@ function PayoutsLedger({
                 variant="ghost"
                 size="sm"
                 className="rounded-lg text-xs"
-                disabled={isCancelling}
-                onClick={() => onCancel(item._id)}
+                disabled={cancellingId === item._id}
+                onClick={() => onCancel(item)}
               >
-                Cancel
+                {cancellingId === item._id ? "Cancelling…" : "Cancel"}
               </Button>
             ) : null
           }
