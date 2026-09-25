@@ -75,11 +75,11 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
     <div className="flex flex-wrap items-center gap-2">
       <Button variant="outline" size="sm" onClick={() => setAttachOpen(true)}>
         <Link2 className="h-3.5 w-3.5" aria-hidden />
-        Attach existing
+        Attach<span className="hidden sm:inline"> existing</span>
       </Button>
       <Button size="sm" nativeButton={false} render={<Link href={`${base}/new`} />}>
         <Plus className="h-3.5 w-3.5" aria-hidden />
-        New assignment
+        New<span className="hidden sm:inline"> assignment</span>
       </Button>
     </div>
   );
@@ -123,6 +123,8 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
             return (
               <LedgerControlItem
                 key={asgn.attachmentId}
+                // Keep the row menu beside the title on phones too.
+                className="flex-row items-start sm:items-center"
                 icon={Award}
                 iconClassName="bg-primary/10 text-primary"
                 title={
