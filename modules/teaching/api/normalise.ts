@@ -1,5 +1,16 @@
-import type { ApiInboxRow, ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
-import type { InboxRow, TeachingCohort, TeachingCohortDetail, TeachingModule } from "../types";
+import type {
+  ApiCohortSubmissionRow,
+  ApiInboxRow,
+  ApiTeachingCohort,
+  ApiTeachingCohortDetail,
+} from "../types/api.types";
+import type {
+  CohortSubmissionRow,
+  InboxRow,
+  TeachingCohort,
+  TeachingCohortDetail,
+  TeachingModule,
+} from "../types";
 
 export function normaliseCohort(api: ApiTeachingCohort): TeachingCohort {
   const course = api.course
@@ -80,6 +91,34 @@ export function normaliseInboxRow(api: ApiInboxRow): InboxRow {
     fileName: api.fileName,
     fileMimeType: api.fileMimeType,
     externalUrl: api.externalUrl,
+    content: api.content,
+  };
+}
+
+export function normaliseCohortSubmissionRow(
+  api: ApiCohortSubmissionRow,
+): CohortSubmissionRow {
+  return {
+    id: api._id,
+    assignment: {
+      id: api.assignment?._id ?? "",
+      title: api.assignment?.title || "Untitled",
+      totalPoints: api.assignment?.totalPoints,
+    },
+    student: {
+      id: api.student?._id ?? "",
+      name: api.student?.name || "Unnamed",
+      email: api.student?.email,
+    },
+    submittedAt: api.submittedAt,
+    status: api.status,
+    isLate: !!api.isLate,
+    score: api.score,
+    fileUrl: api.fileUrl,
+    externalUrl: api.externalUrl,
+    submissionType: api.submissionType,
+    fileName: api.fileName,
+    fileMimeType: api.fileMimeType,
     content: api.content,
   };
 }

@@ -57,3 +57,22 @@ export interface ApiTeachingCohortDetail extends ApiTeachingCohort {
     materialCount?: number;
   }>;
 }
+
+/** Wire shape for `GET /lms/teaching/cohorts/:scheduleId/submissions`
+ *  (smarthub-api get-cohort-submissions.service.ts) — Mongo `_id`s,
+ *  mapped to `id` by `normaliseCohortSubmissionRow`. */
+export interface ApiCohortSubmissionRow {
+  _id: string;
+  assignment: { _id: string; title?: string; totalPoints?: number };
+  student: { _id: string; name: string; email?: string };
+  submittedAt?: string;
+  status?: string;
+  isLate: boolean;
+  score?: number;
+  fileUrl?: string;
+  externalUrl?: string;
+  submissionType?: "file" | "text" | "url";
+  fileName?: string;
+  fileMimeType?: string;
+  content?: string;
+}

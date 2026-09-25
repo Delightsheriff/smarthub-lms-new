@@ -1,6 +1,12 @@
 import { apiClient } from "@/lib/api";
 import { TEACHING_ENDPOINTS } from "../config/endpoints";
-import type { ApiInboxRow, ApiTeachingCohort, ApiTeachingCohortDetail } from "../types/api.types";
+import type {
+  ApiCohortSubmissionRow,
+  ApiInboxRow,
+  ApiTeachingCohort,
+  ApiTeachingCohortDetail,
+} from "../types/api.types";
+import { normaliseCohortSubmissionRow } from "./normalise";
 import type {
   CohortRosterRow,
   CohortAssignmentRow,
@@ -53,8 +59,13 @@ class TeachingService {
     return apiClient.get<InstructorAssignmentRow[]>(TEACHING_ENDPOINTS.MY_ASSIGNMENTS);
   }
 
+  /** The wire rows carry Mongo `_id`s; normalised here so every caller
+   *  gets `id` (grading posts to `/submissions/:id/grade`). */
   async getSubmissions(id: string): Promise<CohortSubmissionRow[]> {
-    return apiClient.get<CohortSubmissionRow[]>(TEACHING_ENDPOINTS.SUBMISSIONS(id));
+    const rows = await apiClient.get<ApiCohortSubmissionRow[]>(
+      TEACHING_ENDPOINTS.SUBMISSIONS(id),
+    );
+    return (rows || []).map(normaliseCohortSubmissionRow);
   }
 
   async gradeSubmission(
