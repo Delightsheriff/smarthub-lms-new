@@ -200,10 +200,11 @@ export function OptionSelect({
     >
       <SelectTrigger
         id={id}
-        className="w-full rounded-xl"
+        // The base trigger capitalizes its value; titles keep their case.
+        className="w-full rounded-xl *:data-[slot=select-value]:normal-case"
         aria-invalid={invalid || undefined}
       >
-        <SelectValue placeholder={placeholder} className="normal-case">
+        <SelectValue placeholder={placeholder}>
           {(v: string | null) =>
             options.find((o) => o.value === v)?.label ?? placeholder
           }
