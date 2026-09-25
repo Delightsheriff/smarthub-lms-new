@@ -1,12 +1,8 @@
 import type { MetadataRoute } from "next";
 import { BRAND } from "@/configs/brand";
 
-/**
- * SmartHub's own maroon (ADR 0015). Hard-coded rather than read from
- * `BRAND.primary`, which still carries the pre-ADR-0015 magenta; the
- * installed app's title bar and splash should match the real brand.
- */
-const BRAND_MAROON = "#430330";
+/** SmartHub's own maroon (ADR 0015): the installed app's title bar and splash. */
+const BRAND_MAROON = BRAND.primary;
 
 /**
  * Makes the LMS installable. On Android this is what turns the browser
