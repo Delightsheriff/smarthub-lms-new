@@ -87,11 +87,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // `user` is only present on the initial sign-in call.
       if (user) {
         token.accessToken = user.accessToken as string;
         token.authUser = user.authUser as AuthUser;
+      }
+      if (trigger === "update" && session) {
+        token.authUser = {
+          ...(token.authUser as AuthUser),
+          ...((session as { user?: Partial<AuthUser> }).user ?? session),
+        };
       }
       return token;
     },

@@ -44,12 +44,13 @@ import { cn } from "@/lib/utils";
  *   `CommandPaletteListener`).
  */
 import { redirect, usePathname } from "next/navigation";
-
+import { useMe } from "@/modules/auth/api/auth.queries";
 import { InstallAppPrompt } from "@/modules/push/components/InstallAppPrompt";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { status } = useSession();
+  useMe();
   const collapsed = useSidebarStore((s) => s.collapsed);
   const setCollapsed = useSidebarStore((s) => s.setCollapsed);
 

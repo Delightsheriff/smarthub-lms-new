@@ -38,10 +38,21 @@ export function toAuthUser(u: {
   bio?: string;
   altPhone?: string;
   timeZone?: string;
+  lmsRole?: "student" | "instructor" | "both" | null;
+  referralEligible?: boolean;
 }): AuthUser {
   const roles = u.roles || [];
   const isStudent = roles.includes("student") || roles.includes("student_free");
   const isInstructor = roles.includes("instructor") || roles.includes("lead") || roles.includes("co-instructor");
+
+  const derivedRole: "student" | "instructor" | "both" =
+    isStudent && isInstructor
+      ? "both"
+      : isStudent
+        ? "student"
+        : isInstructor
+          ? "instructor"
+          : "student";
 
   return {
     _id: u._id,
@@ -69,14 +80,7 @@ export function toAuthUser(u: {
     bio: u.bio,
     altPhone: u.altPhone,
     timeZone: u.timeZone,
-    lmsRole:
-      isStudent && isInstructor
-        ? "both"
-        : isStudent
-          ? "student"
-          : isInstructor
-            ? "instructor"
-            : "student",
-    referralEligible: true,
+    lmsRole: u.lmsRole !== undefined ? u.lmsRole : derivedRole,
+    referralEligible: u.referralEligible !== undefined ? u.referralEligible : true,
   };
 }

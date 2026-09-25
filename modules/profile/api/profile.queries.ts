@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/slices/authStore";
 import { profileService } from "./profile.service";
@@ -21,13 +22,14 @@ export const PROFILE_QUERY_KEYS = {
  */
 export function useUpdateMyDetails() {
   const qc = useQueryClient();
+  const { update: updateSession } = useSession();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   return useMutation<{ ok: true }, Error, ProfileDetailsPatch>({
     mutationFn: (patch) => profileService.updateDetails(patch),
-    onSuccess: (_data, patch) => {
+    onSuccess: async (_data, patch) => {
       if (user) {
-        setUser({
+        const nextUser = {
           ...user,
           ...(patch.firstName !== undefined && { firstName: patch.firstName }),
           ...(patch.middleName !== undefined && { middleName: patch.middleName }),
@@ -35,7 +37,13 @@ export function useUpdateMyDetails() {
           ...(patch.gender !== undefined && { gender: patch.gender }),
           ...(patch.phone !== undefined && { phone: patch.phone }),
           ...(patch.imageUrl !== undefined && { imageUrl: patch.imageUrl }),
-        });
+        };
+        setUser(nextUser);
+        try {
+          await updateSession({ user: nextUser });
+        } catch {
+          // ignore session update errors
+        }
       }
       qc.invalidateQueries({ queryKey: PROFILE_QUERY_KEYS.me });
     },
