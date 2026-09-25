@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, BellRing, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Ledger, NagItem } from "@/components/ui/ledger";
 import {
   useDismissNudge,
   useSelfPacedCourses,
@@ -10,7 +10,10 @@ import {
 } from "../api/self-paced.queries";
 
 /**
- * Active reminders to keep going ("Start X", "Pick up Y where you left off").
+ * Active reminders to keep going ("Start X", "Pick up Y where you left
+ * off"), as nag rows in one ledger rather than a card each. The API's
+ * links arrive already translated to `/learn` routes (see
+ * `lib/nudge-link.ts`). Dismissing hides a reminder for good.
  * Self-gating: nothing renders without one.
  */
 export function SelfPacedNudges({ courseId }: { courseId?: string }) {
@@ -24,45 +27,37 @@ export function SelfPacedNudges({ courseId }: { courseId?: string }) {
   if (!nudges.length) return null;
 
   return (
-    <section className="space-y-2" aria-label="Reminders">
+    <Ledger title="Reminders" count={nudges.length > 1 ? nudges.length : undefined}>
       {nudges.slice(0, 3).map((n) => (
-        <Card
+        <NagItem
           key={n.id}
-          className="flex items-start gap-3 p-4 border-primary/20 bg-primary/[0.03]"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <BellRing className="h-4 w-4 text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold leading-tight">{n.title}</p>
-            {n.message && (
-              <p className="text-sm text-muted-foreground mt-0.5">{n.message}</p>
-            )}
-            {n.href && (
+          tone="accent"
+          title={n.title}
+          meta={n.message || n.course?.name}
+          actions={
+            <div className="flex shrink-0 items-center gap-1">
+              {n.href && (
+                <Link
+                  href={n.href}
+                  className="font-mono text-[11px] font-medium text-primary hover:underline"
+                >
+                  Continue →
+                </Link>
+              )}
               <Button
-                size="sm"
-                className="mt-2.5"
-                render={
-                  <Link href={n.href}>
-                    Continue
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                }
-              />
-            )}
-          </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 shrink-0 text-muted-foreground"
-            aria-label="Dismiss reminder"
-            disabled={dismiss.isPending && dismiss.variables === n.id}
-            onClick={() => dismiss.mutate(n.id)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </Card>
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground"
+                aria-label={`Dismiss reminder: ${n.title}`}
+                disabled={dismiss.isPending && dismiss.variables === n.id}
+                onClick={() => dismiss.mutate(n.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          }
+        />
       ))}
-    </section>
+    </Ledger>
   );
 }
