@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-
 // Global error boundary for the ROOT layout. Must render its own
 // `<html>` and `<body>` (the root layout is replaced while this is
-// shown). Client Component — no metadata/fonts from next/font here.
+// shown). globals.css is NOT loaded outside the root layout, so this
+// component uses minimal inline styles to guarantee readable presentation.
 export default function GlobalError({
   error,
   reset,
@@ -14,16 +13,70 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background px-6 text-center text-foreground">
-        <p className="text-sm font-medium tracking-widest text-foreground/50">
+      <body
+        style={{
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          display: "flex",
+          minHeight: "100vh",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          backgroundColor: "#fcfafc",
+          color: "#27272a",
+          textAlign: "center",
+          margin: 0,
+        }}
+      >
+        <p
+          style={{
+            fontSize: "12px",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "#71717a",
+            marginBottom: "8px",
+          }}
+        >
           Error · {error.digest ?? "Unexpected"}
         </p>
-        <h1 className="text-2xl font-semibold">Something went wrong</h1>
-        <p className="max-w-md text-sm text-muted-foreground">
-          An unexpected error occurred. You can try again, or head back to the
-          dashboard.
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: "600",
+            margin: "0 0 12px 0",
+            color: "#430330",
+          }}
+        >
+          Something went wrong
+        </h1>
+        <p
+          style={{
+            maxWidth: "420px",
+            fontSize: "14px",
+            lineHeight: "1.5",
+            color: "#52525b",
+            marginBottom: "24px",
+          }}
+        >
+          An unexpected error occurred. You can try again, or reload the page.
         </p>
-        <Button onClick={reset}>Try again</Button>
+        <button
+          type="button"
+          onClick={reset}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#430330",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "10px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+        >
+          Try again
+        </button>
       </body>
     </html>
   );
