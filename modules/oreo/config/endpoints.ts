@@ -1,10 +1,8 @@
 /**
- * Oreo endpoints. The ask surface is a hypermedia seam (ADR 0010): the
- * exact transport (one-shot in the mock, SSE later) is behind the
- * service — pages never call these paths directly.
+ * Oreo endpoints. Mounted under `/lms/oreo` in smarthub-api.
  */
 export const OREO_ENDPOINTS = {
-  ASK: "/lms/oreo/ask",
-  STREAM: "/lms/oreo/ask/stream",
+  ASK: "/lms/oreo",
+  STREAM: "/lms/oreo/stream",
   USAGE: "/lms/oreo/usage",
 } as const;
