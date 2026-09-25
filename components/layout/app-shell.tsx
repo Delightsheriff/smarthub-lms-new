@@ -11,6 +11,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { MessageToastListener } from "@/components/layout/message-toast-listener";
 import { CommandPaletteListener } from "@/components/layout/command-palette-listener";
 import { ProfilePhotoGate } from "@/modules/profile/components/ProfilePhotoGate";
+import { BirthdayGate } from "@/modules/profile/components/BirthdayGate";
 import { PaymentGate } from "@/modules/payment-proofs/components/PaymentGate";
 import { PaymentStatusBanner } from "@/modules/payment-proofs/components/PaymentStatusBanner";
 import { useSidebarStore } from "@/store/slices/sidebarStore";
@@ -68,6 +69,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       onOpenChange={(open) => setCollapsed(!open)}
     >
       <ProfilePhotoGate />
+      {/* Teaching staff only — self-gates to null for students. */}
+      <BirthdayGate />
       <AppSidebar />
       <SidebarInset>
         <TopBar />

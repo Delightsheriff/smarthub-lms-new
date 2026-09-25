@@ -35,6 +35,8 @@ export function useUpdateMyDetails() {
           ...(patch.middleName !== undefined && { middleName: patch.middleName }),
           ...(patch.lastName !== undefined && { lastName: patch.lastName }),
           ...(patch.gender !== undefined && { gender: patch.gender }),
+          ...(patch.birthDay !== undefined && { birthDay: patch.birthDay }),
+          ...(patch.birthMonth !== undefined && { birthMonth: patch.birthMonth }),
           ...(patch.phone !== undefined && { phone: patch.phone }),
           ...(patch.imageUrl !== undefined && { imageUrl: patch.imageUrl }),
         };

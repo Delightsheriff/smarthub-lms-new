@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useUpdateMyDetails } from "../api/profile.queries";
+import { isValidBirthday } from "../lib/birthday";
+import { BirthdayFields } from "./BirthdayFields";
 import type { ProfileDetailsPatch } from "../types";
 
 const profileDetailsSchema = z.object({
@@ -31,7 +33,14 @@ const profileDetailsSchema = z.object({
   lastName: z.string().trim().min(1, "Last name is required").max(100),
   gender: z.enum(["", "Male", "Female"]),
   phone: z.string().trim().refine((value) => value.length === 0 || (value.length >= 7 && value.length <= 20), "Phone must be 7–20 characters"),
-});
+  // Strings so a cleared picker is "" rather than NaN. Both halves or
+  // neither — the API refuses half a date.
+  birthDay: z.string(),
+  birthMonth: z.string(),
+}).refine(
+  (v) => (!v.birthDay && !v.birthMonth) || isValidBirthday(Number(v.birthDay), Number(v.birthMonth)),
+  { message: "Pick both a day and a month", path: ["birthDay"] },
+);
 
 const GENDER_OPTIONS = [
   { value: "Male", label: "Male" },
@@ -44,6 +53,8 @@ interface EditProfileDetailsProps {
     middleName?: string;
     lastName?: string;
     gender?: "Male" | "Female";
+    birthDay?: number;
+    birthMonth?: number;
     phone?: string;
   };
 }
@@ -69,7 +80,7 @@ export function EditProfileDetailsDialog({
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-semibold">Edit personal details</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Update your name, gender or phone. Email stays managed by an admin.
+            Update your name, gender, birthday or phone. Email stays managed by an admin.
           </DialogDescription>
         </DialogHeader>
         <ProfileDetailsForm
@@ -101,11 +112,13 @@ function ProfileDetailsForm({
   type Values = z.infer<typeof profileDetailsSchema>;
   const form = useForm<Values>({
     resolver: zodResolver(profileDetailsSchema),
-    defaultValues: { firstName: current.firstName ?? "", middleName: current.middleName ?? "", lastName: current.lastName ?? "", gender: current.gender ?? "", phone: current.phone ?? "" },
+    defaultValues: { firstName: current.firstName ?? "", middleName: current.middleName ?? "", lastName: current.lastName ?? "", gender: current.gender ?? "", phone: current.phone ?? "", birthDay: current.birthDay ? String(current.birthDay) : "", birthMonth: current.birthMonth ? String(current.birthMonth) : "" },
   });
   const [phoneUnlocked, setPhoneUnlocked] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
   const update = useUpdateMyDetails();
+  const birthDay = useWatch({ control: form.control, name: "birthDay" });
+  const birthMonth = useWatch({ control: form.control, name: "birthMonth" });
 
   const submit = async (values: Values) => {
     const dirty: ProfileDetailsPatch = {
@@ -113,6 +126,11 @@ function ProfileDetailsForm({
       ...(values.middleName !== (current.middleName ?? "") && { middleName: values.middleName }),
       ...(values.lastName !== (current.lastName ?? "") && { lastName: values.lastName }),
       ...(values.gender && values.gender !== (current.gender ?? "") && { gender: values.gender }),
+      ...(values.birthDay && values.birthMonth &&
+        (Number(values.birthDay) !== (current.birthDay ?? 0) || Number(values.birthMonth) !== (current.birthMonth ?? 0)) && {
+          birthDay: Number(values.birthDay),
+          birthMonth: Number(values.birthMonth),
+        }),
       ...(phoneUnlocked && values.phone !== (current.phone ?? "") && { phone: values.phone }),
     };
     if (!Object.keys(dirty).length) return;
@@ -156,6 +174,20 @@ function ProfileDetailsForm({
               ))}
             </SelectContent>
           </Select>
+          <FormMessage />
+        </FormItem>
+      )} />
+      <FormField control={form.control} name="birthDay" render={() => (
+        <FormItem>
+          <FormLabel>Birthday (optional)</FormLabel>
+          <BirthdayFields
+            day={birthDay}
+            month={birthMonth}
+            onDayChange={(v) => form.setValue("birthDay", v, { shouldDirty: true, shouldValidate: form.formState.isSubmitted })}
+            onMonthChange={(v) => form.setValue("birthMonth", v, { shouldDirty: true, shouldValidate: form.formState.isSubmitted })}
+            disabled={form.formState.isSubmitting}
+          />
+          <p className="text-xs text-muted-foreground">Day and month only — we never ask for the year.</p>
           <FormMessage />
         </FormItem>
       )} />

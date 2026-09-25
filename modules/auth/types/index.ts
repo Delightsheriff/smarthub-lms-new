@@ -9,6 +9,10 @@ export interface AuthUser {
   roles?: string[];
   isVerified?: boolean;
   gender?: "Male" | "Female";
+  /** Birthday, day + month. No year is stored — it drives the team's
+   *  reminder, not an age. Undefined until the person fills it in. */
+  birthDay?: number;
+  birthMonth?: number;
   country?: { isoCode?: string; name?: string } | string;
   state?: { isoCode?: string; name?: string } | string;
   city?: string;

@@ -1,99 +1,82 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, PlayCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useSelfPacedCourses } from "../api/self-paced.queries";
 import { SELF_PACED_ROUTES } from "../config/endpoints";
-import type { SelfPacedCourseSummary } from "../types";
+import { pickContinueCourses } from "../lib/continue-pick";
 import { CourseCover } from "./CourseCover";
 
-const time = (iso?: string) => (iso ? new Date(iso).getTime() || 0 : 0);
-
 /**
- * Which course to put in front of the learner: the one most recently
- * worked on (`lastActivityAt`, the latest lesson completion). Without
- * that — nothing completed yet, or an API that doesn't send it — a
- * course already under way beats one not started, then the most
- * recently granted wins.
+ * Dashboard re-entry for self-paced learning, as a bento tile for a
+ * learner who also has a cohort (the cohort course owns the hero slot).
+ * A self-paced-only learner gets the same course in the hero instead —
+ * see the dashboard page. Absent when there's nothing unfinished, never
+ * an empty placeholder.
  */
-const pick = (courses: SelfPacedCourseSummary[]) =>
-  courses
-    .filter((c) => !c.completedAt && c.nextLesson)
-    .sort((a, b) => {
-      const activity = time(b.lastActivityAt) - time(a.lastActivityAt);
-      if (activity !== 0) return activity;
-      const startedA = a.progress.completedLessons > 0 ? 1 : 0;
-      const startedB = b.progress.completedLessons > 0 ? 1 : 0;
-      if (startedA !== startedB) return startedB - startedA;
-      return time(b.grantedAt) - time(a.grantedAt);
-    });
-
-/** Dashboard re-entry for self-paced learning. Absent when there's
- *  nothing unfinished — never an empty placeholder. */
 export function ContinueSelfPacedCard() {
   const { data } = useSelfPacedCourses();
-  const candidates = pick(data ?? []);
+  const candidates = pickContinueCourses(data ?? []);
   const course = candidates[0];
   if (!course?.nextLesson) return null;
 
+  const started = course.progress.completedLessons > 0;
+
   return (
-    <section>
-      <header className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Continue learning
-        </h2>
-        {candidates.length > 1 ? (
-          <Link
-            href={SELF_PACED_ROUTES.LIST}
-            className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
-          >
-            All self-paced <ArrowRight className="h-3 w-3" />
-          </Link>
-        ) : (
-          <PlayCircle className="h-4 w-4 text-primary" />
-        )}
-      </header>
-      <Card className="p-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all duration-300">
-        <div className="md:grid md:grid-cols-[200px_1fr]">
-          <CourseCover
-            imageUrl={course.imageUrl}
-            name={course.name}
-            sizes="(max-width: 768px) 100vw, 200px"
-            className="h-32 md:h-full"
-          />
-          <div className="p-5">
-            <Badge variant="secondary" className="mb-2">
-              Self-paced
-            </Badge>
-            <h3 className="font-display font-semibold text-lg leading-tight text-foreground">
-              {course.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-              Up next: {course.nextLesson.title}
-            </p>
-            <div className="mt-3 mb-4 space-y-1">
-              <Progress value={course.progress.percent} className="h-1.5" />
-              <p className="text-xs text-muted-foreground">
-                {course.progress.completedLessons} of {course.progress.totalLessons}{" "}
-                lessons · {course.progress.percent}%
-              </p>
-            </div>
-            <Button
-              size="sm"
-              className="w-full sm:w-auto"
-              render={
-                <Link href={SELF_PACED_ROUTES.LESSON(course.slug, course.nextLesson.id)}>
-                  {course.progress.completedLessons > 0 ? "Continue" : "Start"}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              }
+    <section
+      aria-label="Continue self-paced learning"
+      className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card sm:flex-row"
+    >
+      <CourseCover
+        imageUrl={course.imageUrl}
+        name={course.name}
+        sizes="(max-width: 640px) 100vw, 180px"
+        className="h-28 shrink-0 sm:h-auto sm:w-[180px]"
+      />
+      <div className="flex min-w-0 flex-1 flex-col gap-3 p-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            Self-paced · {started ? "Continue" : "Start"}
+          </p>
+          {candidates.length > 1 && (
+            <Link
+              href={SELF_PACED_ROUTES.LIST}
+              className="font-mono text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              All {candidates.length} →
+            </Link>
+          )}
+        </div>
+        <div className="min-w-0">
+          <h3 className="truncate font-display text-lg font-semibold leading-tight text-foreground">
+            {course.name}
+          </h3>
+          <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+            Up next: {course.nextLesson.title}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative h-0.5 flex-1 rounded-full bg-border" aria-hidden>
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-primary"
+              style={{ width: `${course.progress.percent}%` }}
             />
           </div>
+          <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+            {course.progress.completedLessons}/{course.progress.totalLessons} lessons
+          </span>
         </div>
-      </Card>
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link href={SELF_PACED_ROUTES.LESSON(course.slug, course.nextLesson.id)} />
+            }
+          >
+            {started ? "Continue →" : "Start →"}
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }
