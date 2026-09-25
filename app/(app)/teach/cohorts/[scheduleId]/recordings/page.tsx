@@ -1,11 +1,17 @@
-import { use } from "react";
-import { redirect } from "next/navigation";
+import { Suspense, use } from "react";
+import { RecordingForm } from "@/modules/teaching/components/RecordingForm";
+import { AuthoringSkeleton } from "@/modules/teaching/components/authoring/authoring-kit";
 
 interface PageProps {
   params: Promise<{ scheduleId: string }>;
 }
 
-export default function CohortRecordingsPage({ params }: PageProps) {
+/** "Add recording" — `?module=<id>` pre-selects the module. */
+export default function NewCohortRecordingPage({ params }: PageProps) {
   const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=modules`);
+  return (
+    <Suspense fallback={<AuthoringSkeleton />}>
+      <RecordingForm scheduleId={scheduleId} />
+    </Suspense>
+  );
 }
