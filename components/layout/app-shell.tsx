@@ -43,19 +43,22 @@ import { cn } from "@/lib/utils";
  * - App-wide socket + keyboard listeners (`MessageToastListener`,
  *   `CommandPaletteListener`).
  */
-import { redirect, usePathname } from "next/navigation";
+import { redirect, usePathname, useSearchParams } from "next/navigation";
 import { useMe } from "@/modules/auth/api/auth.queries";
 import { InstallAppPrompt } from "@/modules/push/components/InstallAppPrompt";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { status } = useSession();
   useMe();
   const collapsed = useSidebarStore((s) => s.collapsed);
   const setCollapsed = useSidebarStore((s) => s.setCollapsed);
 
   if (status === "unauthenticated") {
-    const nextUrl = pathname && pathname !== "/dashboard" ? `/login?next=${encodeURIComponent(pathname)}` : "/login";
+    const search = searchParams?.toString();
+    const fullPath = search ? `${pathname}?${search}` : pathname;
+    const nextUrl = fullPath && fullPath !== "/dashboard" ? `/login?next=${encodeURIComponent(fullPath)}` : "/login";
     redirect(nextUrl);
   }
 
