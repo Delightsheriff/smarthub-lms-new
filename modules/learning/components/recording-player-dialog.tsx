@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
+  Circle,
   Clock,
   ExternalLink,
   Film,
@@ -19,7 +20,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useTrackRecordingView } from "@/modules/learning/api/content.queries";
+import { RichText } from "@/components/ui/rich-text";
+import {
+  useTrackRecordingView,
+  useToggleContentComplete,
+} from "@/modules/learning/api/content.queries";
 import { classifyVideoUrl } from "@/modules/learning/utils/video-source";
 import { cn } from "@/lib/utils";
 import type { Recording } from "@/modules/learning/types";
@@ -28,6 +33,8 @@ interface RecordingPlayerDialogProps {
   recording: Recording | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  courseId?: string;
+  completed?: boolean;
 }
 
 /**
@@ -35,19 +42,23 @@ interface RecordingPlayerDialogProps {
  *
  * Features:
  *  - High-fidelity 16:9 cinema frame with ambient glass styling
- *  - Status badge (live recording indicator or completed checkmark)
+ *  - Single view ping on dialog open (guarded by ref)
+ *  - Completion tracking via progress table with auto-mark at 80% on video and manual toggle
  *  - Segmented playlist pills for multi-part recordings
- *  - Automatic 80% view tracking on native video playback
  *  - External session fallback launcher with rich poster card
- *  - Tactile action bar with direct external link and completion controls
+ *  - Accessible actions with nativeButton={false} and semantic tokens
  */
 export function RecordingPlayerDialog({
   recording,
   open,
   onOpenChange,
+  courseId,
+  completed = false,
 }: RecordingPlayerDialogProps) {
   const trackView = useTrackRecordingView();
-  const trackedThisSessionRef = useRef<string | null>(null);
+  const toggleComplete = useToggleContentComplete(courseId);
+  const viewPingedRef = useRef<string | null>(null);
+  const autoCompletedRef = useRef<string | null>(null);
 
   // Which part is playing. Keyed by recording id so a newly-opened
   // recording always starts on its first part without a reset effect.
@@ -57,10 +68,18 @@ export function RecordingPlayerDialog({
   const activePart =
     partState.forId === (recording?.id ?? "") ? partState.index : 0;
 
-  // Reset per-session tracked-id on close so re-opening fires the ping again.
+  // Single /view ping on dialog open, guarded by ref
   useEffect(() => {
-    if (!open) trackedThisSessionRef.current = null;
-  }, [open]);
+    if (open && recording) {
+      if (viewPingedRef.current !== recording.id) {
+        viewPingedRef.current = recording.id;
+        trackView.mutate(recording.id);
+      }
+    } else {
+      viewPingedRef.current = null;
+      autoCompletedRef.current = null;
+    }
+  }, [open, recording?.id, trackView]);
 
   if (!recording) return null;
 
@@ -71,12 +90,6 @@ export function RecordingPlayerDialog({
       : [];
   const activeUrl = parts[activePart]?.url ?? recording.videoUrl;
   const source = activeUrl ? classifyVideoUrl(activeUrl) : null;
-
-  const trackOnce = () => {
-    if (trackedThisSessionRef.current === recording.id) return;
-    trackedThisSessionRef.current = recording.id;
-    trackView.mutate(recording.id);
-  };
 
   const embedUrl =
     source && (source.kind === "youtube" || source.kind === "vimeo" || source.kind === "drive")
@@ -90,17 +103,13 @@ export function RecordingPlayerDialog({
         {/* Cinema Header */}
         <DialogHeader className="px-5 py-4 sm:px-6 sm:py-5 border-b border-border/60 bg-muted/20 pr-14 text-left">
           <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-            {recording.watched ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            {completed ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-0.5 text-[11px] font-semibold text-success border border-success/20">
                 <CheckCircle2 className="h-3 w-3" />
-                Watched
+                Completed
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-                </span>
                 Class Recording
               </span>
             )}
@@ -118,8 +127,11 @@ export function RecordingPlayerDialog({
           </DialogTitle>
 
           {recording.description && (
-            <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1 line-clamp-2 max-w-3xl">
-              {recording.description}
+            <DialogDescription
+              render={<div />}
+              className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1 line-clamp-2 max-w-3xl"
+            >
+              <RichText html={recording.description} />
             </DialogDescription>
           )}
         </DialogHeader>
@@ -171,34 +183,38 @@ export function RecordingPlayerDialog({
               playsInline
               preload="metadata"
               className="h-full w-full object-contain"
-              onPlay={trackOnce}
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
-                if (!el.duration || isFinite(el.duration) === false) return;
-                // Mark complete at 80% — matches API completion logic.
+                if (!el.duration || !isFinite(el.duration)) return;
+                // Auto-mark complete via progress POST once at 80%
                 if (el.currentTime / el.duration >= 0.8) {
-                  if (!recording.watched) {
-                    trackView.mutate(recording.id);
+                  if (courseId && !completed && autoCompletedRef.current !== recording.id) {
+                    autoCompletedRef.current = recording.id;
+                    toggleComplete.mutate({
+                      contentType: "recording",
+                      contentId: recording.id,
+                      completed: false,
+                    });
                   }
                 }
               }}
             />
           ) : source ? (
-            <div className="relative flex flex-col h-full w-full items-center justify-center gap-4 px-6 text-center bg-gradient-to-b from-neutral-900 via-neutral-950 to-black text-white">
-              <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-white/10 border border-white/15 text-accent shadow-lg backdrop-blur-md">
+            <div className="relative flex flex-col h-full w-full items-center justify-center gap-4 px-6 text-center bg-card text-card-foreground">
+              <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-muted/80 border border-border text-accent shadow-lg">
                 <Video className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
               <div className="max-w-md space-y-1">
-                <h3 className="text-base sm:text-lg font-semibold text-white font-display">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground font-display">
                   External Video Session
                 </h3>
-                <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   This recording is hosted on an external platform and opens in a new tab.
                 </p>
               </div>
               <Button
                 size="default"
-                onClick={trackOnce}
+                nativeButton={false}
                 className="mt-1 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md gap-2 active:scale-[0.97] transition-transform"
                 render={
                   <a href={source.src} target="_blank" rel="noopener noreferrer" />
@@ -209,7 +225,7 @@ export function RecordingPlayerDialog({
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col h-full w-full items-center justify-center gap-2 text-muted-foreground bg-neutral-950">
+            <div className="flex flex-col h-full w-full items-center justify-center gap-2 text-muted-foreground bg-muted/50">
               <VideoOff className="h-8 w-8 text-muted-foreground/50" />
               <p className="text-sm font-medium">Video currently unavailable.</p>
             </div>
@@ -219,13 +235,13 @@ export function RecordingPlayerDialog({
         {/* Modernized Bottom Action Bar */}
         <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-t border-border/60 bg-muted/20 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-            {isDirectVideo && !recording.watched ? (
+            {isDirectVideo && !completed ? (
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Clock className="h-3.5 w-3.5 text-accent shrink-0" />
-                <span>Auto-marks as watched at 80% playback</span>
+                <span>Auto-marks complete at 80% playback</span>
               </span>
-            ) : recording.watched ? (
-              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+            ) : completed ? (
+              <span className="flex items-center gap-1.5 text-success font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                 <span>You have completed this recording</span>
               </span>
@@ -242,8 +258,8 @@ export function RecordingPlayerDialog({
               <Button
                 variant="ghost"
                 size="sm"
+                nativeButton={false}
                 className="gap-1.5 text-xs text-muted-foreground hover:text-foreground active:scale-[0.97] transition-transform rounded-xl"
-                onClick={trackOnce}
                 render={
                   <a href={source.src} target="_blank" rel="noopener noreferrer" />
                 }
@@ -252,25 +268,35 @@ export function RecordingPlayerDialog({
                 Open external
               </Button>
             )}
-            <Button
-              size="sm"
-              variant={recording.watched ? "secondary" : "default"}
-              disabled={recording.watched || trackView.isPending}
-              onClick={() => trackView.mutate(recording.id)}
-              className={cn(
-                "gap-1.5 rounded-xl text-xs font-semibold active:scale-[0.97] transition-all",
-                recording.watched
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 cursor-default opacity-100"
-                  : "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-              )}
-            >
-              {trackView.isPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-3.5 w-3.5" />
-              )}
-              {recording.watched ? "Watched" : "Mark as watched"}
-            </Button>
+            {courseId && (
+              <Button
+                size="sm"
+                variant={completed ? "secondary" : "default"}
+                disabled={toggleComplete.isPending}
+                onClick={() =>
+                  toggleComplete.mutate({
+                    contentType: "recording",
+                    contentId: recording.id,
+                    completed,
+                  })
+                }
+                className={cn(
+                  "gap-1.5 rounded-xl text-xs font-semibold active:scale-[0.97] transition-all",
+                  completed
+                    ? "bg-success/10 text-success border border-success/20"
+                    : "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+                )}
+              >
+                {toggleComplete.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : completed ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <Circle className="h-3.5 w-3.5" />
+                )}
+                {completed ? "Completed" : "Mark as complete"}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
