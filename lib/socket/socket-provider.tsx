@@ -8,7 +8,36 @@ const SocketContext = createContext<Socket | null>(null);
 
 export const useSocket = (): Socket | null => useContext(SocketContext);
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+let hasWarnedDev = false;
+
+function resolveSocketUrl(): string {
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_SOCKET_URL;
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.AUTH_API_URL;
+  if (apiUrl) {
+    try {
+      const parsed = new URL(apiUrl);
+      // In dev sandbox, /api-proxy proxies the REST API on port 5000
+      if (parsed.pathname.includes("api-proxy")) {
+        return `${parsed.protocol}//${parsed.hostname}:5000`;
+      }
+      return parsed.origin;
+    } catch {
+      // Ignore URL parse error
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production" && !hasWarnedDev) {
+    hasWarnedDev = true;
+    console.warn(
+      "[SocketProvider] Neither NEXT_PUBLIC_SOCKET_URL nor a resolvable NEXT_PUBLIC_API_URL origin was found. Falling back to http://localhost:5000.",
+    );
+  }
+
+  return "http://localhost:5000";
+}
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -20,17 +49,15 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const socketInstance = io(SOCKET_URL, {
+    const socketUrl = resolveSocketUrl();
+    const socketInstance = io(socketUrl, {
       auth: { token },
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
       autoConnect: true,
     });
 
-    // Synchronize socket state asynchronously inside effect
-    requestAnimationFrame(() => {
-      setSocket(socketInstance);
-    });
+    setSocket(socketInstance);
 
     return () => {
       socketInstance.disconnect();
