@@ -36,7 +36,7 @@ export function ShareMilestoneDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data, isLoading } = useScholarshipBanner();
+  const { data, isLoading } = useScholarshipBanner({ enabled: open });
   const regenerate = useRegenerateScholarshipBanner();
   const photo = useUpdateScholarshipPhoto();
 
