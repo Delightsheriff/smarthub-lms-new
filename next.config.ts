@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import { DEV_API_ORIGIN } from "./lib/api/dev-origin"
 
 const nextConfig: NextConfig = {
   // Every uploaded image (course thumbnails, avatars, instructor
@@ -23,7 +24,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api-proxy/:path*",
-        destination: "http://localhost:6001/api/v1/:path*",
+        destination: `${DEV_API_ORIGIN}/api/v1/:path*`,
       },
     ]
   },

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/slices/authStore";
+import { DEV_API_ORIGIN } from "@/lib/api/dev-origin";
 
 const SocketContext = createContext<Socket | null>(null);
 
@@ -10,33 +11,38 @@ export const useSocket = (): Socket | null => useContext(SocketContext);
 
 let hasWarnedDev = false;
 
-function resolveSocketUrl(): string {
-  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
-    return process.env.NEXT_PUBLIC_SOCKET_URL;
-  }
+/**
+ * Socket origin: an explicit NEXT_PUBLIC_SOCKET_URL wins. Otherwise use
+ * the API URL's origin — except the dev `/api-proxy` rewrite, which is
+ * HTTP-only, so the socket goes straight to the API it proxies to.
+ */
+export function resolveSocketUrl(
+  env: {
+    NEXT_PUBLIC_SOCKET_URL?: string;
+    NEXT_PUBLIC_API_URL?: string;
+  } = {
+    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+): string {
+  if (env.NEXT_PUBLIC_SOCKET_URL) return env.NEXT_PUBLIC_SOCKET_URL;
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.AUTH_API_URL;
-  if (apiUrl) {
+  if (env.NEXT_PUBLIC_API_URL) {
     try {
-      const parsed = new URL(apiUrl);
-      // In dev sandbox, /api-proxy proxies the REST API on port 5000
-      if (parsed.pathname.includes("api-proxy")) {
-        return `${parsed.protocol}//${parsed.hostname}:5000`;
-      }
-      return parsed.origin;
+      const parsed = new URL(env.NEXT_PUBLIC_API_URL);
+      if (!parsed.pathname.startsWith("/api-proxy")) return parsed.origin;
     } catch {
-      // Ignore URL parse error
+      // Unparseable — fall through to the dev default.
     }
   }
 
   if (process.env.NODE_ENV !== "production" && !hasWarnedDev) {
     hasWarnedDev = true;
     console.warn(
-      "[SocketProvider] Neither NEXT_PUBLIC_SOCKET_URL nor a resolvable NEXT_PUBLIC_API_URL origin was found. Falling back to http://localhost:5000.",
+      `[SocketProvider] No NEXT_PUBLIC_SOCKET_URL; using the dev API at ${DEV_API_ORIGIN}.`,
     );
   }
-
-  return "http://localhost:5000";
+  return DEV_API_ORIGIN;
 }
 
 export function SocketProvider({ children }: { children: ReactNode }) {
