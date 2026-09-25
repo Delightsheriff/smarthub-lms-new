@@ -10,14 +10,33 @@ export interface ApiResponse<T> {
   meta?: PaginationMeta;
 }
 
+/**
+ * Mirrors smarthub-api/src/utils/pagination.utils.ts → StandardPaginationMeta.
+ * createPaginationMeta always emits all six fields; optional-only so callers
+ * that receive partial shapes from older endpoints still type-check.
+ */
 export interface PaginationMeta {
+  /** Total number of items across all pages. */
   totalItems?: number;
-  currentPage?: number;
-  pageSize?: number;
+  /** Total number of pages. */
   totalPages?: number;
-  total?: number;
-  page?: number;
-  limit?: number;
+  /** 1-based page number for the current response. */
+  currentPage?: number;
+  /** Number of items per page requested. */
+  pageSize?: number;
+  /** True when another page follows the current one. */
+  hasNext?: boolean;
+  /** True when a page precedes the current one. */
+  hasPrev?: boolean;
+}
+
+/**
+ * Unwrapped result of apiClient.getPaginated<T>. The `data` field holds
+ * the array the service is typed for; `meta` holds the backend pagination.
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
 }
 
 export interface ApiErrorResponse {
