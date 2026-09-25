@@ -2,10 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { Video, CheckCircle2 } from "lucide-react";
+import { Video, CheckCircle2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDateTime } from "@/lib/utils";
 import { useStudentCalendar } from "@/modules/calendar/api/calendar.queries";
@@ -15,7 +16,7 @@ interface CohortSessionsTabProps {
 }
 
 export function CohortSessionsTab({ scheduleId }: CohortSessionsTabProps) {
-  const { data: events, isLoading } = useStudentCalendar();
+  const { data: events, isLoading, error, refetch } = useStudentCalendar();
 
   const sessions = (events || []).filter(
     (e) => e.type === "class-session" && (e.scopeId === scheduleId || e.scope === "global"),
@@ -29,7 +30,25 @@ export function CohortSessionsTab({ scheduleId }: CohortSessionsTabProps) {
         </div>
       )}
 
-      {!isLoading && (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load sessions"
+          description="There was a problem loading live sessions for this cohort. Please try again."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-xl"
+            >
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && (
         <Ledger
           title="Live Sessions"
           count={sessions.length}

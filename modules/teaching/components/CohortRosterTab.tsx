@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { pluralize } from "@/lib/utils";
 import { useCohortRoster } from "../api/teaching.queries";
@@ -17,7 +19,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
   const [selectedStudent, setSelectedStudent] = useState<{ id: string; name: string } | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const { data: roster, isLoading } = useCohortRoster(scheduleId);
+  const { data: roster, isLoading, error, refetch } = useCohortRoster(scheduleId);
 
   const handleOpenAttendance = (row: CohortRosterRow) => {
     setSelectedStudent({ id: row.studentId, name: row.name });
@@ -33,7 +35,25 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
         </div>
       )}
 
-      {!isLoading && roster && roster.length > 0 ? (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load student roster"
+          description="There was a problem loading the roster for this cohort. Please try again."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-xl"
+            >
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && roster && roster.length > 0 ? (
         <IndexList>
           {roster.map((row, idx) => (
             <IndexRow
@@ -59,7 +79,7 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
             />
           ))}
         </IndexList>
-      ) : !isLoading ? (
+      ) : !isLoading && !error ? (
         <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
           No students enrolled in this cohort roster yet.
         </div>

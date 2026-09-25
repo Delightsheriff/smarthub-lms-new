@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
-import { Award } from "lucide-react";
+import { Award, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDate, pluralize } from "@/lib/utils";
 import { useCohortAssignments, useUpdateAssignmentSchedule } from "../api/teaching.queries";
@@ -14,7 +16,7 @@ interface CohortAssignmentsTabProps {
 }
 
 export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) {
-  const { data: assignments, isLoading } = useCohortAssignments(scheduleId);
+  const { data: assignments, isLoading, error, refetch } = useCohortAssignments(scheduleId);
   const updateScheduleMutation = useUpdateAssignmentSchedule(scheduleId);
 
   const handleToggleVisibility = (
@@ -36,7 +38,25 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
         </div>
       )}
 
-      {!isLoading && assignments && assignments.length > 0 ? (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load assignments"
+          description="There was a problem loading assignments for this cohort. Please try again."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-xl"
+            >
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && assignments && assignments.length > 0 ? (
         <Ledger title="Assignments" count={assignments.length}>
           {assignments.map((asgn) => (
             <LedgerControlItem
@@ -82,7 +102,7 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
             />
           ))}
         </Ledger>
-      ) : !isLoading ? (
+      ) : !isLoading && !error ? (
         <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
           No assignments attached to this cohort schedule yet.
         </div>

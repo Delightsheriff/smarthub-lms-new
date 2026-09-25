@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award } from "lucide-react";
+import { Award, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
 import { formatDate } from "@/lib/utils";
 import { useCohortSubmissions, useGradeSubmission } from "../api/teaching.queries";
@@ -22,7 +23,7 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
   const [selectedSub, setSelectedSub] = useState<CohortSubmissionRow | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: submissions, isLoading } = useCohortSubmissions(scheduleId);
+  const { data: submissions, isLoading, error, refetch } = useCohortSubmissions(scheduleId);
   const gradeMutation = useGradeSubmission(scheduleId);
 
   const filtered = (submissions || []).filter((s) => {
@@ -54,7 +55,25 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
         </div>
       )}
 
-      {!isLoading && (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load submissions"
+          description="There was a problem loading submissions for this cohort. Please try again."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-xl"
+            >
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && (
         <Ledger
           title="Submissions"
           count={filtered.length}
