@@ -1,11 +1,12 @@
 import { use } from "react";
-import { redirect } from "next/navigation";
+import { CohortModulePageContent } from "@/modules/teaching/components/CohortModulePageContent";
 
 interface PageProps {
   params: Promise<{ scheduleId: string; moduleSlug: string }>;
 }
 
-export default function CohortModuleDetailPage({ params }: PageProps) {
-  const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=modules`);
+/** One module inside a cohort: status, content, and share controls. */
+export default function CohortModulePage({ params }: PageProps) {
+  const { scheduleId, moduleSlug } = use(params);
+  return <CohortModulePageContent scheduleId={scheduleId} moduleSlug={moduleSlug} />;
 }
