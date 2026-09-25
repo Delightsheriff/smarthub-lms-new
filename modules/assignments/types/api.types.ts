@@ -1,15 +1,7 @@
 import type { WireSubmission } from "@/lib/api/wire.types";
 
 /**
- * smarthub-api submission shape (see `lib/api/wire.types.ts`), plus the
- * upload response the assignment-file upload endpoint returns.
+ * smarthub-api submission shape (see `lib/api/wire.types.ts`). Uploads go
+ * through `uploadFileDetailed` in lib/api, which owns the upload envelope.
  */
 export type ApiSubmission = WireSubmission;
-
-export interface ApiUploadResponse {
-  url: string;
-  publicId?: string;
-  fileName?: string;
-  fileSize?: number;
-  mimeType?: string;
-}

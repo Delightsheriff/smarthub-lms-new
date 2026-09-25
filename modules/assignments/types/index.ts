@@ -82,4 +82,4 @@ export interface Submission {
   gradedBy?: string;
 }
 
-export type { ApiSubmission, ApiUploadResponse } from "./api.types";
+export type { ApiSubmission } from "./api.types";

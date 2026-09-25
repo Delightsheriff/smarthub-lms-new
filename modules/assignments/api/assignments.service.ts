@@ -1,11 +1,11 @@
-import { apiClient } from "@/lib/api";
+import { apiClient, uploadFileDetailed } from "@/lib/api";
 import {
   ASSIGNMENTS_ENDPOINTS,
   SUBMISSIONS_ENDPOINTS,
   UPLOAD_ENDPOINTS,
 } from "../config/endpoints";
 import type { ApiAssignment } from "@/modules/learning/types/api.types";
-import type { ApiSubmission, ApiUploadResponse } from "../types/api.types";
+import type { ApiSubmission } from "../types/api.types";
 
 /** One page big enough to hold every assignment a student will ever
  *  have. The endpoint caps nothing above this; it's a ceiling we choose
@@ -67,18 +67,12 @@ class AssignmentsService {
     fileSize: number;
     fileMimeType: string;
   }> {
-    const form = new FormData();
-    form.append("file", file);
-    const r = await apiClient.post<ApiUploadResponse>(
-      UPLOAD_ENDPOINTS.ASSIGNMENT_FILE,
-      form,
-      { headers: { "Content-Type": "multipart/form-data" } },
-    );
+    const r = await uploadFileDetailed(file, UPLOAD_ENDPOINTS.ASSIGNMENT_FILE);
     return {
       fileUrl: r.url,
-      fileName: r.fileName ?? file.name,
-      fileSize: r.fileSize ?? file.size,
-      fileMimeType: r.mimeType ?? file.type,
+      fileName: r.filename ?? file.name,
+      fileSize: r.size ?? file.size,
+      fileMimeType: r.mime ?? file.type,
     };
   }
 }
