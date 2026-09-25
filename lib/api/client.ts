@@ -152,8 +152,8 @@ instance.interceptors.response.use(
     // Error toast: only on non-GET mutations, only when not silenced.
     const method = cfg?.method || "get";
     if (typeof window !== "undefined" && shouldToast(method, cfg?.silent)) {
-      const data = error.response?.data as { message?: string } | undefined;
-      const msg = data?.message || error.message || "Something went wrong";
+      const msg =
+        apiErrorMessage(error.response?.data) || error.message || "Something went wrong";
       toast.error(msg);
     }
 
@@ -163,14 +163,34 @@ instance.interceptors.response.use(
 
 // ─── Error normalisation ──────────────────────────────────────────────────────
 
+/**
+ * Pure: the human message in an API error body. express-validator
+ * failures arrive as `{ errors: [{ msg, path }] }` with no top-level
+ * `message`, so read those too instead of falling back to axios's
+ * "Request failed with status code 400".
+ */
+export function apiErrorMessage(data: unknown): string | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const body = data as {
+    message?: string | string[];
+    error?: string;
+    errors?: { msg?: string; message?: string }[];
+  };
+  if (Array.isArray(body.message)) return body.message.join(", ") || undefined;
+  if (body.message) return body.message;
+  const fieldMessages = (body.errors ?? [])
+    .map((e) => e?.msg || e?.message)
+    .filter((m): m is string => !!m);
+  if (fieldMessages.length) return [...new Set(fieldMessages)].join(". ");
+  return body.error || undefined;
+}
+
 function formatError(error: unknown): ApiError {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as
-      | { message?: string | string[]; error?: string; statusCode?: number }
-      | undefined;
-    const message = Array.isArray(data?.message)
-      ? data.message.join(", ")
-      : data?.message || data?.error || error.message || "An unexpected network error occurred.";
+    const message =
+      apiErrorMessage(error.response?.data) ||
+      error.message ||
+      "An unexpected network error occurred.";
     const status = error.response?.status || 500;
     return new ApiError(message, status);
   }
