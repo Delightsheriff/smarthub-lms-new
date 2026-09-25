@@ -3,11 +3,13 @@
 export {
   apiClient,
   uploadFile,
+  uploadFileDetailed,
+  parseUploadResponse,
   shouldToast,
   parseContentDispositionFilename,
   is402,
 } from "@/lib/api/client";
-export type { ApiClientRequestOptions } from "@/lib/api/client";
+export type { ApiClientRequestOptions, UploadedFile } from "@/lib/api/client";
 export { ApiError } from "@/lib/api/types";
 export type {
   ApiErrorResponse,

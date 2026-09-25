@@ -328,17 +328,55 @@ export const apiClient = {
 
 // ─── File upload helper ───────────────────────────────────────────────────────
 
-export async function uploadFile(
-  file: File,
+/** What every `/lms/uploads*` route returns (smarthub-api
+ *  file-upload.controllers.ts): the Cloudinary URL is the envelope's
+ *  `data` STRING, with the metadata as siblings — not `data.url`. */
+export interface UploadedFile {
+  url: string;
+  type?: "image" | "video" | "raw";
+  size?: number;
+  mime?: string;
+  filename?: string;
+  extension?: string;
+}
+
+/** Pure: pulls the uploaded file out of the upload envelope. Also accepts
+ *  a `{ url | secure_url }` object in `data` for forward compatibility. */
+export function parseUploadResponse(body: unknown): UploadedFile | null {
+  if (!body || typeof body !== "object") return null;
+  const env = body as Record<string, unknown>;
+  const data = env.data;
+  const url =
+    typeof data === "string"
+      ? data
+      : data && typeof data === "object"
+        ? ((data as { url?: string; secure_url?: string }).url ??
+          (data as { secure_url?: string }).secure_url)
+        : undefined;
+  if (!url) return null;
+  return {
+    url,
+    type: env.type as UploadedFile["type"],
+    size: typeof env.size === "number" ? env.size : undefined,
+    mime: env.mime as string | undefined,
+    filename: env.filename as string | undefined,
+    extension: env.extension as string | undefined,
+  };
+}
+
+/** Upload one file as multipart form-data and return the URL plus the
+ *  metadata the API reports. `path` defaults to the generic LMS upload;
+ *  pass `/lms/uploads/assignment` or `/lms/uploads/material` for those. */
+export async function uploadFileDetailed(
+  file: File | Blob,
+  path = "/lms/uploads",
   options?: ApiClientRequestOptions,
-): Promise<string> {
+): Promise<UploadedFile> {
   const formData = new FormData();
   formData.append("file", file);
 
   try {
-    const response = await instance.post<
-      ApiResponse<{ url?: string; secure_url?: string }>
-    >("/lms/uploads", formData, {
+    const response = await instance.post<unknown>(path, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         ...options?.headers,
@@ -347,12 +385,25 @@ export async function uploadFile(
       timeout: options?.timeout,
       ...(options?.silent !== undefined ? { silent: options.silent } : {}),
     });
-    const url = response.data.data?.url || response.data.data?.secure_url;
-    if (!url) throw new ApiError("Upload succeeded but no file URL was returned", 500);
-    return url;
+    const uploaded = parseUploadResponse(response.data);
+    if (!uploaded) {
+      throw new ApiError("Upload succeeded but no file URL was returned", 500);
+    }
+    return uploaded;
   } catch (err) {
-    const apiError = formatError(err);
-    if (shouldToast("post", options?.silent)) toast.error(apiError.message);
+    const apiError = err instanceof ApiError ? err : formatError(err);
+    // The response interceptor already toasted HTTP failures; only toast
+    // the "no URL" case it never saw.
+    if (err instanceof ApiError && shouldToast("post", options?.silent)) {
+      toast.error(apiError.message);
+    }
     throw apiError;
   }
+}
+
+export async function uploadFile(
+  file: File | Blob,
+  options?: ApiClientRequestOptions,
+): Promise<string> {
+  return (await uploadFileDetailed(file, "/lms/uploads", options)).url;
 }
