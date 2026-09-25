@@ -28,6 +28,8 @@ export interface ApiClientRequestOptions {
    * Oreo's streaming call uses 120 000.
    */
   timeout?: number;
+  /** Request body (e.g. for DELETE requests carrying a payload). */
+  data?: unknown;
 }
 
 // ─── Pure decision helpers (unit-tested) ─────────────────────────────────────
@@ -189,10 +191,11 @@ async function execRequest<T>(
   options?: ApiClientRequestOptions,
 ): Promise<T> {
   try {
+    const payload = data !== undefined ? data : options?.data;
     const response = await instance.request<ApiResponse<T>>({
       method,
       url,
-      data,
+      data: payload,
       params: options?.params,
       headers: options?.headers,
       timeout: options?.timeout,

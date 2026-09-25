@@ -8,11 +8,14 @@ class PushService {
   }
 
   async subscribe(payload: PushSubscribePayload): Promise<void> {
-    await apiClient.post(PUSH_ENDPOINTS.SUBSCRIBE, payload);
+    await apiClient.post(PUSH_ENDPOINTS.SUBSCRIBE, {
+      surface: "lms",
+      ...payload,
+    });
   }
 
   async unsubscribe(endpoint: string): Promise<void> {
-    await apiClient.delete(PUSH_ENDPOINTS.SUBSCRIBE, { params: { endpoint } });
+    await apiClient.delete(PUSH_ENDPOINTS.SUBSCRIBE, { data: { endpoint } });
   }
 
   async getPrefs(): Promise<NotificationPrefs> {

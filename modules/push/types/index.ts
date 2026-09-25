@@ -5,8 +5,9 @@ export interface NotificationPrefs {
 }
 
 export interface PushConfig {
+  enabled: boolean;
+  publicKey?: string | null;
   vapidPublicKey?: string;
-  enabled?: boolean;
 }
 
 export interface PushSubscribePayload {
@@ -15,4 +16,5 @@ export interface PushSubscribePayload {
     p256dh: string;
     auth: string;
   };
+  surface?: "lms" | "admin";
 }
