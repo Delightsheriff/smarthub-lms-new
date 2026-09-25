@@ -1,7 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  AlertCircle,
+  Search,
   ExternalLink,
   Eye,
   FileText,
@@ -12,7 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
@@ -38,32 +48,45 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "guides", label: "Guides" },
 ];
 
+/** The URL a material opens: its file, or its first link when it has
+ *  links but no `fileUrl` (those were unreachable before). */
+const openUrlOf = (m: Material): string | undefined => m.fileUrl || m.links[0]?.url;
+
 /** Cross-course "All materials" surface. Every material on the modules
  *  of the student's enrolled courses, grouped by course. Visibility is
  *  module-level (materials have no cohort attachment layer). */
 export function MaterialsPageContent() {
-  const { data, isLoading, isFetching, refetch } = useMyMaterials();
-  const [filter, setFilter] = useState<Filter>("all");
+  const { data, isLoading, isFetching, error, refetch } = useMyMaterials();
+  // `?filter=` so other pages can link here pre-filtered.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fromUrl = searchParams.get("filter");
+  const filter: Filter = FILTERS.some((f) => f.value === fromUrl) ? (fromUrl as Filter) : "all";
+  const setFilter = (next: Filter) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "all") params.delete("filter");
+    else params.set("filter", next);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+  const [query, setQuery] = useState("");
   const [previewing, setPreviewing] = useState<Material | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const trackDownload = useTrackMaterialDownload();
 
   const rows = useMemo(() => data || [], [data]);
 
-  const visible = useMemo(() => {
-    switch (filter) {
-      case "files":
-        return rows.filter((r) => !!r.material.fileUrl);
-      case "guides":
-        return rows.filter(
-          (r) => !r.material.fileUrl && !!r.material.description,
-        );
-      default:
-        return rows;
-    }
-  }, [rows, filter]);
+  const q = query.trim().toLowerCase();
+  const visible = rows.filter((r) => {
+    const hasUrl = !!openUrlOf(r.material);
+    if (filter === "files" && !hasUrl) return false;
+    if (filter === "guides" && (hasUrl || !r.material.description)) return false;
+    if (!q) return true;
+    return `${r.material.title} ${r.module.title} ${r.course.name}`.toLowerCase().includes(q);
+  });
 
-  const groups = useMemo(() => groupByCourse(visible), [visible]);
+  const groups = groupByCourse(visible);
 
   const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -71,16 +94,17 @@ export function MaterialsPageContent() {
     day: "numeric",
   });
 
-  const totalFiles = rows.filter((r) => !!r.material.fileUrl).length;
+  const totalFiles = rows.filter((r) => !!openUrlOf(r.material)).length;
   const totalGuides = rows.filter(
-    (r) => !r.material.fileUrl && !!r.material.description,
+    (r) => !openUrlOf(r.material) && !!r.material.description,
   ).length;
   const courseCount = groups.length;
 
   const openPreview = (m: Material) => {
-    if (!m.fileUrl) return;
+    const url = openUrlOf(m);
+    if (!url) return;
     trackDownload.mutate(m.id);
-    setPreviewing(m);
+    setPreviewing({ ...m, fileUrl: url });
   };
 
   return (
@@ -117,15 +141,20 @@ export function MaterialsPageContent() {
         actions={
           <div className="flex items-center gap-2">
             <RefreshButton loading={isFetching} onClick={refetch} />
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-              <TabsList className="rounded-xl bg-muted/60 p-1">
+            <Select value={filter} onValueChange={(v) => v && setFilter(v as Filter)}>
+              <SelectTrigger size="sm" aria-label="Filter materials" className="w-[120px] text-xs">
+                <SelectValue>
+                  {(v: string | null) => FILTERS.find((f) => f.value === v)?.label ?? "All"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
                 {FILTERS.map((f) => (
-                  <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
+                  <SelectItem key={f.value} value={f.value} className="text-xs">
                     {f.label}
-                  </TabsTrigger>
+                  </SelectItem>
                 ))}
-              </TabsList>
-            </Tabs>
+              </SelectContent>
+            </Select>
           </div>
         }
       />
@@ -137,20 +166,53 @@ export function MaterialsPageContent() {
         </div>
       )}
 
-      {!isLoading && visible.length === 0 && (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load materials"
+          description="There was a problem loading your materials. Please try again."
+          action={
+            <Button type="button" variant="outline" onClick={() => refetch()} className="rounded-xl">
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && rows.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search materials, modules, courses"
+            aria-label="Search materials"
+            className="pl-8"
+          />
+        </div>
+      )}
+
+      {!isLoading && !error && visible.length === 0 && (
         <EmptyState
           icon={Library}
           title="No materials"
           description={
-            filter === "all"
-              ? "Materials show up here once your tutor uploads them."
-              : "Switch the filter to see other materials."
+            q
+              ? "No materials match your search."
+              : filter === "all"
+                ? "Materials show up here once your tutor uploads them."
+                : "Switch the filter to see other materials."
           }
         />
       )}
 
       {/* Course-grouped IndexList rows */}
       {!isLoading &&
+        !error &&
         groups.map((g) => (
           <section key={g.course.id} className="space-y-1">
             {/* Course heading */}
@@ -177,23 +239,15 @@ export function MaterialsPageContent() {
               {g.items.map((row, idx) => {
                 const m = row.material;
                 const Icon = MATERIAL_ICON[m.type];
-                const hasFile = !!m.fileUrl;
+                const fileUrl = openUrlOf(m);
+                const hasFile = !!fileUrl;
                 const hasBody = !!m.description;
                 const instructionsOnly = !hasFile && hasBody;
                 const expanded = expandedId === m.id;
                 return (
                   <div key={m.id} className="border-b border-border transition-colors hover:bg-muted/30">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5">
-                      <div
-                        className="flex flex-1 items-start sm:items-center gap-3 min-w-0 cursor-pointer"
-                        onClick={() => {
-                          if (instructionsOnly) {
-                            setExpandedId(expanded ? null : m.id);
-                          } else if (hasFile) {
-                            openPreview(m);
-                          }
-                        }}
-                      >
+                      <div className="flex flex-1 items-start sm:items-center gap-3 min-w-0">
                         {/* Number */}
                         <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0">
                           {String(idx + 1).padStart(2, "0")}
@@ -211,9 +265,24 @@ export function MaterialsPageContent() {
                               : ""}
                             {row.module.title}
                           </span>
-                          <span className="block text-sm font-medium leading-snug text-foreground">
-                            {m.title}
-                          </span>
+                          {hasFile || instructionsOnly ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                instructionsOnly
+                                  ? setExpandedId(expanded ? null : m.id)
+                                  : openPreview(m)
+                              }
+                              aria-expanded={instructionsOnly ? expanded : undefined}
+                              className="block text-left text-sm font-medium leading-snug text-foreground hover:text-primary"
+                            >
+                              {m.title}
+                            </button>
+                          ) : (
+                            <span className="block text-sm font-medium leading-snug text-foreground">
+                              {m.title}
+                            </span>
+                          )}
                           <span className="block font-mono text-xs text-muted-foreground mt-0.5">
                             {m.size || (instructionsOnly ? "Reading guide" : null)}
                           </span>
@@ -239,7 +308,7 @@ export function MaterialsPageContent() {
                               className="h-8 rounded-lg px-2.5 text-xs"
                               onClick={() => {
                                 void downloadFile(
-                                  m.fileUrl,
+                                  fileUrl as string,
                                   m.title,
                                   m.fileType,
                                 );
@@ -255,6 +324,7 @@ export function MaterialsPageContent() {
                             size="sm"
                             className="h-8 rounded-lg px-3 text-xs font-medium"
                             onClick={() => setExpandedId(expanded ? null : m.id)}
+                            aria-expanded={expanded}
                           >
                             {expanded ? "Hide guide" : "Read guide"}
                           </Button>
