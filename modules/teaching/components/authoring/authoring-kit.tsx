@@ -183,8 +183,11 @@ export function OptionSelect({
   placeholder,
   disabled,
   invalid,
+  ariaLabel,
 }: {
   id?: string;
+  /** For selects without a visible <Label>. */
+  ariaLabel?: string;
   value: string;
   onChange: (value: string) => void;
   options: Option[];
@@ -203,6 +206,7 @@ export function OptionSelect({
         // The base trigger capitalizes its value; titles keep their case.
         className="w-full rounded-xl *:data-[slot=select-value]:normal-case"
         aria-invalid={invalid || undefined}
+        aria-label={ariaLabel}
       >
         <SelectValue placeholder={placeholder}>
           {(v: string | null) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { pluralize, timeAgo } from "@/lib/utils";
 import { useCohortRoster } from "../api/teaching.queries";
+import { ROSTER_FILTERS, filterRoster, type RosterFilter } from "../lib/roster-risk";
+import { OptionSelect } from "./authoring/authoring-kit";
 
 interface CohortRosterTabProps {
   scheduleId: string;
@@ -15,6 +17,8 @@ interface CohortRosterTabProps {
 
 export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
   const { data: roster, isLoading, error, refetch } = useCohortRoster(scheduleId);
+  const [filter, setFilter] = useState<RosterFilter>("all");
+  const visible = filterRoster(roster ?? [], filter);
 
   return (
     <div className="space-y-4">
@@ -44,29 +48,51 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
       )}
 
       {!isLoading && !error && roster && roster.length > 0 ? (
-        <IndexList>
-          {roster.map((row, idx) => (
-            <IndexRow
-              key={row.studentId}
-              index={idx + 1}
-              title={row.name}
-              subtitle={[
-                row.email,
-                row.lastSubmittedAt
-                  ? `Last submitted ${timeAgo(row.lastSubmittedAt)}`
-                  : "No activity yet",
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              href={`/teach/cohorts/${scheduleId}/students/${row.studentId}`}
-              status={
-                <span className="text-[10px] font-mono">
-                  {pluralize(row.submissionCount, "sub")}
-                </span>
-              }
-            />
-          ))}
-        </IndexList>
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              Showing {visible.length} of {pluralize(roster.length, "student")}
+            </p>
+            <div className="w-full sm:w-[220px]">
+              <OptionSelect
+                value={filter}
+                onChange={(v) => setFilter((v || "all") as RosterFilter)}
+                options={ROSTER_FILTERS}
+                placeholder="All students"
+              ariaLabel="Filter students"
+              />
+            </div>
+          </div>
+          {visible.length === 0 ? (
+            <p className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+              No students match this view.
+            </p>
+          ) : (
+            <IndexList>
+              {visible.map((row, idx) => (
+                <IndexRow
+                  key={row.studentId}
+                  index={idx + 1}
+                  title={row.name}
+                  subtitle={[
+                    row.email,
+                    row.lastSubmittedAt
+                      ? `Last submitted ${timeAgo(row.lastSubmittedAt)}`
+                      : "No activity yet",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  href={`/teach/cohorts/${scheduleId}/students/${row.studentId}`}
+                  status={
+                    <span className="text-[10px] font-mono">
+                      {pluralize(row.submissionCount, "sub")}
+                    </span>
+                  }
+                />
+              ))}
+            </IndexList>
+          )}
+        </>
       ) : !isLoading && !error ? (
         <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
           No students enrolled in this cohort roster yet.
