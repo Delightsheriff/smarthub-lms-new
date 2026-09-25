@@ -19,7 +19,10 @@ import { Button } from "@/components/ui/button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
-import { useTrackMaterialDownload } from "@/modules/learning/api/content.queries";
+import {
+  useTrackMaterialDownload,
+  useCourseProgress,
+} from "@/modules/learning/api/content.queries";
 import { downloadFile } from "@/lib/cloudinary-download";
 import type { Material, Recording } from "@/modules/learning/types";
 import type { Assignment } from "@/modules/assignments/types";
@@ -57,7 +60,14 @@ const STATUS_LABEL: Record<Assignment["status"], string> = {
  * ids are stable hash anchors so the outline side-nav can deep-link.
  */
 
-export function RecordingsSection({ items }: { items: Recording[] }) {
+export function RecordingsSection({
+  items,
+  courseId,
+}: {
+  items: Recording[];
+  courseId?: string;
+}) {
+  const { data: completedIds } = useCourseProgress(courseId);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Guard: a locked recording can never become the active player target.
   const active =
@@ -73,6 +83,7 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
           const open = () => {
             if (!locked) setActiveId(r.id);
           };
+          const isWatched = !!completedIds?.has(r.id);
           return (
             <li
               key={r.id}
@@ -101,7 +112,7 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
                   onClick={open}
                   className="mt-0.5 shrink-0 rounded-full text-primary"
                 >
-                  {r.watched ? (
+                  {isWatched ? (
                     <CheckCircle2 className="h-5 w-5 text-success" />
                   ) : (
                     <PlayCircle className="h-5 w-5" />
@@ -148,6 +159,8 @@ export function RecordingsSection({ items }: { items: Recording[] }) {
       <RecordingPlayerDialog
         recording={active}
         open={!!active}
+        courseId={courseId}
+        completed={!!active && !!completedIds?.has(active.id)}
         onOpenChange={(o) => {
           if (!o) setActiveId(null);
         }}

@@ -11,7 +11,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { IndexList } from "@/components/ui/index-list";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
-import { useMyRecordings } from "../api/content.queries";
+import { useMyRecordings, useAllProgress } from "../api/content.queries";
 import { cn, formatDate, pluralize } from "@/lib/utils";
 import type { RecordingWithContext } from "../types";
 
@@ -27,21 +27,24 @@ const FILTERS: { value: Filter; label: string }[] = [
  *  student's enrolments, grouped by course / module. */
 export function RecordingsPageContent() {
   const { data, isLoading, isFetching, refetch } = useMyRecordings();
+  const { data: progressSet } = useAllProgress();
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rows = useMemo(() => data || [], [data]);
 
+  const isCompleted = (id: string) => !!progressSet?.has(id);
+
   const visible = useMemo(() => {
     switch (filter) {
       case "unwatched":
-        return rows.filter((r) => !r.recording.watched);
+        return rows.filter((r) => !isCompleted(r.recording.id));
       case "watched":
-        return rows.filter((r) => r.recording.watched);
+        return rows.filter((r) => isCompleted(r.recording.id));
       default:
         return rows;
     }
-  }, [rows, filter]);
+  }, [rows, filter, progressSet]);
 
   // Group the flat feed into course / recordings.
   const groups = useMemo(() => groupByCourse(visible), [visible]);
@@ -52,14 +55,17 @@ export function RecordingsPageContent() {
     day: "numeric",
   });
 
-  const unwatched = rows.filter((r) => !r.recording.watched && !r.recording.isLocked);
-  const watchedCount = rows.filter((r) => r.recording.watched).length;
+  const unwatched = rows.filter(
+    (r) => !isCompleted(r.recording.id) && !r.recording.isLocked,
+  );
+  const watchedCount = rows.filter((r) => isCompleted(r.recording.id)).length;
   const nextToWatch = unwatched[0];
 
   // Never open a locked recording, even if some other path set activeId.
-  const active =
-    rows.find((r) => r.recording.id === activeId && !r.recording.isLocked)
-      ?.recording || null;
+  const activeRow = rows.find(
+    (r) => r.recording.id === activeId && !r.recording.isLocked,
+  );
+  const active = activeRow?.recording || null;
 
   return (
     <div className="space-y-6">
@@ -231,7 +237,7 @@ export function RecordingsPageContent() {
                         aria-label={`Play ${r.title}`}
                         className="mt-0.5 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary/20"
                       >
-                        {r.watched ? (
+                        {isCompleted(r.id) ? (
                           <CheckCircle2 className="h-4 w-4 text-success" />
                         ) : (
                           <PlayCircle className="h-4 w-4" />
@@ -274,7 +280,7 @@ export function RecordingsPageContent() {
                           {r.publishedAt
                             ? `published ${formatDate(r.publishedAt)}`
                             : ""}
-                          {r.watched && (
+                          {isCompleted(r.id) && (
                             <span className="ml-2 text-success font-sans">· Completed</span>
                           )}
                         </p>
@@ -306,6 +312,8 @@ export function RecordingsPageContent() {
       <RecordingPlayerDialog
         recording={active}
         open={!!active}
+        courseId={activeRow?.course.id}
+        completed={active ? isCompleted(active.id) : false}
         onOpenChange={(o) => {
           if (!o) setActiveId(null);
         }}

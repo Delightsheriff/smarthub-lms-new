@@ -74,3 +74,13 @@ export interface ApiMaterialWithContext {
   module: ApiContentModuleRef;
   material: ApiMaterial;
 }
+
+export type ContentProgressType = "recording" | "material" | "assignment";
+
+export interface ApiContentProgress {
+  contentType: ContentProgressType;
+  contentId: string;
+  courseId?: string;
+  completedAt: string;
+  source?: "manual" | "auto";
+}

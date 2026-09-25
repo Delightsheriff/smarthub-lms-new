@@ -211,7 +211,7 @@ export function CourseModulePageContent({
 
               {visibleTabs.includes("recordings") && (
                 <TabsContent value="recordings">
-                  <RecordingsSection items={mod.recordings} />
+                  <RecordingsSection items={mod.recordings} courseId={course.id} />
                 </TabsContent>
               )}
               {visibleTabs.includes("materials") && (

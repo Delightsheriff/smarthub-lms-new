@@ -9,6 +9,7 @@ import {
   normaliseRecordingWithContext,
   normaliseMaterialWithContext,
 } from "./normalise";
+import type { ContentProgressType } from "../types/api.types";
 
 export const LEARNING_QUERY_KEYS = {
   recordingsByModule: (moduleId?: string) =>
@@ -102,3 +103,114 @@ export function useMyMaterials() {
     },
   });
 }
+
+/** Cache key for one course's completion set. */
+export const courseProgressKey = (courseId: string | undefined) =>
+  ["learning", "progress", courseId] as const;
+
+export const allProgressKey = ["learning", "progress", "all"] as const;
+
+/**
+ * Which items the student has marked complete in this course, as a Set
+ * of contentIds for O(1) lookup from list rows.
+ */
+export function useCourseProgress(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseProgressKey(courseId),
+    queryFn: async () => {
+      const rows = await learningService.getCourseProgress(courseId as string);
+      return new Set(rows.map((r) => r.contentId));
+    },
+    enabled: !!courseId,
+  });
+}
+
+/**
+ * Completion across every course, as a Set of contentIds. The
+ * cross-course recordings feed spans courses, so a course-scoped
+ * fetch would mean one request per course just to shade the rows.
+ */
+export function useAllProgress() {
+  return useQuery({
+    queryKey: allProgressKey,
+    queryFn: async () => {
+      const rows = await learningService.getAllProgress();
+      return new Set(rows.map((r) => r.contentId));
+    },
+  });
+}
+
+/**
+ * Toggle one item's completion (optimistic, with rollback).
+ */
+export function useToggleContentComplete(courseId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      contentType: ContentProgressType;
+      contentId: string;
+      completed: boolean;
+    }) => {
+      if (input.completed) {
+        await learningService.unmarkContentComplete({
+          contentType: input.contentType,
+          contentId: input.contentId,
+        });
+      } else {
+        await learningService.markContentComplete({
+          courseId: courseId as string,
+          contentType: input.contentType,
+          contentId: input.contentId,
+        });
+      }
+    },
+    onMutate: async (input) => {
+      const cKey = courseProgressKey(courseId);
+      if (courseId) await qc.cancelQueries({ queryKey: cKey });
+      await qc.cancelQueries({ queryKey: allProgressKey });
+
+      const prevCourse = courseId
+        ? qc.getQueryData<Set<string>>(cKey)
+        : undefined;
+      const prevAll = qc.getQueryData<Set<string>>(allProgressKey);
+
+      if (courseId && prevCourse) {
+        const nextCourse = new Set(prevCourse);
+        if (input.completed) {
+          nextCourse.delete(input.contentId);
+        } else {
+          nextCourse.add(input.contentId);
+        }
+        qc.setQueryData(cKey, nextCourse);
+      }
+
+      if (prevAll) {
+        const nextAll = new Set(prevAll);
+        if (input.completed) {
+          nextAll.delete(input.contentId);
+        } else {
+          nextAll.add(input.contentId);
+        }
+        qc.setQueryData(allProgressKey, nextAll);
+      }
+
+      return { prevCourse, prevAll };
+    },
+    onError: (_err, _input, context) => {
+      if (courseId && context?.prevCourse) {
+        qc.setQueryData(courseProgressKey(courseId), context.prevCourse);
+      }
+      if (context?.prevAll) {
+        qc.setQueryData(allProgressKey, context.prevAll);
+      }
+    },
+    onSettled: () => {
+      if (courseId) {
+        qc.invalidateQueries({ queryKey: courseProgressKey(courseId) });
+      }
+      qc.invalidateQueries({ queryKey: allProgressKey });
+      qc.invalidateQueries({ queryKey: COURSES_QUERY_KEYS.all });
+    },
+  });
+}
+

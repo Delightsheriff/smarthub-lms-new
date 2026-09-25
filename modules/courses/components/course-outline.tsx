@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/accordion";
 import { CircularProgress } from "@/components/ui/circular-progress";
 import { cn } from "@/lib/utils";
+import { useCourseProgress } from "@/modules/learning/api/content.queries";
 import type { Material, Module } from "@/modules/learning/types";
 
 const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
@@ -31,6 +32,10 @@ const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
 interface CourseOutlineProps {
   slug: string;
   modules: Module[];
+  /** Course ID used to fetch completion ticks. */
+  courseId?: string;
+  /** Explicit completion set override. */
+  completedIds?: Set<string>;
   /** Overall course completion (0–100) — shown as a ring at the top of
    *  the rail so "how far in am I" doesn't require scrolling to the
    *  overview page. Omitted on surfaces with no single progress number
@@ -58,12 +63,16 @@ interface CourseOutlineProps {
 export function CourseOutline({
   slug,
   modules,
+  courseId,
+  completedIds,
   courseProgress,
   onItemClick,
   basePath,
   assignmentHref,
   emptyHint,
 }: CourseOutlineProps) {
+  const { data: progressSet } = useCourseProgress(courseId);
+  const activeCompletedIds = completedIds ?? progressSet;
   const pathname = usePathname();
   const params = useParams();
   const activeModuleSlug =
@@ -172,19 +181,22 @@ export function CourseOutline({
 
               <AccordionContent className="pl-9 pr-2 pb-1 pt-1">
                 <ul className="space-y-0.5">
-                  {mod.recordings.map((r) => (
-                    <OutlineItem
-                      key={r.id}
-                      label={r.title}
-                      href={`${moduleHref}#recording-${r.id}`}
-                      icon={r.watched ? CheckCircle2 : PlayCircle}
-                      iconClassName={r.watched ? "text-success" : "text-primary"}
-                      active={
-                        isActiveModule && activeHash === `recording-${r.id}`
-                      }
-                      onClick={onItemClick}
-                    />
-                  ))}
+                  {mod.recordings.map((r) => {
+                    const isWatched = !!activeCompletedIds?.has(r.id);
+                    return (
+                      <OutlineItem
+                        key={r.id}
+                        label={r.title}
+                        href={`${moduleHref}#recording-${r.id}`}
+                        icon={isWatched ? CheckCircle2 : PlayCircle}
+                        iconClassName={isWatched ? "text-success" : "text-primary"}
+                        active={
+                          isActiveModule && activeHash === `recording-${r.id}`
+                        }
+                        onClick={onItemClick}
+                      />
+                    );
+                  })}
                   {mod.materials.map((m) => (
                     <OutlineItem
                       key={m.id}

@@ -19,4 +19,6 @@ export const LEARNING_ENDPOINTS = {
     `${LMS_PREFIX}/materials/${materialId}/download`,
   ASSIGNMENTS_BY_MODULE: (moduleId: string) =>
     `${LMS_PREFIX}/assignments/module/${moduleId}`,
+  /** Per-student completion tracking: GET (by course or all), POST, DELETE */
+  PROGRESS: `${LMS_PREFIX}/progress`,
 } as const;

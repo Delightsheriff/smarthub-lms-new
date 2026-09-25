@@ -76,6 +76,7 @@ export default function CourseLayout({
               ) : data ? (
                 <CourseOutline
                   slug={slug}
+                  courseId={data.course.id}
                   modules={modulesForOutline}
                   courseProgress={data.course.progress}
                   onItemClick={() => setDrawerOpen(false)}
@@ -96,6 +97,7 @@ export default function CourseLayout({
           ) : data ? (
             <CourseOutline
               slug={slug}
+              courseId={data.course.id}
               modules={modulesForOutline}
               courseProgress={data.course.progress}
             />

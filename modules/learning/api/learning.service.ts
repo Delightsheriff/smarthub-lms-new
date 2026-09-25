@@ -2,6 +2,8 @@ import { apiClient } from "@/lib/api";
 import { LEARNING_ENDPOINTS } from "../config/endpoints";
 import type {
   ApiAssignment,
+  ApiContentProgress,
+  ContentProgressType,
   ApiMaterial,
   ApiMaterialWithContext,
   ApiRecording,
@@ -39,6 +41,33 @@ class LearningService {
 
   async trackRecordingView(recordingId: string): Promise<void> {
     await apiClient.patch(LEARNING_ENDPOINTS.RECORDING_VIEW(recordingId));
+  }
+
+  /** Completion rows for one course. */
+  async getCourseProgress(courseId: string): Promise<ApiContentProgress[]> {
+    return apiClient.get<ApiContentProgress[]>(LEARNING_ENDPOINTS.PROGRESS, {
+      params: { courseId },
+    });
+  }
+
+  /** Every completion row for the caller across all courses. */
+  async getAllProgress(): Promise<ApiContentProgress[]> {
+    return apiClient.get<ApiContentProgress[]>(LEARNING_ENDPOINTS.PROGRESS);
+  }
+
+  async markContentComplete(input: {
+    courseId: string;
+    contentType: ContentProgressType;
+    contentId: string;
+  }): Promise<void> {
+    await apiClient.post(LEARNING_ENDPOINTS.PROGRESS, input);
+  }
+
+  async unmarkContentComplete(input: {
+    contentType: ContentProgressType;
+    contentId: string;
+  }): Promise<void> {
+    await apiClient.delete(LEARNING_ENDPOINTS.PROGRESS, { data: input });
   }
 
   async getMaterialsByModule(moduleId: string): Promise<ApiMaterial[]> {
