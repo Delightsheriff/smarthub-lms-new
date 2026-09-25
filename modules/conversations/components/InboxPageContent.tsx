@@ -18,23 +18,15 @@ import { useConversations, useMarkConversationRead } from "../api/conversations.
 import { ConversationListItemRow } from "./ConversationListItemRow";
 import { AssignmentThread } from "@/modules/messaging/components/AssignmentThread";
 import { cn, pluralize } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function InboxPageContent() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktop = !useIsMobile();
 
   const { data: conversations, isLoading, isFetching, error, refetch } = useConversations();
   const markRead = useMarkConversationRead();
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
 
   const filtered = (conversations || []).filter((c) => {
     if (typeFilter === "all") return true;
