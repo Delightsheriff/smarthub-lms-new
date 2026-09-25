@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
@@ -84,8 +90,15 @@ function StudentAssignmentsBody() {
   const reviewedCount = (assignments || []).filter((a) => a.assignment.status === "graded").length;
   const submittedCount = (assignments || []).filter((a) => a.assignment.status === "submitted").length;
 
-  const urgentAssignment = pendingAssignments[0];
-  const upcomingLedgerItems = pendingAssignments.slice(1, 6);
+  // The hero is the open item due SOONEST that isn't already overdue;
+  // the ledger lists the next ones by due date. (API order is arbitrary.)
+  const dueMs = (iso?: string) => (iso ? Date.parse(iso) : Infinity);
+  const [now] = useState(() => Date.now());
+  const openByDue = pendingAssignments
+    .filter((a) => a.assignment.status !== "overdue" && dueMs(a.assignment.dueAt) >= now)
+    .sort((a, b) => dueMs(a.assignment.dueAt) - dueMs(b.assignment.dueAt));
+  const urgentAssignment = openByDue[0];
+  const upcomingLedgerItems = openByDue.slice(1, 6);
 
   const filtered = (assignments || [])
     .filter(({ assignment, course, module }) => {
@@ -106,13 +119,21 @@ function StudentAssignmentsBody() {
 
       return true;
     })
-    // Soonest/most-recently-due first, on every filter tab — not just
-    // whatever order the API happens to return.
+    // Newest due date first on every filter (legacy 7f15823); undated last.
     .sort((a, b) => {
-      const da = a.assignment.dueAt ? Date.parse(a.assignment.dueAt) : Infinity;
-      const db = b.assignment.dueAt ? Date.parse(b.assignment.dueAt) : Infinity;
-      return da - db;
+      const da = a.assignment.dueAt ? Date.parse(a.assignment.dueAt) : -Infinity;
+      const db = b.assignment.dueAt ? Date.parse(b.assignment.dueAt) : -Infinity;
+      return db - da;
     });
+
+  const overdueCount = (assignments || []).filter((a) => a.assignment.status === "overdue").length;
+  const statusOptions: { value: Filter; label: string }[] = [
+    { value: "all", label: `All (${assignments?.length || 0})` },
+    { value: "pending", label: `Pending (${pendingAssignments.length})` },
+    { value: "submitted", label: `Submitted (${submittedCount})` },
+    { value: "graded", label: `Reviewed (${reviewedCount})` },
+    { value: "overdue", label: `Overdue (${overdueCount})` },
+  ];
 
   return (
     <div className="space-y-6">
@@ -231,27 +252,20 @@ function StudentAssignmentsBody() {
           />
         </div>
 
-        <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as Filter)} className="w-full">
-            <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
-              <TabsTrigger value="all" className="rounded-lg text-xs">
-                All ({assignments?.length || 0})
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="rounded-lg text-xs">
-                Pending ({pendingAssignments.length})
-              </TabsTrigger>
-              <TabsTrigger value="submitted" className="rounded-lg text-xs">
-                Submitted ({submittedCount})
-              </TabsTrigger>
-              <TabsTrigger value="graded" className="rounded-lg text-xs">
-                Reviewed ({reviewedCount})
-              </TabsTrigger>
-              <TabsTrigger value="overdue" className="rounded-lg text-xs">
-                Overdue
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v as Filter)}>
+          <SelectTrigger aria-label="Filter assignments" className="w-full rounded-xl text-xs sm:w-[200px]">
+            <SelectValue>
+              {(v: string | null) => statusOptions.find((o) => o.value === v)?.label ?? "All"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.map((o) => (
+              <SelectItem key={o.value} value={o.value} className="text-xs">
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading && (
