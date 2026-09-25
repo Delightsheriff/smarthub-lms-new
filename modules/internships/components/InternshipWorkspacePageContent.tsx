@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowUpRight,
   BriefcaseBusiness,
   CalendarDays,
@@ -12,6 +13,7 @@ import {
   FileCheck2,
   FlaskConical,
   Mail,
+  RotateCw,
   Send,
   UserRound,
 } from "lucide-react";
@@ -115,6 +117,23 @@ export function InternshipWorkspacePageContent() {
     );
   }
 
+  // Error before empty: a failed fetch must not claim "no placement".
+  // With cached data from an earlier load, keep showing it instead.
+  if (isError && !data) {
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Couldn't load your internship workspace"
+        description="Check your connection and try again."
+        action={
+          <Button variant="outline" onClick={() => void refetch()} disabled={isFetching}>
+            <RotateCw className="h-4 w-4" /> Try again
+          </Button>
+        }
+      />
+    );
+  }
+
   if (!data) {
     return (
       <EmptyState
@@ -129,8 +148,6 @@ export function InternshipWorkspacePageContent() {
       />
     );
   }
-
-  if (isError) return null;
 
   const { internship, tasks, checkIns, progressPercent } = data;
 
@@ -445,7 +462,7 @@ function CheckInsSection({
             title={
               <div>
                 <span className="font-semibold text-sm text-foreground">
-                  {ci.weekOf || "Weekly check-in"}
+                  {weekOfLabel(ci.weekOf)}
                 </span>
                 <p className="mt-1 text-xs text-muted-foreground font-normal leading-relaxed">
                   {ci.summary}
@@ -565,4 +582,11 @@ function CheckInDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+/** "Week of 22 Sept 2026"; the raw value if it isn't a parseable date. */
+function weekOfLabel(weekOf: string | undefined): string {
+  if (!weekOf) return "Weekly check-in";
+  const formatted = formatDate(weekOf);
+  return formatted === "—" ? weekOf : `Week of ${formatted}`;
 }
