@@ -86,4 +86,13 @@ describe("teaching authoring contracts", () => {
       connected: false,
     });
   });
+
+  it("patches per-cohort module status", async () => {
+    await teachingService.setCohortModuleStatus("s1", "m1", { status: "completed" });
+    expect(apiClient.patch).toHaveBeenCalledWith(
+      "/lms/teaching/cohorts/s1/modules/m1",
+      { status: "completed" },
+      SILENT,
+    );
+  });
 });

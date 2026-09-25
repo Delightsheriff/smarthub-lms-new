@@ -13,6 +13,8 @@ import {
 } from "./normalise";
 import type {
   AttachAssignmentToSchedulePayload,
+  CohortModuleRow,
+  CohortModuleStatus,
   CreateAssignmentPayload,
   CreateMaterialPayload,
   CreateRecordingPayload,
@@ -44,6 +46,7 @@ export const TEACHING_QUERY_KEYS = {
   myModules: ["teaching", "my-modules"] as const,
   cohortRecordings: (id: string) =>
     ["teaching", "cohort", id, "recordings"] as const,
+  cohortModules: (id: string) => ["teaching", "cohort", id, "modules"] as const,
   cohortSlackStatus: (id: string) =>
     ["teaching", "cohort", id, "slack-status"] as const,
   moduleAssignments: (moduleId: string) =>
@@ -481,6 +484,48 @@ export function useDetachFromSchedule(scheduleId: string) {
         : teachingService.detachAssignmentFromSchedule(vars.id, scheduleId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["teaching"] });
+    },
+  });
+}
+
+// ─── Module status per cohort ──────────────────────────────────────
+
+export function useCohortModules(scheduleId: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.cohortModules(scheduleId || ""),
+    queryFn: () => teachingService.getCohortModules(scheduleId as string),
+    enabled: !!scheduleId,
+    staleTime: 30 * 1000,
+  });
+}
+
+/** Optimistic status flip, rolled back if the API refuses it. */
+export function useSetCohortModuleStatus(scheduleId: string) {
+  const qc = useQueryClient();
+  const key = TEACHING_QUERY_KEYS.cohortModules(scheduleId);
+  return useMutation({
+    mutationFn: (vars: { moduleId: string; status: CohortModuleStatus }) =>
+      teachingService.setCohortModuleStatus(scheduleId, vars.moduleId, {
+        status: vars.status,
+      }),
+    onMutate: async (vars) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<CohortModuleRow[]>(key);
+      if (prev) {
+        qc.setQueryData<CohortModuleRow[]>(
+          key,
+          prev.map((r) =>
+            r.moduleId === vars.moduleId ? { ...r, status: vars.status } : r,
+          ),
+        );
+      }
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: key });
     },
   });
 }

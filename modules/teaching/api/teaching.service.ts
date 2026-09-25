@@ -15,6 +15,8 @@ import type {
   CohortStudentAssignments,
   CohortRecordingRow,
   CohortSlackStatus,
+  CohortModuleRow,
+  CohortModuleStatus,
   ApiAssignmentDetail,
   ApiInstructorModule,
   ApiMaterialDetail,
@@ -172,6 +174,25 @@ class TeachingService {
       TEACHING_ENDPOINTS.MY_MODULES,
     );
     return rows || [];
+  }
+
+  async getCohortModules(scheduleId: string): Promise<CohortModuleRow[]> {
+    const rows = await apiClient.get<CohortModuleRow[]>(
+      TEACHING_ENDPOINTS.COHORT_MODULES(scheduleId),
+    );
+    return rows || [];
+  }
+
+  async setCohortModuleStatus(
+    scheduleId: string,
+    moduleId: string,
+    payload: { status: CohortModuleStatus; notes?: string },
+  ): Promise<CohortModuleRow> {
+    return apiClient.patch<CohortModuleRow>(
+      TEACHING_ENDPOINTS.COHORT_MODULE_STATUS(scheduleId, moduleId),
+      payload,
+      SILENT,
+    );
   }
 
   async getCohortSlackStatus(scheduleId: string): Promise<CohortSlackStatus> {

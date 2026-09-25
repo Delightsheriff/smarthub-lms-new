@@ -161,3 +161,26 @@ export function refId(
   if (!ref) return undefined;
   return typeof ref === "string" ? ref : ref._id;
 }
+
+/** Per-cohort module status; `not-started` when no row exists yet. */
+export type CohortModuleStatus = "not-started" | "in-progress" | "completed";
+
+export const COHORT_MODULE_STATUS_OPTIONS: { value: CohortModuleStatus; label: string }[] = [
+  { value: "not-started", label: "Not started" },
+  { value: "in-progress", label: "In progress" },
+  { value: "completed", label: "Completed" },
+];
+
+/** `GET /lms/teaching/cohorts/:id/modules` row (and the PATCH response). */
+export interface CohortModuleRow {
+  moduleId: string;
+  title: string;
+  titleSlug?: string;
+  order: number;
+  estimatedDuration?: string;
+  customDuration?: string;
+  status: CohortModuleStatus;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  notes?: string;
+}

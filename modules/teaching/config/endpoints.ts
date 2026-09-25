@@ -21,6 +21,12 @@ export const TEACHING_ENDPOINTS = {
   /** RecordingSchedule rows for one cohort: `{ recordingId, isVisible }`. */
   COHORT_RECORDINGS: (scheduleId: string) =>
     `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/recordings`,
+  /** Modules on the cohort's course with the per-cohort status overlay. */
+  COHORT_MODULES: (scheduleId: string) =>
+    `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/modules`,
+  /** PATCH `{ status, notes? }` — upserts the cohort's ModuleSchedule row. */
+  COHORT_MODULE_STATUS: (scheduleId: string, moduleId: string) =>
+    `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/modules/${moduleId}`,
   /** `{ connected, channelName? }` — drives the attach Slack toggle. */
   COHORT_SLACK_STATUS: (scheduleId: string) =>
     `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/slack-status`,
