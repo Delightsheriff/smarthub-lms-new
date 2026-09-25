@@ -128,10 +128,9 @@ TASK F-UP: small follow-ups. One commit each.
       blocks them; scholars who are students get the simpler gate with no crop.
       Should awarded scholars get the crop flow instead? That would mean
       ProfilePhotoGate skipping awarded scholars.
-   b. The payment receipt cap is 10MB for images too; the API allows 25MB.
-      Keep it or relax it?
-   c. Self-paced revenue-share pay items count toward Earnings totals but have
-      no cohort row (the backend groups by cohort). Is the link-only port OK?
+   b. DECIDED: keep the 10MB receipt cap.
+   c. DECIDED: self-paced earnings stay UI-only, with no backend work. The
+      link-only port matching legacy is final.
    d. N3 glass/motion, and N4 the instructor course-outline rail (see §3).
 ```
 
