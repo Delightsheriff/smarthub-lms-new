@@ -1,17 +1,13 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import type { PaginationMeta } from "@/lib/api/types";
 import { webinarsService } from "./webinars.service";
 import { normaliseWebinar } from "./normalise";
 import type { WebinarSummary } from "../types";
 
 export interface WebinarsPage {
   items: WebinarSummary[];
-  meta: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    pageSize: number;
-  };
+  meta: PaginationMeta;
 }
 
 export function useWebinars(
@@ -36,10 +32,10 @@ export function useWebinars(
           page: params!.page,
           pageSize: params!.pageSize,
         });
-        return { items: res.data.map(normaliseWebinar), meta: res.meta };
+        return { items: (res.data || []).map(normaliseWebinar), meta: res.meta };
       }
       const data = await webinarsService.list("upcoming");
-      return data.map(normaliseWebinar);
+      return (data || []).map(normaliseWebinar);
     },
   });
 }

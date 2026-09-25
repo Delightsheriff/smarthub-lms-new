@@ -11,4 +11,5 @@ export interface WebinarSummary {
   /** Best link to rewatch (past) — recordingLink || watchLink. */
   watchLink?: string;
   isAvailable: boolean;
+  reservationsOpen?: boolean;
 }

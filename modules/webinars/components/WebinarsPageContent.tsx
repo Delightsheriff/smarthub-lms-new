@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Presentation } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Presentation } from "lucide-react";
+import { Pager } from "@/components/ui/pager";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Stagger, StaggerItem } from "@/components/animation/stagger";
 import { pluralize } from "@/lib/utils";
-import { useWebinars } from "../api/webinars.queries";
+import { useWebinars, type WebinarsPage } from "../api/webinars.queries";
 import { WebinarCard } from "./WebinarCard";
 import type { WebinarSummary } from "../types";
 
@@ -59,9 +59,7 @@ export function WebinarsPageContent() {
   const pastQuery = useWebinars("past", { page, pageSize: PAGE_SIZE });
 
   const upcomingList = (upcomingQuery.data as WebinarSummary[]) || [];
-  const pastPage = pastQuery.data as
-    | { items: WebinarSummary[]; meta: { totalPages: number; currentPage: number } }
-    | undefined;
+  const pastPage = pastQuery.data as WebinarsPage | undefined;
   const pastList = pastPage?.items || [];
 
   const webinars = activeTab === "upcoming" ? upcomingList : pastList;
@@ -142,30 +140,13 @@ export function WebinarsPageContent() {
                 ))}
               </Stagger>
 
-              {activeTab === "past" && pastPage && pastPage.meta.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page <= 1}
-                    onClick={() => handlePageChange(page - 1)}
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                    Previous
-                  </Button>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    Page {pastPage.meta.currentPage} of {pastPage.meta.totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= pastPage.meta.totalPages}
-                    onClick={() => handlePageChange(page + 1)}
-                  >
-                    Next
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+              {activeTab === "past" && pastPage && (pastPage.meta.totalPages ?? 1) > 1 && (
+                <Pager
+                  page={page}
+                  totalPages={pastPage.meta.totalPages ?? 1}
+                  onPage={handlePageChange}
+                  label={pastPage.meta.totalItems ? `${pastPage.meta.totalItems} ${pluralize(pastPage.meta.totalItems, "recording", undefined, false)}` : undefined}
+                />
               )}
             </>
           ) : (

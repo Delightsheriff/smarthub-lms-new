@@ -18,6 +18,7 @@ export function normaliseWebinar(api: ApiWebinar): WebinarSummary {
     posterUrl: api.posterUrl,
     joinLink: api.liveLink ?? api.watchLink,
     watchLink: api.recordingLink ?? api.watchLink,
-    isAvailable: !!api.isAvailable,
+    isAvailable: api.isAvailable !== false,
+    reservationsOpen: api.reservationsOpen,
   };
 }

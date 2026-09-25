@@ -21,10 +21,6 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
   const getStatusBadge = () => {
     switch (status) {
       case "ongoing":
-        // Solid, not the tinted default `destructive` variant — "live
-        // now" is the one state on this card that should visually
-        // interrupt, matching the bold solid-active-state convention
-        // used elsewhere (sidebar, filters) rather than a soft tint.
         return (
           <Badge className="bg-destructive text-destructive-foreground animate-pulse">
             <Video className="mr-1 h-3 w-3" /> Live Now
@@ -47,7 +43,7 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
   };
 
   return (
-    <Card className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden flex flex-col justify-between hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+    <Card className="rounded-2xl border border-border bg-card shadow-xs overflow-hidden flex flex-col justify-between hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
       <div className="relative w-full h-44 bg-muted overflow-hidden">
         {webinar.posterUrl ? (
           <Image
@@ -91,22 +87,38 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
       </CardContent>
 
       <CardFooter className="px-5 pb-5 pt-4 border-t border-border mt-auto">
-        {status === "passed" && webinar.watchLink ? (
-          <Button
-            render={
-              <a
-                href={webinar.watchLink}
-                target="_blank"
-                rel="noreferrer"
-              />
-            }
-            variant="outline"
-            className="w-full rounded-xl mt-3"
-          >
-            <PlayCircle className="mr-2 h-4 w-4 text-primary" /> Watch Recording
+        {status === "passed" ? (
+          webinar.watchLink ? (
+            <Button
+              nativeButton={false}
+              render={
+                <a
+                  href={webinar.watchLink}
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+              variant="outline"
+              className="w-full rounded-xl mt-3"
+            >
+              <PlayCircle className="mr-2 h-4 w-4 text-primary" /> Watch Recording
+            </Button>
+          ) : (
+            <Button disabled variant="outline" className="w-full rounded-xl mt-3">
+              Recording Unavailable
+            </Button>
+          )
+        ) : webinar.isAvailable === false ? (
+          <Button disabled variant="outline" className="w-full rounded-xl mt-3">
+            Unavailable
           </Button>
-        ) : webinar.joinLink ? (
+        ) : webinar.reservationsOpen === false ? (
+          <Button disabled variant="outline" className="w-full rounded-xl mt-3">
+            Registration Closed
+          </Button>
+        ) : (status === "ongoing" || isJoinOpen) && webinar.joinLink ? (
           <Button
+            nativeButton={false}
             render={
               <a
                 href={webinar.joinLink}
@@ -114,19 +126,18 @@ export function WebinarCard({ webinar }: WebinarCardProps) {
                 rel="noreferrer"
               />
             }
-            disabled={!isJoinOpen && status !== "ongoing"}
             className="w-full rounded-xl mt-3"
           >
             <ExternalLink className="mr-2 h-4 w-4" />
-            {status === "ongoing"
-              ? "Join Live Now"
-              : isJoinOpen
-                ? "Join Session"
-                : "Join Link Opens 10m Before"}
+            {status === "ongoing" ? "Join Live Now" : "Join Session"}
+          </Button>
+        ) : webinar.joinLink ? (
+          <Button disabled variant="outline" className="w-full rounded-xl mt-3">
+            Join Link Opens 10m Before
           </Button>
         ) : (
           <Button disabled variant="outline" className="w-full rounded-xl mt-3">
-            Registration Closed
+            Link Coming Soon
           </Button>
         )}
       </CardFooter>
