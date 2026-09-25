@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -11,12 +12,21 @@ import {
   Lock,
   Notebook,
   PlayCircle,
+  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
+import { ContentToolbar } from "@/components/ui/content-toolbar";
+import { EmptyState as SharedEmptyState } from "@/components/ui/empty-state";
+import { Pager } from "@/components/ui/pager";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { pluralize } from "@/lib/utils";
+import {
+  recordingKindOf,
+  useContentFilter,
+} from "@/modules/learning/utils/content-filter";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { MaterialPreviewDialog } from "./material-preview-dialog";
 import {
@@ -34,16 +44,7 @@ const MATERIAL_ICON: Record<Material["type"], React.ElementType> = {
   link: LinkIcon,
 };
 
-const STATUS_VARIANT: Record<
-  Assignment["status"],
-  "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
-> = {
-  draft: "secondary",
-  submitted: "outline",
-  graded: "default",
-  overdue: "destructive",
-  returned: "secondary",
-};
+const RECORDINGS_PER_PAGE = 10;
 
 const STATUS_LABEL: Record<Assignment["status"], string> = {
   draft: "Not started",
@@ -69,16 +70,73 @@ export function RecordingsSection({
 }) {
   const { data: completedIds } = useCourseProgress(courseId);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const filter = useContentFilter(items, {
+    getTitle: (r) => r.title,
+    getSubtitle: (r) => r.description,
+    getKind: (r) => recordingKindOf(r.title),
+  });
+
+  // `?recording=<id>` (from the course outline) turns to the page that
+  // holds it and opens the player once. Locked recordings never open.
+  const searchParams = useSearchParams();
+  const linkedId = searchParams.get("recording");
+  const [dismissedLink, setDismissedLink] = useState<string | null>(null);
+  const linkedIndex = linkedId
+    ? filter.filtered.findIndex((r) => r.id === linkedId)
+    : -1;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filter.filtered.length / RECORDINGS_PER_PAGE),
+  );
+  const [pickedPage, setPickedPage] = useState<number | null>(null);
+  const linkedPage =
+    linkedIndex >= 0 ? Math.floor(linkedIndex / RECORDINGS_PER_PAGE) + 1 : 1;
+  // Clamp rather than reset when filtering shrinks the list.
+  const page = Math.min(pickedPage ?? linkedPage, totalPages);
+  const pageItems = filter.filtered.slice(
+    (page - 1) * RECORDINGS_PER_PAGE,
+    page * RECORDINGS_PER_PAGE,
+  );
+
+  const linkedRecording =
+    linkedId && dismissedLink !== linkedId
+      ? items.find((r) => r.id === linkedId && !r.isLocked)
+      : undefined;
   // Guard: a locked recording can never become the active player target.
   const active =
-    items.find((r) => r.id === activeId && !r.isLocked) || null;
+    items.find((r) => r.id === activeId && !r.isLocked) ||
+    linkedRecording ||
+    null;
 
   if (items.length === 0) return <EmptyState label="No recordings yet" />;
 
   return (
     <>
+      <ContentToolbar
+        query={filter.query}
+        onQuery={(v) => {
+          filter.setQuery(v);
+          setPickedPage(null);
+        }}
+        kind={filter.kind}
+        onKind={(v) => {
+          filter.setKind(v);
+          setPickedPage(null);
+        }}
+        direction={filter.direction}
+        onDirection={filter.setDirection}
+        placeholder="Search recordings"
+        label="Search recordings"
+        showing={filter.filtered.length}
+        total={filter.total}
+      />
+      {pageItems.length === 0 && (
+        <EmptyState label="No recordings match your search" />
+      )}
+      {pageItems.length > 0 && (
       <ul className="divide-y rounded-2xl border border-border bg-card">
-        {items.map((r) => {
+        {pageItems.map((r) => {
           const locked = r.isLocked;
           const open = () => {
             if (!locked) setActiveId(r.id);
@@ -156,13 +214,23 @@ export function RecordingsSection({
           );
         })}
       </ul>
+      )}
+      <Pager
+        page={page}
+        totalPages={totalPages}
+        onPage={setPickedPage}
+        label={pluralize(filter.filtered.length, "recording")}
+      />
       <RecordingPlayerDialog
         recording={active}
         open={!!active}
         courseId={courseId}
         completed={!!active && !!completedIds?.has(active.id)}
         onOpenChange={(o) => {
-          if (!o) setActiveId(null);
+          if (!o) {
+            setActiveId(null);
+            if (linkedId) setDismissedLink(linkedId);
+          }
         }}
       />
     </>
@@ -171,6 +239,10 @@ export function RecordingsSection({
 
 export function MaterialsSection({ items }: { items: Material[] }) {
   const trackDownload = useTrackMaterialDownload();
+  const filter = useContentFilter(items, {
+    getTitle: (m) => m.title,
+    getSubtitle: (m) => m.category ?? m.type,
+  });
   const [previewing, setPreviewing] = useState<{
     title: string;
     url: string;
@@ -191,8 +263,21 @@ export function MaterialsSection({ items }: { items: Material[] }) {
 
   return (
     <>
-      <ul className="divide-y rounded-2xl border border-border bg-card">
-        {items.map((m) => {
+      <ContentToolbar
+        query={filter.query}
+        onQuery={filter.setQuery}
+        direction={filter.direction}
+        onDirection={filter.setDirection}
+        placeholder="Search materials"
+        label="Search materials"
+        showing={filter.filtered.length}
+        total={filter.total}
+      />
+      {filter.filtered.length === 0 && (
+        <EmptyState label="No materials match your search" />
+      )}
+      <ul className="divide-y rounded-2xl border border-border bg-card empty:hidden">
+        {filter.filtered.map((m) => {
           const Icon = MATERIAL_ICON[m.type];
           const links = m.links;
           const hasFile = links.length > 0;
@@ -331,11 +416,30 @@ export function AssignmentsSection({
   courseSlug: string;
   moduleSlug: string;
 }) {
+  const filter = useContentFilter(items, {
+    getTitle: (a) => a.title,
+    getSubtitle: (a) => a.description,
+  });
+
   if (items.length === 0) return <EmptyState label="No assignments yet" />;
 
   return (
-    <ul className="divide-y rounded-2xl border border-border bg-card">
-      {items.map((a) => (
+    <>
+    <ContentToolbar
+      query={filter.query}
+      onQuery={filter.setQuery}
+      direction={filter.direction}
+      onDirection={filter.setDirection}
+      placeholder="Search assignments"
+      label="Search assignments"
+      showing={filter.filtered.length}
+      total={filter.total}
+    />
+    {filter.filtered.length === 0 && (
+      <EmptyState label="No assignments match your search" />
+    )}
+    <ul className="divide-y rounded-2xl border border-border bg-card empty:hidden">
+      {filter.filtered.map((a) => (
         <li key={a.id} id={`assignment-${a.id}`} className="scroll-mt-24">
           <Link
             href={`/courses/${courseSlug}/modules/${moduleSlug}/assignments/${a.id}`}
@@ -350,9 +454,7 @@ export function AssignmentsSection({
               </p>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
-              <Badge variant={STATUS_VARIANT[a.status]}>
-                {STATUS_LABEL[a.status]}
-              </Badge>
+              <StatusBadge status={a.status} label={STATUS_LABEL[a.status]} />
               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-primary transition-colors">
                 Open
                 <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
@@ -362,13 +464,10 @@ export function AssignmentsSection({
         </li>
       ))}
     </ul>
+    </>
   );
 }
 
 function EmptyState({ label }: { label: string }) {
-  return (
-    <p className="text-sm text-muted-foreground py-6 text-center border border-border bg-card shadow-sm rounded-2xl">
-      {label}
-    </p>
-  );
+  return <SharedEmptyState icon={Inbox} title={label} />;
 }
