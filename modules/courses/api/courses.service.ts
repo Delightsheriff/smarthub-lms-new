@@ -21,12 +21,13 @@ class CoursesService {
   /**
    * The curriculum PDF is rendered per request from live course data.
    * The bytes come back on an authenticated call and are saved straight
-   * to disk. The mock adapter currently resolves `getBlob` to an empty
-   * Blob, so this is a no-op until the real upload stream lands.
+   * to disk under the server's Content-Disposition filename. Silent: the
+   * calling hook owns the success/error toast.
    */
   async downloadCurriculum(slug: string): Promise<void> {
     const { blob, filename } = await apiClient.getBlob(
       COURSES_ENDPOINTS.CURRICULUM_PDF(slug),
+      { silent: true },
     );
     triggerBlobDownload(blob, filename ?? `${slug}-curriculum.pdf`);
   }
