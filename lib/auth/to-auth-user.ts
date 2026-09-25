@@ -23,6 +23,8 @@ export function toAuthUser(u: {
   roles?: string[];
   isVerified?: boolean;
   gender?: "Male" | "Female";
+  birthDay?: number;
+  birthMonth?: number;
   country?: { isoCode?: string; name?: string } | string;
   state?: { isoCode?: string; name?: string } | string;
   city?: string;
@@ -65,6 +67,8 @@ export function toAuthUser(u: {
     roles: u.roles,
     isVerified: u.isVerified,
     gender: u.gender,
+    birthDay: u.birthDay,
+    birthMonth: u.birthMonth,
     country: u.country,
     state: u.state,
     city: u.city,
