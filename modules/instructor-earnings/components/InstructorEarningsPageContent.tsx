@@ -20,6 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/stat-tile";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { useBankingDetails } from "@/modules/referrals/queries/use-my-referrals";
+import { SELF_PACED_ROUTES } from "@/modules/self-paced/config/endpoints";
+import { useLearnerShape } from "@/modules/self-paced/hooks/use-learner-shape";
 import { useMyInstructorEarnings } from "../api/instructor-earnings.queries";
 import type {
   EarningStream,
@@ -77,6 +79,7 @@ function PayoutStatusBadge({ status }: { status: string }) {
 export function InstructorEarningsPageContent() {
   const { data, isLoading, isFetching, error, refetch } = useMyInstructorEarnings();
   const banking = useBankingDetails();
+  const { teachesSelfPaced } = useLearnerShape();
   const router = useRouter();
 
   const hasBanking =
@@ -237,6 +240,31 @@ export function InstructorEarningsPageContent() {
             />
           </div>
         )}
+
+      {/* Self-paced revenue share lives on its own per-currency ledger
+          (attribution-based rates, not cohort collections), so it's
+          linked from here rather than folded into the cohort rows —
+          only for instructors named on a self-paced course. */}
+      {teachesSelfPaced && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-4">
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-sm font-semibold text-foreground">Self-paced courses</p>
+            <p className="max-w-md text-sm text-muted-foreground">
+              Your share of self-paced sales, your referral links and the
+              sales they brought in are tracked separately.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href={SELF_PACED_ROUTES.INSTRUCTOR} />}
+          >
+            View self-paced earnings
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {nothingYet ? (
         <EmptyState
