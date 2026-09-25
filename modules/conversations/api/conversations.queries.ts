@@ -8,6 +8,7 @@ import type { ConversationListItem } from "../types";
 export const CONVERSATIONS_QUERY_KEYS = {
   all: ["conversations", "list"] as const,
   list: (userId?: string) => ["conversations", "list", userId ?? ""] as const,
+  assignment: (assignmentId: string) => ["conversations", "assignment", assignmentId] as const,
 } as const;
 
 export function useConversations() {
@@ -30,6 +31,29 @@ export function useMarkConversationRead() {
     mutationFn: (conversationId: string) => conversationsService.markRead(conversationId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEYS.all });
+    },
+  });
+}
+
+/** The student's staff thread for one assignment (created on first view).
+ *  Returns the conversation id. */
+export function useAssignmentConversation(args: {
+  assignmentId?: string;
+  courseId?: string;
+  moduleId?: string;
+}) {
+  const { assignmentId, courseId, moduleId } = args;
+  return useQuery({
+    queryKey: CONVERSATIONS_QUERY_KEYS.assignment(assignmentId ?? ""),
+    enabled: !!assignmentId && !!courseId,
+    staleTime: Infinity,
+    queryFn: async () => {
+      const convo = await conversationsService.findOrCreateAssignmentConversation({
+        assignmentId: assignmentId as string,
+        courseId: courseId as string,
+        moduleId,
+      });
+      return convo._id;
     },
   });
 }

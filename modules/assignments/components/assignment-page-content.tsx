@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AssignmentStaffThread } from "./assignment-staff-thread";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -224,6 +225,13 @@ export function AssignmentPageContent({
 
           {/* Graded Card if applicable */}
           {submission && <GradeCard submission={submission} />}
+
+          <AssignmentStaffThread
+            assignmentId={assignment.id}
+            courseId={course?.id ?? data.courseId}
+            moduleId={module?.id ?? data.moduleId}
+            title={assignment.title}
+          />
         </div>
 
         {/* Right Sticky Rail: Current Submission Status & History */}
