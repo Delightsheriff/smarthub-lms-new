@@ -10,12 +10,12 @@ import type {
 } from "../types/instructor.types";
 
 const toMeta = (
-  meta: { total?: number; page?: number; limit?: number } | undefined,
+  meta: import("@/lib/api/types").PaginationMeta | undefined,
   fallbackLimit: number
 ): InstructorListMeta => ({
-  total: meta?.total ?? 0,
-  page: meta?.page ?? 1,
-  limit: meta?.limit ?? fallbackLimit,
+  total: meta?.totalItems ?? 0,
+  page: meta?.currentPage ?? 1,
+  limit: meta?.pageSize ?? fallbackLimit,
 });
 
 class SelfPacedInstructorService {

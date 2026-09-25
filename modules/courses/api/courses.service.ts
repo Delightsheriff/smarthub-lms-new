@@ -25,10 +25,10 @@ class CoursesService {
    * Blob, so this is a no-op until the real upload stream lands.
    */
   async downloadCurriculum(slug: string): Promise<void> {
-    const blob = await apiClient.getBlob(
+    const { blob, filename } = await apiClient.getBlob(
       COURSES_ENDPOINTS.CURRICULUM_PDF(slug),
     );
-    triggerBlobDownload(blob, `${slug}-curriculum.pdf`);
+    triggerBlobDownload(blob, filename ?? `${slug}-curriculum.pdf`);
   }
 
   async getModulesByCourse(courseId: string): Promise<ApiModule[]> {
