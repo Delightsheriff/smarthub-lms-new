@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,10 @@ export function RecordingsPageContent() {
 
   const rows = useMemo(() => data || [], [data]);
 
-  const isCompleted = (id: string) => !!progressSet?.has(id);
+  const isCompleted = useCallback(
+    (id: string) => !!progressSet?.has(id),
+    [progressSet],
+  );
 
   const visible = useMemo(() => {
     switch (filter) {
@@ -44,7 +47,7 @@ export function RecordingsPageContent() {
       default:
         return rows;
     }
-  }, [rows, filter, progressSet]);
+  }, [rows, filter, isCompleted]);
 
   // Group the flat feed into course / recordings.
   const groups = useMemo(() => groupByCourse(visible), [visible]);

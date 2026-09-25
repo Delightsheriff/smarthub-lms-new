@@ -69,17 +69,19 @@ export function RecordingPlayerDialog({
     partState.forId === (recording?.id ?? "") ? partState.index : 0;
 
   // Single /view ping on dialog open, guarded by ref
+  const recordingId = recording?.id;
+  const trackViewMutate = trackView.mutate;
   useEffect(() => {
-    if (open && recording) {
-      if (viewPingedRef.current !== recording.id) {
-        viewPingedRef.current = recording.id;
-        trackView.mutate(recording.id);
+    if (open && recordingId) {
+      if (viewPingedRef.current !== recordingId) {
+        viewPingedRef.current = recordingId;
+        trackViewMutate(recordingId);
       }
     } else {
       viewPingedRef.current = null;
       autoCompletedRef.current = null;
     }
-  }, [open, recording?.id, trackView]);
+  }, [open, recordingId, trackViewMutate]);
 
   if (!recording) return null;
 
