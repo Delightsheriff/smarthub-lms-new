@@ -71,7 +71,7 @@ export interface AcceptInvitationPayload {
 }
 
 export interface ChangePasswordRequest {
-  oldPassword?: string;
-  currentPassword?: string;
-  newPassword?: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
