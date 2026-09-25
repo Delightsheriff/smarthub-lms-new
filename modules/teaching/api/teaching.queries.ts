@@ -282,6 +282,18 @@ export function useUpdateAssignmentSchedule(scheduleId: string) {
 
 // ─── Authoring: assignments ────────────────────────────────────────
 
+/** Module content lists are read through the learning module's keys
+ *  (the module page reuses them), so authoring writes refresh those too. */
+const MODULE_CONTENT_KEYS = [
+  ["learning", "recordings", "by-module"],
+  ["learning", "materials", "by-module"],
+] as const;
+
+function refreshModuleContent(qc: ReturnType<typeof useQueryClient>) {
+  for (const key of MODULE_CONTENT_KEYS) qc.invalidateQueries({ queryKey: key });
+  qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+}
+
 /** The canonical assignment for the edit form (description, links,
  *  module, type…). Separate key from `useTeachingAssignment`, which
  *  reads the student-facing shape for the grading brief. */
@@ -377,9 +389,11 @@ export function useTeachingRecording(id: string | undefined) {
 }
 
 export function useCreateTeachingRecording() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateRecordingPayload) =>
       teachingService.createRecording(payload),
+    onSuccess: () => refreshModuleContent(qc),
   });
 }
 
@@ -390,7 +404,7 @@ export function useUpdateTeachingRecording(id: string) {
       teachingService.updateRecording(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.recording(id) });
-      qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+      refreshModuleContent(qc);
     },
   });
 }
@@ -436,9 +450,11 @@ export function useTeachingMaterial(id: string | undefined) {
 }
 
 export function useCreateTeachingMaterial() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateMaterialPayload) =>
       teachingService.createMaterial(payload),
+    onSuccess: () => refreshModuleContent(qc),
   });
 }
 
@@ -449,7 +465,7 @@ export function useUpdateTeachingMaterial(id: string) {
       teachingService.updateMaterial(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.material(id) });
-      qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+      refreshModuleContent(qc);
     },
   });
 }
@@ -464,6 +480,7 @@ export function useDeleteTeachingContent() {
         : teachingService.deleteMaterial(vars.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["teaching"] });
+      refreshModuleContent(qc);
     },
   });
 }
