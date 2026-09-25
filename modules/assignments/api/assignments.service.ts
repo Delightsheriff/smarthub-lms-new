@@ -40,13 +40,14 @@ class AssignmentsService {
   }
 
   async getMySubmission(assignmentId: string): Promise<ApiSubmission | null> {
-    // No `/submissions/:assignmentId/mine` route exists on the backend
-    // (confirmed against submissions.lms.routes.ts — only `/student`,
-    // `/:id`, `/:id/history`, `/:id/download` are registered). The
-    // equivalent data is already served by `/submissions/student`;
-    // filter client-side instead of hitting a route that 404s.
-    const mine = await this.getMySubmissions();
-    return mine.find((s) => s.assignment === assignmentId) ?? null;
+    // GET /lms/assignments/:id embeds the caller's latest submission
+    // at `assignment.submission`. We read that directly rather than
+    // scanning the paginated /lms/submissions/student list.
+    const assignment = await this.getAssignmentById(assignmentId);
+    return (
+      (assignment as unknown as { submission?: ApiSubmission }).submission ??
+      null
+    );
   }
 
   async createSubmission(body: SubmissionPayload): Promise<ApiSubmission> {
