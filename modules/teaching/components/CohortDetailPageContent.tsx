@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTeachingCohortDetail } from "../api/teaching.queries";
 import { CohortOverviewTab } from "./CohortOverviewTab";
 import { CohortModulesTab } from "./CohortModulesTab";
+import { CohortSwitcher } from "./CohortSwitcher";
 import { CohortAssignmentsTab } from "./CohortAssignmentsTab";
 import { CohortSubmissionsTab } from "./CohortSubmissionsTab";
 import { CohortSessionsTab } from "./CohortSessionsTab";
@@ -108,10 +109,13 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
               </>
             }
             actions={
-              <RefreshButton
-                loading={isFetching || isRefreshing}
-                onClick={handleRefresh}
-              />
+              <>
+                <CohortSwitcher scheduleId={scheduleId} courseId={cohort.course.id} />
+                <RefreshButton
+                  loading={isFetching || isRefreshing}
+                  onClick={handleRefresh}
+                />
+              </>
             }
           />
 
