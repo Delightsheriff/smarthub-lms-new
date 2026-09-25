@@ -114,8 +114,8 @@ PushPermissionPrompt is mounted on the dashboard. Also done this session:
   clone must run `git fetch && git reset --hard origin/main` (or re-clone). A
   local-only backup branch `backup/pre-strip-claude` holds the old history;
   delete it once satisfied. Never add attribution trailers again.
-- **Glass (N3), decided and implemented on branch `feat/glass-chrome`,
-  pushed, NOT merged:**
+- **Glass (N3), decided, implemented and MERGED into main
+  (`feat/glass-chrome`):**
   - one `glass-chrome` utility in globals.css: 86% background, 14px blur,
     with solid fallbacks for no backdrop-filter, no color-mix, and
     `prefers-reduced-transparency`
@@ -127,9 +127,10 @@ PushPermissionPrompt is mounted on the dashboard. Also done this session:
     muted text (light), which passes AA
   - registered in plans/DESIGN-SYSTEM.md, with a "glass is chrome-only"
     non-negotiable
-  - **Before merging:** test on a real mid-range Android phone (scroll
-    smoothness) and in Safari/iOS (the -webkit-backdrop-filter path). If both
-    are fine: `git merge --no-ff feat/glass-chrome`.
+  - **Still to do:** test on a real mid-range Android phone (scroll
+    smoothness) and in Safari/iOS (the -webkit-backdrop-filter path). If
+    either struggles, lower the blur, or drop to solid, in the one
+    `.glass-chrome` rule.
 
 ## 2. Small follow-ups left by this session (do before the Q1+ sweep)
 
@@ -231,9 +232,9 @@ Additions to that prompt:
 - Update AGENTS.md: replace the "fully shipped" claim, and point to this file.
 - Also update HANDOFF.md: #2 (git remote) is DONE.
 
-### N3 — Glass: DECIDED and built on `feat/glass-chrome` (see §1)
+### N3 — Glass: DONE and merged (see §1)
 
-Only a device/Safari check and the merge remain. The motion items (sheet
+Only a real-device and Safari check remains. The motion items (sheet
 drag-dismiss, expand/collapse, role-switch cross-fade) are still Q3 work and
 don't depend on glass.
 
