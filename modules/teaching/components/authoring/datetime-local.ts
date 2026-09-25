@@ -14,9 +14,24 @@ export function isoToLocalInput(iso: string | undefined | null): string {
   return Number.isNaN(d.getTime()) ? "" : dateToLocalInput(d);
 }
 
-/** Shift a datetime-local value by whole days; falls back to now. */
-export function addDaysToLocalInput(value: string, days: number): string {
-  const base = value ? new Date(value) : new Date();
-  const start = Number.isNaN(base.getTime()) ? new Date() : base;
-  return dateToLocalInput(new Date(start.getTime() + days * 24 * 60 * 60 * 1000));
+/**
+ * Extend a due date by whole days. Starts from the later of the current
+ * value and `now` — extending an already-past date would still be in the
+ * past, and the API rejects due dates that aren't in the future.
+ */
+export function addDaysToLocalInput(
+  value: string,
+  days: number,
+  now: Date = new Date(),
+): string {
+  const parsed = value ? new Date(value) : now;
+  const base =
+    Number.isNaN(parsed.getTime()) || parsed < now ? now : parsed;
+  return dateToLocalInput(new Date(base.getTime() + days * 24 * 60 * 60 * 1000));
+}
+
+/** True when a datetime-local value is strictly in the future. */
+export function isFutureLocalInput(value: string, now: Date = new Date()): boolean {
+  const d = new Date(value);
+  return !Number.isNaN(d.getTime()) && d > now;
 }

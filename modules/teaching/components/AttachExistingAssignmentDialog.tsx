@@ -24,6 +24,7 @@ import {
 } from "../api/teaching.queries";
 import type { TeachingModule } from "../types";
 import { Field, OptionSelect, ToggleRow, moduleOptions } from "./authoring/authoring-kit";
+import { isFutureLocalInput } from "./authoring/datetime-local";
 
 /**
  * Attach assignments already filed under a module to this cohort, with
@@ -114,7 +115,8 @@ function AttachForm({
     });
 
   const slackConnected = !!slack.data?.connected;
-  const canSubmit = selected.size > 0 && !!dueDate && !submitting;
+  const dueOk = isFutureLocalInput(dueDate);
+  const canSubmit = selected.size > 0 && dueOk && !submitting;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -246,7 +248,11 @@ function AttachForm({
             </fieldset>
           ))}
 
-        <Field id="attach-due" label="Due date and time">
+        <Field
+          id="attach-due"
+          label="Due date and time"
+          error={dueDate && !dueOk ? "Pick a date in the future" : undefined}
+        >
           <Input
             id="attach-due"
             type="datetime-local"

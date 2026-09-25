@@ -45,6 +45,7 @@ import {
   toAssignmentPayload,
   type AssignmentBodyValues,
 } from "./authoring/assignment-body";
+import { isFutureLocalInput } from "./authoring/datetime-local";
 
 const schema = assignmentBodySchema.extend({
   module: z.string().min(1, "Pick a module"),
@@ -136,8 +137,8 @@ export function AssignmentForm({
 
   const onSubmit = async (v: FormValues) => {
     setServerError(null);
-    if (!isEdit && !v.dueDate) {
-      setServerError("Set a due date — students need to know when it's due.");
+    if (!isEdit && !isFutureLocalInput(v.dueDate)) {
+      setServerError("Set a due date in the future — students need to know when it's due.");
       return;
     }
     try {

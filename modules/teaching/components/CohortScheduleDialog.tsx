@@ -16,8 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDateTime } from "@/lib/utils";
 import { useCohortSlackStatus, useUpdateAssignmentSchedule } from "../api/teaching.queries";
-import { ToggleRow } from "./authoring/authoring-kit";
-import { addDaysToLocalInput, isoToLocalInput } from "./authoring/datetime-local";
+import { ToggleRow, errorText } from "./authoring/authoring-kit";
+import {
+  addDaysToLocalInput,
+  isFutureLocalInput,
+  isoToLocalInput,
+} from "./authoring/datetime-local";
 
 export interface CohortScheduleTarget {
   assignmentId: string;
@@ -81,8 +85,8 @@ function ScheduleForm({
   const slackConnected = !!slack.data?.connected;
 
   const save = async () => {
-    if (!dueDate) {
-      toast.error("Pick a due date");
+    if (!isFutureLocalInput(dueDate)) {
+      toast.error("Pick a due date in the future.");
       return;
     }
     try {
@@ -96,8 +100,8 @@ function ScheduleForm({
       });
       toast.success("Cohort settings updated");
       onDone();
-    } catch {
-      // Toasted by the API client; stay open to retry.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't update the due date."));
     }
   };
 
@@ -106,8 +110,8 @@ function ScheduleForm({
       <DialogHeader>
         <DialogTitle>Due date and late work</DialogTitle>
         <DialogDescription>
-          For <span className="font-medium text-foreground">{target.title}</span> in this cohort
-          only. Other cohorts aren&apos;t affected.
+          For <span className="font-medium text-foreground">{target.title}</span>{" "}
+          in this cohort only. Other cohorts aren&apos;t affected.
         </DialogDescription>
       </DialogHeader>
 

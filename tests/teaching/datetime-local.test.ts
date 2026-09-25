@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addDaysToLocalInput,
   dateToLocalInput,
+  isFutureLocalInput,
   isoToLocalInput,
 } from "@/modules/teaching/components/authoring/datetime-local";
 
@@ -17,7 +18,20 @@ describe("datetime-local helpers", () => {
     expect(isoToLocalInput("not a date")).toBe("");
   });
 
-  it("extends by whole days", () => {
-    expect(addDaysToLocalInput("2026-09-29T23:00", 3)).toBe("2026-10-02T23:00");
+  it("extends a future date by whole days", () => {
+    const now = new Date(2026, 8, 1, 12, 0);
+    expect(addDaysToLocalInput("2026-09-29T23:00", 3, now)).toBe("2026-10-02T23:00");
+  });
+
+  it("extends from now when the current date has already passed", () => {
+    const now = new Date(2026, 8, 25, 9, 30);
+    expect(addDaysToLocalInput("2026-05-24T01:00", 1, now)).toBe("2026-09-26T09:30");
+  });
+
+  it("detects future values", () => {
+    const now = new Date(2026, 8, 25, 9, 30);
+    expect(isFutureLocalInput("2026-09-25T09:31", now)).toBe(true);
+    expect(isFutureLocalInput("2026-09-25T09:30", now)).toBe(false);
+    expect(isFutureLocalInput("", now)).toBe(false);
   });
 });

@@ -32,13 +32,14 @@ import {
   OptionSelect,
 } from "./authoring/authoring-kit";
 import { assignmentBodySchema, toAssignmentPayload } from "./authoring/assignment-body";
+import { isFutureLocalInput } from "./authoring/datetime-local";
 
 const BACK_HREF = "/assignments";
 
 const schema = assignmentBodySchema.extend({
   moduleId: z.string().min(1, "Pick a module"),
   cohortIds: z.array(z.string()).min(1, "Pick at least one cohort"),
-  dueDate: z.string().min(1, "Set a due date"),
+  dueDate: z.string().refine((v) => isFutureLocalInput(v), "Set a due date in the future"),
 });
 
 type FormValues = z.infer<typeof schema>;
