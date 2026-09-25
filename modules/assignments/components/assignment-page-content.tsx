@@ -21,6 +21,7 @@ import { RichText } from "@/components/ui/rich-text";
 import { formatDateTime } from "@/lib/utils";
 import { useAssignmentDetail } from "../api/assignments.queries";
 import { CountdownToDeadline, getDeadlineStatus } from "./countdown-to-deadline";
+import { isSubmissionWindowClosed } from "../lib/submission-window";
 import { SubmissionStatusCard } from "./submission-status-card";
 import { GradeCard } from "./grade-card";
 import { SubmissionHistory } from "./submission-history";
@@ -74,11 +75,13 @@ export function AssignmentPageContent({
   const isOverdue =
     assignment.status === "overdue" ||
     (deadlineStatus.isOverdue && !submission);
-  // Late submissions disallowed + already past due + nothing submitted
-  // yet: the form would only ever produce a guaranteed-rejected POST,
-  // so it's suppressed entirely rather than shown and left to fail.
-  const submissionWindowClosed =
-    isOverdue && !submission && !assignment.allowLateSubmission;
+
+  // Compute closed window whether or not a submission exists
+  const submissionWindowClosed = isSubmissionWindowClosed({
+    dueAt: assignment.dueAt,
+    allowLateSubmission: assignment.allowLateSubmission,
+    submission,
+  });
 
   return (
     <div className="space-y-6">
