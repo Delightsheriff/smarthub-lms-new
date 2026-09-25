@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckCircle2, Lock, ShieldCheck, ArrowRight, AlertCircle, Phone, User as UserIcon } from "lucide-react";
+import { CheckCircle2, Lock, ShieldCheck, ArrowRight, AlertCircle, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
