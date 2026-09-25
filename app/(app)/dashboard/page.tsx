@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { PushPermissionPrompt } from "@/modules/push/components/PushPermissionPrompt";
 import Link from "next/link";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -169,12 +170,9 @@ function StudentDashboardBody() {
 
       <RevokedCourseNotice />
 
-      {/* TODO(D1/P1): mount <PushPermissionPrompt /> from
-          modules/push/components/PushPermissionPrompt here, full width —
-          it's a paragraph plus two buttons, not a compact tile, so it
-          doesn't belong inside the "Needs a look" ledger. Self-gates to
-          null. P1 is building it in a separate worktree; wire it after
-          merging. */}
+      {/* Full width: a paragraph and two buttons, not a ledger row.
+          Renders nothing unless push is supported and not yet decided. */}
+      <PushPermissionPrompt />
 
       {/* Reminders point at the same next lesson the hero / self-paced
           tile does, so they sit directly above it. Self-gating. */}
