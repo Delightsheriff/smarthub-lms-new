@@ -1,21 +1,26 @@
 import { apiClient } from "@/lib/api";
 import { MESSAGING_ENDPOINTS } from "../config/endpoints";
-import type { ApiMessage } from "../types/api.types";
+import type { ApiMessage, ApiMessageType, CreateMessagePayload } from "../types/api.types";
 
 class MessagingService {
   async getThreadMessages(conversationId: string): Promise<ApiMessage[]> {
-    return apiClient.get<ApiMessage[]>(MESSAGING_ENDPOINTS.MESSAGES(conversationId));
+    const res = await apiClient.getPaginated<ApiMessage>(
+      MESSAGING_ENDPOINTS.CONVERSATION_MESSAGES(conversationId),
+    );
+    return res.data;
   }
 
   async sendMessage(
     conversationId: string,
     content: string,
-    type: "text" | "file" | "audio" | "video" | "system" = "text",
+    type: ApiMessageType = "text",
   ): Promise<ApiMessage> {
-    return apiClient.post<ApiMessage>(MESSAGING_ENDPOINTS.MESSAGES(conversationId), {
+    const payload: CreateMessagePayload = {
+      conversationId,
       content,
       type,
-    });
+    };
+    return apiClient.post<ApiMessage>(MESSAGING_ENDPOINTS.MESSAGES, payload);
   }
 }
 

@@ -34,3 +34,17 @@ export interface ApiMessage {
   updatedAt?: string;
   isDeleted?: boolean;
 }
+
+export interface CreateMessagePayload {
+  conversationId: string;
+  content: string;
+  type: ApiMessageType;
+  replyTo?: string;
+  attachments?: Array<{
+    type: "image" | "video" | "audio" | "document" | "other";
+    url: string;
+    name: string;
+    size: number;
+    mimeType: string;
+  }>;
+}
