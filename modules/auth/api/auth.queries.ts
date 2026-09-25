@@ -19,6 +19,7 @@ import type {
 export const AUTH_QUERY_KEYS = {
   me: ["auth", "me"] as const,
   invitation: (token: string) => ["auth", "invitation", token] as const,
+  verifyResetToken: (token: string) => ["auth", "verify-reset-token", token] as const,
 } as const;
 
 /**
@@ -104,6 +105,15 @@ export function useForgotPassword() {
 export function useResetPassword() {
   return useMutation({
     mutationFn: (payload: ResetPasswordRequest) => authService.resetPassword(payload),
+  });
+}
+
+export function useVerifyResetToken(token: string) {
+  return useQuery({
+    queryKey: AUTH_QUERY_KEYS.verifyResetToken(token),
+    queryFn: () => authService.verifyResetToken(token),
+    enabled: !!token,
+    retry: false,
   });
 }
 

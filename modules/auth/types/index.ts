@@ -45,8 +45,8 @@ export interface ForgotPasswordRequest {
 
 export interface ResetPasswordRequest {
   token: string;
-  password?: string;
-  newPassword?: string;
+  password: string;
+  confirmPassword: string;
 }
 
 export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";

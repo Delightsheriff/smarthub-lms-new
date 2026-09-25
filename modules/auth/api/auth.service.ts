@@ -26,6 +26,10 @@ class AuthService {
     return apiClient.post<{ success: boolean; message?: string }>(AUTH_ENDPOINTS.RESET_PASSWORD, payload);
   }
 
+  async verifyResetToken(token: string): Promise<{ valid: boolean }> {
+    return apiClient.get<{ valid: boolean }>(AUTH_ENDPOINTS.VERIFY_RESET_TOKEN(token), { silent: true });
+  }
+
   async changePassword(payload: ChangePasswordRequest): Promise<{ success: boolean; message?: string }> {
     return apiClient.post<{ success: boolean; message?: string }>(AUTH_ENDPOINTS.CHANGE_PASSWORD, payload);
   }

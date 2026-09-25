@@ -16,6 +16,7 @@ export const AUTH_ENDPOINTS = {
   ME: "/auth/me",
   FORGOT_PASSWORD: "/auth/forgot-password",
   RESET_PASSWORD: "/auth/reset-password",
+  VERIFY_RESET_TOKEN: (token: string) => `/auth/verify-reset-token/${encodeURIComponent(token)}`,
   CHANGE_PASSWORD: "/auth/change-password",
   // Token is a query param server-side (`GET /invitations/verify?token=`),
   // not a path segment.
