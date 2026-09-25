@@ -25,6 +25,7 @@ import { DashboardAssignedModulesWidget } from "@/modules/assigned-modules/compo
 import { ProgressPulseCard } from "@/modules/progress/components/ProgressPulseCard";
 import { DashboardCalendarCard } from "@/modules/calendar/components/DashboardCalendarCard";
 import { DashboardStatsStrip } from "@/modules/dashboard/components/StatsStrip";
+import { DashboardHero } from "@/modules/dashboard/components/DashboardHero";
 import { PageHeader } from "@/components/layout/page-header";
 import { RevokedCourseNotice } from "@/modules/access/components/RevokedCourseNotice";
 import { formatDate, htmlToPlainText, pluralize } from "@/lib/utils";
@@ -124,9 +125,9 @@ function StudentDashboardBody() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2fr_1fr] lg:items-stretch">
         {continueLearning ? (
-          <div className="flex min-h-[300px] flex-col overflow-hidden rounded-[20px] border border-border bg-card">
-            <div className="relative h-[190px] shrink-0 bg-gradient-to-br from-foreground/90 to-accent/60 dark:from-background dark:to-accent/30">
-              {continueLearning.imageUrl && (
+          <DashboardHero
+            cover={
+              continueLearning.imageUrl ? (
                 <Image
                   src={continueLearning.imageUrl}
                   alt={continueLearning.name}
@@ -134,47 +135,16 @@ function StudentDashboardBody() {
                   sizes="(max-width: 1024px) 100vw, 66vw"
                   className="object-cover"
                 />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" aria-hidden />
-              <span className="absolute left-4 top-4 rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-white">
-                Continue learning
-              </span>
-            </div>
-            <div className="flex flex-1 flex-col gap-3.5 p-5 md:p-6">
-              <div>
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
-                  {[continueLearning.mode, formatDate(continueLearning.startDate)]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-                <h2 className="mt-1 font-display text-2xl font-semibold leading-[1.15] text-foreground">
-                  {continueLearning.name}
-                </h2>
-              </div>
-              <p className="text-[13.5px] leading-relaxed text-muted-foreground line-clamp-2">
-                {htmlToPlainText(continueLearning.description)}
-              </p>
-              <div className="mt-auto flex items-center gap-3">
-                <div className="relative h-0.5 flex-1 rounded-full bg-border">
-                  <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
-                    style={{ width: `${continueLearning.progress}%` }}
-                  />
-                </div>
-                <span className="shrink-0 font-mono text-xs tabular-nums text-foreground">
-                  {continueLearning.progress}%
-                </span>
-              </div>
-              <div className="flex justify-end">
-                <Link
-                  href={`/courses/${continueLearning.slug}`}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-                >
-                  Resume →
-                </Link>
-              </div>
-            </div>
-          </div>
+              ) : undefined
+            }
+            meta={[continueLearning.mode, formatDate(continueLearning.startDate)]
+              .filter(Boolean)
+              .join(" · ")}
+            title={continueLearning.name}
+            body={htmlToPlainText(continueLearning.description)}
+            progress={continueLearning.progress}
+            href={`/courses/${continueLearning.slug}`}
+          />
         ) : (
           <EmptyState
             icon={BookOpen}
