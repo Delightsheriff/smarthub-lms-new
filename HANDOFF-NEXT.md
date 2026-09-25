@@ -105,6 +105,32 @@ PushPermissionPrompt is mounted on the dashboard. Also done this session:
 - the add-on badge, and the revoked notice on /courses
 - raw colours removed from learning, courses and assignments
 
+### Also done after the merges
+- README.md rewritten (setup, env table, scripts, layout, design-system
+  pointer), and `.env.example` added (keys only; `.gitignore` allows it).
+- **Git history rewritten on 2026-09-25:** the `Co-Authored-By: Claude …`
+  trailers were stripped from 37 commits with git filter-repo. The code is
+  identical, but EVERY hash changed and `main` was force-pushed. Any other
+  clone must run `git fetch && git reset --hard origin/main` (or re-clone). A
+  local-only backup branch `backup/pre-strip-claude` holds the old history;
+  delete it once satisfied. Never add attribution trailers again.
+- **Glass (N3), decided and implemented on branch `feat/glass-chrome`,
+  pushed, NOT merged:**
+  - one `glass-chrome` utility in globals.css: 86% background, 14px blur,
+    with solid fallbacks for no backdrop-filter, no color-mix, and
+    `prefers-reduced-transparency`
+  - the top bar is solid at rest and turns glass once the window scrolls
+    (`hooks/use-scrolled.ts`)
+  - the mobile bottom nav is glass
+  - contrast measured from rendered canvas pixels over
+    black/white/maroon/orange: worst case 12.37:1 for text and 5.13:1 for
+    muted text (light), which passes AA
+  - registered in plans/DESIGN-SYSTEM.md, with a "glass is chrome-only"
+    non-negotiable
+  - **Before merging:** test on a real mid-range Android phone (scroll
+    smoothness) and in Safari/iOS (the -webkit-backdrop-filter path). If both
+    are fine: `git merge --no-ff feat/glass-chrome`.
+
 ## 2. Small follow-ups left by this session (do before the Q1+ sweep)
 
 ```
@@ -131,7 +157,8 @@ TASK F-UP: small follow-ups. One commit each.
    b. DECIDED: keep the 10MB receipt cap.
    c. DECIDED: self-paced earnings stay UI-only, with no backend work. The
       link-only port matching legacy is final.
-   d. N3 glass/motion, and N4 the instructor course-outline rail (see §3).
+   d. N4 the instructor course-outline rail (see §3). N3 glass is decided
+      (see above).
 ```
 
 ## 3. Remaining feature work
@@ -194,15 +221,21 @@ module page with more than 10 recordings, /recordings?filter=unwatched,
 
 ### N2 — Q2 repo hygiene (the prompt is in AUDIT-FIX-PROMPTS.md "Q2")
 
+README and .env.example are DONE. The rest still applies: CI workflow,
+security headers, Sentry and instrumentation, the proxy.ts decision, the
+token-model ADR, and updating AGENTS.md.
+
 Additions to that prompt:
 - `.env.example` must also list `NEXT_PUBLIC_SOCKET_URL`, noting "defaults to
   the dev API origin in lib/api/dev-origin.ts".
 - Update AGENTS.md: replace the "fully shipped" claim, and point to this file.
 - Also update HANDOFF.md: #2 (git remote) is DONE.
 
-### N3 — Glass / motion decision (user decision, not agent work)
+### N3 — Glass: DECIDED and built on `feat/glass-chrome` (see §1)
 
-HANDOFF.md item 1 is still open. Don't start it without the user's go-ahead.
+Only a device/Safari check and the merge remain. The motion items (sheet
+drag-dismiss, expand/collapse, role-switch cross-fade) are still Q3 work and
+don't depend on glass.
 
 ### N4 — Instructor course-outline sidebar (user decision)
 

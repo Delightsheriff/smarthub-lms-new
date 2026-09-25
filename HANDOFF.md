@@ -1,5 +1,11 @@
 # Handoff — everything left before this ships
 
+> **Superseded as the live punch list by `HANDOFF-NEXT.md`** (2026-09-25).
+> Status of the items below: #1 DECIDED (restrained glass on floating chrome
+> only — branch `feat/glass-chrome`), #2 DONE (GitHub remote, pushed),
+> #6 DONE (accent StatusTone), #8 DONE (README), #9 DONE (.env.example).
+> Everything else is carried into HANDOFF-NEXT.md.
+
 Written 2026-09-25, for a fresh session to pick up and work through before
 this goes to the boss. Read `plans/DESIGN-SYSTEM.md` first — it's the
 living design-system reference (tokens, primitives, non-negotiables,
