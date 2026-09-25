@@ -5,7 +5,13 @@ import { Award, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerControlItem } from "@/components/ui/ledger";
@@ -78,19 +84,27 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
           title="Submissions"
           count={filtered.length}
           actions={
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "pending" | "graded")}>
-              <TabsList className="rounded-xl bg-muted/60 p-1">
-                <TabsTrigger value="all" className="rounded-lg text-xs">
+            <Select
+              value={filter}
+              onValueChange={(val) => {
+                if (val) setFilter(val as "all" | "pending" | "graded");
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[210px] rounded-xl text-xs h-8">
+                <SelectValue placeholder="Filter submissions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
                   All ({submissions?.length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="rounded-lg text-xs">
+                </SelectItem>
+                <SelectItem value="pending">
                   Needs Grading ({submissions?.filter((s) => s.status !== "graded").length || 0})
-                </TabsTrigger>
-                <TabsTrigger value="graded" className="rounded-lg text-xs">
+                </SelectItem>
+                <SelectItem value="graded">
                   Graded ({submissions?.filter((s) => s.status === "graded").length || 0})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           }
           empty="No submissions found in this filter."
         >
