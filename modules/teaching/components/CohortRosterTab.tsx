@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
-import { pluralize } from "@/lib/utils";
+import { pluralize, timeAgo } from "@/lib/utils";
 import { useCohortRoster } from "../api/teaching.queries";
 
 interface CohortRosterTabProps {
@@ -50,7 +50,14 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
               key={row.studentId}
               index={idx + 1}
               title={row.name}
-              subtitle={row.email}
+              subtitle={[
+                row.email,
+                row.lastSubmittedAt
+                  ? `Last submitted ${timeAgo(row.lastSubmittedAt)}`
+                  : "No activity yet",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
               href={`/teach/cohorts/${scheduleId}/students/${row.studentId}`}
               status={
                 <span className="text-[10px] font-mono">
