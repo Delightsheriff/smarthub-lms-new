@@ -35,4 +35,29 @@ describe("normaliseMessage", () => {
     expect(ui.senderId).toBe("usr_2");
     expect(ui.senderName).toBe("Ngozi Okonkwo");
   });
+
+  it("determines mine correctly with real 24-character hex MongoDB ObjectId", () => {
+    const realAuthId = "64f8a123bc45de6789012345";
+    const peerAuthId = "64f8a123bc45de6789012399";
+
+    const ownMsg: ApiMessage = {
+      _id: "msg_10",
+      conversationId: "conv_1",
+      sender: { _id: realAuthId, firstName: "Kola", lastName: "Adebayo" },
+      content: "My submission is ready.",
+      createdAt: "2026-09-01T12:00:00.000Z",
+    };
+    expect(normaliseMessage(ownMsg, realAuthId).mine).toBe(true);
+    expect(normaliseMessage(ownMsg, realAuthId).senderName).toBe("You");
+
+    const peerMsg: ApiMessage = {
+      _id: "msg_11",
+      conversationId: "conv_1",
+      sender: { _id: peerAuthId, firstName: "Tola", lastName: "Ojo" },
+      content: "Got it!",
+      createdAt: "2026-09-01T12:01:00.000Z",
+    };
+    expect(normaliseMessage(peerMsg, realAuthId).mine).toBe(false);
+    expect(normaliseMessage(peerMsg, realAuthId).senderName).toBe("Tola Ojo");
+  });
 });

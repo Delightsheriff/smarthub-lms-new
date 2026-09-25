@@ -3,7 +3,7 @@ import type { ConversationListItem, ConversationAssignmentRef } from "../types";
 
 export function normaliseConversation(
   api: ApiConversation,
-  currentUserId = "usr_1",
+  currentUserId: string,
 ): ConversationListItem {
   // Extract participants
   const participants = (api.participants || []).map((p) => ({

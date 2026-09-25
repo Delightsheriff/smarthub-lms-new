@@ -56,4 +56,22 @@ describe("normaliseConversation", () => {
       moduleSlug: undefined,
     });
   });
+
+  it("resolves unread count using real user ObjectId dictionary", () => {
+    const realUserId = "64f8a123bc45de6789012345";
+    const otherUserId = "64f8a123bc45de6789012399";
+    const wire: ApiConversation = {
+      _id: "conv_300",
+      type: "direct",
+      participants: [{ _id: realUserId }, { _id: otherUserId }],
+      unreadCount: {
+        [realUserId]: 5,
+        [otherUserId]: 0,
+      },
+      updatedAt: "2026-09-01T15:00:00.000Z",
+    };
+
+    const ui = normaliseConversation(wire, realUserId);
+    expect(ui.unread).toBe(5);
+  });
 });

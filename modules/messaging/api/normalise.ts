@@ -3,7 +3,7 @@ import type { ChatMessage } from "../types";
 
 export function normaliseMessage(
   api: ApiMessage,
-  currentUserId = "usr_1",
+  currentUserId: string,
 ): ChatMessage {
   let senderId = "unknown";
   let senderName = "User";
