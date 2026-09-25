@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { uploadSizeError } from "@/lib/utils";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,6 +35,10 @@ import {
 } from "../api/assignments.queries";
 import type { Assignment, Submission } from "../types";
 
+/** Mirrors legacy: the file types tutors can open and grade. */
+const ACCEPTED_MIME_TYPES =
+  "application/pdf,image/png,image/jpeg,image/jpg,application/zip,application/x-ipynb+json,.ipynb,.py,.md,.txt,.docx,.pptx";
+
 interface SubmissionFormProps {
   assignment: Assignment;
   existingSubmission?: Submission | null;
@@ -62,6 +67,7 @@ export function SubmissionForm({
 }: SubmissionFormProps) {
   const [open, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const form = useForm<z.input<typeof submissionSchema>, unknown, z.output<typeof submissionSchema>>({
     resolver: zodResolver(submissionSchema),
     defaultValues: { submissionType: existingSubmission?.submissionType || "file", content: existingSubmission?.content || "", externalUrl: existingSubmission?.externalUrl || "", notes: "" },
@@ -220,8 +226,26 @@ export function SubmissionForm({
                   type="file"
                    className="rounded-xl cursor-pointer"
                    disabled={form.formState.isSubmitting}
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  accept={ACCEPTED_MIME_TYPES}
+                  aria-invalid={!!fileError || undefined}
+                  aria-describedby="fileInput-hint"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    // Catch an oversize file before the upload round-trip.
+                    const tooBig = file ? uploadSizeError(file) : null;
+                    setFileError(tooBig);
+                    setSelectedFile(tooBig ? null : file);
+                    if (tooBig) e.target.value = "";
+                  }}
                 />
+                <p
+                  id="fileInput-hint"
+                  className={fileError ? "text-xs text-destructive" : "text-xs text-muted-foreground"}
+                  role={fileError ? "alert" : undefined}
+                >
+                  {fileError ??
+                    "PDF, image, zip, notebook, .py, .md, .txt, .docx or .pptx. Documents up to 10 MB, images up to 25 MB."}
+                </p>
                 {existingSubmission?.fileName && !selectedFile && (
                   <p className="text-xs text-muted-foreground">
                     Current file: <span className="font-mono">{existingSubmission.fileName}</span>
