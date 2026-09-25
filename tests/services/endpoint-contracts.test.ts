@@ -94,11 +94,15 @@ describe("F4 Endpoint contract tests", () => {
         keys: { p256dh: "key-dh", auth: "key-auth" },
       });
 
-      expect(apiClient.post).toHaveBeenCalledWith("/push/subscribe", {
-        surface: "lms",
-        endpoint: "https://push.example.com/sub/123",
-        keys: { p256dh: "key-dh", auth: "key-auth" },
-      });
+      expect(apiClient.post).toHaveBeenCalledWith(
+        "/push/subscribe",
+        {
+          surface: "lms",
+          endpoint: "https://push.example.com/sub/123",
+          keys: { p256dh: "key-dh", auth: "key-auth" },
+        },
+        { silent: true },
+      );
     });
 
     it("calls DELETE /push/subscribe with endpoint in body (data)", async () => {
@@ -108,6 +112,7 @@ describe("F4 Endpoint contract tests", () => {
 
       expect(apiClient.delete).toHaveBeenCalledWith("/push/subscribe", {
         data: { endpoint: "https://push.example.com/sub/123" },
+        silent: true,
       });
     });
   });

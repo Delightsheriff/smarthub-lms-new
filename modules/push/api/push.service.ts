@@ -8,14 +8,17 @@ class PushService {
   }
 
   async subscribe(payload: PushSubscribePayload): Promise<void> {
-    await apiClient.post(PUSH_ENDPOINTS.SUBSCRIBE, {
-      surface: "lms",
-      ...payload,
-    });
+    // Silent: the hook also re-subscribes automatically after a server key
+    // change, and that must not toast on page load. The prompt owns its copy.
+    await apiClient.post(
+      PUSH_ENDPOINTS.SUBSCRIBE,
+      { surface: "lms", ...payload },
+      { silent: true },
+    );
   }
 
   async unsubscribe(endpoint: string): Promise<void> {
-    await apiClient.delete(PUSH_ENDPOINTS.SUBSCRIBE, { data: { endpoint } });
+    await apiClient.delete(PUSH_ENDPOINTS.SUBSCRIBE, { data: { endpoint }, silent: true });
   }
 
   async getPrefs(): Promise<NotificationPrefs> {
