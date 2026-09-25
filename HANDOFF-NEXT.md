@@ -86,89 +86,58 @@ item as done, partial or blocked, with the commit hash.
 
 ---
 
-## 1. Current state (verified 2026-09-25)
+## 1. Current state (updated end of session, 2026-09-25)
 
-`main` is at `62e6e41`, and `origin/main` is at `23f7435`. The L1 commits
-after that point are **not pushed yet**. All four checks passed at the last
-full run (230 tests).
+`main` is pushed to origin. Checks pass: typecheck and lint clean,
+266/266 tests, build succeeds. A 375px overflow sweep is clean on /dashboard,
+/payments, /refer-and-earn, /jobs, /internships and /courses.
 
-**Done:**
-- **Wave 1:** F1 (API client), F2 (auth), F3 (messaging and realtime),
-  F4 (endpoint fixes), F5 (submissions and progress), F6 (teaching fixes).
-- **Wave 2:**
-  - T1: instructor student page, grading brief, deep links.
-  - T2: assignment authoring, multi-cohort create, attach existing,
-    due-date dialog, row menu.
-  - T3: materials and recordings authoring, plus detail pages.
-  - T4: module page, module status, cohort switcher, overview shortcuts,
-    `?assignment=` filter, roster activity and at-risk filters.
-- **Contract bugs fixed along the way:**
-  - cohort submission `_id` → `id` (grading targeted `undefined`)
-  - `uploadFile` read the wrong field (every upload was broken)
-  - the socket pointed at port 5000
-  - the visibility switch acted as an unconfirmed detach
-  - validation errors showed axios's generic text
-  - duplicate toasts
+**Done: F1–F6, T1–T4, L1 (N1), P1, D1, B1.** The three worktree branches are
+merged (with the app-shell conflict resolved to keep both BirthdayGate and
+ScholarshipPhotoGate), and the worktrees and branches are removed.
+PushPermissionPrompt is mounted on the dashboard. Also done this session:
+- the brand meta colour is maroon (#430330)
+- push subscribe/unsubscribe are silent
+- student assignment pages have the staff thread (find-or-create conversation)
+- the assignment course resolves from the enrolled module
+- upload type and size limits
+- Tasks: hero = nearest open deadline, newest-due-first order, Select filter
+- the add-on badge, and the revoked notice on /courses
+- raw colours removed from learning, courses and assignments
 
-**L1 (student learning) is IN PROGRESS.** Done and committed:
-- the content toolbar and filter (`components/ui/content-toolbar.tsx`,
-  `modules/learning/utils/content-filter.ts`)
-- module-page lists: search, kind and order filters, recordings paged at 10,
-  `?recording=` deep link, StatusBadge and shared EmptyState
-- course outline: `?recording=` links and a "Show more" reveal of 8
-- recordings page: URL `?filter=` via Select, search, per-course paging, hero
-  HTML fix
-- materials page: opens link-only materials, error state, search, URL filter,
-  real buttons, aria-expanded
-
-The rest of L1 is task **N1** below.
-
----
-
-## 2. MERGE WORK IN FLIGHT (do this first)
-
-Three background agents worked in git worktrees under `.claude/worktrees/`.
-Each has its own branch:
-
-| Task | Branch | Path |
-|---|---|---|
-| B1 scholarship / payments / internships / referrals / jobs | `worktree-agent-a7f23a71328cdfa61` | `.claude/worktrees/agent-a7f23a71328cdfa61` |
-| D1 dashboard parity + 24 legacy commits | `worktree-agent-a9ad05408ad8bb38a` | `.claude/worktrees/agent-a9ad05408ad8bb38a` |
-| P1 push, PWA, live bell | `worktree-agent-ac0a43dff1c6a1ed1` | `.claude/worktrees/agent-ac0a43dff1c6a1ed1` |
+## 2. Small follow-ups left by this session (do before the Q1+ sweep)
 
 ```
-TASK M1: Review and merge the three worktree branches into main.
+TASK F-UP: small follow-ups. One commit each.
 
-1. For each branch, `git log --oneline main..<branch>` and
-   `git diff main...<branch> --stat`. If a worktree still has uncommitted
-   changes (`git -C <path> status --short`), the agent didn't finish: note what
-   is missing and carry on.
-2. Review each diff against its task in AUDIT-FIX-PROMPTS.md (sections B1, D1
-   and P1). Check endpoints against smarthub-api `dev`, and check for:
-   - `_id` vs `id` normalisation
-   - raw palette colours
-   - missing error states
-   - Base UI Select label/value issues
-   - co-author trailers (none are allowed)
-3. Merge one at a time: `git merge --no-ff <branch> -m "merge: <task>"` (no
-   trailers). The expected conflict is components/layout/app-shell.tsx: D1
-   mounts BirthdayGate and B1 mounts ScholarshipPhotoGate. Keep both.
-4. After P1 and D1 are both merged, mount PushPermissionPrompt
-   (modules/push/components/PushPermissionPrompt.tsx) on the dashboard at the
-   TODO marker D1 left. Commit that separately.
-5. Run the full checks after each merge. Live-check /dashboard, /payments,
-   /refer-and-earn, /internships and /jobs at 375px and desktop.
-6. Remove the worktrees: `git worktree remove <path>` (use --force only if they
-   are clean and merged), then `git branch -d <branch>`.
-7. Add `.claude/worktrees/` to .gitignore if it isn't already there.
-8. Push only if the user asks.
+1. SELF-PACED ON /courses (legacy a77f687): port SelfPacedCoursesSection onto
+   the student courses page (modules/courses/components/CoursesPageContent.tsx),
+   using the existing self-paced hooks in modules/self-paced. Fit it into the
+   editorial layout; no stacked cards.
+2. REFERRALS COPY (legacy 8c305c3): the "buy a self-paced course" line in
+   ReferralsPanel.tsx is missing. Diff legacy's ReferralsPanel and port that copy.
+3. ASSIGNMENT UPLOAD TOAST: modules/assignments/components/submission-form.tsx
+   toasts "File upload failed" while the API client also toasts the HTTP
+   error. Pass `silent: true` through assignmentsService.uploadAssignmentFile
+   (it uses uploadFileDetailed) and show apiErrorMessage inline instead.
+4. 375px SWEEP for the pages not yet checked: /recordings, /materials,
+   /assignments, /profile, /inbox, /notifications, /billing, /webinars,
+   /calendar, /learn, plus every /teach page. Both roles, light and dark.
+5. USER DECISIONS to ask about (don't guess):
+   a. ScholarshipPhotoGate skips students because ProfilePhotoGate already
+      blocks them; scholars who are students get the simpler gate with no crop.
+      Should awarded scholars get the crop flow instead? That would mean
+      ProfilePhotoGate skipping awarded scholars.
+   b. The payment receipt cap is 10MB for images too; the API allows 25MB.
+      Keep it or relax it?
+   c. Self-paced revenue-share pay items count toward Earnings totals but have
+      no cohort row (the backend groups by cohort). Is the link-only port OK?
+   d. N3 glass/motion, and N4 the instructor course-outline rail (see §3).
 ```
-
----
 
 ## 3. Remaining feature work
 
-### N1 — Finish L1 (student learning)
+### N1 — Finish L1 (student learning) — DONE this session (kept for reference)
 
 ```
 TASK N1: Finish the remaining L1 items. (Done so far: toolbar/filter,
@@ -331,10 +300,7 @@ Remaining:
 
 ## 6. Suggested order for the next agent
 
-1. **M1**: merge the worktrees, mount PushPermissionPrompt, run checks, and ask
-   whether to push.
-2. **N1**: finish L1.
-3. **N2**: repo hygiene (.env.example, README, CI, headers, Sentry, AGENTS.md).
-4. **Q1+**: UI consistency sweep.
-5. **Q3**: improvements.
-6. Ask the user about N3 (glass) and N4 (the outline rail).
+1. **F-UP** (§2): small follow-ups and user questions.
+2. **N2**: repo hygiene (.env.example, README, CI, headers, Sentry, AGENTS.md).
+3. **Q1+**: UI consistency sweep.
+4. **Q3**: improvements.
