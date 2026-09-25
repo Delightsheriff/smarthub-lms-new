@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Award, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -32,7 +33,27 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
   const { data: submissions, isLoading, error, refetch } = useCohortSubmissions(scheduleId);
   const gradeMutation = useGradeSubmission(scheduleId);
 
-  const filtered = (submissions || []).filter((s) => {
+  // `?assignment=<id>` narrows to one assignment, so an assignment link
+  // (or a shared URL) can land here already filtered.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const assignmentFilter = searchParams.get("assignment") ?? "all";
+  const setAssignmentFilter = (value: string) => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value === "all") next.delete("assignment");
+    else next.set("assignment", value);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  };
+
+  const assignmentOptions = [
+    ...new Map((submissions || []).map((s) => [s.assignment.id, s.assignment.title])).entries(),
+  ].sort((a, b) => a[1].localeCompare(b[1]));
+
+  const inAssignment = (submissions || []).filter(
+    (s) => assignmentFilter === "all" || s.assignment.id === assignmentFilter,
+  );
+  const filtered = inAssignment.filter((s) => {
     if (filter === "pending") return s.status !== "graded";
     if (filter === "graded") return s.status === "graded";
     return true;
@@ -84,27 +105,49 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
           title="Submissions"
           count={filtered.length}
           actions={
-            <Select
-              value={filter}
-              onValueChange={(val) => {
-                if (val) setFilter(val as "all" | "pending" | "graded");
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-[210px] rounded-xl text-xs h-8">
-                <SelectValue placeholder="Filter submissions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  All ({submissions?.length || 0})
-                </SelectItem>
-                <SelectItem value="pending">
-                  Needs Grading ({submissions?.filter((s) => s.status !== "graded").length || 0})
-                </SelectItem>
-                <SelectItem value="graded">
-                  Graded ({submissions?.filter((s) => s.status === "graded").length || 0})
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Select value={assignmentFilter} onValueChange={(v) => v && setAssignmentFilter(v)}>
+                <SelectTrigger
+                  aria-label="Filter by assignment"
+                  className="h-8 w-full rounded-xl text-xs *:data-[slot=select-value]:normal-case sm:w-[210px]"
+                >
+                  <SelectValue>
+                    {(v: string | null) =>
+                      !v || v === "all"
+                        ? "All assignments"
+                        : (assignmentOptions.find(([id]) => id === v)?.[1] ?? "Assignment")
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All assignments</SelectItem>
+                  {assignmentOptions.map(([id, title]) => (
+                    <SelectItem key={id} value={id} className="normal-case">
+                      {title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filter}
+                onValueChange={(val) => {
+                  if (val) setFilter(val as "all" | "pending" | "graded");
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[210px] rounded-xl text-xs h-8">
+                  <SelectValue placeholder="Filter submissions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All ({inAssignment.length})</SelectItem>
+                  <SelectItem value="pending">
+                    Needs Grading ({inAssignment.filter((s) => s.status !== "graded").length})
+                  </SelectItem>
+                  <SelectItem value="graded">
+                    Graded ({inAssignment.filter((s) => s.status === "graded").length})
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           }
           empty="No submissions found in this filter."
         >
@@ -123,13 +166,13 @@ export function CohortSubmissionsTab({ scheduleId }: CohortSubmissionsTabProps) 
                 }
                 title={
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-foreground">{sub.student.name}</span>
+                    <span className="font-semibold text-sm text-foreground">
+                      {sub.student.name}
+                    </span>
                     <Badge variant="outline" className="text-[10px]">
                       {sub.assignment.title}
                     </Badge>
-                    {sub.isLate && (
-                      <StatusBadge status="late" className="text-[10px]" />
-                    )}
+                    {sub.isLate && <StatusBadge status="late" className="text-[10px]" />}
                   </div>
                 }
                 meta={
