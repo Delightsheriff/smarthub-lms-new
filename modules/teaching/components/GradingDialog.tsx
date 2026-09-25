@@ -44,23 +44,45 @@ function GradingForm({
   onOpenChange,
   onGradeSubmit,
 }: GradingDialogProps & { submission: CohortSubmissionRow }) {
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const totalPoints = submission.assignment.totalPoints || 100;
   const schema = z.object({
-    score: z.coerce.number().min(0, "Score cannot be negative").max(totalPoints, `Score cannot exceed ${totalPoints}`),
-    feedback: z.string().max(2000, "Feedback must be 2,000 characters or fewer"),
-  });
-  const form = useForm<z.input<typeof schema>, unknown, z.output<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: { score: submission.score ?? 0, feedback: "" },
+    score: z
+      .number({ message: "Score is required" })
+      .min(0, "Score cannot be negative")
+      .max(totalPoints, `Score cannot exceed ${totalPoints}`),
+    feedback: z
+      .string()
+      .max(2000, "Feedback must be 2,000 characters or fewer")
+      .optional(),
   });
 
-  const handleSubmit = async (values: z.infer<typeof schema>) => {
+  type FormValues = z.infer<typeof schema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      score:
+        submission.score !== undefined && submission.score !== null
+          ? submission.score
+          : (undefined as unknown as number),
+      feedback: "",
+    },
+  });
+
+  const handleSubmit = async (values: FormValues) => {
     try {
-      await onGradeSubmit(values.score, values.feedback.trim() || undefined);
+      setErrorMessage(null);
+      await onGradeSubmit(values.score, values.feedback?.trim() || undefined);
       form.reset();
       onOpenChange(false);
-    } catch {
-      // Keep entered values for retry.
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err as { message?: string })?.message ||
+            "Failed to record grade. Please try again.";
+      setErrorMessage(message);
     }
   };
 
@@ -152,13 +174,39 @@ function GradingForm({
           {/* Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <FormField control={form.control} name="score" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-semibold">Score (Out of {totalPoints})</FormLabel>
-                  <FormControl><Input type="number" min={0} max={totalPoints} className="rounded-xl" disabled={form.formState.isSubmitting} {...field} value={field.value as number} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              {errorMessage && (
+                <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+                  {errorMessage}
+                </div>
+              )}
+              <FormField
+                control={form.control}
+                name="score"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-semibold">Score (Out of {totalPoints})</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={totalPoints}
+                        placeholder={`0 - ${totalPoints}`}
+                        className="rounded-xl"
+                        disabled={form.formState.isSubmitting}
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(val === "" ? undefined : Number(val));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField control={form.control} name="feedback" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-semibold">Instructor Feedback & Comments</FormLabel>
