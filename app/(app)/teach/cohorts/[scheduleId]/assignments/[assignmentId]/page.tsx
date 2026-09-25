@@ -1,11 +1,16 @@
 import { use } from "react";
-import { redirect } from "next/navigation";
+import { CohortAssignmentDetail } from "@/modules/teaching/components/CohortAssignmentDetail";
 
 interface PageProps {
   params: Promise<{ scheduleId: string; assignmentId: string }>;
 }
 
 export default function CohortAssignmentDetailPage({ params }: PageProps) {
-  const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=assignments`);
+  const { scheduleId, assignmentId } = use(params);
+  return (
+    <CohortAssignmentDetail
+      scheduleId={scheduleId}
+      assignmentId={assignmentId}
+    />
+  );
 }
