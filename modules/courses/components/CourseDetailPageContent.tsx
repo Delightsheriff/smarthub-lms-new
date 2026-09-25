@@ -101,6 +101,11 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
               <p className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                 <span className="h-px w-6 sm:w-8 bg-accent" aria-hidden />
                 {course.category}
+                {course.isModuleAddon && (
+                  <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tracking-[0.1em] text-muted-foreground">
+                    Add-on modules
+                  </span>
+                )}
               </p>
               <h1 className="mt-2.5 font-display text-2xl sm:text-3xl lg:text-4xl font-bold leading-[1.1] text-balance text-foreground break-words">
                 {course.name}
