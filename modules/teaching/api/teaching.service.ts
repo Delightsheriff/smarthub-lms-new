@@ -232,7 +232,17 @@ class TeachingService {
     );
   }
 
+  /** Deletes the canonical recording — gone from EVERY cohort. */
+  async deleteRecording(id: string): Promise<void> {
+    await apiClient.delete(TEACHING_ENDPOINTS.RECORDING_BY_ID(id));
+  }
+
   // ─── Authoring: materials ────────────────────────────────────────
+
+  /** Deletes the canonical material — gone from EVERY cohort. */
+  async deleteMaterial(id: string): Promise<void> {
+    await apiClient.delete(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id));
+  }
 
   async getMaterialDetail(id: string): Promise<ApiMaterialDetail> {
     return apiClient.get<ApiMaterialDetail>(

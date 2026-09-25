@@ -451,6 +451,20 @@ export function useUpdateTeachingMaterial(id: string) {
   });
 }
 
+/** Delete a recording or material outright (all cohorts). */
+export function useDeleteTeachingContent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { kind: "recording" | "material"; id: string }) =>
+      vars.kind === "recording"
+        ? teachingService.deleteRecording(vars.id)
+        : teachingService.deleteMaterial(vars.id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teaching"] });
+    },
+  });
+}
+
 // ─── Detach (assignment | recording) ───────────────────────────────
 
 /**
