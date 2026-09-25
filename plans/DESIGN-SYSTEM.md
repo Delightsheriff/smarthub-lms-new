@@ -98,6 +98,10 @@ Motion tokens live in `app/globals.css`'s `:root` block:
 | `lib/utils/` | `lib/utils/{cn,format-date,format-text,html,status}.ts` | Split from one flat `lib/utils.ts`, barrelled through `index.ts` (same `@/lib/utils` import path everywhere). Includes `pluralize()`, `getInitial()`, `daysUntil()` — reach for these before writing a local `n === 1 ? "x" : "xs"` ternary or `name.slice(0,1)`. |
 | `FilterDropdown` / `FilterBar` | `components/ui/filter-dropdown.tsx` | Any page-local filter dropdown (built on `Select`, not `DropdownMenu`). Unchanged. |
 | `AuthCard` / `AuthCardBody` / `AuthColumn` | `modules/auth/components/AuthCard.tsx` | Auth screen shell. Unchanged. |
+| `RichTextEditor` | `components/ui/rich-text-editor.tsx` | TipTap-backed rich text editor for material guides, assignment briefs, and announcements. Sanitised HTML output matches `RichText`. |
+| `LinkRowsInput` | `components/ui/link-rows-input.tsx` | Repeatable name + URL rows for authoring forms with client validation and `cleanLinkRows`. |
+| `CopyableEmail` | `components/ui/copyable-email.tsx` | One-click copy email cell with hover affordance and mailto link support for teaching surfaces. |
+| `UserAvatar` | `components/ui/user-avatar.tsx` | Canonical user avatar with initials fallback and optional zoomable preview dialog. |
 | `groupNavItems` | `lib/nav-grouping.ts` | Sidebar section grouping. Unchanged. |
 | **Reading + Rail** (fifth move, not yet a shared component — a layout pattern) | See `plans/005-editorial-rollout-phase2-real-redesign.md` §1 | Single-item detail pages (an assignment, a lesson, a cohort's revenue breakdown) that don't fit hero+ledger: a wide reading column (~2/3, real prose typography) + a slim sticky rail (~1/3 — status, countdown, the primary action) that moves below the reading column on mobile. |
 
