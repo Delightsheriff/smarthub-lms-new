@@ -26,6 +26,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  InstallAppIosHelpDialog,
+  InstallAppMenuItem,
+} from "@/modules/push/components/InstallAppMenuItem";
 
 /**
  * Avatar in the top-bar that opens a quick-action dropdown. Sign-out is
@@ -37,6 +41,7 @@ export function UserMenu() {
   const user = useAuthStore((s) => s.user);
   const handleLogout = useAppLogout();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [installHelpOpen, setInstallHelpOpen] = useState(false);
 
   const fullName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
@@ -92,6 +97,8 @@ export function UserMenu() {
             Help &amp; support
           </DropdownMenuItem>
 
+          <InstallAppMenuItem onShowIosHelp={() => setInstallHelpOpen(true)} />
+
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
@@ -103,6 +110,8 @@ export function UserMenu() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <InstallAppIosHelpDialog open={installHelpOpen} onOpenChange={setInstallHelpOpen} />
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>

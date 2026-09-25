@@ -86,3 +86,57 @@ export const dropLocalSubscription = async (): Promise<string | null> => {
   await sub.unsubscribe();
   return endpoint;
 };
+
+/**
+ * Base64url-encode the raw key bytes a subscription was created with,
+ * so it can be compared against the string form the server serves.
+ */
+const encodeKey = (buf: ArrayBuffer | null): string | null => {
+  if (!buf) return null;
+  const binary = Array.from(new Uint8Array(buf), (b) => String.fromCharCode(b)).join("");
+  return window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
+/**
+ * True when this browser holds a subscription created against a
+ * DIFFERENT VAPID key than the server now signs with. Such a
+ * subscription is permanently unusable (the push service rejects the
+ * JWT with a 403) but looks healthy locally. When the browser doesn't
+ * expose `applicationServerKey`, returns false rather than guess and
+ * leaves it to the server's 403 pruning.
+ */
+export const hasStaleVapidKey = async (currentPublicKey: string): Promise<boolean> => {
+  if (!isPushSupported()) return false;
+  const registration = await navigator.serviceWorker.getRegistration("/");
+  const sub = await registration?.pushManager.getSubscription();
+  if (!sub) return false;
+
+  const existing = encodeKey(sub.options?.applicationServerKey ?? null);
+  if (!existing) return false;
+  return existing !== currentPublicKey;
+};
+
+/**
+ * Replace a subscription bound to an old key. Safe without a user
+ * gesture: permission is already `granted` (only the subscription died
+ * in the rotation), so `subscribe()` resolves without prompting.
+ * Returns the old endpoint so the caller can drop the server row.
+ */
+export const resubscribeWithCurrentKey = async (
+  vapidPublicKey: string,
+): Promise<{ oldEndpoint: string | null; next: RawSubscription } | null> => {
+  if (Notification.permission !== "granted") return null;
+
+  const registration = await registerServiceWorker();
+  await navigator.serviceWorker.ready;
+
+  const existing = await registration.pushManager.getSubscription();
+  const oldEndpoint = existing?.endpoint ?? null;
+  if (existing) await existing.unsubscribe();
+
+  const sub = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+  });
+  return { oldEndpoint, next: toRaw(sub) };
+};
