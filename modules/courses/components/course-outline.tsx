@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -75,6 +75,7 @@ export function CourseOutline({
   const activeCompletedIds = completedIds ?? progressSet;
   const pathname = usePathname();
   const params = useParams();
+  const linkedRecording = useSearchParams().get("recording");
   const activeModuleSlug =
     (params?.moduleSlug as string | undefined) ?? null;
 
@@ -181,22 +182,13 @@ export function CourseOutline({
 
               <AccordionContent className="pl-9 pr-2 pb-1 pt-1">
                 <ul className="space-y-0.5">
-                  {mod.recordings.map((r) => {
-                    const isWatched = !!activeCompletedIds?.has(r.id);
-                    return (
-                      <OutlineItem
-                        key={r.id}
-                        label={r.title}
-                        href={`${moduleHref}#recording-${r.id}`}
-                        icon={isWatched ? CheckCircle2 : PlayCircle}
-                        iconClassName={isWatched ? "text-success" : "text-primary"}
-                        active={
-                          isActiveModule && activeHash === `recording-${r.id}`
-                        }
-                        onClick={onItemClick}
-                      />
-                    );
-                  })}
+                  <OutlineRecordings
+                    recordings={mod.recordings}
+                    moduleHref={moduleHref}
+                    activeId={isActiveModule ? linkedRecording : null}
+                    completedIds={activeCompletedIds}
+                    onItemClick={onItemClick}
+                  />
                   {mod.materials.map((m) => (
                     <OutlineItem
                       key={m.id}
@@ -241,6 +233,64 @@ export function CourseOutline({
         })}
       </Accordion>
     </div>
+  );
+}
+
+const OUTLINE_RECORDINGS_STEP = 8;
+
+/**
+ * A module's recordings in the rail, revealed 8 at a time ("Show more",
+ * not a pager — this is navigation, and one module can hold 47). The
+ * reveal never hides the recording the reader is on. Links carry
+ * `?recording=<id>`, which the module page turns into the right page
+ * and an open player; a `#hash` failed once the list was paged.
+ */
+function OutlineRecordings({
+  recordings,
+  moduleHref,
+  activeId,
+  completedIds,
+  onItemClick,
+}: {
+  recordings: Module["recordings"];
+  moduleHref: string;
+  activeId: string | null;
+  completedIds?: Set<string>;
+  onItemClick?: () => void;
+}) {
+  const [shown, setShown] = useState(OUTLINE_RECORDINGS_STEP);
+  const activeIndex = activeId ? recordings.findIndex((r) => r.id === activeId) : -1;
+  const visibleCount = Math.max(shown, activeIndex + 1);
+  const hidden = recordings.length - visibleCount;
+
+  return (
+    <>
+      {recordings.slice(0, visibleCount).map((r) => {
+        const isWatched = !!completedIds?.has(r.id);
+        return (
+          <OutlineItem
+            key={r.id}
+            label={r.title}
+            href={`${moduleHref}?recording=${r.id}`}
+            icon={isWatched ? CheckCircle2 : PlayCircle}
+            iconClassName={isWatched ? "text-success" : "text-primary"}
+            active={activeId === r.id}
+            onClick={onItemClick}
+          />
+        );
+      })}
+      {hidden > 0 && (
+        <li>
+          <button
+            type="button"
+            onClick={() => setShown(visibleCount + OUTLINE_RECORDINGS_STEP)}
+            className="w-full rounded-md px-3 py-1.5 text-left text-xs font-medium text-primary hover:bg-muted"
+          >
+            Show {Math.min(hidden, OUTLINE_RECORDINGS_STEP)} more of {hidden}
+          </button>
+        </li>
+      )}
+    </>
   );
 }
 
