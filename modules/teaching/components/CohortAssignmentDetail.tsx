@@ -11,6 +11,8 @@ import {
   ExternalLink,
   Award,
   AlertCircle,
+  CalendarClock,
+  Pencil,
   UserX,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -29,9 +31,11 @@ import {
   useCohortRoster,
   useCohortSubmissions,
   useTeachingAssignment,
+  useTeachingCohortDetail,
   useGradeSubmission,
 } from "../api/teaching.queries";
 import type { CohortSubmissionRow } from "../types";
+import { CohortScheduleDialog } from "./CohortScheduleDialog";
 import { GradingDialog } from "./GradingDialog";
 
 interface CohortAssignmentDetailProps {
@@ -51,6 +55,8 @@ export function CohortAssignmentDetail({
 
   const [picked, setPicked] = useState<CohortSubmissionRow | null>(null);
   const [briefOpen, setBriefOpen] = useState(true);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const cohort = useTeachingCohortDetail(scheduleId);
 
   // Deep linking: `?submission=<id>` or fallback `?student=<id>`
   const searchParams = useSearchParams();
@@ -157,6 +163,9 @@ export function CohortAssignmentDetail({
 
   const asgn = assignment.data;
   const dueDate = attachment?.dueDate || asgn.dueDate;
+  const moduleTitle = attachment?.module
+    ? cohort.data?.modules.find((m) => m.id === attachment.module)?.title
+    : undefined;
 
   const handleSaveAndNext = async (score: number, feedback?: string) => {
     if (!grading) return;
@@ -198,20 +207,40 @@ export function CohortAssignmentDetail({
             : "No due date set · Assignment Detail"
         }
         description={
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {attachment?.module && (
+          <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {moduleTitle && (
               <Badge variant="outline" className="text-xs">
-                {attachment.module}
+                {moduleTitle}
               </Badge>
             )}
-            <span>·</span>
-            <span>Total Points: {asgn.totalPoints ?? 100}</span>
-            <span>·</span>
+            <span>{asgn.totalPoints ?? 100} points</span>
+            <span aria-hidden>·</span>
             <span>
-              {attachment?.isVisible ?? true
-                ? "Visible to students"
-                : "Hidden (Draft)"}
+              {attachment?.allowLateSubmission ? "Late work accepted" : "No late work"}
             </span>
+          </span>
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {attachment && (
+              <Button variant="outline" size="sm" onClick={() => setScheduleOpen(true)}>
+                <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+                Due date
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={
+                <Link
+                  href={`/teach/cohorts/${scheduleId}/assignments/${assignmentId}/edit`}
+                />
+              }
+            >
+              <Pencil className="h-3.5 w-3.5" aria-hidden />
+              Edit
+            </Button>
           </div>
         }
       />
@@ -470,6 +499,21 @@ export function CohortAssignmentDetail({
       </Tabs>
 
       {/* Grading Dialog */}
+      <CohortScheduleDialog
+        scheduleId={scheduleId}
+        target={
+          scheduleOpen && attachment
+            ? {
+                assignmentId,
+                title: asgn.title,
+                dueDate: attachment.dueDate,
+                allowLateSubmission: attachment.allowLateSubmission,
+              }
+            : null
+        }
+        onOpenChange={setScheduleOpen}
+      />
+
       <GradingDialog
         submission={grading}
         open={Boolean(grading)}
