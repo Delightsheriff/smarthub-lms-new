@@ -17,6 +17,8 @@ export function uploadTeachingFile(
     // Large media can outlive the 30s default on a slow uplink; the API
     // itself allows Cloudinary 120s.
     timeout: 150_000,
+    // The form shows the failure inline.
+    silent: true,
   });
 }
 

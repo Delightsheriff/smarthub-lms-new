@@ -19,6 +19,7 @@ import {
   AuthoringShell,
   AuthoringSkeleton,
   ConfirmDialog,
+  errorText,
 } from "./authoring/authoring-kit";
 
 /**
@@ -63,8 +64,8 @@ export function CohortMaterialDetail({
       await del.mutateAsync({ kind: "material", id: materialId });
       toast.success("Material deleted");
       router.replace(cohortHref);
-    } catch {
-      // The API client already toasted; keep the dialog open to retry.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't delete the material."));
     }
   };
 

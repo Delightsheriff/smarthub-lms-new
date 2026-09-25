@@ -30,6 +30,11 @@ import type {
   UpdateRecordingPayload,
 } from "../types";
 
+/** Authoring writes: the UI owns success and error messaging (inline form
+ *  errors, dialog toasts), so the client's auto-toasts are silenced —
+ *  otherwise create-then-attach shows two server toasts plus the form's. */
+const SILENT = { silent: true } as const;
+
 class TeachingService {
   async getCohorts(): Promise<ApiTeachingCohort[]> {
     return apiClient.get<ApiTeachingCohort[]>(TEACHING_ENDPOINTS.COHORTS);
@@ -102,6 +107,7 @@ class TeachingService {
     return apiClient.patch<{ success: boolean }>(
       TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
       patch,
+      SILENT,
     );
   }
 
@@ -119,6 +125,7 @@ class TeachingService {
     return apiClient.post<{ _id: string }>(
       TEACHING_ENDPOINTS.ASSIGNMENTS_BASE,
       payload,
+      SILENT,
     );
   }
 
@@ -126,7 +133,7 @@ class TeachingService {
     id: string,
     payload: UpdateAssignmentPayload,
   ): Promise<unknown> {
-    return apiClient.patch(TEACHING_ENDPOINTS.ASSIGNMENT_BY_ID(id), payload);
+    return apiClient.patch(TEACHING_ENDPOINTS.ASSIGNMENT_BY_ID(id), payload, SILENT);
   }
 
   async attachAssignmentToSchedule(
@@ -137,6 +144,7 @@ class TeachingService {
     await apiClient.post(
       TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
       payload,
+      SILENT,
     );
   }
 
@@ -146,6 +154,7 @@ class TeachingService {
   ): Promise<void> {
     await apiClient.delete(
       TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
+      SILENT,
     );
   }
 
@@ -187,6 +196,7 @@ class TeachingService {
     return apiClient.post<{ _id: string }>(
       TEACHING_ENDPOINTS.RECORDINGS_BASE,
       payload,
+      SILENT,
     );
   }
 
@@ -195,7 +205,7 @@ class TeachingService {
     id: string,
     payload: UpdateRecordingPayload,
   ): Promise<unknown> {
-    return apiClient.put(TEACHING_ENDPOINTS.RECORDING_BY_ID(id), payload);
+    return apiClient.put(TEACHING_ENDPOINTS.RECORDING_BY_ID(id), payload, SILENT);
   }
 
   async getModuleRecordings(moduleId: string): Promise<ApiRecordingDetail[]> {
@@ -219,6 +229,7 @@ class TeachingService {
     await apiClient.post(
       TEACHING_ENDPOINTS.RECORDING_TO_SCHEDULE(recordingId, scheduleId),
       {},
+      SILENT,
     );
   }
 
@@ -229,19 +240,20 @@ class TeachingService {
   ): Promise<void> {
     await apiClient.delete(
       TEACHING_ENDPOINTS.RECORDING_TO_SCHEDULE(recordingId, scheduleId),
+      SILENT,
     );
   }
 
   /** Deletes the canonical recording — gone from EVERY cohort. */
   async deleteRecording(id: string): Promise<void> {
-    await apiClient.delete(TEACHING_ENDPOINTS.RECORDING_BY_ID(id));
+    await apiClient.delete(TEACHING_ENDPOINTS.RECORDING_BY_ID(id), SILENT);
   }
 
   // ─── Authoring: materials ────────────────────────────────────────
 
   /** Deletes the canonical material — gone from EVERY cohort. */
   async deleteMaterial(id: string): Promise<void> {
-    await apiClient.delete(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id));
+    await apiClient.delete(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id), SILENT);
   }
 
   async getMaterialDetail(id: string): Promise<ApiMaterialDetail> {
@@ -256,6 +268,7 @@ class TeachingService {
     return apiClient.post<{ _id: string }>(
       TEACHING_ENDPOINTS.MATERIALS_BASE,
       payload,
+      SILENT,
     );
   }
 
@@ -265,7 +278,7 @@ class TeachingService {
     id: string,
     payload: UpdateMaterialPayload,
   ): Promise<unknown> {
-    return apiClient.put(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id), payload);
+    return apiClient.put(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id), payload, SILENT);
   }
 }
 

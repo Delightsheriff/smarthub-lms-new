@@ -358,3 +358,9 @@ export function ConfirmDialog({
     </AlertDialog>
   );
 }
+
+/** The API's message for a failed write, or a fallback. Authoring writes
+ *  are silent (see teaching.service), so the UI must show this itself. */
+export function errorText(err: unknown, fallback: string): string {
+  return err instanceof Error && err.message ? err.message : fallback;
+}

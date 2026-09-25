@@ -14,6 +14,8 @@ vi.mock("@/lib/api", () => ({
 
 // Paths/verbs mirror smarthub-api lms-routes (assignments, recordings,
 // materials, teaching). A drift here is a request the API will 404.
+// Writes are silent: the authoring UI owns its own messages.
+const SILENT = { silent: true };
 describe("teaching authoring contracts", () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -22,11 +24,11 @@ describe("teaching authoring contracts", () => {
     expect(apiClient.post).toHaveBeenCalledWith("/lms/assignments", {
       title: "T",
       module: "m1",
-    });
+    }, SILENT);
     await teachingService.updateAssignment("a1", { title: "U" });
     expect(apiClient.patch).toHaveBeenCalledWith("/lms/assignments/a1", {
       title: "U",
-    });
+    }, SILENT);
   });
 
   it("attaches, edits and detaches an assignment per cohort", async () => {
@@ -35,18 +37,18 @@ describe("teaching authoring contracts", () => {
     });
     expect(apiClient.post).toHaveBeenCalledWith(
       "/lms/assignments/a1/schedules/s1",
-      { dueDate: "2026-10-01T00:00:00.000Z" },
+      { dueDate: "2026-10-01T00:00:00.000Z" }, SILENT
     );
     await teachingService.updateAssignmentSchedule("a1", "s1", {
       isVisible: false,
     });
     expect(apiClient.patch).toHaveBeenCalledWith(
       "/lms/assignments/a1/schedules/s1",
-      { isVisible: false },
+      { isVisible: false }, SILENT
     );
     await teachingService.detachAssignmentFromSchedule("a1", "s1");
     expect(apiClient.delete).toHaveBeenCalledWith(
-      "/lms/assignments/a1/schedules/s1",
+      "/lms/assignments/a1/schedules/s1", SILENT
     );
   });
 
@@ -54,22 +56,22 @@ describe("teaching authoring contracts", () => {
     await teachingService.updateRecording("r1", { title: "R" });
     expect(apiClient.put).toHaveBeenCalledWith("/lms/recordings/r1", {
       title: "R",
-    });
+    }, SILENT);
     await teachingService.updateMaterial("m1", { title: "M" });
     expect(apiClient.put).toHaveBeenCalledWith("/lms/materials/m1", {
       title: "M",
-    });
+    }, SILENT);
   });
 
   it("attaches and detaches recordings per cohort", async () => {
     await teachingService.attachRecordingToSchedule("r1", "s1");
     expect(apiClient.post).toHaveBeenCalledWith(
       "/lms/recordings/r1/schedules/s1",
-      {},
+      {}, SILENT
     );
     await teachingService.detachRecordingFromSchedule("r1", "s1");
     expect(apiClient.delete).toHaveBeenCalledWith(
-      "/lms/recordings/r1/schedules/s1",
+      "/lms/recordings/r1/schedules/s1", SILENT
     );
   });
 

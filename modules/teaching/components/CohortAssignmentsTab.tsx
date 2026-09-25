@@ -36,7 +36,7 @@ import {
 import type { CohortAssignmentRow } from "../types";
 import { AttachExistingAssignmentDialog } from "./AttachExistingAssignmentDialog";
 import { CohortScheduleDialog, type CohortScheduleTarget } from "./CohortScheduleDialog";
-import { ConfirmDialog } from "./authoring/authoring-kit";
+import { ConfirmDialog, errorText } from "./authoring/authoring-kit";
 
 interface CohortAssignmentsTabProps {
   scheduleId: string;
@@ -66,8 +66,8 @@ export function CohortAssignmentsTab({ scheduleId }: CohortAssignmentsTabProps) 
       await detach.mutateAsync({ kind: "assignment", id: detaching.assignmentId });
       toast.success("Removed from this cohort");
       setDetaching(null);
-    } catch {
-      // Toasted by the API client; keep the dialog open.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't remove it from this cohort."));
     }
   };
 

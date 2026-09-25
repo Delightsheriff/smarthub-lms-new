@@ -22,6 +22,7 @@ import {
   AuthoringShell,
   AuthoringSkeleton,
   ConfirmDialog,
+  errorText,
 } from "./authoring/authoring-kit";
 
 /**
@@ -74,8 +75,8 @@ export function CohortRecordingDetail({
     try {
       await attach.mutateAsync(recordingId);
       toast.success("Shared with this cohort");
-    } catch {
-      // Toasted by the API client.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't share it with this cohort."));
     }
   };
 
@@ -84,8 +85,8 @@ export function CohortRecordingDetail({
       await detach.mutateAsync({ kind: "recording", id: recordingId });
       toast.success("Hidden from this cohort");
       setConfirm(null);
-    } catch {
-      // Toasted; keep the dialog open.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't hide it from this cohort."));
     }
   };
 
@@ -94,8 +95,8 @@ export function CohortRecordingDetail({
       await del.mutateAsync({ kind: "recording", id: recordingId });
       toast.success("Recording deleted");
       router.replace(cohortHref);
-    } catch {
-      // Toasted; keep the dialog open.
+    } catch (err) {
+      toast.error(errorText(err, "Couldn't delete the recording."));
     }
   };
 

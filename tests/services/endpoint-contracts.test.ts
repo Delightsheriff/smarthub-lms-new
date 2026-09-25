@@ -148,6 +148,7 @@ describe("F4 Endpoint contract tests", () => {
       expect(apiClient.patch).toHaveBeenCalledWith(
         "/lms/assignments/asgn_123/schedules/sched_456",
         { isVisible: false },
+        { silent: true },
       );
     });
   });

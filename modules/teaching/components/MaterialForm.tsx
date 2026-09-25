@@ -31,6 +31,7 @@ import {
   FormSection,
   OptionSelect,
   ToggleRow,
+  errorText,
   isRichTextEmpty,
   moduleOptions,
 } from "./authoring/authoring-kit";
@@ -191,8 +192,10 @@ export function MaterialForm({
       setValue("fileType", r.mime || r.extension || file.type);
       setValue("fileSize", r.size ?? file.size);
       toast.success("File uploaded");
-    } catch {
-      setServerError("Upload failed. Check the file type and size, then try again.");
+    } catch (err) {
+      setServerError(
+        errorText(err, "Upload failed. Check the file type and size, then try again."),
+      );
     }
   };
 
