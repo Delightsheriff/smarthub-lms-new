@@ -18,6 +18,10 @@ const badgeVariants = cva(
           "bg-success/10 text-success focus-visible:ring-success/20 dark:bg-success/20 [a]:hover:bg-success/20",
         warning:
           "bg-warning/10 text-warning focus-visible:ring-warning/20 dark:bg-warning/20 [a]:hover:bg-warning/20",
+        // Solid, not a tint: orange text on a pale orange wash fails
+        // contrast, dark ink on the solid accent passes in both themes.
+        accent:
+          "bg-accent text-accent-foreground focus-visible:ring-accent/40 [a]:hover:bg-accent/80",
         outline:
           "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
         ghost:

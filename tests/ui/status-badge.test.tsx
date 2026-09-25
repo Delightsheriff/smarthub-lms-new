@@ -31,6 +31,13 @@ describe("StatusBadge", () => {
     expect(badge.className).toContain("text-destructive");
   });
 
+  it("renders qualified in the solid accent tone", () => {
+    render(<StatusBadge status="qualified" />);
+    const badge = screen.getByText("Qualified");
+    expect(badge.className).toContain("bg-accent");
+    expect(badge.className).toContain("text-accent-foreground");
+  });
+
   it("renders an optional leading icon", () => {
     const { container } = render(<StatusBadge status="paid" icon={Check} />);
     expect(container.querySelector("svg")).not.toBeNull();

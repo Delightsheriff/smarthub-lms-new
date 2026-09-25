@@ -2,10 +2,11 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "./badge";
 import { resolveStatus, type StatusTone } from "@/lib/utils";
 
-const TONE_TO_VARIANT: Record<StatusTone, "success" | "warning" | "destructive" | "outline"> = {
+const TONE_TO_VARIANT: Record<StatusTone, "success" | "warning" | "destructive" | "accent" | "outline"> = {
   success: "success",
   warning: "warning",
   destructive: "destructive",
+  accent: "accent",
   neutral: "outline",
 };
 
