@@ -84,3 +84,45 @@ export interface StudentAttendanceHistory {
   };
   cohorts: StudentAttendanceCohortBlock[];
 }
+
+/** One assignment on a cohort, with what this student did about it.
+ *  Mirrors `StudentAssignmentRow` on the API. */
+export interface CohortStudentAssignmentRow {
+  assignmentId: string;
+  title: string;
+  type: string;
+  moduleId?: string;
+  moduleTitle?: string;
+  totalPoints?: number;
+  isPublished: boolean;
+  dueDate?: string;
+  allowLateSubmission: boolean;
+  status: "graded" | "returned" | "submitted" | "missing" | "pending";
+  submittedAt?: string;
+  daysLate?: number;
+  isLate: boolean;
+  submissionId?: string;
+  score?: number;
+  percentage?: number;
+  gradedAt?: string;
+}
+
+/** One student's coursework for one cohort, plus who they are. */
+export interface CohortStudentAssignments {
+  scheduleId?: string;
+  courseId: string;
+  courseName: string;
+  startDate?: string;
+  scopedEnrollment: boolean;
+  summary: {
+    total: number;
+    submitted: number;
+    graded: number;
+    missing: number;
+    pending: number;
+    late: number;
+    averagePercentage?: number;
+  };
+  assignments: CohortStudentAssignmentRow[];
+  student: { id: string; name: string; email?: string; imageUrl?: string };
+}

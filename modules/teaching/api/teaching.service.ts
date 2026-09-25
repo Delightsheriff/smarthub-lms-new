@@ -6,6 +6,7 @@ import type {
   CohortAssignmentRow,
   CohortSubmissionRow,
   InstructorAssignmentRow,
+  CohortStudentAssignments,
 } from "../types";
 
 class TeachingService {
@@ -35,6 +36,15 @@ class TeachingService {
 
   async getAssignments(id: string): Promise<CohortAssignmentRow[]> {
     return apiClient.get<CohortAssignmentRow[]>(TEACHING_ENDPOINTS.ASSIGNMENTS(id));
+  }
+
+  async getCohortStudentAssignments(
+    scheduleId: string,
+    studentId: string,
+  ): Promise<CohortStudentAssignments> {
+    return apiClient.get<CohortStudentAssignments>(
+      TEACHING_ENDPOINTS.COHORT_STUDENT_ASSIGNMENTS(scheduleId, studentId),
+    );
   }
 
   /** Every assignment across every cohort the caller teaches, with

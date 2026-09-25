@@ -110,10 +110,36 @@ export function useGradeSubmission(scheduleId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.submissions(scheduleId) });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignments(scheduleId) });
+      queryClient.invalidateQueries({
+        queryKey: ["teaching", "cohort", scheduleId, "student-assignments"],
+      });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.inbox() });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.recentSubmissions() });
       queryClient.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.myAssignments });
     },
+  });
+}
+
+/** One student's coursework on a cohort the caller teaches. Powers the
+ *  student page's Coursework list. */
+export function useCohortStudentAssignments(
+  scheduleId: string | undefined,
+  studentId: string | undefined,
+) {
+  return useQuery({
+    queryKey: [
+      "teaching",
+      "cohort",
+      scheduleId,
+      "student-assignments",
+      studentId,
+    ] as const,
+    queryFn: () =>
+      teachingService.getCohortStudentAssignments(
+        scheduleId as string,
+        studentId as string,
+      ),
+    enabled: !!scheduleId && !!studentId,
   });
 }
 

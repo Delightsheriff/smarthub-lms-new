@@ -14,4 +14,6 @@ export const TEACHING_ENDPOINTS = {
   ATTENDANCE_SESSION: (id: string) => `${LMS_PREFIX}/class-sessions/${id}/attendance`,
   MARK_ATTENDANCE: (id: string) => `${LMS_PREFIX}/class-sessions/${id}/attendance`,
   STUDENT_ATTENDANCE: (scheduleId: string, studentId: string) => `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/students/${studentId}/attendance`,
+  COHORT_STUDENT_ASSIGNMENTS: (scheduleId: string, studentId: string) =>
+    `${LMS_PREFIX}/teaching/cohorts/${scheduleId}/students/${studentId}/assignments`,
 } as const;

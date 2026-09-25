@@ -175,4 +175,5 @@ export interface CohortRecordingRow {
   isVisible: boolean;
 }
 
+export * from "./attendance";
 export type { ApiTeachingCohort, ApiTeachingCohortDetail } from "./api.types";
