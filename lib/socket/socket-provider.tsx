@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/slices/authStore";
 
@@ -42,28 +42,27 @@ function resolveSocketUrl(): string {
 export function SocketProvider({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // One socket per signed-in token; connect/disconnect is the effect's job.
+  const socket = useMemo(
+    () =>
+      isAuthenticated && token
+        ? io(resolveSocketUrl(), {
+            auth: { token },
+            withCredentials: true,
+            transports: ["websocket"],
+            autoConnect: false,
+          })
+        : null,
+    [token, isAuthenticated],
+  );
 
   useEffect(() => {
-    if (!isAuthenticated || !token) {
-      return;
-    }
-
-    const socketUrl = resolveSocketUrl();
-    const socketInstance = io(socketUrl, {
-      auth: { token },
-      withCredentials: true,
-      transports: ["websocket"],
-      autoConnect: true,
-    });
-
-    setSocket(socketInstance);
-
+    if (!socket) return;
+    socket.connect();
     return () => {
-      socketInstance.disconnect();
-      setSocket(null);
+      socket.disconnect();
     };
-  }, [token, isAuthenticated]);
+  }, [socket]);
 
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
