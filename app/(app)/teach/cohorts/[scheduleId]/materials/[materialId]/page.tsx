@@ -1,11 +1,11 @@
 import { use } from "react";
-import { redirect } from "next/navigation";
+import { CohortMaterialDetail } from "@/modules/teaching/components/CohortMaterialDetail";
 
 interface PageProps {
   params: Promise<{ scheduleId: string; materialId: string }>;
 }
 
-export default function CohortMaterialDetailPage({ params }: PageProps) {
-  const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=modules`);
+export default function CohortMaterialPage({ params }: PageProps) {
+  const { scheduleId, materialId } = use(params);
+  return <CohortMaterialDetail scheduleId={scheduleId} materialId={materialId} />;
 }
