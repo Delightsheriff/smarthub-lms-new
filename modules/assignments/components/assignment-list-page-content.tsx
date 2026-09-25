@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FileText, Search } from "lucide-react";
+import { FileText, Plus, Search } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,12 @@ function InstructorTasksBody() {
         dateline={`${dateline} · Teaching Space`}
         title="Tasks"
         description="Submissions waiting on you, plus the full set of assignments across the cohorts you teach."
+        actions={
+          <Button nativeButton={false} render={<Link href="/teach/assignments/new" />}>
+            <Plus className="h-4 w-4" aria-hidden />
+            New assignment
+          </Button>
+        }
       />
       <NeedsGradingStrip />
       <InstructorAssignmentsList />

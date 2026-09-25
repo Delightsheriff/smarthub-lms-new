@@ -41,9 +41,8 @@ const VISIBILITY_FILTERS: { value: VisibilityFilter; label: string }[] = [
 /**
  * Instructor-facing list of every assignment across every cohort they
  * teach, with submission rollups. Sits below the Needs-grading strip on
- * the Tasks page. Each row links to the cohort detail page (lands on
- * Overview — the cohort page's tab state isn't URL-addressable yet, so
- * a deep link straight to its Submissions tab isn't possible today).
+ * the Tasks page. Each row opens that assignment on its cohort — the
+ * brief, who has and hasn't submitted, and grading.
  */
 export function InstructorAssignmentsList() {
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -172,7 +171,7 @@ export function InstructorAssignmentsList() {
 function AssignmentRow({ row }: { row: InstructorAssignmentRow }) {
   return (
     <Link
-      href={`/teach/cohorts/${row.schedule.id}`}
+      href={`/teach/cohorts/${row.schedule.id}/assignments/${row.assignmentId}`}
       className="group flex items-start justify-between gap-4 px-5 py-4 hover:bg-muted/50 transition-colors"
     >
       <div className="min-w-0 flex-1 space-y-1">
