@@ -145,7 +145,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
             </TabsContent>
 
             <TabsContent value="modules">
-              <CohortModulesTab modules={cohort.modules} />
+              <CohortModulesTab scheduleId={scheduleId} modules={cohort.modules} />
             </TabsContent>
 
             <TabsContent value="assignments">
