@@ -88,6 +88,7 @@ export interface CohortSubmissionRow {
   fileName?: string;
   fileMimeType?: string;
   content?: string;
+  generalFeedback?: string;
 }
 
 /** Aggregate row for `GET /lms/teaching/inbox` — a submission across

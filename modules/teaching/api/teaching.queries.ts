@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teachingService } from "./teaching.service";
 import { attendanceService } from "./attendance.service";
+import { assignmentsService } from "@/modules/assignments/api/assignments.service";
 import { normaliseCohort, normaliseCohortDetail, normaliseInboxRow } from "./normalise";
 import type { InboxRow, InstructorAssignmentRow, TeachingCohort, TeachingCohortDetail } from "../types";
 
@@ -164,6 +165,19 @@ export function useCohortStudentAttendance(
         studentId as string,
       ),
     enabled: !!scheduleId && !!studentId,
+  });
+}
+
+/** Fetches full assignment details (description, instructions, link)
+ *  for teaching and grading context. */
+export function useTeachingAssignment(
+  id: string | undefined,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["teaching", "assignment", id] as const,
+    queryFn: () => assignmentsService.getAssignmentById(id as string),
+    enabled: enabled && !!id,
   });
 }
 
