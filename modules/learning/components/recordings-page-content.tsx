@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video } from "lucide-react";
+import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -26,7 +26,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 /** All recordings surface. Every visible recording across the
  *  student's enrolments, grouped by course / module. */
 export function RecordingsPageContent() {
-  const { data, isLoading, isFetching, refetch } = useMyRecordings();
+  const { data, isLoading, isFetching, error, refetch } = useMyRecordings();
   const { data: progressSet } = useAllProgress();
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -75,7 +75,7 @@ export function RecordingsPageContent() {
         dateline={dateline}
         title="Class Recordings"
         description={
-          !isLoading ? (
+          !isLoading && !error ? (
             rows.length === 0 ? (
               "Class recordings will appear here as your tutors publish live session replays."
             ) : (
@@ -119,7 +119,7 @@ export function RecordingsPageContent() {
       />
 
       {/* Hero for next unwatched recording */}
-      {!isLoading && filter === "all" && nextToWatch && (
+      {!isLoading && !error && filter === "all" && nextToWatch && (
         <div className="flex flex-col justify-between overflow-hidden rounded-[20px] border border-border bg-card p-5 md:p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1.5 min-w-0">
@@ -164,7 +164,25 @@ export function RecordingsPageContent() {
         </div>
       )}
 
-      {!isLoading && visible.length === 0 && (
+      {error && !isLoading && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load recordings"
+          description="There was a problem loading your recordings. Please try again."
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => refetch()}
+              className="rounded-xl"
+            >
+              Try again
+            </Button>
+          }
+        />
+      )}
+
+      {!isLoading && !error && visible.length === 0 && (
         <EmptyState
           icon={Video}
           title="No recordings"
@@ -178,6 +196,7 @@ export function RecordingsPageContent() {
 
       {/* Course-grouped IndexList rows */}
       {!isLoading &&
+        !error &&
         groups.map((g) => (
           <section key={g.course.id} className="space-y-1">
             {/* Course heading */}
