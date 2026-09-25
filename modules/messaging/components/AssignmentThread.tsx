@@ -3,11 +3,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Send, MessageSquare } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/lib/socket/socket-provider";
-import { useThread, useSendMessage } from "../api/messaging.queries";
+import { useAuthStore } from "@/store/slices/authStore";
+import { useThread, useSendMessage, MESSAGING_QUERY_KEYS } from "../api/messaging.queries";
+import { normaliseMessage } from "../api/normalise";
+import type { ApiMessage } from "../types/api.types";
+import type { ChatMessage } from "../types";
 import { MessageBubble } from "./MessageBubble";
 
 interface AssignmentThreadProps {
@@ -22,27 +27,44 @@ interface AssignmentThreadProps {
 export function AssignmentThread({ conversationId, title, assignmentHref }: AssignmentThreadProps) {
   const [content, setContent] = useState("");
   const feedRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const currentUserId = useAuthStore((s) => s.user?._id) || "";
 
-  const { data: messages, isLoading, refetch } = useThread(conversationId);
+  const { data: messages, isLoading } = useThread(conversationId);
   const sendMessageMutation = useSendMessage(conversationId);
 
   const socket = useSocket();
 
-  // Socket listener for live arrival
+  // Socket room join/leave and real-time message listener
   useEffect(() => {
-    if (!socket) return;
-    const handleCreated = (data: unknown) => {
-      const msg = data as { conversationId?: string };
-      if (msg?.conversationId === conversationId) {
-        refetch();
-      }
+    if (!socket || !conversationId) return;
+
+    // Join the conversation room on mount
+    socket.emit("conversation:join", conversationId);
+
+    const handleNewMessage = (raw: unknown) => {
+      const apiMsg = raw as ApiMessage;
+      if (!apiMsg || !apiMsg._id) return;
+      if (apiMsg.conversationId !== conversationId) return;
+
+      const normalised = normaliseMessage(apiMsg, currentUserId);
+      queryClient.setQueryData<ChatMessage[]>(
+        MESSAGING_QUERY_KEYS.thread(conversationId, currentUserId),
+        (old) => {
+          if (!old) return [normalised];
+          if (old.some((m) => m.id === normalised.id)) return old;
+          return [...old, normalised];
+        },
+      );
     };
 
-    socket.on("message:created", handleCreated);
+    socket.on("message:new", handleNewMessage);
+
     return () => {
-      socket.off("message:created", handleCreated);
+      socket.off("message:new", handleNewMessage);
+      socket.emit("conversation:leave", conversationId);
     };
-  }, [socket, conversationId, refetch]);
+  }, [socket, conversationId, currentUserId, queryClient]);
 
   // Auto-scroll feed on new messages
   useEffect(() => {
@@ -58,9 +80,7 @@ export function AssignmentThread({ conversationId, title, assignmentHref }: Assi
     setContent("");
     try {
       await sendMessageMutation.mutateAsync(trimmed);
-      if (socket) {
-        socket.emit("message:created", { conversationId, content: trimmed });
-      }
+      // Realtime arrival is broadcast by backend through socket to room members
     } catch {
       // Revert if mutation fails
       setContent(trimmed);
@@ -128,7 +148,7 @@ export function AssignmentThread({ conversationId, title, assignmentHref }: Assi
           onKeyDown={handleKeyDown}
           placeholder="Write a message... (Press Enter to send)"
           rows={1}
-          className="min-h-[40px] max-h-[120px] resize-none text-xs rounded-xl py-2.5 px-3"
+          className="min-h-[40px] max-h-[120px] resize-none rounded-xl py-2.5 px-3"
         />
         <Button
           onClick={handleSend}
