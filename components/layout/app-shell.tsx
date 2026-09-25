@@ -12,6 +12,7 @@ import { MessageToastListener } from "@/components/layout/message-toast-listener
 import { CommandPaletteListener } from "@/components/layout/command-palette-listener";
 import { ProfilePhotoGate } from "@/modules/profile/components/ProfilePhotoGate";
 import { BirthdayGate } from "@/modules/profile/components/BirthdayGate";
+import { ScholarshipPhotoGate } from "@/modules/tech-scholarship/components/ScholarshipPhotoGate";
 import { PaymentGate } from "@/modules/payment-proofs/components/PaymentGate";
 import { PaymentStatusBanner } from "@/modules/payment-proofs/components/PaymentStatusBanner";
 import { useSidebarStore } from "@/store/slices/sidebarStore";
@@ -71,6 +72,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ProfilePhotoGate />
       {/* Teaching staff only — self-gates to null for students. */}
       <BirthdayGate />
+      {/* Awarded scholars who aren't students (students get ProfilePhotoGate). */}
+      <ScholarshipPhotoGate />
       <AppSidebar />
       <SidebarInset>
         <TopBar />

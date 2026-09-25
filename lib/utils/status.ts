@@ -1,9 +1,9 @@
-export type StatusTone = "success" | "warning" | "destructive" | "neutral";
+export type StatusTone = "success" | "warning" | "destructive" | "accent" | "neutral";
 
 /**
  * Canonical status -> {label, tone} used by `StatusBadge`. Keys are matched
  * case-insensitively. `tone` maps 1:1 to a `Badge` variant (success/warning/
- * destructive/outline) — add to this registry rather than inventing a
+ * destructive/accent/outline) — add to this registry rather than inventing a
  * one-off color combination at the call site.
  */
 export const STATUS_REGISTRY: Record<string, { label: string; tone: StatusTone }> = {
@@ -41,7 +41,8 @@ export const STATUS_REGISTRY: Record<string, { label: string; tone: StatusTone }
   archived: { label: "Archived", tone: "neutral" },
   todo: { label: "To do", tone: "neutral" },
   refunded: { label: "Refunded", tone: "neutral" },
-  qualified: { label: "Qualified", tone: "neutral" },
+  // A milestone, not a routine state — the brand accent sets it apart.
+  qualified: { label: "Qualified", tone: "accent" },
   "not-started": { label: "Not started", tone: "neutral" },
   "not started": { label: "Not started", tone: "neutral" },
   present: { label: "Present", tone: "success" },

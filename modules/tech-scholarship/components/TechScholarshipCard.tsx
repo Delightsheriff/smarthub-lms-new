@@ -2,23 +2,28 @@
 import { useState } from "react";
 import { NagItem } from "@/components/ui/ledger";
 import { useMyScholarship } from "../api/tech-scholarship.queries";
-import { SCHOLARSHIP_TIERS, SCHOLARSHIP_TRACKS } from "../types";
+import {
+  isActiveScholar,
+  scholarshipTierLabel,
+  scholarshipTrackLabel,
+} from "../types";
 import { ShareMilestoneDialog } from "./ShareMilestoneDialog";
 
 /**
  * Tech Scholarship nudge in the dashboard's "Needs a look" ledger.
- * Self-gating: students whose application isn't at an awarded/enrolled
- * stage render nothing.
+ * Self-gating: renders only for stage `admitted` or `enrolled` (legacy
+ * ACTIVE_STAGES) — earlier funnel stages, rejected and withdrawn get
+ * nothing, and so does a failed fetch (never nag on an error).
  */
 export function TechScholarshipCard() {
   const { data, isLoading } = useMyScholarship();
   const [shareOpen, setShareOpen] = useState(false);
 
   if (isLoading) return null;
-  if (!data) return null;
+  if (!data || !isActiveScholar(data)) return null;
 
-  const track = SCHOLARSHIP_TRACKS[data.track] || data.track;
-  const tier = data.awardedTier ? SCHOLARSHIP_TIERS[data.awardedTier] : undefined;
+  const track = scholarshipTrackLabel(data.track);
+  const tier = scholarshipTierLabel(data.awardedTier);
   const meta = [
     tier || "Scholar",
     track,

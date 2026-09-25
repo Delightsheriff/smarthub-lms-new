@@ -44,14 +44,17 @@ export function EditSiwesDurationDialog({
 }: Props) {
   const mutation = useUpdateSiwesDuration();
 
-  const handleSave = async (value: number) => {
+  /** Resolves true on success. Never rethrows: the interceptor has
+   *  already toasted the failure, and a rethrow inside RHF's handleSubmit
+   *  would surface as an unhandled rejection. The dialog stays open so
+   *  the student can retry. */
+  const handleSave = async (value: number): Promise<boolean> => {
     try {
       await mutation.mutateAsync({ registrationId, siwesDurationMonths: value });
       onOpenChange(false);
-    } catch (error) {
-      // Interceptor toasts the error; keep the dialog open so the
-      // student can retry without reopening.
-      throw error;
+      return true;
+    } catch {
+      return false;
     }
   };
 
@@ -88,7 +91,7 @@ function DurationPicker({
 }: {
   currentValue: number | undefined;
   disabled: boolean;
-  onSave: (value: number) => Promise<void>;
+  onSave: (value: number) => Promise<boolean>;
   onCancel: () => void;
 }) {
   const form = useForm<z.input<typeof durationSchema>, unknown, z.output<typeof durationSchema>>({
@@ -99,8 +102,7 @@ function DurationPicker({
 
   return (
     <form onSubmit={form.handleSubmit(async (values) => {
-      await onSave(values.siwesDurationMonths);
-      form.reset(values);
+      if (await onSave(values.siwesDurationMonths)) form.reset(values);
     })}>
       <div className="space-y-2">
         <label

@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle2, Clock, Copy, Loader2, UploadCloud } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Copy, Loader2, RotateCw, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Ledger, LedgerItem } from "@/components/ui/ledger";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
@@ -21,12 +22,25 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
-import { pluralize } from "@/lib/utils";
+import { formatFileSize, formatPrice, pluralize, RAW_MAX_BYTES } from "@/lib/utils";
 import { useMyInstallmentPlans, useMyPaymentSurface, useSubmitPaymentProof } from "../api/payment-proofs.queries";
 import type { MyInstallmentPlanUi, MyPaymentProofUi, PlanTrancheUi } from "../types";
 import { InstallmentScheduleCard } from "./InstallmentScheduleCard";
 
 const GENERAL = "general";
+/** Receipts may be PDFs, which Cloudinary caps at 10 MB as `raw` assets —
+ *  hold images to the same cap so the copy ("up to 10MB") is one rule. */
+const RECEIPT_MAX_BYTES = RAW_MAX_BYTES;
+
+function receiptError(file: File): string | null {
+  if (!/^image\//.test(file.type) && file.type !== "application/pdf") {
+    return "Attach an image or a PDF.";
+  }
+  if (file.size > RECEIPT_MAX_BYTES) {
+    return `This file is ${formatFileSize(file.size)} — receipts must be 10 MB or smaller.`;
+  }
+  return null;
+}
 const paymentProofSchema = z.object({
   amount: z.string().trim().refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, "Enter an amount greater than zero"),
   reference: z.string().max(500, "Reference must be 500 characters or fewer"),
@@ -37,12 +51,14 @@ export function PaymentsPageContent() {
     data: surface,
     isLoading: surfaceLoading,
     isFetching: surfaceFetching,
+    isError: surfaceError,
     refetch: refetchSurface,
   } = useMyPaymentSurface();
   const {
     data: plans,
     isLoading: plansLoading,
     isFetching: plansFetching,
+    isError: plansError,
     refetch: refetchPlans,
   } = useMyInstallmentPlans();
   const submit = useSubmitPaymentProof();
@@ -52,9 +68,11 @@ export function PaymentsPageContent() {
 
   const [registration, setRegistration] = useState("general");
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [tranche, setTranche] = useState<PlanTrancheUi | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const form = useForm<z.infer<typeof paymentProofSchema>>({
     resolver: zodResolver(paymentProofSchema),
     defaultValues: { amount: "", reference: "" },
@@ -69,20 +87,42 @@ export function PaymentsPageContent() {
     );
     if (reg) setRegistration(reg._id);
     else setRegistration(GENERAL);
+    formRef.current?.scrollIntoView({ block: "center" });
+  };
+
+  const clearTranche = () => {
+    setTranche(null);
+    form.setValue("amount", "", { shouldDirty: true });
+    form.clearErrors("amount");
+  };
+
+  const pickFile = (next: File | null) => {
+    if (!next) return;
+    const error = receiptError(next);
+    setFileError(error);
+    setFile(error ? null : next);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const bank = surface?.bank;
 
-  const copy = (v?: string) => {
-    if (v) {
-      void navigator.clipboard?.writeText(v);
+  const copy = async (v?: string) => {
+    if (!v) return;
+    try {
+      await navigator.clipboard.writeText(v);
       toast.success("Copied");
+    } catch {
+      toast.error("Couldn't copy — select the number and copy it manually.");
     }
   };
 
+  // The form needs the surface (bank details + payable registrations);
+  // with it failed, submitting would be a proof against nothing.
+  const formDisabled = surfaceError || !surface;
+
   const onSubmit = async (values: z.infer<typeof paymentProofSchema>) => {
     if (!file) {
-      form.setError("amount", { message: "Attach your transfer receipt before submitting" });
+      setFileError("Attach your transfer receipt before submitting.");
       return;
     }
     try {
@@ -99,6 +139,7 @@ export function PaymentsPageContent() {
       setTranche(null);
       setRegistration(GENERAL);
       setFile(null);
+      setFileError(null);
       if (fileRef.current) fileRef.current.value = "";
     } catch {
       // interceptor toasts
@@ -161,6 +202,19 @@ export function PaymentsPageContent() {
         }
       />
 
+      {surfaceError && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load your payment details"
+          description="The bank account and your submissions didn't load, so uploads are paused until they do."
+          action={
+            <Button variant="outline" size="sm" onClick={() => void refetchSurface()} disabled={surfaceFetching}>
+              <RotateCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          }
+        />
+      )}
+
       {bank && (bank.accountNumber || bank.bankName) && (
         <div className="rounded-2xl border border-border bg-card shadow-sm p-5 md:p-6 space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -196,7 +250,7 @@ export function PaymentsPageContent() {
                   size="icon-sm"
                   aria-label="Copy account number"
                   className="rounded-lg hover:bg-muted"
-                  onClick={() => copy(bank.accountNumber)}
+                  onClick={() => void copy(bank.accountNumber)}
                 >
                   <Copy className="h-4 w-4 text-primary" />
                 </Button>
@@ -211,6 +265,19 @@ export function PaymentsPageContent() {
         </div>
       )}
 
+      {plansError && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load your payment schedule"
+          description="You can still upload a proof below."
+          action={
+            <Button variant="outline" size="sm" onClick={() => void refetchPlans()} disabled={plansFetching}>
+              <RotateCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          }
+        />
+      )}
+
       {(plans ?? []).map((plan) => (
         <InstallmentScheduleCard
           key={plan.id}
@@ -220,6 +287,7 @@ export function PaymentsPageContent() {
       ))}
 
       <Form {...form}><form
+        ref={formRef}
         onSubmit={(event) => {
           void form.handleSubmit(onSubmit)(event);
         }}
@@ -231,13 +299,13 @@ export function PaymentsPageContent() {
           <p className="flex items-center justify-between gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
             <span>
               Paying <strong>payment {tranche.sequence}</strong> ·{" "}
-              {`₦${tranche.amount.toLocaleString("en-NG")}`}
+              {formatPrice(tranche.amount)}
             </span>
             <Button
               type="button"
               variant="link"
               className="p-0 text-xs"
-              onClick={() => setTranche(null)}
+              onClick={clearTranche}
             >
               Clear
             </Button>
@@ -246,15 +314,15 @@ export function PaymentsPageContent() {
 
         {surface && surface.registrations.length > 0 && (
           <div className="grid gap-1.5">
-             <Label>What is this payment for?</Label>
-             <Select value={registration} onValueChange={(v) => setRegistration(v ?? GENERAL)} disabled={form.formState.isSubmitting}>
-              <SelectTrigger className="w-full">
+            <Label htmlFor="payment-registration">What is this payment for?</Label>
+            <Select value={registration} onValueChange={(v) => setRegistration(v ?? GENERAL)} disabled={form.formState.isSubmitting}>
+              <SelectTrigger id="payment-registration" className="w-full *:data-[slot=select-value]:normal-case">
                 <SelectValue placeholder="General / other">
                   {(v: string) => {
                     if (!v || v === GENERAL) return "General / other";
                     const reg = surface?.registrations.find((r) => r._id === v);
                     if (!reg) return v;
-                    return `${reg.courseName}${reg.remainingAmount > 0 ? ` — ₦${reg.remainingAmount.toLocaleString("en-NG")} outstanding` : ""}`;
+                    return `${reg.courseName}${reg.remainingAmount > 0 ? ` — ${formatPrice(reg.remainingAmount)} outstanding` : ""}`;
                   }}
                 </SelectValue>
               </SelectTrigger>
@@ -264,7 +332,7 @@ export function PaymentsPageContent() {
                   <SelectItem key={r._id} value={r._id}>
                     {r.courseName}
                     {r.remainingAmount > 0
-                      ? ` — ₦${r.remainingAmount.toLocaleString("en-NG")} outstanding`
+                      ? ` — ${formatPrice(r.remainingAmount)} outstanding`
                       : ""}
                   </SelectItem>
                 ))}
@@ -274,33 +342,47 @@ export function PaymentsPageContent() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
-           <FormField control={form.control} name="amount" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Amount paid (₦)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={1} placeholder="e.g. 50000" className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
-           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input type="text" placeholder="From your bank app" className="rounded-xl" disabled={form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+           <FormField control={form.control} name="amount" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Amount paid (₦)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={1} placeholder="e.g. 50000" className="rounded-xl" disabled={formDisabled || form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
+           <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input type="text" placeholder="From your bank app" className="rounded-xl" disabled={formDisabled || form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
         </div>
 
-        <Label
-          htmlFor="proof-file"
-          className="block cursor-pointer rounded-2xl border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/30 transition-all"
-        >
-          <UploadCloud className="mx-auto mb-2 h-6 w-6 text-primary" />
-          {file ? (
-            <span className="font-semibold text-foreground">{file.name}</span>
-          ) : (
-            <div>
-              <p className="font-medium text-foreground">Tap to attach your receipt</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Supports PNG, JPG, PDF up to 10MB</p>
-            </div>
-          )}
-          <Input
-            id="proof-file"
+        <div className="grid gap-1.5">
+          <Label htmlFor="proof-file-trigger">Transfer receipt</Label>
+          <Button
+            id="proof-file-trigger"
+            type="button"
+            variant="outline"
+            aria-describedby={fileError ? "proof-file-error" : undefined}
+            aria-invalid={!!fileError || undefined}
+            className="h-auto w-full flex-col gap-1 whitespace-normal rounded-2xl border-2 border-dashed p-6 text-center font-normal text-muted-foreground hover:border-primary/50 hover:bg-muted/30"
+            onClick={() => fileRef.current?.click()}
+            disabled={formDisabled || form.formState.isSubmitting}
+          >
+            <UploadCloud className="mb-1 h-6 w-6 text-primary" />
+            {file ? (
+              <span className="font-semibold text-foreground break-all">{file.name}</span>
+            ) : (
+              <>
+                <span className="font-medium text-foreground">Tap to attach your receipt</span>
+                <span className="text-xs">Supports PNG, JPG, PDF up to 10MB</span>
+              </>
+            )}
+          </Button>
+          <input
             ref={fileRef}
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            disabled={form.formState.isSubmitting}
+            tabIndex={-1}
+            aria-hidden
+            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
           />
-        </Label>
+          {fileError && (
+            <p id="proof-file-error" className="text-sm text-destructive">
+              {fileError}
+            </p>
+          )}
+        </div>
 
         {done && (
           <p className="flex items-center gap-1.5 text-sm text-success font-medium">
@@ -311,7 +393,7 @@ export function PaymentsPageContent() {
         <Button
           type="submit"
           className="rounded-xl bg-primary text-primary-foreground font-semibold px-5"
-          disabled={submit.isPending || form.formState.isSubmitting}
+          disabled={formDisabled || submit.isPending || form.formState.isSubmitting}
         >
           {submit.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
           {submit.isPending ? "Submitting…" : "Submit payment proof"}
@@ -340,7 +422,7 @@ export function PaymentsPageContent() {
                 }
                 title={
                   <>
-                    {`₦${amount.toLocaleString("en-NG")}`}
+                    {formatPrice(amount)}
                     {p.courseName ? (
                       <span className="font-normal text-muted-foreground">
                         {" · "}

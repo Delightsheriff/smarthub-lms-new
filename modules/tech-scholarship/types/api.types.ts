@@ -12,11 +12,12 @@ export interface ApiScholarshipBanner {
   squareUrl: string;
   wideUrl: string;
   generatedAt: string;
-  suggestedCaption: string;
+  suggestedCaption?: string;
 }
 
-/** `PATCH /scholarship-applications/me/photo` — upload-persist the
- *  banner portrait. No crop in this slice (see plan 010). */
+/** `PATCH /scholarship-applications/me/photo` — persist the (cropped,
+ *  already-uploaded) banner portrait. The API also stores it as the
+ *  user's `imageUrl`. */
 export type ApiUpdateScholarshipPhotoInput = {
   imageUrl: string;
 };

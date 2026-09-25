@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowLeft,
   CheckCircle2,
   Clock3,
@@ -12,6 +13,7 @@ import {
   Landmark,
   Loader2,
   ReceiptText,
+  RotateCw,
   UploadCloud,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,7 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDate, formatFileSize, formatPrice, RAW_MAX_BYTES } from "@/lib/utils";
 import {
   useInternshipPayment,
   useSubmitInternshipPaymentProof,
@@ -41,7 +43,7 @@ import {
  *  like the dashboard tiles: no applicable payment renders an empty
  *  state, a confirmed payment shows the receipt strip. */
 export function InternshipPaymentPageContent() {
-  const { data, isLoading } = useInternshipPayment();
+  const { data, isLoading, isError, isFetching, refetch } = useInternshipPayment();
 
   if (isLoading) {
     return (
@@ -49,6 +51,21 @@ export function InternshipPaymentPageContent() {
         <Skeleton className="h-9 w-64" />
         <Skeleton className="h-40 w-full rounded-2xl" />
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Couldn't load your internship payment"
+        description="Check your connection and try again."
+        action={
+          <Button variant="outline" onClick={() => void refetch()} disabled={isFetching}>
+            <RotateCw className="h-4 w-4" /> Try again
+          </Button>
+        }
+      />
     );
   }
 
@@ -197,10 +214,13 @@ function BankDetailsCard({
 }) {
   if (!bank || !bank.bankName) return null;
 
-  const copy = (v?: string) => {
-    if (v) {
-      void navigator.clipboard?.writeText(v);
+  const copy = async (v?: string) => {
+    if (!v) return;
+    try {
+      await navigator.clipboard.writeText(v);
       toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy — select the number and copy it manually.");
     }
   };
 
@@ -244,7 +264,7 @@ function BankDetailsCard({
               size="icon-sm"
               aria-label="Copy account number"
               className="rounded-lg hover:bg-muted"
-              onClick={() => copy(bank.accountNumber)}
+              onClick={() => void copy(bank.accountNumber)}
             >
               <Copy className="h-4 w-4 text-primary" />
             </Button>
@@ -321,20 +341,35 @@ function UploadProofDialog({
   onSubmit: (input: { file: File; reference?: string }) => Promise<void>;
 }) {
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const form = useForm<{ reference: string }>({
     resolver: zodResolver(z.object({ reference: z.string().max(500, "Reference must be 500 characters or fewer") })),
     defaultValues: { reference: "" },
   });
 
+  const pickFile = (next: File | null) => {
+    if (fileRef.current) fileRef.current.value = "";
+    if (!next) return;
+    let error: string | null = null;
+    if (!/^image\//.test(next.type) && next.type !== "application/pdf") {
+      error = "Attach an image or a PDF.";
+    } else if (next.size > RAW_MAX_BYTES) {
+      error = `This file is ${formatFileSize(next.size)} — receipts must be 10 MB or smaller.`;
+    }
+    setFileError(error);
+    setFile(error ? null : next);
+  };
+
   const submit = async ({ reference }: { reference: string }) => {
     if (!file) {
-      form.setError("reference", { message: "Attach your transfer receipt first." });
+      setFileError("Attach your transfer receipt first.");
       return;
     }
     try {
       await onSubmit({ file, reference: reference.trim() || undefined });
       setFile(null);
+      setFileError(null);
       form.reset();
     } catch {
       // Interceptor toasts the error; keep the dialog open for retry.
@@ -351,26 +386,40 @@ function UploadProofDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}><form className="space-y-3" onSubmit={form.handleSubmit(submit)}>
-          <Label
-            htmlFor="internship-proof-file"
-            className="block cursor-pointer rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground hover:border-primary/40"
-          >
-            <UploadCloud className="mx-auto mb-1 h-5 w-5" />
-            {file ? (
-              <span className="font-medium text-foreground">{file.name}</span>
-            ) : (
-              <span>Tap to attach your receipt (image or PDF)</span>
-            )}
-            <Input
-              id="internship-proof-file"
+          <div className="grid gap-1.5">
+            <Label htmlFor="internship-proof-trigger">Transfer receipt</Label>
+            <Button
+              id="internship-proof-trigger"
+              type="button"
+              variant="outline"
+              aria-describedby={fileError ? "internship-proof-error" : undefined}
+              aria-invalid={!!fileError || undefined}
+              className="h-auto w-full flex-col gap-1 whitespace-normal border-dashed p-4 text-center font-normal text-muted-foreground hover:border-primary/40"
+              onClick={() => fileRef.current?.click()}
+              disabled={pending || form.formState.isSubmitting}
+            >
+              <UploadCloud className="h-5 w-5" />
+              {file ? (
+                <span className="font-medium text-foreground break-all">{file.name}</span>
+              ) : (
+                <span>Tap to attach your receipt (image or PDF, up to 10MB)</span>
+              )}
+            </Button>
+            <input
               ref={fileRef}
               type="file"
               accept="image/*,application/pdf"
               className="hidden"
-               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-               disabled={pending || form.formState.isSubmitting}
+              tabIndex={-1}
+              aria-hidden
+              onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
             />
-          </Label>
+            {fileError && (
+              <p id="internship-proof-error" className="text-sm text-destructive">
+                {fileError}
+              </p>
+            )}
+          </div>
            <FormField control={form.control} name="reference" render={({ field }) => <FormItem className="grid gap-1.5"><FormLabel>Transfer reference (optional)</FormLabel><FormControl><Input placeholder="From your bank app" disabled={pending || form.formState.isSubmitting} {...field} /></FormControl><FormMessage /></FormItem>} />
          </form></Form>
         <DialogFooter>
