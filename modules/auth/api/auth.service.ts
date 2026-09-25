@@ -35,7 +35,7 @@ class AuthService {
   }
 
   async verifyInvitation(token: string): Promise<VerifyInvitationResponse> {
-    return apiClient.get<VerifyInvitationResponse>(AUTH_ENDPOINTS.VERIFY_INVITATION(token));
+    return apiClient.get<VerifyInvitationResponse>(AUTH_ENDPOINTS.VERIFY_INVITATION(token), { silent: true });
   }
 
   async acceptInvitation(payload: AcceptInvitationPayload): Promise<{ success: boolean; accessToken?: string }> {

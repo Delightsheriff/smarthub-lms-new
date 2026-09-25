@@ -52,15 +52,15 @@ export interface ResetPasswordRequest {
 export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";
 
 export interface VerifyInvitationResponse {
-  valid: boolean;
-  email?: string;
-  invitation?: {
-    _id: string;
-    email: string;
-    courseName?: string;
-    cohortName?: string;
-    role?: string;
-  };
+  email: string;
+  role?: string;
+  firstName?: string;
+  lastName?: string;
+  message?: string;
+  expiresAt?: string;
+  userExists?: boolean;
+  status?: string;
+  valid?: boolean;
 }
 
 export interface AcceptInvitationPayload {
@@ -68,6 +68,7 @@ export interface AcceptInvitationPayload {
   password?: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
 }
 
 export interface ChangePasswordRequest {
