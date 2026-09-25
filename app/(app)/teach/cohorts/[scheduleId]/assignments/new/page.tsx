@@ -1,11 +1,17 @@
-import { use } from "react";
-import { redirect } from "next/navigation";
+import { Suspense, use } from "react";
+import { AssignmentForm } from "@/modules/teaching/components/AssignmentForm";
+import { AuthoringSkeleton } from "@/modules/teaching/components/authoring/authoring-kit";
 
 interface PageProps {
   params: Promise<{ scheduleId: string }>;
 }
 
-export default function CohortNewAssignmentPage({ params }: PageProps) {
+/** New assignment for one cohort — `?module=<id>` pre-selects the module. */
+export default function NewCohortAssignmentPage({ params }: PageProps) {
   const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=assignments`);
+  return (
+    <Suspense fallback={<AuthoringSkeleton />}>
+      <AssignmentForm scheduleId={scheduleId} />
+    </Suspense>
+  );
 }
