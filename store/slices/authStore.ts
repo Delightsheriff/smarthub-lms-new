@@ -16,18 +16,16 @@ interface AuthState {
   isAuthenticated: boolean;
   setAuth: (user: AuthUser, accessToken?: string) => void;
   setUser: (user: AuthUser) => void;
-  logout: () => void;
+  clearMirror: () => void;
 }
 
 /**
  * No `persist` middleware here on purpose. NextAuth's httpOnly session
  * cookie is the actual, durable source of truth now (see auth.ts) —
  * this store is a pure in-memory mirror of it, re-populated every load
- * by `AuthSessionBridge`. A second, independent persistence layer
- * (this store's own localStorage cache) would race the real session
- * on every fresh load: stale cached user/token rendered first, then
- * silently overwritten once the bridge's effect catches up — the same
- * class of flash this replaces, just inverted.
+ * by `AuthSessionBridge`. The store mirrors the session; it is not the
+ * source of truth. Calling clearMirror clears the in-memory mirror, but
+ * terminating the actual session requires signOut().
  */
 export const useAuthStore = create<AuthState>()((set) => ({
   user: null,
@@ -40,5 +38,5 @@ export const useAuthStore = create<AuthState>()((set) => ({
       isAuthenticated: true,
     }),
   setUser: (user) => set({ user, isAuthenticated: true }),
-  logout: () => set({ user: null, token: null, isAuthenticated: false }),
+  clearMirror: () => set({ user: null, token: null, isAuthenticated: false }),
 }));

@@ -27,6 +27,7 @@ import { SiwesPlacementTab } from "@/modules/siwes-profile/components/SiwesPlace
 import { ChangePasswordForm } from "@/modules/auth/components/ChangePasswordForm";
 import { NotificationSettingsCard } from "@/modules/push/components/NotificationSettingsCard";
 import { AchievementsList } from "@/modules/progress/components/AchievementsList";
+import { useAppLogout } from "@/modules/auth/api/auth.queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
@@ -79,7 +80,7 @@ export default function ProfilePageContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = useAppLogout();
   const [editOpen, setEditOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
@@ -105,11 +106,6 @@ export default function ProfilePageContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", value);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.replace("/login");
   };
 
   const fullName =

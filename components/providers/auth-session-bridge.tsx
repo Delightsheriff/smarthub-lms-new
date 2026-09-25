@@ -17,16 +17,16 @@ import { useAuthStore } from "@/store/slices/authStore";
 export function AuthSessionBridge() {
   const { data: session, status } = useSession();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const logout = useAuthStore((s) => s.logout);
+  const clearMirror = useAuthStore((s) => s.clearMirror);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       setAuth(session.user, session.accessToken);
     } else if (status === "unauthenticated") {
-      logout();
+      clearMirror();
     }
     // "loading" — leave the store as-is; nothing to sync yet.
-  }, [status, session, setAuth, logout]);
+  }, [status, session, setAuth, clearMirror]);
 
   return null;
 }

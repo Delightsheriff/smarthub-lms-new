@@ -1,10 +1,13 @@
 "use client";
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { authService } from "./auth.service";
 import { useAuthStore, toAuthUser } from "@/store/slices/authStore";
+import { useRoleModeStore } from "@/store/slices/roleModeStore";
 import type {
   LoginRequest,
   ForgotPasswordRequest,
@@ -55,6 +58,25 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => signOut({ redirect: false }),
   });
+}
+
+export function useAppLogout() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const logout = useLogout();
+  const clearMirror = useAuthStore((s) => s.clearMirror);
+
+  return useCallback(async () => {
+    try {
+      await logout.mutateAsync();
+    } catch {
+      // Ignore network errors so local session and cache are always cleared
+    }
+    clearMirror();
+    queryClient.clear();
+    useRoleModeStore.getState().setMode("student");
+    router.replace("/login");
+  }, [clearMirror, logout, queryClient, router]);
 }
 
 export function useMe() {

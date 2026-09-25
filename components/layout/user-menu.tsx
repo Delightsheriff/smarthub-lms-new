@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ClipboardList, HelpCircle, LogOut, User } from "lucide-react";
 import { cn, getInitial } from "@/lib/utils";
 import { useAuthStore } from "@/store/slices/authStore";
+import { useAppLogout } from "@/modules/auth/api/auth.queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +35,7 @@ import {
 export function UserMenu() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = useAppLogout();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const fullName =
@@ -42,11 +43,6 @@ export function UserMenu() {
     user?.email ||
     "";
   const initial = getInitial(fullName);
-
-  const handleLogout = () => {
-    logout();
-    router.replace("/login");
-  };
 
   return (
     <>
