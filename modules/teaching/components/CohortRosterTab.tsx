@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,23 +8,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IndexList, IndexRow } from "@/components/ui/index-list";
 import { pluralize } from "@/lib/utils";
 import { useCohortRoster } from "../api/teaching.queries";
-import { StudentAttendanceSheet } from "./StudentAttendanceSheet";
-import type { CohortRosterRow } from "../types";
 
 interface CohortRosterTabProps {
   scheduleId: string;
 }
 
 export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
-  const [selectedStudent, setSelectedStudent] = useState<{ id: string; name: string } | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-
   const { data: roster, isLoading, error, refetch } = useCohortRoster(scheduleId);
-
-  const handleOpenAttendance = (row: CohortRosterRow) => {
-    setSelectedStudent({ id: row.studentId, name: row.name });
-    setSheetOpen(true);
-  };
 
   return (
     <div className="space-y-4">
@@ -61,20 +51,11 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
               index={idx + 1}
               title={row.name}
               subtitle={row.email}
+              href={`/teach/cohorts/${scheduleId}/students/${row.studentId}`}
               status={
                 <span className="text-[10px] font-mono">
                   {pluralize(row.submissionCount, "sub")}
                 </span>
-              }
-              actions={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOpenAttendance(row)}
-                  className="rounded-xl text-xs h-7 ml-auto"
-                >
-                  Attendance Record
-                </Button>
               }
             />
           ))}
@@ -84,14 +65,6 @@ export function CohortRosterTab({ scheduleId }: CohortRosterTabProps) {
           No students enrolled in this cohort roster yet.
         </div>
       ) : null}
-
-      <StudentAttendanceSheet
-        scheduleId={scheduleId}
-        studentId={selectedStudent?.id || null}
-        studentName={selectedStudent?.name}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
     </div>
   );
 }
