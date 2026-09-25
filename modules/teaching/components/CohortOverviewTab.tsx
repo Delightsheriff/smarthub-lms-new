@@ -1,7 +1,18 @@
 "use client";
 
 import React from "react";
-import { BookOpen, Users, Award, Clock } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  ClipboardList,
+  Clock,
+  FileText,
+  PlayCircle,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { StatTile } from "@/components/ui/stat-tile";
@@ -10,6 +21,12 @@ import type { TeachingCohortDetail } from "../types";
 interface CohortOverviewTabProps {
   cohort: TeachingCohortDetail;
 }
+
+const CREATE_ACTIONS: { path: string; icon: LucideIcon; label: string; hint: string }[] = [
+  { path: "assignments/new", icon: ClipboardList, label: "New assignment", hint: "Brief, points, due date." },
+  { path: "recordings", icon: PlayCircle, label: "Add recording", hint: "Class video or walkthrough." },
+  { path: "materials", icon: FileText, label: "Add material", hint: "Slides, PDF, dataset or guide." },
+];
 
 export function CohortOverviewTab({ cohort }: CohortOverviewTabProps) {
   const totalModules = cohort.modules.length;
@@ -45,6 +62,39 @@ export function CohortOverviewTab({ cohort }: CohortOverviewTabProps) {
           tone="success"
         />
       </div>
+
+      {/* The three things an instructor makes for a cohort. */}
+      <section aria-labelledby="create-heading" className="space-y-3">
+        <h2
+          id="create-heading"
+          className="font-mono text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+        >
+          Add to this cohort
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {CREATE_ACTIONS.map(({ path, icon: Icon, label, hint }) => (
+            <Link
+              key={path}
+              href={`/teach/cohorts/${cohort.id}/${path}`}
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-foreground group-hover:text-primary">
+                  {label}
+                </span>
+                <span className="block text-xs text-muted-foreground">{hint}</span>
+              </span>
+              <ArrowRight
+                className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                aria-hidden
+              />
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* Progress & Description Card */}
       <Card className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-sm">
