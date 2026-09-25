@@ -33,6 +33,10 @@ export interface AssignmentDetailContext {
   submission: Submission | null;
   course?: Course;
   module?: Module;
+  /** Raw refs from the assignment itself — present even when the course
+   *  isn't in the caller's enrolled list (e.g. an instructor viewing it). */
+  courseId?: string;
+  moduleId?: string;
 }
 
 type PopulatedRef =
@@ -145,6 +149,8 @@ export function useAssignmentDetail(id?: string, courseSlug?: string) {
           return {
             assignment,
             submission,
+            courseId,
+            moduleId,
             course: cached.course,
             module: cachedMod,
           };
@@ -162,6 +168,8 @@ export function useAssignmentDetail(id?: string, courseSlug?: string) {
             return {
               assignment,
               submission,
+              courseId,
+              moduleId,
               course,
               module: {
                 id: apiMod._id,
@@ -185,16 +193,27 @@ export function useAssignmentDetail(id?: string, courseSlug?: string) {
       const courses = enrolledRaw.map(normaliseEnrolledCourse);
       const courseById = new Map(courses.map((c) => [c.id, c]));
 
-      const course = courseId ? courseById.get(courseId) : undefined;
+      // Assignments are filed under a module and often carry no `course`
+      // ref, so fall back to the enrolled course that contains the module.
+      const resolvedCourseId =
+        courseId ??
+        (moduleId
+          ? courses[
+              enrolledRaw.findIndex((ec) =>
+                (ec.modules || []).some((m) => m._id === moduleId),
+              )
+            ]?.id
+          : undefined);
+      const course = resolvedCourseId ? courseById.get(resolvedCourseId) : undefined;
       let moduleShape: Module | undefined;
-      if (moduleId && courseId) {
+      if (moduleId && resolvedCourseId) {
         const fromList = enrolledRaw
           .flatMap((ec) => ec.modules || [])
           .find((m) => m._id === moduleId);
         moduleShape = {
           id: moduleId,
           slug: (fromList as ApiModule | undefined)?.titleSlug || moduleId,
-          courseId,
+          courseId: resolvedCourseId,
           order: (fromList as ApiModule | undefined)?.order ?? 0,
           title: (fromList as ApiModule | undefined)?.title || "Module",
           summary: (fromList as ApiModule | undefined)?.description || "",
@@ -209,6 +228,8 @@ export function useAssignmentDetail(id?: string, courseSlug?: string) {
         submission,
         course,
         module: moduleShape,
+        courseId: resolvedCourseId,
+        moduleId,
       };
     },
   });
