@@ -102,6 +102,7 @@ Motion tokens live in `app/globals.css`'s `:root` block:
 | `LinkRowsInput` | `components/ui/link-rows-input.tsx` | Repeatable name + URL rows for authoring forms with client validation and `cleanLinkRows`. |
 | `CopyableEmail` | `components/ui/copyable-email.tsx` | One-click copy email cell with hover affordance and mailto link support for teaching surfaces. |
 | `UserAvatar` | `components/ui/user-avatar.tsx` | Canonical user avatar with initials fallback and optional zoomable preview dialog. |
+| `glass-chrome` | `app/globals.css` (utility) + `hooks/use-scrolled.ts` | The ONE translucent material: 86% background, 14px blur. Only for chrome floating over scrolling content — the top bar once scrolled (`useScrolled`), the mobile bottom nav. Solid fallback when blur/color-mix is unsupported and under `prefers-reduced-transparency`. Contrast measured from rendered pixels over black/white/maroon/orange: worst case 12.37:1 text, 5.13:1 muted (light), passes AA. |
 | `groupNavItems` | `lib/nav-grouping.ts` | Sidebar section grouping. Unchanged. |
 | **Reading + Rail** (fifth move, not yet a shared component — a layout pattern) | See `plans/005-editorial-rollout-phase2-real-redesign.md` §1 | Single-item detail pages (an assignment, a lesson, a cohort's revenue breakdown) that don't fit hero+ledger: a wide reading column (~2/3, real prose typography) + a slim sticky rail (~1/3 — status, countdown, the primary action) that moves below the reading column on mobile. |
 
@@ -152,6 +153,7 @@ converted vs. still pending.
   CSS resolves by source order, not by which one "sounds newer."
   `IndexRow` avoids this entirely by using `hidden sm:flex` etc.
 - **Motion needs a reason.**
+- **Glass is chrome-only.** `glass-chrome` belongs on floating chrome (top bar when scrolled, bottom nav). Never on cards, the sidebar, buttons, dialogs or page surfaces — the editorial language is flat hairlines, not layered depth. A full glass migration was built and reverted once; don't repeat it.
 - **Confirm scope before a big slice.** A cross-cutting layout change
   (a new page-layout direction, nav chrome, auth) gets confirmed by the
   user before code, plan doc or not — the per-page-plan workflow itself

@@ -52,7 +52,7 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+        className="glass-chrome fixed inset-x-0 bottom-0 z-40 border-t border-border/60 pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Primary navigation"
       >
         <ul className="container flex items-stretch justify-around gap-1 py-1.5">
@@ -79,7 +79,7 @@ export function BottomNav() {
                   >
                     <Icon className="h-4.5 w-4.5" />
                     {badge > 0 && (
-                      <Badge className="absolute -right-1.5 -top-1.5 h-3.5 min-w-3.5 justify-center px-1 text-[9px] leading-none border-transparent bg-accent text-white">
+                      <Badge className="absolute -right-1.5 -top-1.5 h-3.5 min-w-3.5 justify-center px-1 text-[9px] leading-none border-transparent bg-accent text-accent-foreground">
                         {badge > 9 ? "9+" : badge}
                       </Badge>
                     )}
@@ -163,7 +163,7 @@ export function BottomNav() {
                     <span className="relative">
                       <Icon className="h-5 w-5" />
                       {badge > 0 && (
-                        <Badge className="absolute -right-2 -top-2 h-3.5 min-w-3.5 justify-center px-1 text-[9px] leading-none border-transparent bg-accent text-white">
+                        <Badge className="absolute -right-2 -top-2 h-3.5 min-w-3.5 justify-center px-1 text-[9px] leading-none border-transparent bg-accent text-accent-foreground">
                           {badge > 9 ? "9+" : badge}
                         </Badge>
                       )}

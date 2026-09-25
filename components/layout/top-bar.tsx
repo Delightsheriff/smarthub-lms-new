@@ -8,6 +8,7 @@ import { UserMenu } from "@/components/layout/user-menu";
 import { SearchTrigger } from "@/components/layout/search-trigger";
 import { NotificationBell } from "@/modules/notifications/components/NotificationBell";
 import { useEffectiveMode } from "@/hooks/use-effective-mode";
+import { useScrolled } from "@/hooks/use-scrolled";
 import { CONTENT_MAX_WIDTH } from "@/configs/brand";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +24,18 @@ import { cn } from "@/lib/utils";
  */
 export function TopBar() {
   const { canSwitch } = useEffectiveMode();
+  // Solid and borderless at the top of the page; glass (plus a hairline)
+  // only once content actually scrolls underneath.
+  const scrolled = useScrolled();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header
+      data-scrolled={scrolled || undefined}
+      className={cn(
+        "sticky top-0 z-30 border-b transition-[background-color,border-color] duration-200",
+        scrolled ? "glass-chrome border-border/60" : "border-transparent bg-background",
+      )}
+    >
       <div
         className={cn(
           "flex h-14 w-full items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-8",
