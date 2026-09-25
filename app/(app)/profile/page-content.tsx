@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Bell,
   Briefcase,
+  Cake,
   Calendar,
   CheckCircle2,
   GraduationCap,
@@ -27,6 +28,7 @@ import { SiwesPlacementTab } from "@/modules/siwes-profile/components/SiwesPlace
 import { ChangePasswordForm } from "@/modules/auth/components/ChangePasswordForm";
 import { NotificationSettingsCard } from "@/modules/push/components/NotificationSettingsCard";
 import { AchievementsList } from "@/modules/progress/components/AchievementsList";
+import { formatBirthday } from "@/modules/profile/lib/birthday";
 import { useAppLogout } from "@/modules/auth/api/auth.queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -280,6 +282,17 @@ export default function ProfilePageContent() {
                         )
                       }
                     />
+                    {/* Day + month only — no year is collected, so this is
+                        a date to mark rather than an age. Always rendered:
+                        students aren't required to give one, and a row that
+                        disappeared would read as a missing feature rather
+                        than an empty field they can fill in from Edit
+                        details. Row falls back to "—". */}
+                    <Row
+                      icon={Cake}
+                      label="Birthday"
+                      value={formatBirthday(user?.birthDay, user?.birthMonth)}
+                    />
                     {(() => {
                       // country / state arrive as `{ isoCode, name }` from
                       // smarthub-api (or plain strings on legacy accounts).
@@ -391,6 +404,8 @@ export default function ProfilePageContent() {
           middleName: user?.middleName,
           lastName: user?.lastName,
           gender: user?.gender,
+          birthDay: user?.birthDay,
+          birthMonth: user?.birthMonth,
           phone: user?.phone,
         }}
       />
