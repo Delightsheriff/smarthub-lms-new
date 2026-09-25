@@ -194,7 +194,7 @@ function Result({
   const toneClass = {
     success: "text-success",
     info: "text-primary",
-    warning: "text-amber-600",
+    warning: "text-warning",
   }[tone];
   return (
     <div className="space-y-4">

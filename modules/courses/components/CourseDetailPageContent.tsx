@@ -256,7 +256,7 @@ export function CourseDetailPageContent({ slug }: { slug: string }) {
               <div className="rounded-xl border border-border/80 bg-muted/20 p-3.5">
                 <div className="flex items-center justify-between text-muted-foreground">
                   <span className="font-mono text-[10px] uppercase tracking-[0.08em] font-medium">Tasks</span>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                 </div>
                 <p className="mt-1 font-display text-2xl font-bold tabular-nums text-foreground">
                   {totalAssignments}
