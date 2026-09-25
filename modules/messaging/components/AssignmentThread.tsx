@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocket } from "@/lib/socket/socket-provider";
+import { setActiveThreadId } from "@/lib/socket/active-thread";
 import { useAuthStore } from "@/store/slices/authStore";
 import { useThread, useSendMessage, MESSAGING_QUERY_KEYS } from "../api/messaging.queries";
 import { normaliseMessage } from "../api/normalise";
@@ -65,6 +66,15 @@ export function AssignmentThread({ conversationId, title, assignmentHref }: Assi
       socket.emit("conversation:leave", conversationId);
     };
   }, [socket, conversationId, currentUserId, queryClient]);
+
+  // Track active thread so global toast listener knows this thread is currently open
+  useEffect(() => {
+    if (!conversationId) return;
+    setActiveThreadId(conversationId);
+    return () => {
+      setActiveThreadId(null);
+    };
+  }, [conversationId]);
 
   // Auto-scroll feed on new messages
   useEffect(() => {
