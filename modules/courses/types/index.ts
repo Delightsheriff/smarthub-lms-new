@@ -20,6 +20,8 @@ export interface Course {
   status: "in-progress" | "not-started" | "completed";
   mode?: string;
   courseKind?: string;
+  /** Bought individual modules, not a full enrolment. */
+  isModuleAddon?: boolean;
 }
 
 export interface CourseInstructor {

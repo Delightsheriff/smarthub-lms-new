@@ -173,6 +173,9 @@ export interface WireEnrolledCourse {
   moduleStats: { total: number; completed: number };
   mode?: string;
   courseKind?: string;
+  /** True when the student bought some modules of a cohort rather than
+   *  enrolling: the outline is their slice, not the whole curriculum. */
+  isModuleAddon?: boolean;
 }
 
 export interface WireModule {

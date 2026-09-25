@@ -45,6 +45,12 @@ export function CourseCard({ course }: { course: Course }) {
         <span className="absolute bottom-3 left-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-background">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
           {course.category}
+          {/* A two-module purchase shouldn't read as a whole course. */}
+          {course.isModuleAddon && (
+            <span className="rounded-full border border-background/60 px-1.5 py-px text-[10px] tracking-[0.08em]">
+              Add-on
+            </span>
+          )}
         </span>
 
         <div className="absolute right-3 top-3">

@@ -56,5 +56,6 @@ export function normaliseEnrolledCourse(
     status,
     mode: api.mode,
     courseKind: api.courseKind,
+    isModuleAddon: api.isModuleAddon,
   };
 }

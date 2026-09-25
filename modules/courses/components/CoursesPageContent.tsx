@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { RevokedCourseNotice } from "@/modules/access/components/RevokedCourseNotice";
 import { BookOpen, GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -221,6 +222,7 @@ function StudentCoursesBody() {
 
   return (
     <div className="space-y-6 font-sans">
+      <RevokedCourseNotice />
       <PageHeader
         variant="editorial"
         divider
