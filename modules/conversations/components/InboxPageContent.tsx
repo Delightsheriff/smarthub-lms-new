@@ -1,38 +1,67 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Inbox, MessageSquare } from "lucide-react";
+import { ArrowLeft, Inbox, MessageSquare } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { useConversations, useMarkConversationRead } from "../api/conversations.queries";
 import { ConversationListItemRow } from "./ConversationListItemRow";
 import { AssignmentThread } from "@/modules/messaging/components/AssignmentThread";
-import { pluralize } from "@/lib/utils";
+import { cn, pluralize } from "@/lib/utils";
 
 export function InboxPageContent() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const { data: conversations, isLoading, isFetching, error, refetch } = useConversations();
   const markRead = useMarkConversationRead();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const filtered = (conversations || []).filter((c) => {
     if (typeFilter === "all") return true;
     return c.type === typeFilter;
   });
 
-  const activeConv = (conversations || []).find((c) => c.id === activeId) || filtered[0];
+  // On desktop, default to the first conversation if none explicitly selected.
+  // On mobile, keep activeId null so the user lands on the conversation list.
+  const activeConv =
+    (conversations || []).find((c) => c.id === activeId) ||
+    (isDesktop ? filtered[0] : null);
 
-  // Marks read whenever the active thread changes — covers both an
-  // explicit row click and the default-selected first conversation,
-  // which previously never cleared its unread badge either.
+  // Mark read when thread pane is actually visible:
+  // On desktop: whenever activeConv changes and is displayed side-by-side.
+  // On mobile: only when a thread was explicitly selected (activeId !== null).
   useEffect(() => {
-    if (activeConv?.id) markRead.mutate(activeConv.id);
+    if (!activeConv?.id) return;
+    if (isDesktop || activeId !== null) {
+      markRead.mutate(activeConv.id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConv?.id]);
+  }, [activeConv?.id, isDesktop, activeId]);
+
+  const handleSelectConversation = (id: string) => {
+    setActiveId(id);
+    markRead.mutate(id);
+  };
 
   const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -51,7 +80,8 @@ export function InboxPageContent() {
           conversations && conversations.length > 0 ? (
             <>
               Direct messages, cohort announcements, and instructor support.{" "}
-              <strong className="text-foreground">{conversations.length}</strong> active {pluralize(conversations.length, "thread", undefined, false)}.
+              <strong className="text-foreground">{conversations.length}</strong> active{" "}
+              {pluralize(conversations.length, "thread", undefined, false)}.
             </>
           ) : (
             "Direct messages, cohort announcements, course discussions, and instructor support."
@@ -59,27 +89,33 @@ export function InboxPageContent() {
         }
         actions={
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <div className="min-w-0 overflow-x-auto pb-0.5 max-w-full -mx-1 px-1">
-              <Tabs value={typeFilter} onValueChange={setTypeFilter}>
-                <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
-                  <TabsTrigger value="all" className="rounded-lg text-xs">All</TabsTrigger>
-                  <TabsTrigger value="direct" className="rounded-lg text-xs">Direct</TabsTrigger>
-                  <TabsTrigger value="group" className="rounded-lg text-xs">Group</TabsTrigger>
-                  <TabsTrigger value="assignment" className="rounded-lg text-xs">Assignments</TabsTrigger>
-                  <TabsTrigger value="announcement" className="rounded-lg text-xs">Announcements</TabsTrigger>
-                  <TabsTrigger value="support" className="rounded-lg text-xs">Support</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+            <Select value={typeFilter} onValueChange={(val) => setTypeFilter(val ?? "all")}>
+              <SelectTrigger className="w-[160px] sm:w-[180px] rounded-xl text-xs h-9">
+                <SelectValue placeholder="All Threads" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Threads</SelectItem>
+                <SelectItem value="direct">Direct Messages</SelectItem>
+                <SelectItem value="group">Group Chats</SelectItem>
+                <SelectItem value="assignment">Assignments</SelectItem>
+                <SelectItem value="announcement">Announcements</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+              </SelectContent>
+            </Select>
             <RefreshButton loading={isFetching} onClick={refetch} />
           </div>
         }
       />
 
-      {/* Main Inbox Layout (2 Columns) */}
+      {/* Main Inbox Layout (Master/Detail below md) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[540px]">
-        {/* Left Column: Conversation List (5 Cols) */}
-        <div className="md:col-span-5 space-y-3">
+        {/* Left Column: Conversation List */}
+        <div
+          className={cn(
+            "space-y-3 md:col-span-5",
+            activeId ? "hidden md:block" : "block",
+          )}
+        >
           {isLoading && (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -105,7 +141,7 @@ export function InboxPageContent() {
                       key={conv.id}
                       conversation={conv}
                       isActive={activeConv?.id === conv.id}
-                      onSelect={() => setActiveId(conv.id)}
+                      onSelect={() => handleSelectConversation(conv.id)}
                     />
                   ))}
                 </div>
@@ -116,16 +152,31 @@ export function InboxPageContent() {
           )}
         </div>
 
-        {/* Right Column: Active Thread Pane (7 Cols) */}
-        <div className="md:col-span-7">
+        {/* Right Column: Active Thread Pane */}
+        <div
+          className={cn(
+            "md:col-span-7",
+            !activeId ? "hidden md:block" : "block",
+          )}
+        >
           {activeConv ? (
-            <AssignmentThread
-              conversationId={activeConv.id}
-              title={activeConv.title}
-              assignmentHref={
-                activeConv.assignment ? `/assignments/${activeConv.assignment.id}` : undefined
-              }
-            />
+            <div className="space-y-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveId(null)}
+                className="md:hidden gap-1.5 text-xs text-muted-foreground hover:text-foreground -ml-2"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to conversations
+              </Button>
+              <AssignmentThread
+                conversationId={activeConv.id}
+                title={activeConv.title}
+                assignmentHref={
+                  activeConv.assignment ? `/assignments/${activeConv.assignment.id}` : undefined
+                }
+              />
+            </div>
           ) : (
             <div className="h-full border rounded-2xl bg-card p-12 text-center flex flex-col items-center justify-center space-y-2">
               <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
