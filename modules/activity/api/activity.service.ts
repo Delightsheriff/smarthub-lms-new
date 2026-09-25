@@ -1,13 +1,14 @@
 import { apiClient } from "@/lib/api";
+import type { PaginatedResponse } from "@/lib/api/types";
 import { ACTIVITY_ENDPOINTS } from "../config/endpoints";
-import type { PaginatedActivityResponse } from "../types";
+import type { RawActivityItem } from "../types";
 
 class ActivityService {
   async getMyActivity(params?: {
     page?: number;
     pageSize?: number;
-  }): Promise<PaginatedActivityResponse> {
-    return apiClient.get<PaginatedActivityResponse>(ACTIVITY_ENDPOINTS.ME, {
+  }): Promise<PaginatedResponse<RawActivityItem>> {
+    return apiClient.getPaginated<RawActivityItem>(ACTIVITY_ENDPOINTS.ME, {
       params,
     });
   }

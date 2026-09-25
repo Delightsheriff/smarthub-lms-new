@@ -22,20 +22,22 @@ export interface ActivityEvent {
   createdAt: string;
 }
 
+export interface RawActivityItem {
+  _id: string;
+  actor: ActivityActor;
+  action: string;
+  resource?: ActivityResource;
+  metadata?: Record<string, unknown>;
+  ip?: string;
+  userAgent?: string;
+  createdAt: string;
+}
+
 export interface PaginatedActivityResponse {
   statusCode: number;
   message: string;
   success: boolean;
-  data: Array<{
-    _id: string;
-    actor: ActivityActor;
-    action: string;
-    resource?: ActivityResource;
-    metadata?: Record<string, unknown>;
-    ip?: string;
-    userAgent?: string;
-    createdAt: string;
-  }>;
+  data: RawActivityItem[];
   meta: {
     total: number;
     totalPages: number;

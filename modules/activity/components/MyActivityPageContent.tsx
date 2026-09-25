@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Activity as ActivityIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Activity as ActivityIcon } from "lucide-react";
+import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -19,6 +19,8 @@ export function MyActivityPageContent() {
 
   const events = data?.events || [];
   const meta = data?.meta;
+  const total = meta?.totalItems ?? 0;
+  const totalPages = meta?.totalPages ?? 1;
 
   // Group events by day string
   const groupedMap = new Map<string, ActivityEvent[]>();
@@ -50,10 +52,10 @@ export function MyActivityPageContent() {
         dateline={`${dateline} · Security & Audit`}
         title="Activity Log"
         description={
-          meta ? (
+          meta && total > 0 ? (
             <>
               Security and audit timeline recording{" "}
-              <strong className="text-foreground">{meta.total}</strong> {pluralize(meta.total, "account action", undefined, false)}.
+              <strong className="text-foreground">{total}</strong> {pluralize(total, "account action", undefined, false)}.
             </>
           ) : (
             "A security and audit timeline of your recent account actions, submissions, and payments."
@@ -119,32 +121,13 @@ export function MyActivityPageContent() {
                 </Ledger>
               ))}
 
-              {meta && meta.totalPages > 1 && (
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <span className="text-xs text-muted-foreground">
-                    Page {meta.currentPage} of {meta.totalPages} ({meta.total} total items)
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="rounded-xl"
-                    >
-                      <ChevronLeft className="mr-1 h-4 w-4" /> Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page >= meta.totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                      className="rounded-xl"
-                    >
-                      Next <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+              {totalPages > 1 && (
+                <Pager
+                  page={page}
+                  totalPages={totalPages}
+                  onPage={setPage}
+                  label={`${total} ${pluralize(total, "account action", undefined, false)}`}
+                />
               )}
             </div>
           ) : (
