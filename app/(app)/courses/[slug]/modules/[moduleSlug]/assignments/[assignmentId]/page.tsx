@@ -1,5 +1,5 @@
 import { use } from "react";
-import AssignmentDetailPage from "@/app/(app)/assignments/[id]/page";
+import { AssignmentPageContent } from "@/modules/assignments/components/assignment-page-content";
 
 interface CourseModuleAssignmentPageProps {
   params: Promise<{
@@ -10,6 +10,12 @@ interface CourseModuleAssignmentPageProps {
 }
 
 export default function CourseModuleAssignmentPage({ params }: CourseModuleAssignmentPageProps) {
-  const { assignmentId } = use(params);
-  return <AssignmentDetailPage params={Promise.resolve({ id: assignmentId })} />;
+  const { slug, moduleSlug, assignmentId } = use(params);
+  return (
+    <AssignmentPageContent
+      assignmentId={assignmentId}
+      courseSlug={slug}
+      moduleSlug={moduleSlug}
+    />
+  );
 }

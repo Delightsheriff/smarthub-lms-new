@@ -46,7 +46,7 @@ export function useCourses() {
   });
 }
 
-interface CourseBySlugResult {
+export interface CourseBySlugResult {
   course: Course;
   /** Fully normalised modules with recordings/materials/assignments
    *  embedded — the outline reads this directly. */

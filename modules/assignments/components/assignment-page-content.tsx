@@ -29,12 +29,16 @@ import { SubmissionForm } from "./submission-form";
 
 interface AssignmentPageContentProps {
   assignmentId: string;
+  courseSlug?: string;
+  moduleSlug?: string;
 }
 
 export function AssignmentPageContent({
   assignmentId,
+  courseSlug,
+  moduleSlug,
 }: AssignmentPageContentProps) {
-  const { data, isLoading, error } = useAssignmentDetail(assignmentId);
+  const { data, isLoading, error } = useAssignmentDetail(assignmentId, courseSlug);
 
   if (isLoading) {
     return (
@@ -60,11 +64,21 @@ export function AssignmentPageContent({
           </AlertDescription>
         </Alert>
         <Button
-          nativeButton={false} render={<Link href="/assignments" />}
+          nativeButton={false}
+          render={
+            <Link
+              href={
+                courseSlug && moduleSlug
+                  ? `/courses/${courseSlug}/modules/${moduleSlug}`
+                  : "/assignments"
+              }
+            />
+          }
           variant="outline"
           className="rounded-xl"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Assignments
+          <ArrowLeft className="mr-2 h-4 w-4" />{" "}
+          {courseSlug && moduleSlug ? "Back to module" : "Back to Assignments"}
         </Button>
       </div>
     );
@@ -88,10 +102,17 @@ export function AssignmentPageContent({
       {/* Top Navigation */}
       <div>
         <Link
-          href="/assignments"
+          href={
+            courseSlug && moduleSlug
+              ? `/courses/${courseSlug}/modules/${moduleSlug}#assignment-${assignment.id}`
+              : "/assignments"
+          }
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> All assignments
+          <ArrowLeft className="h-4 w-4" />{" "}
+          {courseSlug && moduleSlug
+            ? `Back to ${module?.title ?? "module"}`
+            : "All assignments"}
         </Link>
       </div>
 

@@ -1,6 +1,10 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { coursesService } from "@/modules/courses/api/courses.service";
+import {
+  COURSES_QUERY_KEYS,
+  type CourseBySlugResult,
+} from "@/modules/courses/api/courses.queries";
 import { normaliseEnrolledCourse } from "@/modules/courses/api/normalise";
 import { normaliseAssignment, normaliseSubmission } from "./normalise";
 import type { ApiModule } from "@/modules/courses/types/api.types";
@@ -12,7 +16,10 @@ import type { Assignment, Submission } from "../types";
 export const ASSIGNMENTS_QUERY_KEYS = {
   my: ["assignments", "my"] as const,
   upcoming: ["assignments", "upcoming"] as const,
-  detail: (id?: string) => ["assignments", "detail", id] as const,
+  detail: (id?: string, courseSlug?: string) =>
+    courseSlug
+      ? (["assignments", "detail", id, courseSlug] as const)
+      : (["assignments", "detail", id] as const),
 } as const;
 
 interface AssignmentWithContext {
@@ -102,16 +109,16 @@ export function useMyAssignments() {
   });
 }
 
-export function useAssignmentDetail(id?: string) {
+export function useAssignmentDetail(id?: string, courseSlug?: string) {
+  const qc = useQueryClient();
   return useQuery<AssignmentDetailContext | null>({
-    queryKey: ASSIGNMENTS_QUERY_KEYS.detail(id),
+    queryKey: ASSIGNMENTS_QUERY_KEYS.detail(id, courseSlug),
     enabled: !!id,
     queryFn: async () => {
       if (!id) return null;
-      const [assignmentRaw, submissionRaw, enrolledRaw] = await Promise.all([
+      const [assignmentRaw, submissionRaw] = await Promise.all([
         assignmentsService.getAssignmentById(id),
         assignmentsService.getMySubmission(id),
-        coursesService.getEnrolled(),
       ]);
 
       if (!assignmentRaw) return null;
@@ -121,13 +128,62 @@ export function useAssignmentDetail(id?: string) {
         ? normaliseSubmission(submissionRaw)
         : null;
 
-      const courses = enrolledRaw.map(normaliseEnrolledCourse);
-      const courseById = new Map(courses.map((c) => [c.id, c]));
-
       const moduleRef = assignmentRaw.module as PopulatedRef;
       const courseRef = assignmentRaw.course as PopulatedRef;
       const moduleId = refId(moduleRef);
       const courseId = refId(courseRef);
+
+      // Fast path: courseSlug provided or resolved
+      if (courseSlug) {
+        const cached = qc.getQueryData<CourseBySlugResult | null>(
+          COURSES_QUERY_KEYS.bySlug(courseSlug),
+        );
+        const cachedMod = cached?.modules.find(
+          (m) => m.id === moduleId || m.slug === moduleId,
+        );
+        if (cached && cachedMod) {
+          return {
+            assignment,
+            submission,
+            course: cached.course,
+            module: cachedMod,
+          };
+        }
+
+        try {
+          const detail = await coursesService.getEnrolledDetail(courseSlug);
+          const course = normaliseEnrolledCourse(detail);
+          const modulesArr =
+            (detail.modules as unknown as Array<ApiModule>) || [];
+          const apiMod = modulesArr.find(
+            (m) => m._id === moduleId || m.titleSlug === moduleId,
+          );
+          if (apiMod) {
+            return {
+              assignment,
+              submission,
+              course,
+              module: {
+                id: apiMod._id,
+                slug: apiMod.titleSlug || apiMod._id,
+                courseId: course.id,
+                order: apiMod.order ?? 0,
+                title: apiMod.title,
+                summary: apiMod.description || "",
+                recordings: [],
+                materials: [],
+                assignments: [],
+              },
+            };
+          }
+        } catch {
+          // Fall back to scanning enrolled courses below
+        }
+      }
+
+      const enrolledRaw = await coursesService.getEnrolled();
+      const courses = enrolledRaw.map(normaliseEnrolledCourse);
+      const courseById = new Map(courses.map((c) => [c.id, c]));
 
       const course = courseId ? courseById.get(courseId) : undefined;
       let moduleShape: Module | undefined;
