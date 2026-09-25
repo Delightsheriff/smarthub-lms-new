@@ -1,9 +1,14 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
+  AlertCircle,
   Briefcase,
+  RotateCw,
   Search,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pager } from "@/components/ui/pager";
@@ -33,10 +38,13 @@ const SCOPES: { value: Scope; label: string }[] = [
 ];
 
 const REMOTE_FILTERS: { value: RemoteFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "remote", label: "Remote" },
-  { value: "onsite", label: "On-site" },
+  { value: "all", label: "Remote & on-site" },
+  { value: "remote", label: "Remote only" },
+  { value: "onsite", label: "On-site only" },
 ];
+
+const remoteLabel = (v: string) =>
+  REMOTE_FILTERS.find((f) => f.value === v)?.label ?? "Remote & on-site";
 
 /**
  * Student job board.
@@ -62,7 +70,7 @@ export function JobsPageContent() {
   const changeRemote = (v: RemoteFilter) => { setRemote(v); setPage(1); };
   const changeScope = (v: Scope) => { setScope(v); setPage(1); };
 
-  const { data, isLoading, isFetching, refetch } = useJobs({
+  const { data, isLoading, isError, isFetching, refetch } = useJobs({
     page,
     pageSize: PAGE_SIZE,
     keyword: keyword || undefined,
@@ -83,7 +91,10 @@ export function JobsPageContent() {
     day: "numeric",
   });
 
-  const jobs = useMemo(() => data?.jobs ?? [], [data]);
+  const jobs = data?.jobs ?? [];
+  // keepPreviousData holds the last page through a failed refetch; only
+  // show the error when there's nothing to show instead.
+  const failed = isError && !data;
   const meta = data?.meta;
   const filtered = !!keyword || company !== "__all__" || remote !== "all";
 
@@ -116,26 +127,14 @@ export function JobsPageContent() {
 
       {/* Scope selector and count summary */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/40 p-1 w-fit">
-          {SCOPES.map((s) => {
-            const on = scope === s.value;
-            return (
-              <button
-                key={s.value}
-                type="button"
-                onClick={() => changeScope(s.value)}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-                  on
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedControl
+          items={SCOPES}
+          value={scope}
+          onChange={changeScope}
+          layoutId="jobs-scope-pill"
+          ariaLabel="Which openings to show"
+          className="w-fit"
+        />
 
         {meta && (
           <span className="text-xs text-muted-foreground">
@@ -153,13 +152,17 @@ export function JobsPageContent() {
             value={rawQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="Search role, company or location…"
+            aria-label="Search jobs by role, company or location"
             className="pl-9 rounded-xl"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Select value={company} onValueChange={(v) => changeCompany(v ?? "__all__")}>
-            <SelectTrigger className="w-44 rounded-xl shrink-0">
+            <SelectTrigger
+              aria-label="Company"
+              className="w-44 rounded-xl shrink-0 *:data-[slot=select-value]:normal-case"
+            >
               <SelectValue placeholder="All companies">
                 {(v: string) => (v === "__all__" || !v ? "All companies" : v)}
               </SelectValue>
@@ -180,27 +183,21 @@ export function JobsPageContent() {
             </SelectContent>
           </Select>
 
-          {/* Remote pill filters */}
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-0.5">
-            {REMOTE_FILTERS.map((f) => {
-              const on = remote === f.value;
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  onClick={() => changeRemote(f.value)}
-                  className={cn(
-                    "shrink-0 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors",
-                    on
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background text-muted-foreground border-border hover:text-foreground hover:bg-muted/40"
-                  )}
-                >
+          <Select value={remote} onValueChange={(v) => changeRemote((v as RemoteFilter | null) ?? "all")}>
+            <SelectTrigger
+              aria-label="Work arrangement"
+              className="w-44 rounded-xl shrink-0 *:data-[slot=select-value]:normal-case"
+            >
+              <SelectValue>{(v: string) => remoteLabel(v)}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {REMOTE_FILTERS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
                   {f.label}
-                </button>
-              );
-            })}
-          </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -213,8 +210,23 @@ export function JobsPageContent() {
         </div>
       )}
 
+      {/* Error state — before empty, so a failed fetch never reads as
+          "no openings". */}
+      {!isLoading && failed && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load openings"
+          description="Check your connection and try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={isFetching}>
+              <RotateCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          }
+        />
+      )}
+
       {/* Empty state */}
-      {!isLoading && jobs.length === 0 && (
+      {!isLoading && !failed && jobs.length === 0 && (
         <Card className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
           <Briefcase className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
           <p className="font-display font-semibold">No openings</p>

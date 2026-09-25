@@ -20,7 +20,9 @@ class JobsService {
   }
 
   async companies(): Promise<string[]> {
-    return apiClient.get<string[]>(JOBS_ENDPOINTS.COMPANIES) ?? [];
+    // Await first: a Promise is never nullish, so `get() ?? []` never
+    // fell back when the API sent `data: null`.
+    return (await apiClient.get<string[] | null>(JOBS_ENDPOINTS.COMPANIES)) ?? [];
   }
 
   async detail(id: string): Promise<Job> {
