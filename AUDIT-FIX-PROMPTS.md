@@ -54,7 +54,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each commit must
   pass `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Another agent may be working in this repo at the
   same time.
 - The author is the existing git config; don't pass -c user.* or --author.
@@ -135,7 +136,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each commit must
   pass `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working in this repo at the
   same time.
 - The author is the existing git config; don't override it.
@@ -255,7 +257,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -353,7 +356,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -438,7 +442,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -543,7 +548,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -639,7 +645,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -749,7 +756,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently; T3 is
   editing the same teaching api/config files, so ONLY APPEND there and re-read each
   file right before you edit it.
@@ -847,7 +855,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. T2 is editing the same teaching api/config files
   concurrently, so ONLY APPEND there and re-read each file right before you edit it.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
@@ -926,7 +935,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1000,7 +1010,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1090,7 +1101,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1166,7 +1178,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item, and one per ported legacy
   commit. Each must pass `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1245,7 +1258,8 @@ CODE RULES:
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item (or smaller). Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`. Other agents are working concurrently.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1341,7 +1355,8 @@ push; never touch the smarthub-api `lms-backend-fixes` branch).
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item, or per module for large items.
   Each must pass `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1400,7 +1415,8 @@ push; never touch the smarthub-api `lms-backend-fixes` branch).
 COMMITS (strict):
 - Commit INCREMENTALLY: one commit per numbered item. Each must pass
   `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
@@ -1472,7 +1488,8 @@ colors; Select for filters; handle loading, then error, then empty.
 
 COMMITS (strict):
 - ONE commit per item. Each must pass `npm run typecheck`.
-- Use `git commit -m "<type(scope): summary>" -- <exact paths>`. Never `git add -A`,
+- Use `git add <exact paths> && git commit -m "<type(scope): summary>" -- <exact paths>`
+  (the add is required for NEW files; list the same paths in both). Never `git add -A`,
   and never run a bare `git commit`.
 - Existing git config is the author. NO Co-Authored-By, no "Generated with", no
   attribution trailers of any kind.
