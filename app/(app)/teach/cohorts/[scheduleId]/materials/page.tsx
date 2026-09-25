@@ -1,11 +1,17 @@
-import { use } from "react";
-import { redirect } from "next/navigation";
+import { Suspense, use } from "react";
+import { MaterialForm } from "@/modules/teaching/components/MaterialForm";
+import { AuthoringSkeleton } from "@/modules/teaching/components/authoring/authoring-kit";
 
 interface PageProps {
   params: Promise<{ scheduleId: string }>;
 }
 
-export default function CohortMaterialsPage({ params }: PageProps) {
+/** "Add material" — `?module=<id>` pre-selects the module. */
+export default function NewCohortMaterialPage({ params }: PageProps) {
   const { scheduleId } = use(params);
-  redirect(`/teach/cohorts/${scheduleId}?tab=modules`);
+  return (
+    <Suspense fallback={<AuthoringSkeleton />}>
+      <MaterialForm scheduleId={scheduleId} />
+    </Suspense>
+  );
 }
