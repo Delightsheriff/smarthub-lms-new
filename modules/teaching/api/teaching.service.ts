@@ -13,6 +13,21 @@ import type {
   CohortSubmissionRow,
   InstructorAssignmentRow,
   CohortStudentAssignments,
+  CohortRecordingRow,
+  CohortSlackStatus,
+  ApiAssignmentDetail,
+  ApiInstructorModule,
+  ApiMaterialDetail,
+  ApiModuleAssignmentRow,
+  ApiRecordingDetail,
+  AttachAssignmentToSchedulePayload,
+  CreateAssignmentPayload,
+  CreateMaterialPayload,
+  CreateRecordingPayload,
+  UpdateAssignmentPayload,
+  UpdateAssignmentSchedulePayload,
+  UpdateMaterialPayload,
+  UpdateRecordingPayload,
 } from "../types";
 
 class TeachingService {
@@ -82,12 +97,165 @@ class TeachingService {
   async updateAssignmentSchedule(
     assignmentId: string,
     scheduleId: string,
-    patch: { dueDate?: string; isVisible?: boolean },
+    patch: UpdateAssignmentSchedulePayload,
   ): Promise<{ success: boolean }> {
     return apiClient.patch<{ success: boolean }>(
       TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
       patch,
     );
+  }
+
+  // ─── Authoring: assignments ──────────────────────────────────────
+
+  async getAssignmentDetail(id: string): Promise<ApiAssignmentDetail> {
+    return apiClient.get<ApiAssignmentDetail>(
+      TEACHING_ENDPOINTS.ASSIGNMENT_BY_ID(id),
+    );
+  }
+
+  async createAssignment(
+    payload: CreateAssignmentPayload,
+  ): Promise<{ _id: string }> {
+    return apiClient.post<{ _id: string }>(
+      TEACHING_ENDPOINTS.ASSIGNMENTS_BASE,
+      payload,
+    );
+  }
+
+  async updateAssignment(
+    id: string,
+    payload: UpdateAssignmentPayload,
+  ): Promise<unknown> {
+    return apiClient.patch(TEACHING_ENDPOINTS.ASSIGNMENT_BY_ID(id), payload);
+  }
+
+  async attachAssignmentToSchedule(
+    assignmentId: string,
+    scheduleId: string,
+    payload: AttachAssignmentToSchedulePayload,
+  ): Promise<void> {
+    await apiClient.post(
+      TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
+      payload,
+    );
+  }
+
+  async detachAssignmentFromSchedule(
+    assignmentId: string,
+    scheduleId: string,
+  ): Promise<void> {
+    await apiClient.delete(
+      TEACHING_ENDPOINTS.ASSIGNMENT_SCHEDULE(assignmentId, scheduleId),
+    );
+  }
+
+  async getModuleAssignments(
+    moduleId: string,
+  ): Promise<ApiModuleAssignmentRow[]> {
+    const rows = await apiClient.get<ApiModuleAssignmentRow[]>(
+      TEACHING_ENDPOINTS.MODULE_ASSIGNMENTS(moduleId),
+    );
+    return rows || [];
+  }
+
+  async getMyModules(): Promise<ApiInstructorModule[]> {
+    const rows = await apiClient.get<ApiInstructorModule[]>(
+      TEACHING_ENDPOINTS.MY_MODULES,
+    );
+    return rows || [];
+  }
+
+  async getCohortSlackStatus(scheduleId: string): Promise<CohortSlackStatus> {
+    const r = await apiClient.get<CohortSlackStatus>(
+      TEACHING_ENDPOINTS.COHORT_SLACK_STATUS(scheduleId),
+      { silent: true },
+    );
+    return r || { connected: false };
+  }
+
+  // ─── Authoring: recordings ───────────────────────────────────────
+
+  async getRecordingDetail(id: string): Promise<ApiRecordingDetail> {
+    return apiClient.get<ApiRecordingDetail>(
+      TEACHING_ENDPOINTS.RECORDING_BY_ID(id),
+    );
+  }
+
+  async createRecording(
+    payload: CreateRecordingPayload,
+  ): Promise<{ _id: string }> {
+    return apiClient.post<{ _id: string }>(
+      TEACHING_ENDPOINTS.RECORDINGS_BASE,
+      payload,
+    );
+  }
+
+  /** The API uses PUT for recording updates (recordings.lms.routes.ts). */
+  async updateRecording(
+    id: string,
+    payload: UpdateRecordingPayload,
+  ): Promise<unknown> {
+    return apiClient.put(TEACHING_ENDPOINTS.RECORDING_BY_ID(id), payload);
+  }
+
+  async getModuleRecordings(moduleId: string): Promise<ApiRecordingDetail[]> {
+    const rows = await apiClient.get<ApiRecordingDetail[]>(
+      TEACHING_ENDPOINTS.RECORDINGS_BY_MODULE(moduleId),
+    );
+    return rows || [];
+  }
+
+  async getCohortRecordings(scheduleId: string): Promise<CohortRecordingRow[]> {
+    const rows = await apiClient.get<CohortRecordingRow[]>(
+      TEACHING_ENDPOINTS.COHORT_RECORDINGS(scheduleId),
+    );
+    return rows || [];
+  }
+
+  async attachRecordingToSchedule(
+    recordingId: string,
+    scheduleId: string,
+  ): Promise<void> {
+    await apiClient.post(
+      TEACHING_ENDPOINTS.RECORDING_TO_SCHEDULE(recordingId, scheduleId),
+      {},
+    );
+  }
+
+  /** Detach hides the recording from this cohort; re-attach flips it back. */
+  async detachRecordingFromSchedule(
+    recordingId: string,
+    scheduleId: string,
+  ): Promise<void> {
+    await apiClient.delete(
+      TEACHING_ENDPOINTS.RECORDING_TO_SCHEDULE(recordingId, scheduleId),
+    );
+  }
+
+  // ─── Authoring: materials ────────────────────────────────────────
+
+  async getMaterialDetail(id: string): Promise<ApiMaterialDetail> {
+    return apiClient.get<ApiMaterialDetail>(
+      TEACHING_ENDPOINTS.MATERIAL_BY_ID(id),
+    );
+  }
+
+  async createMaterial(
+    payload: CreateMaterialPayload,
+  ): Promise<{ _id: string }> {
+    return apiClient.post<{ _id: string }>(
+      TEACHING_ENDPOINTS.MATERIALS_BASE,
+      payload,
+    );
+  }
+
+  /** PUT, and the API re-runs the CREATE validator on it — send the full
+   *  material, not a partial patch. */
+  async updateMaterial(
+    id: string,
+    payload: UpdateMaterialPayload,
+  ): Promise<unknown> {
+    return apiClient.put(TEACHING_ENDPOINTS.MATERIAL_BY_ID(id), payload);
   }
 }
 

@@ -177,4 +177,5 @@ export interface CohortRecordingRow {
 }
 
 export * from "./attendance";
+export * from "./authoring";
 export type { ApiTeachingCohort, ApiTeachingCohortDetail } from "./api.types";

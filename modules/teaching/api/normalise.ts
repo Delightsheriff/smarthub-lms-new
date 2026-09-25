@@ -5,6 +5,10 @@ import type {
   ApiTeachingCohortDetail,
 } from "../types/api.types";
 import type {
+  ApiInstructorModule,
+  ApiModuleAssignmentRow,
+  InstructorModule,
+  ModuleAssignmentRow,
   CohortSubmissionRow,
   InboxRow,
   TeachingCohort,
@@ -120,5 +124,36 @@ export function normaliseCohortSubmissionRow(
     fileName: api.fileName,
     fileMimeType: api.fileMimeType,
     content: api.content,
+  };
+}
+
+export function normaliseModuleAssignmentRow(
+  api: ApiModuleAssignmentRow,
+): ModuleAssignmentRow {
+  return {
+    assignmentId: api.assignmentId,
+    title: api.title || "Untitled assignment",
+    description: api.description,
+    totalPoints: api.totalPoints,
+    allowLateSubmission: api.allowLateSubmission,
+    isPublished: api.isPublished,
+    attachedScheduleIds: api.attachedScheduleIds || [],
+  };
+}
+
+export function normaliseInstructorModule(
+  api: ApiInstructorModule,
+): InstructorModule {
+  return {
+    id: api.moduleId,
+    title: api.title || "Untitled module",
+    slug: api.slug,
+    cohorts: (api.cohorts || []).map((c) => ({
+      scheduleId: c.scheduleId,
+      scheduleName: c.scheduleName,
+      courseId: c.courseId,
+      courseName: c.courseName,
+      startDate: c.startDate,
+    })),
   };
 }

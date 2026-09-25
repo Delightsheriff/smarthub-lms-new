@@ -4,8 +4,27 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teachingService } from "./teaching.service";
 import { attendanceService } from "./attendance.service";
 import { assignmentsService } from "@/modules/assignments/api/assignments.service";
-import { normaliseCohort, normaliseCohortDetail, normaliseInboxRow } from "./normalise";
-import type { InboxRow, InstructorAssignmentRow, TeachingCohort, TeachingCohortDetail } from "../types";
+import {
+  normaliseCohort,
+  normaliseCohortDetail,
+  normaliseInboxRow,
+  normaliseInstructorModule,
+  normaliseModuleAssignmentRow,
+} from "./normalise";
+import type {
+  AttachAssignmentToSchedulePayload,
+  CreateAssignmentPayload,
+  CreateMaterialPayload,
+  CreateRecordingPayload,
+  InboxRow,
+  InstructorAssignmentRow,
+  TeachingCohort,
+  TeachingCohortDetail,
+  UpdateAssignmentPayload,
+  UpdateAssignmentSchedulePayload,
+  UpdateMaterialPayload,
+  UpdateRecordingPayload,
+} from "../types";
 
 export const TEACHING_QUERY_KEYS = {
   cohorts: ["teaching", "cohorts"] as const,
@@ -22,6 +41,19 @@ export const TEACHING_QUERY_KEYS = {
       ? (["teaching", "recent-submissions", limit] as const)
       : (["teaching", "recent-submissions"] as const),
   myAssignments: ["teaching", "my-assignments"] as const,
+  myModules: ["teaching", "my-modules"] as const,
+  cohortRecordings: (id: string) =>
+    ["teaching", "cohort", id, "recordings"] as const,
+  cohortSlackStatus: (id: string) =>
+    ["teaching", "cohort", id, "slack-status"] as const,
+  moduleAssignments: (moduleId: string) =>
+    ["teaching", "module", moduleId, "assignments"] as const,
+  moduleRecordings: (moduleId: string) =>
+    ["teaching", "module", moduleId, "recordings"] as const,
+  assignmentDetail: (id: string) =>
+    ["teaching", "assignment-detail", id] as const,
+  recording: (id: string) => ["teaching", "recording", id] as const,
+  material: (id: string) => ["teaching", "material", id] as const,
 } as const;
 
 export function useTeachingCohorts() {
@@ -226,7 +258,7 @@ export function useUpdateAssignmentSchedule(scheduleId: string) {
       patch,
     }: {
       assignmentId: string;
-      patch: { dueDate?: string; isVisible?: boolean };
+      patch: UpdateAssignmentSchedulePayload;
     }) => {
       return teachingService.updateAssignmentSchedule(
         assignmentId,
@@ -241,6 +273,200 @@ export function useUpdateAssignmentSchedule(scheduleId: string) {
       queryClient.invalidateQueries({
         queryKey: TEACHING_QUERY_KEYS.myAssignments,
       });
+    },
+  });
+}
+
+// ─── Authoring: assignments ────────────────────────────────────────
+
+/** The canonical assignment for the edit form (description, links,
+ *  module, type…). Separate key from `useTeachingAssignment`, which
+ *  reads the student-facing shape for the grading brief. */
+export function useAssignmentDetail(id: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.assignmentDetail(id || ""),
+    queryFn: () => teachingService.getAssignmentDetail(id as string),
+    enabled: !!id,
+  });
+}
+
+export function useCreateTeachingAssignment() {
+  return useMutation({
+    mutationFn: (payload: CreateAssignmentPayload) =>
+      teachingService.createAssignment(payload),
+  });
+}
+
+export function useUpdateTeachingAssignment(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateAssignmentPayload) =>
+      teachingService.updateAssignment(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.assignmentDetail(id) });
+      qc.invalidateQueries({ queryKey: ["teaching", "assignment", id] });
+    },
+  });
+}
+
+/** Attach an assignment to one cohort with its per-cohort due date. */
+export function useAttachAssignmentToSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: {
+      assignmentId: string;
+      scheduleId: string;
+      payload: AttachAssignmentToSchedulePayload;
+    }) =>
+      teachingService.attachAssignmentToSchedule(
+        vars.assignmentId,
+        vars.scheduleId,
+        vars.payload,
+      ),
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({
+        queryKey: TEACHING_QUERY_KEYS.assignments(vars.scheduleId),
+      });
+      qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+      qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.myAssignments });
+    },
+  });
+}
+
+export function useModuleAssignments(moduleId: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.moduleAssignments(moduleId || ""),
+    queryFn: async () =>
+      (await teachingService.getModuleAssignments(moduleId as string)).map(
+        normaliseModuleAssignmentRow,
+      ),
+    enabled: !!moduleId,
+  });
+}
+
+/** Every module the caller teaches, with its cohort fan-out — powers
+ *  the multi-cohort create flow. */
+export function useInstructorModules() {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.myModules,
+    queryFn: async () =>
+      (await teachingService.getMyModules()).map(normaliseInstructorModule),
+  });
+}
+
+export function useCohortSlackStatus(scheduleId: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.cohortSlackStatus(scheduleId || ""),
+    queryFn: () => teachingService.getCohortSlackStatus(scheduleId as string),
+    enabled: !!scheduleId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Authoring: recordings ─────────────────────────────────────────
+
+export function useTeachingRecording(id: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.recording(id || ""),
+    queryFn: () => teachingService.getRecordingDetail(id as string),
+    enabled: !!id,
+  });
+}
+
+export function useCreateTeachingRecording() {
+  return useMutation({
+    mutationFn: (payload: CreateRecordingPayload) =>
+      teachingService.createRecording(payload),
+  });
+}
+
+export function useUpdateTeachingRecording(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateRecordingPayload) =>
+      teachingService.updateRecording(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.recording(id) });
+      qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+    },
+  });
+}
+
+export function useModuleRecordings(moduleId: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.moduleRecordings(moduleId || ""),
+    queryFn: () => teachingService.getModuleRecordings(moduleId as string),
+    enabled: !!moduleId,
+  });
+}
+
+/** Which recordings are attached (and visible) on this cohort. */
+export function useCohortRecordings(scheduleId: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.cohortRecordings(scheduleId || ""),
+    queryFn: () => teachingService.getCohortRecordings(scheduleId as string),
+    enabled: !!scheduleId,
+  });
+}
+
+export function useAttachRecordingToSchedule(scheduleId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (recordingId: string) =>
+      teachingService.attachRecordingToSchedule(recordingId, scheduleId),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: TEACHING_QUERY_KEYS.cohortRecordings(scheduleId),
+      });
+    },
+  });
+}
+
+// ─── Authoring: materials ──────────────────────────────────────────
+
+export function useTeachingMaterial(id: string | undefined) {
+  return useQuery({
+    queryKey: TEACHING_QUERY_KEYS.material(id || ""),
+    queryFn: () => teachingService.getMaterialDetail(id as string),
+    enabled: !!id,
+  });
+}
+
+export function useCreateTeachingMaterial() {
+  return useMutation({
+    mutationFn: (payload: CreateMaterialPayload) =>
+      teachingService.createMaterial(payload),
+  });
+}
+
+export function useUpdateTeachingMaterial(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateMaterialPayload) =>
+      teachingService.updateMaterial(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: TEACHING_QUERY_KEYS.material(id) });
+      qc.invalidateQueries({ queryKey: ["teaching", "module"] });
+    },
+  });
+}
+
+// ─── Detach (assignment | recording) ───────────────────────────────
+
+/**
+ * Detach content from ONE cohort. Hides rather than deletes, so
+ * re-attaching restores it and other cohorts are untouched. Materials
+ * have no per-cohort state (legacy 2a6285c), so they can't be detached.
+ */
+export function useDetachFromSchedule(scheduleId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { kind: "recording" | "assignment"; id: string }) =>
+      vars.kind === "recording"
+        ? teachingService.detachRecordingFromSchedule(vars.id, scheduleId)
+        : teachingService.detachAssignmentFromSchedule(vars.id, scheduleId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teaching"] });
     },
   });
 }
