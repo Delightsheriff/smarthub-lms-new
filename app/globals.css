@@ -295,6 +295,37 @@
 
 @layer utilities {
   /*
+   * Glass chrome — the ONE translucent material in the app, and only for
+   * chrome that floats over scrolling content (top bar once scrolled,
+   * mobile bottom nav). Cards, sidebar, buttons and page surfaces stay
+   * solid: the editorial language is flat hairlines, not layered depth.
+   *
+   * 86% background keeps text contrast within a hair of the solid
+   * surface whatever scrolls beneath (measured from rendered pixels over
+   * black and white backdrops, light and dark). A modest 14px blur keeps
+   * scrolling cheap on mid-range Android. Falls back to solid when blur or
+   * color-mix is unsupported, and when the user asks for less transparency.
+   */
+  .glass-chrome {
+    background-color: var(--background);
+    background-color: color-mix(in oklch, var(--background) 86%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-chrome {
+      background-color: var(--background);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-chrome {
+      background-color: var(--background);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /*
    * Light sections had all the atmosphere stripped out — every gradient
    * and texture lived on the deep slabs. This is a very quiet warm wash
    * off the top edge, adding designed depth across the warm paper background.
