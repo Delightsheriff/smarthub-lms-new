@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
@@ -18,16 +19,44 @@ import { CohortSubmissionsTab } from "./CohortSubmissionsTab";
 import { CohortSessionsTab } from "./CohortSessionsTab";
 import { CohortRosterTab } from "./CohortRosterTab";
 
+const VALID_TABS = [
+  "overview",
+  "modules",
+  "assignments",
+  "submissions",
+  "sessions",
+  "roster",
+] as const;
+type TabValue = (typeof VALID_TABS)[number];
+
+function toValidTab(raw: string | null): TabValue {
+  if (raw && (VALID_TABS as readonly string[]).includes(raw)) {
+    return raw as TabValue;
+  }
+  return "overview";
+}
+
 interface CohortDetailPageContentProps {
   scheduleId: string;
 }
 
 export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = toValidTab(searchParams.get("tab"));
 
   const { data: cohort, isLoading, isFetching, error, refetch } = useTeachingCohortDetail(scheduleId);
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      params.set("tab", tab);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -87,7 +116,7 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
           />
 
           {/* 6 Tabs Workspace Shell */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
             <div className="overflow-x-auto pb-1 max-w-full -mx-1 px-1">
               <TabsList className="rounded-xl bg-muted/60 p-1 w-max">
                 <TabsTrigger value="overview" className="rounded-lg text-xs">
@@ -97,13 +126,13 @@ export function CohortDetailPageContent({ scheduleId }: CohortDetailPageContentP
                   Modules ({cohort.modules.length})
                 </TabsTrigger>
                 <TabsTrigger value="assignments" className="rounded-lg text-xs">
-                  Assignments & Schedules
+                  Assignments &amp; Schedules
                 </TabsTrigger>
                 <TabsTrigger value="submissions" className="rounded-lg text-xs">
-                  Submissions & Grading
+                  Submissions &amp; Grading
                 </TabsTrigger>
                 <TabsTrigger value="sessions" className="rounded-lg text-xs">
-                  Live Sessions & Attendance
+                  Live Sessions &amp; Attendance
                 </TabsTrigger>
                 <TabsTrigger value="roster" className="rounded-lg text-xs">
                   Student Roster ({cohort.studentCount})
