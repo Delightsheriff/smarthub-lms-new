@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  CalendarClock,
   CheckCircle2,
   ChevronDown,
   ClipboardList,
   ExternalLink,
   Award,
   AlertCircle,
-  Clock,
   UserX,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -51,14 +49,17 @@ export function CohortAssignmentDetail({
   const roster = useCohortRoster(scheduleId);
   const gradeMutation = useGradeSubmission(scheduleId);
 
-  const [grading, setGrading] = useState<CohortSubmissionRow | null>(null);
+  const [picked, setPicked] = useState<CohortSubmissionRow | null>(null);
   const [briefOpen, setBriefOpen] = useState(true);
 
   // Deep linking: `?submission=<id>` or fallback `?student=<id>`
   const searchParams = useSearchParams();
   const wantedSubmission = searchParams.get("submission");
   const wantedStudent = searchParams.get("student");
-  const openedFor = useRef<string | null>(null);
+  const deepLinkKey = wantedSubmission ?? wantedStudent;
+  // The deep-linked submission opens once per link: closing the dialog
+  // records the key so it doesn't reopen on the next render.
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
 
   // Attachment carries per-cohort due date + visibility
   const attachment = useMemo(
@@ -80,19 +81,22 @@ export function CohortAssignmentDetail({
 
   const rosterRows = useMemo(() => roster.data || [], [roster.data]);
 
-  // Deep link auto-open logic
-  useEffect(() => {
-    const key = wantedSubmission ?? wantedStudent;
-    if (!key || openedFor.current === key || !subs.length) return;
-    const match =
+  // Deep link: `?submission=<id>`, falling back to `?student=<id>` for a
+  // resubmission that changed the submission id.
+  const deepLinkMatch = useMemo(() => {
+    if (!deepLinkKey || dismissedKey === deepLinkKey) return null;
+    return (
       (wantedSubmission && subs.find((x) => x.id === wantedSubmission)) ||
       (wantedStudent && subs.find((x) => x.student.id === wantedStudent)) ||
-      null;
-    if (match) {
-      openedFor.current = key;
-      setGrading(match);
-    }
-  }, [subs, wantedSubmission, wantedStudent]);
+      null
+    );
+  }, [subs, deepLinkKey, dismissedKey, wantedSubmission, wantedStudent]);
+
+  const grading = picked ?? deepLinkMatch;
+  const setGrading = (row: CohortSubmissionRow | null) => {
+    if (deepLinkKey) setDismissedKey(deepLinkKey);
+    setPicked(row);
+  };
 
   // Calculate statistics
   const stats = useMemo(() => {
