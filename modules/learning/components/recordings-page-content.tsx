@@ -1,18 +1,27 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Lock, PlayCircle, Video, AlertCircle } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, CheckCircle2, Lock, PlayCircle, Search, Video, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Pager, usePagedList } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { CollapsibleRichText } from "@/components/ui/collapsible-rich-text";
 import { IndexList } from "@/components/ui/index-list";
 import { RecordingPlayerDialog } from "./recording-player-dialog";
 import { useMyRecordings, useAllProgress } from "../api/content.queries";
-import { cn, formatDate, pluralize } from "@/lib/utils";
+import { cn, formatDate, htmlToPlainText, pluralize } from "@/lib/utils";
 import type { RecordingWithContext } from "../types";
 
 type Filter = "all" | "unwatched" | "watched";
@@ -28,7 +37,20 @@ const FILTERS: { value: Filter; label: string }[] = [
 export function RecordingsPageContent() {
   const { data, isLoading, isFetching, error, refetch } = useMyRecordings();
   const { data: progressSet } = useAllProgress();
-  const [filter, setFilter] = useState<Filter>("all");
+  // `?filter=` so dashboard tiles can land here pre-filtered.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fromUrl = searchParams.get("filter");
+  const filter: Filter = FILTERS.some((f) => f.value === fromUrl) ? (fromUrl as Filter) : "all";
+  const setFilter = (next: Filter) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "all") params.delete("filter");
+    else params.set("filter", next);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+  const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rows = useMemo(() => data || [], [data]);
@@ -38,19 +60,16 @@ export function RecordingsPageContent() {
     [progressSet],
   );
 
-  const visible = useMemo(() => {
-    switch (filter) {
-      case "unwatched":
-        return rows.filter((r) => !isCompleted(r.recording.id));
-      case "watched":
-        return rows.filter((r) => isCompleted(r.recording.id));
-      default:
-        return rows;
-    }
-  }, [rows, filter, isCompleted]);
+  const q = query.trim().toLowerCase();
+  const visible = rows.filter((r) => {
+    if (filter === "unwatched" && isCompleted(r.recording.id)) return false;
+    if (filter === "watched" && !isCompleted(r.recording.id)) return false;
+    if (!q) return true;
+    return `${r.recording.title} ${r.module.title} ${r.course.name}`.toLowerCase().includes(q);
+  });
 
   // Group the flat feed into course / recordings.
-  const groups = useMemo(() => groupByCourse(visible), [visible]);
+  const groups = groupByCourse(visible);
 
   const dateline = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -108,21 +127,43 @@ export function RecordingsPageContent() {
         actions={
           <div className="flex items-center gap-2">
             <RefreshButton loading={isFetching} onClick={refetch} />
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-              <TabsList className="rounded-xl bg-muted/60 p-1">
+            <Select value={filter} onValueChange={(v) => v && setFilter(v as Filter)}>
+              <SelectTrigger size="sm" aria-label="Filter recordings" className="w-[140px] text-xs">
+                <SelectValue>
+                  {(v: string | null) => FILTERS.find((f) => f.value === v)?.label ?? "All"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
                 {FILTERS.map((f) => (
-                  <TabsTrigger key={f.value} value={f.value} className="rounded-lg text-xs">
+                  <SelectItem key={f.value} value={f.value} className="text-xs">
                     {f.label}
-                  </TabsTrigger>
+                  </SelectItem>
                 ))}
-              </TabsList>
-            </Tabs>
+              </SelectContent>
+            </Select>
           </div>
         }
       />
 
+      {!isLoading && !error && rows.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search recordings, modules, courses"
+            aria-label="Search recordings"
+            className="pl-8"
+          />
+        </div>
+      )}
+
       {/* Hero for next unwatched recording */}
-      {!isLoading && !error && filter === "all" && nextToWatch && (
+      {!isLoading && !error && filter === "all" && !q && nextToWatch && (
         <div className="flex flex-col justify-between overflow-hidden rounded-[20px] border border-border bg-card p-5 md:p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1.5 min-w-0">
@@ -144,7 +185,7 @@ export function RecordingsPageContent() {
               </h2>
               {nextToWatch.recording.description && (
                 <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                  {nextToWatch.recording.description}
+                  {htmlToPlainText(nextToWatch.recording.description)}
                 </p>
               )}
             </div>
@@ -190,9 +231,11 @@ export function RecordingsPageContent() {
           icon={Video}
           title="No recordings"
           description={
-            filter === "all"
-              ? "Recordings show up here once your tutor publishes them."
-              : "Switch the filter to see other recordings."
+            q
+              ? "No recordings match your search."
+              : filter === "all"
+                ? "Recordings show up here once your tutor publishes them."
+                : "Switch the filter to see other recordings."
           }
         />
       )}
@@ -221,113 +264,11 @@ export function RecordingsPageContent() {
               </span>
             </div>
 
-            {/* IndexList — numbered hairline rows within this course */}
-            <IndexList>
-              {g.items.map((row, idx) => {
-                const r = row.recording;
-                const locked = r.isLocked;
-                const open = () => {
-                  if (!locked) setActiveId(r.id);
-                };
-                return (
-                  <div
-                    key={r.id}
-                    className={cn(
-                      "flex items-start justify-between gap-3 border-b border-border px-0 py-3.5 transition-colors hover:bg-muted/30",
-                      locked && "opacity-60",
-                    )}
-                  >
-                    {/* Number */}
-                    <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0 mt-0.5">
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-
-                    {/* Play or locked chip */}
-                    {locked ? (
-                      <span
-                        className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
-                        aria-hidden
-                      >
-                        <Lock className="h-4 w-4" />
-                      </span>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={open}
-                        aria-label={`Play ${r.title}`}
-                        className="mt-0.5 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary/20"
-                      >
-                        {isCompleted(r.id) ? (
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                        ) : (
-                          <PlayCircle className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
-
-                    {/* Content */}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
-                        {row.module.order != null
-                          ? `Module ${row.module.order
-                              .toString()
-                              .padStart(2, "0")} · `
-                          : ""}
-                        {row.module.title}
-                      </p>
-                      {locked ? (
-                        <p className="text-sm font-medium leading-snug text-muted-foreground">
-                          {r.title}
-                        </p>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={open}
-                          className="text-left text-sm font-medium leading-snug text-foreground hover:text-accent transition-colors"
-                        >
-                          {r.title}
-                        </button>
-                      )}
-                      {locked ? (
-                        <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
-                          <Lock className="h-3 w-3" />
-                          Not available to you
-                        </p>
-                      ) : (
-                        <p className="font-mono text-xs text-muted-foreground mt-0.5">
-                          {r.durationLabel}
-                          {r.durationLabel && r.publishedAt ? " · " : ""}
-                          {r.publishedAt
-                            ? `published ${formatDate(r.publishedAt)}`
-                            : ""}
-                          {isCompleted(r.id) && (
-                            <span className="ml-2 text-success font-sans">· Completed</span>
-                          )}
-                        </p>
-                      )}
-                      {!locked && r.description && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          <CollapsibleRichText
-                            html={r.description}
-                            maxHeight={72}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <Link
-                      href={`/courses/${g.course.slug}/modules/${row.module.slug}`}
-                      className="shrink-0 self-center rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                      aria-label="Open module"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                );
-              })}
-            </IndexList>
+            <RecordingCourseList
+              group={g}
+              isCompleted={isCompleted}
+              onOpen={setActiveId}
+            />
           </section>
         ))}
 
@@ -341,6 +282,141 @@ export function RecordingsPageContent() {
         }}
       />
     </div>
+  );
+}
+
+
+const PER_COURSE_PAGE = 10;
+
+/** One course's recordings, paged at 10. Its own component because the
+ *  pager needs state per course and hooks can't run inside a map. */
+function RecordingCourseList({
+  group: g,
+  isCompleted,
+  onOpen,
+}: {
+  group: CourseGroup;
+  isCompleted: (id: string) => boolean;
+  onOpen: (id: string) => void;
+}) {
+  const { page, setPage, totalPages, pageItems } = usePagedList(g.items, PER_COURSE_PAGE);
+  return (
+    <>
+      {/* IndexList — numbered hairline rows within this course */}
+      <IndexList>
+        {pageItems.map((row, i) => {
+        const idx = (page - 1) * PER_COURSE_PAGE + i;
+          const r = row.recording;
+          const locked = r.isLocked;
+          const open = () => {
+            if (!locked) onOpen(r.id);
+          };
+          return (
+            <div
+              key={r.id}
+              className={cn(
+                "flex items-start justify-between gap-3 border-b border-border px-0 py-3.5 transition-colors hover:bg-muted/30",
+                locked && "opacity-60",
+              )}
+            >
+              {/* Number */}
+              <span className="font-mono text-xs tabular-nums text-muted-foreground w-6 shrink-0 mt-0.5">
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+
+              {/* Play or locked chip */}
+              {locked ? (
+                <span
+                  className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
+                  aria-hidden
+                >
+                  <Lock className="h-4 w-4" />
+                </span>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={open}
+                  aria-label={`Play ${r.title}`}
+                  className="mt-0.5 shrink-0 rounded-xl bg-primary/10 text-primary hover:bg-primary/20"
+                >
+                  {isCompleted(r.id) ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <PlayCircle className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+
+              {/* Content */}
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
+                  {row.module.order != null
+                    ? `Module ${row.module.order
+                        .toString()
+                        .padStart(2, "0")} · `
+                    : ""}
+                  {row.module.title}
+                </p>
+                {locked ? (
+                  <p className="text-sm font-medium leading-snug text-muted-foreground">
+                    {r.title}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={open}
+                    className="text-left text-sm font-medium leading-snug text-foreground hover:text-accent transition-colors"
+                  >
+                    {r.title}
+                  </button>
+                )}
+                {locked ? (
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground font-mono">
+                    <Lock className="h-3 w-3" />
+                    Not available to you
+                  </p>
+                ) : (
+                  <p className="font-mono text-xs text-muted-foreground mt-0.5">
+                    {r.durationLabel}
+                    {r.durationLabel && r.publishedAt ? " · " : ""}
+                    {r.publishedAt
+                      ? `published ${formatDate(r.publishedAt)}`
+                      : ""}
+                    {isCompleted(r.id) && (
+                      <span className="ml-2 text-success font-sans">· Completed</span>
+                    )}
+                  </p>
+                )}
+                {!locked && r.description && (
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    <CollapsibleRichText
+                      html={r.description}
+                      maxHeight={72}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <Link
+                href={`/courses/${g.course.slug}/modules/${row.module.slug}`}
+                className="shrink-0 self-center rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Open module"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          );
+        })}
+      </IndexList>
+      <Pager
+        page={page}
+        totalPages={totalPages}
+        onPage={setPage}
+        label={pluralize(g.items.length, "recording")}
+      />
+    </>
   );
 }
 
