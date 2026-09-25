@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import { CreateAssignmentMultiCohort } from "@/modules/teaching/components/CreateAssignmentMultiCohort";
 
-export default function TeachNewAssignmentPage() {
-  redirect("/teach");
+/**
+ * Tasks-page entry for creating one assignment across several cohorts.
+ * Lives under /teach because /assignments is the student aggregate.
+ */
+export default function NewMultiCohortAssignmentPage() {
+  return <CreateAssignmentMultiCohort />;
 }
